@@ -1,0 +1,15 @@
+id,dataset_id,table_name,column_name,jsonb_key,semantic_name,data_type,enum_mapping,extraction_rule,is_active,created_at,updated_at
+10001,100,smart_sales_performance,year,,年份,text,{},,True,2026-09-11 00:00:00+00:00,2026-09-11 00:00:00+00:00
+10002,100,smart_sales_performance,month,,月份,integer,{},,True,2026-09-11 00:00:00+00:00,2026-09-11 00:00:00+00:00
+10003,100,smart_sales_performance,quarter,,季度,text,{},,True,2026-09-11 00:00:00+00:00,2026-09-11 00:00:00+00:00
+10004,100,smart_sales_performance,group_name,,集团名称,text,{},,True,2026-09-11 00:00:00+00:00,2026-09-11 00:00:00+00:00
+10005,100,smart_sales_performance,bu_name,,事业部,text,{},,True,2026-09-11 00:00:00+00:00,2026-09-11 00:00:00+00:00
+10006,100,smart_sales_performance,region_name,,区域分公司,text,{},,True,2026-09-11 00:00:00+00:00,2026-09-11 00:00:00+00:00
+10007,100,smart_sales_performance,department_name,,业务团队,text,{},,True,2026-09-11 00:00:00+00:00,2026-09-11 00:00:00+00:00
+10008,100,smart_sales_performance,business_line,,细分业务线,text,{},,True,2026-09-11 00:00:00+00:00,2026-09-11 00:00:00+00:00
+10009,100,smart_sales_performance,node_level,,层级级别,text,{},,True,2026-09-11 00:00:00+00:00,2026-09-11 00:00:00+00:00
+10010,100,smart_sales_performance,target_amount,,任务金额,numeric,{},,True,2026-09-11 00:00:00+00:00,2026-09-11 00:00:00+00:00
+10011,100,smart_sales_performance,actual_billing_amount,,年度开单金额,numeric,{},,True,2026-09-11 00:00:00+00:00,2026-09-11 00:00:00+00:00
+10012,100,smart_sales_performance,last_year_billing_amount,,去年同期金额,numeric,{},,True,2026-09-11 00:00:00+00:00,2026-09-11 00:00:00+00:00
+10013,100,smart_sales_performance,completion_rate,,达成率,numeric,{},,True,2026-09-11 00:00:00+00:00,2026-09-11 00:00:00+00:00
+10014,100,smart_sales_performance,owner_name,,负责人,text,{},,True,2026-09-11 00:00:00+00:00,2026-09-11 00:00:00+00:00

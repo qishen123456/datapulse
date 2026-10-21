@@ -1,0 +1,2 @@
+id,dataset_name,physical_table,description,is_active,created_at,updated_at
+100,智问科技集团全域销售业绩与组织大盘数据集,smart_sales_performance,包含集团/事业部/区域分公司/团队4级层次的标准经营与业绩数据集,True,2026-09-11 00:00:00+00:00,2026-09-11 00:00:00+00:00

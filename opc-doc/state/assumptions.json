@@ -1,0 +1,7 @@
+[
+  { "id": "A1", "priority": "P0", "assumption": "职务作品边界可厘清（雇主书面确认或主体/代码切割），商业化主体合规成立", "verify": "律师咨询+雇主书面确认，谈合作前必做" },
+  { "id": "A2", "priority": "P1", "assumption": "S1客户愿付10-25万/年而非继续人肉导表", "verify": "3个自营PoC转化率与议价实测" },
+  { "id": "A3", "priority": "P2", "assumption": "口径实施可复制为ISV照SOP执行的标准动作（4-6周交付）", "verify": "首个ISV认证项目实测" },
+  { "id": "A4", "priority": "P3", "assumption": "次年纯软件年费续费率≥80%", "verify": "首批客户12个月后续费数据" },
+  { "id": "A5", "priority": "P4", "assumption": "License+闭源+三禁条款足以防止ISV白牌/自研", "verify": "合同执行观察+镜像水印抽检" }
+]

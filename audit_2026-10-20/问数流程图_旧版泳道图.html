@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataPulse 智能问数目标流程 · 工程级详图（v5）</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #F7F8FA; padding: 28px; color: #1F2937; }
+  .page { max-width: 1740px; margin: 0 auto; }
+  h1 { font-size: 20px; font-weight: 600; }
+  .subtitle { font-size: 13px; color: #6B7280; margin-top: 6px; line-height: 1.6; }
+  .legend { display: flex; gap: 14px; margin-top: 12px; font-size: 12px; color: #4B5563; flex-wrap: wrap; align-items: center; }
+  .legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+  .legend .ln { display: inline-block; width: 18px; height: 0; margin-right: 5px; vertical-align: 3px; }
+  .canvas-wrap { background: #fff; border: 1px solid #E5E7EB; border-radius: 14px; margin-top: 16px; overflow-x: auto; }
+  .stage { position: relative; width: 1720px; height: 1250px; }
+  svg.wires { position: absolute; inset: 0; pointer-events: none; }
+
+  .lane { position: absolute; left: 30px; width: 1660px; border-radius: 14px; background: #F8FAFC; border: 1px dashed #DDE3EA; }
+  .lane-tag { position: absolute; top: 10px; left: 16px; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+
+  .node { position: absolute; background: #fff; border: 1px solid #E5E7EB; border-radius: 10px; padding: 9px 11px 9px 14px; box-shadow: 0 1px 3px rgba(16,24,40,.06); }
+  .node::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 10px 0 0 10px; }
+  .node .head { display: flex; align-items: center; gap: 7px; }
+  .node .icon { width: 24px; height: 24px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #fff; flex: none; }
+  .node .name { font-size: 13px; font-weight: 600; line-height: 1.25; }
+  .node .file { font-size: 10.5px; color: #7C3AED; font-family: ui-monospace, monospace; line-height: 1.35; }
+  .node .desc { margin-top: 5px; font-size: 11.5px; color: #4B5563; line-height: 1.5; }
+  .node .chips { margin-top: 5px; display: flex; gap: 5px; flex-wrap: wrap; }
+  .chip { font-size: 10.5px; padding: 1px 7px; border-radius: 999px; background: #F3F4F6; color: #4B5563; }
+  .chip.llm { background: #EEF2FF; color: #4F46E5; }
+  .chip.gap { background: #FEF2F2; color: #B91C1C; }
+  .chip.ok { background: #ECFDF5; color: #047857; }
+
+  .c-entry::before  { background: #64748B; } .c-entry .icon { background: #64748B; }
+  .c-judge::before  { background: #334155; } .c-judge .icon { background: #334155; }
+  .c-expert::before { background: #2563EB; } .c-expert .icon { background: #2563EB; }
+  .c-super::before  { background: #7C3AED; } .c-super .icon { background: #7C3AED; }
+  .c-deliver::before{ background: #059669; } .c-deliver .icon { background: #059669; }
+  .c-gate { border-color: #F59E0B; }
+  .c-gate::before { background: #D97706; } .c-gate .icon { background: #D97706; }
+  .c-gap { border: 1.5px dashed #D97706; background: #FFFDF7; }
+
+  .branch { position: absolute; background: #FFF7ED; border: 1px dashed #EA580C; border-radius: 10px; padding: 8px 10px; }
+  .branch .t { font-size: 11.5px; font-weight: 700; color: #C2410C; }
+  .branch .d { font-size: 11px; color: #7C2D12; line-height: 1.5; margin-top: 3px; }
+
+  .edge-label { position: absolute; font-size: 11px; font-weight: 600; color: #475569; background: #fff; border: 1px solid #E2E8F0; border-radius: 6px; padding: 2px 8px; z-index: 5; }
+  .loop-label { position: absolute; font-size: 11.5px; font-weight: 600; color: #B91C1C; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 4px 10px; z-index: 5; line-height: 1.5; }
+  .lane-note { position: absolute; font-size: 11.5px; color: #6B7280; line-height: 1.6; z-index: 5; }
+  .base { position: absolute; left: 30px; width: 1660px; height: 60px; border-radius: 10px; background: #F1F5F9; border: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: center; font-size: 12.5px; color: #475569; gap: 6px; flex-wrap: wrap; padding: 0 20px; }
+  .base b { color: #334155; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>智能问数目标流程 · 主理人模式工程级详图（v5）</h1>
+  <div class="subtitle">每个节点均落到真实文件/函数；红虚线 = 打回重新校验；橙虚线卡 = 分支/特殊情况；紫虚线 = 升档/降档；灰点线 = 追问/澄清循环。已离线实测可调用：planner / golden_sql / sql_quality / answer_contract / self_check / evidence_vote。</div>
+  <div class="legend">
+    <span><span class="dot" style="background:#64748B"></span>入口</span>
+    <span><span class="dot" style="background:#334155"></span>类型判断</span>
+    <span><span class="dot" style="background:#2563EB"></span>专家（问津 / 格物 / 析微）</span>
+    <span><span class="dot" style="background:#7C3AED"></span>主理人 · 综合复核</span>
+    <span><span class="dot" style="background:#D97706"></span>确定性校验（零 token）</span>
+    <span><span class="dot" style="background:#059669"></span>交付</span>
+    <span><span class="ln" style="border-top:2px solid #94A3B8"></span>主流程</span>
+    <span><span class="ln" style="border-top:2px dashed #DC2626"></span>打回重校验</span>
+    <span><span class="ln" style="border-top:2px dashed #EA580C"></span>分支出口</span>
+    <span><span class="ln" style="border-top:2px dashed #7C3AED"></span>升/降档</span>
+    <span><span class="ln" style="border-top:2px dotted #94A3B8"></span>追问/澄清</span>
+    <span><span class="dot" style="background:#FEF2F2;border:1px dashed #D97706"></span>缺口需新建</span>
+  </div>
+
+  <div class="canvas-wrap">
+    <div class="stage">
+      <svg class="wires" viewBox="0 0 1720 1250">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M1 1L9 5L1 9" fill="none" stroke="#94A3B8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+          <marker id="arrRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M1 1L9 5L1 9" fill="none" stroke="#DC2626" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+          <marker id="arrOrange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M1 1L9 5L1 9" fill="none" stroke="#EA580C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+          <marker id="arrPurple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M1 1L9 5L1 9" fill="none" stroke="#7C3AED" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+
+        <!-- ===== 入口区 ===== -->
+        <path d="M231 137 L248 137" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <path d="M451 137 L468 137" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <!-- 类型判断 → 普通泳道（灰实线） -->
+        <path d="M560 172 C 560 205, 260 196, 126 244" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <!-- 类型判断 → 高阶泳道（紫虚线=升档） -->
+        <path d="M660 172 C 760 300, 240 480, 158 640" fill="none" stroke="#7C3AED" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#arrPurple)"/>
+        <!-- 追问弧（灰点线）：类型判断 → 用户提问 -->
+        <path d="M700 108 C 600 52, 320 52, 142 100" fill="none" stroke="#94A3B8" stroke-width="1.6" stroke-dasharray="2 4" marker-end="url(#arr)"/>
+
+        <!-- ===== 普通泳道主干 y=355 ===== -->
+        <path d="M221 355 L232 355" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <path d="M425 355 L436 355" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <path d="M629 355 L640 355" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <path d="M833 355 L844 355" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <path d="M1037 355 L1048 355" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <path d="M1241 355 L1252 355" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <path d="M1445 355 L1456 355" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+
+        <!-- 打回红虚线：C7 复核底 → C6/C4/C2 底（三个专家每人重新校验） -->
+        <path d="M1349 464 C 1349 500, 1145 500, 1145 466" fill="none" stroke="#DC2626" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#arrRed)"/>
+        <path d="M1349 464 C 1349 528, 737 528, 737 466" fill="none" stroke="#DC2626" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#arrRed)"/>
+        <path d="M1349 464 C 1349 540, 329 540, 329 466" fill="none" stroke="#DC2626" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#arrRed)"/>
+
+        <!-- 分支橙虚线：C2→消歧卡 / C5→安全卡 / C6→空结果卡 / C8→报告卡 / C1→追问卡 -->
+        <path d="M300 464 C 300 500, 330 515, 330 550" fill="none" stroke="#EA580C" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#arrOrange)"/>
+        <path d="M960 464 C 960 505, 720 512, 700 550" fill="none" stroke="#EA580C" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#arrOrange)"/>
+        <path d="M1145 464 C 1145 505, 1060 515, 1060 550" fill="none" stroke="#EA580C" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#arrOrange)"/>
+        <path d="M1548 464 C 1548 505, 1450 515, 1450 550" fill="none" stroke="#EA580C" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#arrOrange)"/>
+        <path d="M110 464 C 110 505, 120 515, 120 550" fill="none" stroke="#EA580C" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#arrOrange)"/>
+
+        <!-- 降档紫虚线：高阶规划 → 回落普通链路 -->
+        <path d="M158 736 C 90 660, 90 560, 122 466" fill="none" stroke="#7C3AED" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#arrPurple)"/>
+
+        <!-- ===== 高阶：规划 → 5 专用工具 ===== -->
+        <path d="M281 790 C 300 790, 300 800, 317 800" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <path d="M281 800 C 400 745, 460 780, 542 800" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <path d="M281 812 C 480 730, 620 765, 767 800" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <path d="M281 824 C 560 725, 800 755, 992 800" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <path d="M281 836 C 640 720, 1000 745, 1217 800" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <!-- 高阶：工具底 → 综合复核顶（扇入） -->
+        <path d="M425 888 C 425 906, 540 906, 557 918" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <path d="M650 888 C 650 906, 618 906, 610 918" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <path d="M875 888 C 875 908, 700 908, 671 918" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <path d="M1100 888 C 1100 910, 760 910, 731 918" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <path d="M1325 888 C 1325 912, 800 912, 779 918" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <!-- 复核 → 交付 -->
+        <path d="M782 975 L1147 975" fill="none" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arr)"/>
+        <!-- 高阶打回红虚线：复核底 → 取数查询底 -->
+        <path d="M650 1032 C 650 1092, 425 1092, 425 890" fill="none" stroke="#DC2626" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#arrRed)"/>
+        <!-- 高阶澄清循环（灰点线）：规划左侧自环 -->
+        <path d="M30 780 C 4 780, 4 850, 30 850" fill="none" stroke="#94A3B8" stroke-width="1.6" stroke-dasharray="2 4" marker-end="url(#arr)"/>
+      </svg>
+
+      <!-- ===== 入口区 ===== -->
+      <div class="node c-entry" style="left:40px; top:104px; width:190px; height:66px;">
+        <div class="head"><div class="icon">🧑</div><div><div class="name">用户提问</div><div class="file">ask_chat.py 入口守卫</div></div></div>
+      </div>
+      <div class="node c-entry" style="left:250px; top:104px; width:200px; height:66px;">
+        <div class="head"><div class="icon">🔐</div><div><div class="name">权限 + 输入守卫</div><div class="file">X-Auth-Token 校验 · 长度/敏感词</div></div></div>
+      </div>
+      <div class="node c-judge" style="left:470px; top:104px; width:230px; height:66px;">
+        <div class="head"><div class="icon">🔀</div><div><div class="name">问题类型判断</div><div class="file">planner.py · PlannerSkill.infer()</div></div></div>
+      </div>
+      <div class="edge-label" style="left:262px; top:182px;">简单明确 · 单数据集 · 有模板</div>
+      <div class="edge-label" style="left:880px; top:212px; color:#7C3AED; border-color:#DDD6FE;">升档：跨数据集 / 归因 / 预测 / 异动 / 多轮复杂</div>
+      <div class="edge-label" style="left:700px; top:66px;">信息不足 → 追问（≤2 轮，灰点线回环）</div>
+
+      <!-- ===== 普通泳道 ===== -->
+      <div class="lane" style="top:196px; height:470px;">
+        <span class="lane-tag" style="background:#EFF6FF; color:#2563EB;">普通问数 · 蒸馏版四角色：问津/格物/析微 三专家干活 + 主理人综合复核（全部已有代码，仅需补 TaskState + AST/超时 + 复核打回回环）</span>
+      </div>
+
+      <div class="node c-expert" style="left:30px; top:246px; width:190px; height:218px;">
+        <div class="head"><div class="icon">🧭</div><div><div class="name">① 问津 · 路由专家</div><div class="file">dataset_route.py + route_guard.py</div></div></div>
+        <div class="desc">上下文恢复：短期记忆 8 轮/2h TTL<br>数据集匹配 · 别名打分 · 守门消歧<br>TaskState 建立（任务态表·新建）</div>
+        <div class="chips"><span class="chip llm">LLM 0-1 次</span><span class="chip">记忆: conversation_history</span></div>
+      </div>
+      <div class="node c-expert" style="left:234px; top:246px; width:190px; height:218px;">
+        <div class="head"><div class="icon">📚</div><div><div class="name">② 资产装载</div><div class="file">bookshelf_repository.py:131 get_dataset_context</div></div></div>
+        <div class="desc">装载上下文包：字段/口径/同义词<br>金榜 SQL · 标准题集（bs_common_questions）<br>7 类书架资产全部生效（已核实）</div>
+        <div class="chips"><span class="chip">零 token</span></div>
+      </div>
+      <div class="node c-expert" style="left:438px; top:246px; width:190px; height:218px;">
+        <div class="head"><div class="icon">🛠️</div><div><div class="name">③ 格物 · SQL 工程专家</div><div class="file">golden_sql.py + 规则/LLM 生成（已有代码）</div></div></div>
+        <div class="desc">Golden 命中直接复用<br>规则构建 → LLM 生成（带上下文包）<br>口径映射：同义词→标准字段</div>
+        <div class="chips"><span class="chip llm">LLM 0-1 次</span></div>
+      </div>
+      <div class="node c-gate" style="left:642px; top:246px; width:190px; height:218px;">
+        <div class="head"><div class="icon">🛡️</div><div><div class="name">④ 安全质检 + 执行</div><div class="file">sql_quality.py + sql_gate.py(新) + executor_guard.py(新)</div></div></div>
+        <div class="desc">正则只读校验（已有）<br><b>待补：sqlglot AST 单语句/禁函数</b><br><b>待补：statement_timeout + 墙钟 + 行数截断</b></div>
+        <div class="chips"><span class="chip">零 token 必跑</span><span class="chip gap">缺口</span></div>
+      </div>
+      <div class="node c-expert" style="left:846px; top:246px; width:190px; height:218px;">
+        <div class="head"><div class="icon">📊</div><div><div class="name">⑤ 析微 · 数据分析专家</div><div class="file">pandas_analyze.py（已有）</div></div></div>
+        <div class="desc">结论 / 图表 / 口径说明 / 建议<br>排名类首句必须点名最优对象<br>统一返回契约 findings/evidence/risk</div>
+        <div class="chips"><span class="chip llm">LLM 1 次</span></div>
+      </div>
+      <div class="node c-super" style="left:1050px; top:246px; width:190px; height:218px;">
+        <div class="head"><div class="icon">⚖️</div><div><div class="name">⑥ 主理人 · 综合复核</div><div class="file">evidence_vote.py + self_check.py（已有）</div></div></div>
+        <div class="desc">复核三专家全部产出<br>6 路信号加权 → accept/caution/review_required<br><b>定位改为闸门信号，不作结论裁决（禁投票）</b></div>
+        <div class="chips"><span class="chip llm">LLM 1 次必跑</span></div>
+      </div>
+      <div class="node c-super" style="left:1254px; top:246px; width:190px; height:218px;">
+        <div class="head"><div class="icon">📤</div><div><div class="name">⑦ 复核不通过 → 分派</div><div class="file">问题清单（JSON）· 重试意图锁</div></div></div>
+        <div class="desc">按问题清单分派回三个专家（问津/格物/析微）<br>每人重新校验后重交主理人<br>≤2 轮；仍矛盾→指定口径核验</div>
+        <div class="chips"><span class="chip gap">回环需新建</span></div>
+      </div>
+      <div class="node c-deliver" style="left:1458px; top:246px; width:190px; height:218px;">
+        <div class="head"><div class="icon">✅</div><div><div class="name">⑧ 交付 + 写回</div><div class="file">answer_contract.py 终检 + TaskState=done</div></div></div>
+        <div class="desc">结果+图表+口径+SQL 轨迹<br>conversation_history 回写<br>审计日志落库</div>
+        <div class="chips"><span class="chip ok">终检零 token</span></div>
+      </div>
+
+      <div class="loop-label" style="left:790px; top:512px; width:430px;">⑥ 复核不通过 → 打回三个专家（问津/格物/析微）每人重新校验（附问题清单）→ 重交主理人再评估 → 通过才交付（红虚线，此回环当前不存在，需新建）</div>
+
+      <!-- 分支/特殊卡 -->
+      <div class="branch" style="left:30px; top:552px; width:200px; height:92px;">
+        <div class="t">分支 A · 追问/上下文不足</div>
+        <div class="d">记忆无上下文且问题缺要素 → 追问 ≤2 轮 → 仍不足：给引导选项或转人工，禁止猜测直传</div>
+      </div>
+      <div class="branch" style="left:250px; top:552px; width:300px; height:92px;">
+        <div class="t">分支 B · 数据集歧义确认卡</div>
+        <div class="d">route_guard 检出多数据集 → 返回选项卡（≤4）→ POST /api/ask-chat/confirm-by-boss（session_id + option_id + selected_dataset_ids）→ 回 ①；2 轮未定 → 兜底话术</div>
+      </div>
+      <div class="branch" style="left:570px; top:552px; width:330px; height:92px;">
+        <div class="t">分支 C · 安全拦截 / 超时 / 修复回环</div>
+        <div class="d">AST 拦截或超时或行超限 → 打回格物修复（≤2 轮，意图锁：只改写法不改口径）→ 仍失败：拒绝执行 + 明示原因，禁止降级放行</div>
+      </div>
+      <div class="branch" style="left:920px; top:552px; width:330px; height:92px;">
+        <div class="t">分支 D · 空结果降级链</div>
+        <div class="d">0 行 → 同义词扩展重试 → 近似口径 + 明示差异 → 仍无：明确"未找到数据"，禁止编造；⑤ 不得对空数据生成结论</div>
+      </div>
+      <div class="branch" style="left:1270px; top:552px; width:340px; height:92px;">
+        <div class="t">分支 E · 报告生成（独立环节）</div>
+        <div class="d">用户要报告 → 走独立报告生成（HTML/PDF），不阻塞主链；生成失败回退纯文本结果 + 明示</div>
+      </div>
+
+      <!-- ===== 高阶泳道 ===== -->
+      <div class="lane" style="top:690px; height:470px;">
+        <span class="lane-tag" style="background:#F5F3FF; color:#7C3AED;">高阶问数 · 主理人规划 → 专用工具（4 个缺口）→ 综合复核 → 打回循环（≤2 轮）</span>
+      </div>
+
+      <div class="node c-super" style="left:30px; top:736px; width:250px; height:150px;">
+        <div class="head"><div class="icon">⚖️</div><div><div class="name">主理人 · 任务规划</div><div class="file">复用 planner.py infer() 定档</div></div></div>
+        <div class="desc">拆子任务 · 选专用工具<br>硬歧义前置澄清 ≤2 轮（灰点线自环）<br>预算上限 · 交接协议 JSON · 重试意图锁</div>
+        <div class="chips"><span class="chip llm">LLM 1 次</span></div>
+      </div>
+
+      <div class="node c-expert" style="left:320px; top:736px; width:210px; height:150px;">
+        <div class="head"><div class="icon">🔍</div><div><div class="name">专用工具 1 · 取数查询</div><div class="file">问津+格物内核 · golden_sql.py（已有）</div></div></div>
+        <div class="desc">统计 / 排行 / 趋势 / 对比<br>必经 L0 安全闸门，禁止裸 SQL 绕过</div>
+        <div class="chips"><span class="chip ok">已有</span><span class="chip">挂 L0 闸门</span></div>
+      </div>
+      <div class="node c-expert c-gap" style="left:545px; top:736px; width:210px; height:150px;">
+        <div class="head"><div class="icon">🧩</div><div><div class="name">专用工具 2 · 归因分析</div><div class="file">缺口 · 新建</div></div></div>
+        <div class="desc">两期对照 · 维度贡献度 · 自动下钻<br>澄清契约：指标/当期/基期/维度</div>
+        <div class="chips"><span class="chip gap">缺口</span></div>
+      </div>
+      <div class="node c-expert c-gap" style="left:770px; top:736px; width:210px; height:150px;">
+        <div class="head"><div class="icon">📈</div><div><div class="name">专用工具 3 · 趋势预测</div><div class="file">缺口 · 新建</div></div></div>
+        <div class="desc">时序预测 · 置信区间 · 明示假设<br>澄清契约：指标/粒度/预测范围</div>
+        <div class="chips"><span class="chip gap">缺口</span></div>
+      </div>
+      <div class="node c-expert c-gap" style="left:995px; top:736px; width:210px; height:150px;">
+        <div class="head"><div class="icon">🔗</div><div><div class="name">专用工具 4 · 相关性分析</div><div class="file">缺口 · 新建</div></div></div>
+        <div class="desc">Spearman · 偏相关控制混淆变量<br>强制标注：相关 ≠ 因果</div>
+        <div class="chips"><span class="chip gap">缺口</span></div>
+      </div>
+      <div class="node c-expert c-gap" style="left:1220px; top:736px; width:210px; height:150px;">
+        <div class="head"><div class="icon">🚨</div><div><div class="name">专用工具 5 · 异动检测</div><div class="file">缺口 · 新建</div></div></div>
+        <div class="desc">单指标时序 sigma 扫描 · 分级告警<br>澄清契约：指标/范围/粒度</div>
+        <div class="chips"><span class="chip gap">缺口</span></div>
+      </div>
+
+      <div class="node c-super" style="left:520px; top:918px; width:260px; height:112px;">
+        <div class="head"><div class="icon">⚖️</div><div><div class="name">主理人 · 综合复核</div><div class="file">evidence_vote.py + self_check.py（已有）</div></div></div>
+        <div class="desc">汇总全部工具产出，统一返回契约：<br>findings / evidence_refs / risk_flags / artifacts<br>交叉校验：口径一致 · 证据可溯 · 无矛盾</div>
+        <div class="chips"><span class="chip llm">LLM 1 次</span></div>
+      </div>
+      <div class="node c-deliver" style="left:1150px; top:918px; width:230px; height:112px;">
+        <div class="head"><div class="icon">✅</div><div><div class="name">统一交付</div><div class="file">answer_contract.py 终检</div></div></div>
+        <div class="desc">结论 + 证据链 + 口径 + SQL 轨迹<br>报告生成为独立环节<br>TaskState=done + 审计日志</div>
+      </div>
+
+      <div class="loop-label" style="left:850px; top:1052px; width:470px;">复核不通过 → 打回三个专家每人重新校验（附问题清单，≤2 轮）· 重试意图锁：修复不得改口径 · 仍矛盾 → 指定口径核验，不投票</div>
+      <div class="lane-note" style="left:30px; top:1096px; width:1660px;">高阶纪律：专用工具优先，禁止裸 SQL 绕过；要素不齐先澄清，禁止模糊直传（对齐 DataBuddy 前置澄清契约）；任一工具失败 → 降级为该工具内最小可用结论 + risk_flags 明示，不得静默丢弃。降档出口（紫虚线）：规划失败/要素不足/预算超限 → 回落普通链路。</div>
+
+      <!-- ===== 共享底座 ===== -->
+      <div class="base" style="top:1176px;">共享底座（两档复用）：<b>TaskState 任务状态（新建）</b>·<b>sql_quality.py + AST/超时闸门（补强）</b>·<b>短期记忆 + 记忆服务（候选待审核）</b>·<b>检查点回放</b>·<b>交接协议 JSON</b>·<b>预算/停止/降级</b>·<b>审计日志</b></div>
+    </div>
+  </div>
+
+  <div style="font-size:12px; color:#9CA3AF; margin-top:12px; line-height:1.6;">核实方式：6 个纯函数 skill 离线调用实测通过（planner 识别"排名+前10+战区"、sql_quality 拦截 DELETE、answer_contract 抓出未首句点名、evidence_vote 冲突场景出 review_required）｜ 角色命名：主理人（综合复核）+ 三专家 问津/格物/析微，详见 C_专家团蒸馏架构设计.md ｜ 落地步骤：D_普通与高阶问数落地方案.md（先 L0 闸门 → TaskState → 主理人复核 → 交付契约，一点点来）</div>
+</div>
+</body>
+</html>

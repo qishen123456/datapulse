@@ -1,0 +1,202 @@
+[
+  {
+    "id": "Q022",
+    "question": "新零售板块今年贡献了多少开单金额？",
+    "domain": "消费者",
+    "ground_truth": "新零售开单 1.0473 亿元",
+    "route_datasets": [
+      2
+    ],
+    "sql": "WITH 字段提取 AS (\n    SELECT\n        id,\n        COALESCE(NULLIF(TRIM(fields->>'事业部'), ''), '消费者事业部') AS 事业部,\n        COALESCE(NULLIF(TRIM(fields->>'分公司'), ''), '') AS 分公司,\n        COALESCE(NULLIF(TRIM(fields->>'城市分公司'), ''), '') AS 城市分公司,\n        COALESCE(NULLIF(TRIM(fields->>'层级级别'), ''), '') AS 源层级,\n        COALESCE(NULLIF(TRIM(fields->>'当前年'), ''), '2026') AS 当前年,\n        NULLIF(regexp_replace(COALESCE(fields->>'总任务（金额）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 总任务原值,\n        NULLIF(regexp_replace(COALESCE(fields->>'年度开单金额', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 年度开单原值,\n        NULLIF(regexp_replace(COALESCE(fields->>'线下（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 线下任务万,\n        NULLIF(regexp_replace(COALESCE(fields->>'新零售（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 新零售任务万,\n        NULLIF(regexp_replace(COALESCE(fields->>'燃气定制（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 燃气定制任务万,\n        NULLIF(regexp_replace(COALESCE(fields->>'地产（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 地产任务万,\n        NULLIF(regexp_replace(COALESCE(fields->>'线下-年度开单金额（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 线下实际万,\n        NULLIF(regexp_replace(COALESCE(fields->>'新零售-年度开单金额（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 新零售实际万,\n        NULLIF(regexp_replace(COALESCE(fields->>'燃气定制-年度开单金额（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 燃气定制实际万,\n        NULLIF(regexp_replace(COALESCE(fields->>'地产-年度开单金额（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 地产实际万\n    FROM public.feishu_tbl_xioafeizhe\n    WHERE fields IS NOT NULL\n),\n标准行 AS (\n    SELECT\n        id,\n        CASE\n            WHEN 城市分公司 <> '' THEN '城市分公司'\n            WHEN 分公司 <> '' THEN '分公司'\n            ELSE '消费者事业部总体'\n        END AS 层级,\n        CASE\n            WHEN 城市分公司 <> '' THEN 城市分公司\n            WHEN 分公司 <> '' THEN 分公司\n            ELSE 事业部\n        END AS 节点名称,\n        CASE\n            WHEN 城市分公司 <> '' THEN 分公司\n            WHEN 分公司 <> '' THEN 事业部\n            ELSE NULL\n        END AS 上级名称,\n        COALESCE(总任务原值, (COALESCE(线下任务万, 0) + COALESCE(新零售任务万, 0) + COALESCE(燃气定制任务万, 0) + COALESCE(地产任务万, 0)) * 10000, 0) AS 总任务金额,\n        COALESCE(年度开单原值, (COALESCE(线下实际万, 0) + COALESCE(新零售实际万, 0) + COALESCE(燃气定制实际万, 0) + COALESCE(地产实际万, 0)) * 10000, 0) AS 年度开单金额,\n        COALESCE(线下任务万, 0) AS 线下任务_万元,\n        COALESCE(新零售任务万, 0) AS 新零售任务_万元,\n        COALESCE(燃气定制任务万, 0) AS 燃气定制任务_万元,\n        COALESCE(地产任务万, 0) AS 地产任务_万元,\n        COALESCE(线下实际万, 0) AS 线下实际_万元,\n        COALESCE(新零售实际万, 0) AS 新零售实际_万元,\n        COALESCE(燃气定制实际万, 0) AS 燃气定制实际_万元,\n        COALESCE(地产实际万, 0) AS 地产实际_万元\n    FROM 字段提取\n    WHERE 当前年 = '2026'\n      AND (事业部 = '消费者事业部' OR 分公司 <> '' OR 城市分公司 <> '')\n),\n汇总结果 AS (\n    SELECT\n        '消费者经营链路' AS 条线,\n        '全部' AS 分析口径,\n        层级,\n        节点名称,\n        上级名称,\n        ROUND((总任务金额), 2) AS 总任务金额,\n        ROUND((年度开单金额), 2) AS 年度开单金额,\n        CASE WHEN (总任务金额) > 0 THEN ROUND((年度开单金额) / (总任务金额) * 100, 2) ELSE 0 END AS 达成率,\n        ROUND(GREATEST((总任务金额) - (年度开单金额), 0), 2) AS 剩余任务金额,\n        ROUND(线下任务_万元, 2) AS 线下任务_万元,\n        ROUND(新零售任务_万元, 2) AS 新零售任务_万元,\n        ROUND(燃气定制任务_万元, 2) AS 燃气定制任务_万元,\n        ROUND(地产任务_万元, 2) AS 地产任务_万元,\n        ROUND(线下实际_万元, 2) AS 线下实际_万元,\n        ROUND(新零售实际_万元, 2) AS 新零售实际_万元,\n        ROUND(燃气定制实际_万元, 2) AS 燃气定制实际_万元,\n        ROUND(地产实际_万元, 2) AS 地产实际_万元\n    FROM 标准行\n    WHERE 节点名称 <> ''\n      AND ((总任务金额) > 0 OR (年度开单金额) > 0)\n)\nSELECT\n    节点名称 AS 分组名称,\n    节点名称,\n    MAX(层级) AS 层级,\n    MAX(上级名称) AS 上级名称,\n    SUM(总任务金额) AS 总任务金额, SUM(年度开单金额) AS 年度开单金额, CASE WHEN SUM(总任务金额) = 0 THEN 0 ELSE ROUND(SUM(年度开单金额) / SUM(总任务金额) * 100, 2) END AS 达成率, SUM(剩余任务金额) AS 剩余任务金额\nFROM 汇总结果\nWHERE 层级 = '新零售'\nGROUP BY 节点名称\nORDER BY 年度开单金额 DESC NULLS LAST\nLIMIT 200",
+    "rows_count": 0,
+    "first_row": {},
+    "elapsed_s": 0.06,
+    "status": "FAIL",
+    "error_reason": "出数 0 行 (返回空表或路由冲突中断)"
+  },
+  {
+    "id": "Q023",
+    "question": "地产业务今年完成了多少？",
+    "domain": "消费者",
+    "ground_truth": "地产开单 2,831.72 万元 (仅总部)",
+    "route_datasets": [
+      2
+    ],
+    "sql": "WITH 字段提取 AS (\n    SELECT\n        id,\n        COALESCE(NULLIF(TRIM(fields->>'事业部'), ''), '消费者事业部') AS 事业部,\n        COALESCE(NULLIF(TRIM(fields->>'分公司'), ''), '') AS 分公司,\n        COALESCE(NULLIF(TRIM(fields->>'城市分公司'), ''), '') AS 城市分公司,\n        COALESCE(NULLIF(TRIM(fields->>'层级级别'), ''), '') AS 源层级,\n        COALESCE(NULLIF(TRIM(fields->>'当前年'), ''), '2026') AS 当前年,\n        NULLIF(regexp_replace(COALESCE(fields->>'总任务（金额）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 总任务原值,\n        NULLIF(regexp_replace(COALESCE(fields->>'年度开单金额', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 年度开单原值,\n        NULLIF(regexp_replace(COALESCE(fields->>'线下（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 线下任务万,\n        NULLIF(regexp_replace(COALESCE(fields->>'新零售（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 新零售任务万,\n        NULLIF(regexp_replace(COALESCE(fields->>'燃气定制（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 燃气定制任务万,\n        NULLIF(regexp_replace(COALESCE(fields->>'地产（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 地产任务万,\n        NULLIF(regexp_replace(COALESCE(fields->>'线下-年度开单金额（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 线下实际万,\n        NULLIF(regexp_replace(COALESCE(fields->>'新零售-年度开单金额（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 新零售实际万,\n        NULLIF(regexp_replace(COALESCE(fields->>'燃气定制-年度开单金额（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 燃气定制实际万,\n        NULLIF(regexp_replace(COALESCE(fields->>'地产-年度开单金额（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 地产实际万\n    FROM public.feishu_tbl_xioafeizhe\n    WHERE fields IS NOT NULL\n),\n标准行 AS (\n    SELECT\n        id,\n        CASE\n            WHEN 城市分公司 <> '' THEN '城市分公司'\n            WHEN 分公司 <> '' THEN '分公司'\n            ELSE '消费者事业部总体'\n        END AS 层级,\n        CASE\n            WHEN 城市分公司 <> '' THEN 城市分公司\n            WHEN 分公司 <> '' THEN 分公司\n            ELSE 事业部\n        END AS 节点名称,\n        CASE\n            WHEN 城市分公司 <> '' THEN 分公司\n            WHEN 分公司 <> '' THEN 事业部\n            ELSE NULL\n        END AS 上级名称,\n        COALESCE(总任务原值, (COALESCE(线下任务万, 0) + COALESCE(新零售任务万, 0) + COALESCE(燃气定制任务万, 0) + COALESCE(地产任务万, 0)) * 10000, 0) AS 总任务金额,\n        COALESCE(年度开单原值, (COALESCE(线下实际万, 0) + COALESCE(新零售实际万, 0) + COALESCE(燃气定制实际万, 0) + COALESCE(地产实际万, 0)) * 10000, 0) AS 年度开单金额,\n        COALESCE(线下任务万, 0) AS 线下任务_万元,\n        COALESCE(新零售任务万, 0) AS 新零售任务_万元,\n        COALESCE(燃气定制任务万, 0) AS 燃气定制任务_万元,\n        COALESCE(地产任务万, 0) AS 地产任务_万元,\n        COALESCE(线下实际万, 0) AS 线下实际_万元,\n        COALESCE(新零售实际万, 0) AS 新零售实际_万元,\n        COALESCE(燃气定制实际万, 0) AS 燃气定制实际_万元,\n        COALESCE(地产实际万, 0) AS 地产实际_万元\n    FROM 字段提取\n    WHERE 当前年 = '2026'\n      AND (事业部 = '消费者事业部' OR 分公司 <> '' OR 城市分公司 <> '')\n),\n汇总结果 AS (\n    SELECT\n        '消费者经营链路' AS 条线,\n        '全部' AS 分析口径,\n        层级,\n        节点名称,\n        上级名称,\n        ROUND((总任务金额), 2) AS 总任务金额,\n        ROUND((年度开单金额), 2) AS 年度开单金额,\n        CASE WHEN (总任务金额) > 0 THEN ROUND((年度开单金额) / (总任务金额) * 100, 2) ELSE 0 END AS 达成率,\n        ROUND(GREATEST((总任务金额) - (年度开单金额), 0), 2) AS 剩余任务金额,\n        ROUND(线下任务_万元, 2) AS 线下任务_万元,\n        ROUND(新零售任务_万元, 2) AS 新零售任务_万元,\n        ROUND(燃气定制任务_万元, 2) AS 燃气定制任务_万元,\n        ROUND(地产任务_万元, 2) AS 地产任务_万元,\n        ROUND(线下实际_万元, 2) AS 线下实际_万元,\n        ROUND(新零售实际_万元, 2) AS 新零售实际_万元,\n        ROUND(燃气定制实际_万元, 2) AS 燃气定制实际_万元,\n        ROUND(地产实际_万元, 2) AS 地产实际_万元\n    FROM 标准行\n    WHERE 节点名称 <> ''\n      AND ((总任务金额) > 0 OR (年度开单金额) > 0)\n)\nSELECT\n    节点名称 AS 分组名称,\n    节点名称,\n    MAX(层级) AS 层级,\n    MAX(上级名称) AS 上级名称,\n    SUM(总任务金额) AS 总任务金额, SUM(年度开单金额) AS 年度开单金额, CASE WHEN SUM(总任务金额) = 0 THEN 0 ELSE ROUND(SUM(年度开单金额) / SUM(总任务金额) * 100, 2) END AS 达成率, SUM(剩余任务金额) AS 剩余任务金额\nFROM 汇总结果\nWHERE 层级 = '地产'\nGROUP BY 节点名称\nORDER BY 年度开单金额 DESC NULLS LAST\nLIMIT 200",
+    "rows_count": 0,
+    "first_row": {},
+    "elapsed_s": 0.03,
+    "status": "FAIL",
+    "error_reason": "出数 0 行 (返回空表或路由冲突中断)"
+  },
+  {
+    "id": "Q024",
+    "question": "燃气定制业务今年做了多少业绩？",
+    "domain": "消费者",
+    "ground_truth": "燃气定制开单 1,325.08 万元",
+    "route_datasets": [
+      2
+    ],
+    "sql": "WITH 字段提取 AS (\n    SELECT\n        id,\n        COALESCE(NULLIF(TRIM(fields->>'事业部'), ''), '消费者事业部') AS 事业部,\n        COALESCE(NULLIF(TRIM(fields->>'分公司'), ''), '') AS 分公司,\n        COALESCE(NULLIF(TRIM(fields->>'城市分公司'), ''), '') AS 城市分公司,\n        COALESCE(NULLIF(TRIM(fields->>'层级级别'), ''), '') AS 源层级,\n        COALESCE(NULLIF(TRIM(fields->>'当前年'), ''), '2026') AS 当前年,\n        NULLIF(regexp_replace(COALESCE(fields->>'总任务（金额）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 总任务原值,\n        NULLIF(regexp_replace(COALESCE(fields->>'年度开单金额', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 年度开单原值,\n        NULLIF(regexp_replace(COALESCE(fields->>'线下（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 线下任务万,\n        NULLIF(regexp_replace(COALESCE(fields->>'新零售（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 新零售任务万,\n        NULLIF(regexp_replace(COALESCE(fields->>'燃气定制（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 燃气定制任务万,\n        NULLIF(regexp_replace(COALESCE(fields->>'地产（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 地产任务万,\n        NULLIF(regexp_replace(COALESCE(fields->>'线下-年度开单金额（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 线下实际万,\n        NULLIF(regexp_replace(COALESCE(fields->>'新零售-年度开单金额（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 新零售实际万,\n        NULLIF(regexp_replace(COALESCE(fields->>'燃气定制-年度开单金额（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 燃气定制实际万,\n        NULLIF(regexp_replace(COALESCE(fields->>'地产-年度开单金额（万）', ''), '[^0-9.-]', '', 'g'), '')::NUMERIC AS 地产实际万\n    FROM public.feishu_tbl_xioafeizhe\n    WHERE fields IS NOT NULL\n),\n标准行 AS (\n    SELECT\n        id,\n        CASE\n            WHEN 城市分公司 <> '' THEN '城市分公司'\n            WHEN 分公司 <> '' THEN '分公司'\n            ELSE '消费者事业部总体'\n        END AS 层级,\n        CASE\n            WHEN 城市分公司 <> '' THEN 城市分公司\n            WHEN 分公司 <> '' THEN 分公司\n            ELSE 事业部\n        END AS 节点名称,\n        CASE\n            WHEN 城市分公司 <> '' THEN 分公司\n            WHEN 分公司 <> '' THEN 事业部\n            ELSE NULL\n        END AS 上级名称,\n        COALESCE(总任务原值, (COALESCE(线下任务万, 0) + COALESCE(新零售任务万, 0) + COALESCE(燃气定制任务万, 0) + COALESCE(地产任务万, 0)) * 10000, 0) AS 总任务金额,\n        COALESCE(年度开单原值, (COALESCE(线下实际万, 0) + COALESCE(新零售实际万, 0) + COALESCE(燃气定制实际万, 0) + COALESCE(地产实际万, 0)) * 10000, 0) AS 年度开单金额,\n        COALESCE(线下任务万, 0) AS 线下任务_万元,\n        COALESCE(新零售任务万, 0) AS 新零售任务_万元,\n        COALESCE(燃气定制任务万, 0) AS 燃气定制任务_万元,\n        COALESCE(地产任务万, 0) AS 地产任务_万元,\n        COALESCE(线下实际万, 0) AS 线下实际_万元,\n        COALESCE(新零售实际万, 0) AS 新零售实际_万元,\n        COALESCE(燃气定制实际万, 0) AS 燃气定制实际_万元,\n        COALESCE(地产实际万, 0) AS 地产实际_万元\n    FROM 字段提取\n    WHERE 当前年 = '2026'\n      AND (事业部 = '消费者事业部' OR 分公司 <> '' OR 城市分公司 <> '')\n),\n汇总结果 AS (\n    SELECT\n        '消费者经营链路' AS 条线,\n        '全部' AS 分析口径,\n        层级,\n        节点名称,\n        上级名称,\n        ROUND((总任务金额), 2) AS 总任务金额,\n        ROUND((年度开单金额), 2) AS 年度开单金额,\n        CASE WHEN (总任务金额) > 0 THEN ROUND((年度开单金额) / (总任务金额) * 100, 2) ELSE 0 END AS 达成率,\n        ROUND(GREATEST((总任务金额) - (年度开单金额), 0), 2) AS 剩余任务金额,\n        ROUND(线下任务_万元, 2) AS 线下任务_万元,\n        ROUND(新零售任务_万元, 2) AS 新零售任务_万元,\n        ROUND(燃气定制任务_万元, 2) AS 燃气定制任务_万元,\n        ROUND(地产任务_万元, 2) AS 地产任务_万元,\n        ROUND(线下实际_万元, 2) AS 线下实际_万元,\n        ROUND(新零售实际_万元, 2) AS 新零售实际_万元,\n        ROUND(燃气定制实际_万元, 2) AS 燃气定制实际_万元,\n        ROUND(地产实际_万元, 2) AS 地产实际_万元\n    FROM 标准行\n    WHERE 节点名称 <> ''\n      AND ((总任务金额) > 0 OR (年度开单金额) > 0)\n)\nSELECT\n    节点名称 AS 分组名称,\n    节点名称,\n    MAX(层级) AS 层级,\n    MAX(上级名称) AS 上级名称,\n    SUM(总任务金额) AS 总任务金额, SUM(年度开单金额) AS 年度开单金额, CASE WHEN SUM(总任务金额) = 0 THEN 0 ELSE ROUND(SUM(年度开单金额) / SUM(总任务金额) * 100, 2) END AS 达成率, SUM(剩余任务金额) AS 剩余任务金额\nFROM 汇总结果\nWHERE 层级 = '燃气定制'\nGROUP BY 节点名称\nORDER BY 年度开单金额 DESC NULLS LAST\nLIMIT 200",
+    "rows_count": 0,
+    "first_row": {},
+    "elapsed_s": 11.5,
+    "status": "FAIL",
+    "error_reason": "出数 0 行 (返回空表或路由冲突中断)"
+  },
+  {
+    "id": "Q049",
+    "question": "四大区域分公司（各大区）的开单排名是怎样的？",
+    "domain": "商用",
+    "ground_truth": "东部 > 南部 > 北部 > 西部",
+    "route_datasets": [
+      2,
+      3
+    ],
+    "sql": "",
+    "rows_count": 0,
+    "first_row": {},
+    "elapsed_s": 0.04,
+    "status": "FAIL",
+    "error_reason": "出数 0 行 (返回空表或路由冲突中断)"
+  },
+  {
+    "id": "Q056",
+    "question": "今年上半年各区域分公司的开单情况",
+    "domain": "商用",
+    "ground_truth": "1-6月各分公司累计开单",
+    "route_datasets": [
+      3,
+      2
+    ],
+    "sql": "",
+    "rows_count": 0,
+    "first_row": {},
+    "elapsed_s": 0.04,
+    "status": "FAIL",
+    "error_reason": "出数 0 行 (返回空表或路由冲突中断)"
+  },
+  {
+    "id": "Q057",
+    "question": "对比今年上半年各分公司相比去年的同比增速",
+    "domain": "商用",
+    "ground_truth": "上半年 YoY 增速",
+    "route_datasets": [
+      2,
+      3
+    ],
+    "sql": "",
+    "rows_count": 0,
+    "first_row": {},
+    "elapsed_s": 0.03,
+    "status": "FAIL",
+    "error_reason": "出数 0 行 (返回空表或路由冲突中断)"
+  },
+  {
+    "id": "Q065",
+    "question": "商用事业部一季度整体开单多少？",
+    "domain": "商用",
+    "ground_truth": "商用 1-3 月大盘开单",
+    "route_datasets": [
+      3
+    ],
+    "sql": "WITH raw_data AS (\n    SELECT\n        TRIM(COALESCE(CASE WHEN jsonb_typeof(fields->'分公司') = 'array' THEN fields->'分公司'->0->>'text' ELSE fields->>'分公司' END, '')) AS 分公司,\n        TRIM(COALESCE(CASE WHEN jsonb_typeof(fields->'代表处') = 'array' THEN fields->'代表处'->0->>'text' ELSE fields->>'代表处' END, '')) AS 代表处,\n        TRIM(COALESCE(CASE WHEN jsonb_typeof(fields->'业务代表') = 'array' THEN fields->'业务代表'->0->>'text' ELSE fields->>'业务代表' END, '')) AS 业务代表,\n        '' AS 业务部,\n        SUM(COALESCE(NULLIF(regexp_replace(COALESCE(CASE WHEN jsonb_typeof(fields->'总任务（金额）') = 'array' THEN fields->'总任务（金额）'->0->>'text' ELSE fields->>'总任务（金额）' END, '0'), '[^0-9.-]', '', 'g'), ''), '0')::NUMERIC) AS 总任务金额,\n        SUM(COALESCE(NULLIF(regexp_replace(COALESCE(CASE WHEN jsonb_typeof(fields->'年度开单金额') = 'array' THEN fields->'年度开单金额'->0->>'text' ELSE fields->>'年度开单金额' END, '0'), '[^0-9.-]', '', 'g'), ''), '0')::NUMERIC) AS 年度开单金额\n    FROM angel_group_data\n    WHERE COALESCE(NULLIF(TRIM(CASE WHEN jsonb_typeof(fields->'当前年') = 'array' THEN fields->'当前年'->0->>'text' ELSE fields->>'当前年' END), ''), '2026') = '2026'\n    GROUP BY 1, 2, 3, 4\n),\nflattened_tree AS (\n    SELECT\n        CASE\n            WHEN 业务代表 <> '' THEN '业务代表'\n            WHEN 代表处 <> '' THEN '代表处'\n            WHEN 分公司 <> '' AND 分公司 LIKE '%业务部' THEN '业务部'\n            WHEN 业务部 <> '' THEN '业务部'\n            WHEN 分公司 <> '' THEN '分公司'\n            ELSE '事业部'\n        END AS 层级,\n        CASE\n            WHEN 业务代表 <> '' THEN COALESCE(NULLIF(代表处, ''), NULLIF(业务部, ''), NULLIF(分公司, ''), '商用事业部')\n            WHEN 代表处 <> '' THEN NULLIF(分公司, '')\n            WHEN 分公司 <> '' OR 业务部 <> '' THEN '商用事业部'\n            ELSE NULL\n        END AS 上级名称,\n        CASE\n            WHEN 业务代表 <> '' THEN 业务代表\n            WHEN 代表处 <> '' THEN 代表处\n            WHEN 分公司 <> '' THEN 分公司\n            WHEN 业务部 <> '' THEN 业务部\n            ELSE '商用事业部'\n        END AS 节点名称,\n        CASE\n            WHEN COALESCE(NULLIF(分公司, ''), NULLIF(业务部, '')) LIKE '%业务部' THEN '行业条线'\n            WHEN COALESCE(NULLIF(分公司, ''), NULLIF(业务部, '')) LIKE '%分公司' THEN '区域条线'\n            ELSE '事业部层级'\n        END AS 条线,\n        '商用事业部' AS 事业部,\n        分公司,\n        代表处,\n        业务部,\n        业务代表,\n        总任务金额,\n        年度开单金额\n    FROM raw_data\n),\nsummarized_nodes AS (\n    SELECT\n        条线,\n        层级,\n        上级名称,\n        节点名称,\n        MAX(事业部) AS 事业部,\n        MAX(分公司) AS 分公司,\n        MAX(代表处) AS 代表处,\n        MAX(业务部) AS 业务部,\n        MAX(业务代表) AS 业务代表,\n        SUM(总任务金额) AS 总任务金额,\n        SUM(年度开单金额) AS 年度开单金额\n    FROM flattened_tree\n    WHERE 节点名称 <> ''\n    GROUP BY 条线, 层级, 上级名称, 节点名称\n)\nSELECT\n    条线,\n    层级,\n    节点名称,\n    上级名称,\n    事业部,\n    分公司,\n    代表处,\n    业务部,\n    业务代表,\n    总任务金额,\n    年度开单金额,\n    CASE WHEN 总任务金额 = 0 THEN 0 ELSE ROUND((年度开单金额 / 总任务金额) * 100, 2) END AS 达成率,\n    ROUND(总任务金额 - 年度开单金额, 2) AS 剩余任务金额\nFROM summarized_nodes\nSELECT *\nFROM 汇总结果\nWHERE 层级 = '商用事业部'\nORDER BY 条线 DESC,\n  CASE 层级\n    WHEN '事业部' THEN 0\n    WHEN '分公司' THEN 1\n    WHEN '业务部' THEN 1\n    WHEN '代表处' THEN 2\n    WHEN '业务代表' THEN 3\n    ELSE 9\n  END,\n  上级名称,\n  节点名称\nLIMIT 10000",
+    "rows_count": 0,
+    "first_row": {},
+    "elapsed_s": 64.22,
+    "status": "FAIL",
+    "error_reason": "出数 0 行 (返回空表或路由冲突中断)"
+  },
+  {
+    "id": "Q066",
+    "question": "商用事业部二季度整体开单多少？",
+    "domain": "商用",
+    "ground_truth": "商用 4-6 月大盘开单",
+    "route_datasets": [
+      3
+    ],
+    "sql": "WITH raw_data AS (\n    SELECT\n        TRIM(COALESCE(CASE WHEN jsonb_typeof(fields->'分公司') = 'array' THEN fields->'分公司'->0->>'text' ELSE fields->>'分公司' END, '')) AS 分公司,\n        TRIM(COALESCE(CASE WHEN jsonb_typeof(fields->'代表处') = 'array' THEN fields->'代表处'->0->>'text' ELSE fields->>'代表处' END, '')) AS 代表处,\n        TRIM(COALESCE(CASE WHEN jsonb_typeof(fields->'业务代表') = 'array' THEN fields->'业务代表'->0->>'text' ELSE fields->>'业务代表' END, '')) AS 业务代表,\n        '' AS 业务部,\n        SUM(COALESCE(NULLIF(regexp_replace(COALESCE(CASE WHEN jsonb_typeof(fields->'总任务（金额）') = 'array' THEN fields->'总任务（金额）'->0->>'text' ELSE fields->>'总任务（金额）' END, '0'), '[^0-9.-]', '', 'g'), ''), '0')::NUMERIC) AS 总任务金额,\n        SUM(COALESCE(NULLIF(regexp_replace(COALESCE(CASE WHEN jsonb_typeof(fields->'年度开单金额') = 'array' THEN fields->'年度开单金额'->0->>'text' ELSE fields->>'年度开单金额' END, '0'), '[^0-9.-]', '', 'g'), ''), '0')::NUMERIC) AS 年度开单金额\n    FROM angel_group_data\n    WHERE COALESCE(NULLIF(TRIM(CASE WHEN jsonb_typeof(fields->'当前年') = 'array' THEN fields->'当前年'->0->>'text' ELSE fields->>'当前年' END), ''), '2026') = '2026'\n    GROUP BY 1, 2, 3, 4\n),\nflattened_tree AS (\n    SELECT\n        CASE\n            WHEN 业务代表 <> '' THEN '业务代表'\n            WHEN 代表处 <> '' THEN '代表处'\n            WHEN 分公司 <> '' AND 分公司 LIKE '%业务部' THEN '业务部'\n            WHEN 业务部 <> '' THEN '业务部'\n            WHEN 分公司 <> '' THEN '分公司'\n            ELSE '事业部'\n        END AS 层级,\n        CASE\n            WHEN 业务代表 <> '' THEN COALESCE(NULLIF(代表处, ''), NULLIF(业务部, ''), NULLIF(分公司, ''), '商用事业部')\n            WHEN 代表处 <> '' THEN NULLIF(分公司, '')\n            WHEN 分公司 <> '' OR 业务部 <> '' THEN '商用事业部'\n            ELSE NULL\n        END AS 上级名称,\n        CASE\n            WHEN 业务代表 <> '' THEN 业务代表\n            WHEN 代表处 <> '' THEN 代表处\n            WHEN 分公司 <> '' THEN 分公司\n            WHEN 业务部 <> '' THEN 业务部\n            ELSE '商用事业部'\n        END AS 节点名称,\n        CASE\n            WHEN COALESCE(NULLIF(分公司, ''), NULLIF(业务部, '')) LIKE '%业务部' THEN '行业条线'\n            WHEN COALESCE(NULLIF(分公司, ''), NULLIF(业务部, '')) LIKE '%分公司' THEN '区域条线'\n            ELSE '事业部层级'\n        END AS 条线,\n        '商用事业部' AS 事业部,\n        分公司,\n        代表处,\n        业务部,\n        业务代表,\n        总任务金额,\n        年度开单金额\n    FROM raw_data\n),\nsummarized_nodes AS (\n    SELECT\n        条线,\n        层级,\n        上级名称,\n        节点名称,\n        MAX(事业部) AS 事业部,\n        MAX(分公司) AS 分公司,\n        MAX(代表处) AS 代表处,\n        MAX(业务部) AS 业务部,\n        MAX(业务代表) AS 业务代表,\n        SUM(总任务金额) AS 总任务金额,\n        SUM(年度开单金额) AS 年度开单金额\n    FROM flattened_tree\n    WHERE 节点名称 <> ''\n    GROUP BY 条线, 层级, 上级名称, 节点名称\n)\nSELECT\n    条线,\n    层级,\n    节点名称,\n    上级名称,\n    事业部,\n    分公司,\n    代表处,\n    业务部,\n    业务代表,\n    总任务金额,\n    年度开单金额,\n    CASE WHEN 总任务金额 = 0 THEN 0 ELSE ROUND((年度开单金额 / 总任务金额) * 100, 2) END AS 达成率,\n    ROUND(总任务金额 - 年度开单金额, 2) AS 剩余任务金额\nFROM summarized_nodes\nSELECT *\nFROM 汇总结果\nWHERE 层级 = '商用事业部'\nORDER BY 条线 DESC,\n  CASE 层级\n    WHEN '事业部' THEN 0\n    WHEN '分公司' THEN 1\n    WHEN '业务部' THEN 1\n    WHEN '代表处' THEN 2\n    WHEN '业务代表' THEN 3\n    ELSE 9\n  END,\n  上级名称,\n  节点名称\nLIMIT 10000",
+    "rows_count": 0,
+    "first_row": {},
+    "elapsed_s": 59.95,
+    "status": "FAIL",
+    "error_reason": "出数 0 行 (返回空表或路由冲突中断)"
+  },
+  {
+    "id": "Q067",
+    "question": "5月医疗板块和去年同期比增幅怎么样？",
+    "domain": "商用",
+    "ground_truth": "5月医疗同比 YoY",
+    "route_datasets": [
+      2
+    ],
+    "sql": "",
+    "rows_count": 0,
+    "first_row": {},
+    "elapsed_s": 28.17,
+    "status": "FAIL",
+    "error_reason": "出数 0 行 (返回空表或路由冲突中断)"
+  },
+  {
+    "id": "Q083",
+    "question": "各个分公司地产业务完成情况",
+    "domain": "消费者",
+    "ground_truth": "各分公司地产全为0",
+    "route_datasets": [
+      2
+    ],
+    "sql": "SELECT '消费者经营链路' AS 条线, '全部' AS 分析口径, NULL AS 层级, NULL AS 节点名称, NULL AS 上级名称, 0 AS 总任务金额, 0 AS 年度开单金额, 0 AS 达成率, 0 AS 剩余任务金额, 0 AS 线下任务_万元, 0 AS 新零售任务_万元, 0 AS 燃气定制任务_万元, 0 AS 地产任务_万元, 0 AS 线下实际_万元, 0 AS 新零售实际_万元, 0 AS 燃气定制实际_万元, 0 AS 地产实际_万元 FROM public.feishu_tbl_xioafeizhe WHERE 1=0 LIMIT 0",
+    "rows_count": 0,
+    "first_row": {},
+    "elapsed_s": 0.04,
+    "status": "FAIL",
+    "error_reason": "出数 0 行 (返回空表或路由冲突中断)"
+  },
+  {
+    "id": "Q084",
+    "question": "哪个分公司低于30%？",
+    "domain": "消费者",
+    "ground_truth": "仅江浙沪分公司低于 30%",
+    "route_datasets": [
+      2,
+      3
+    ],
+    "sql": "",
+    "rows_count": 0,
+    "first_row": {},
+    "elapsed_s": 0.04,
+    "status": "FAIL",
+    "error_reason": "出数 0 行 (返回空表或路由冲突中断)"
+  },
+  {
+    "id": "Q085",
+    "question": "达成率高于50%的分公司有哪些？",
+    "domain": "消费者",
+    "ground_truth": "山东、豫晋、河北 (3家)",
+    "route_datasets": [
+      2,
+      3
+    ],
+    "sql": "",
+    "rows_count": 0,
+    "first_row": {},
+    "elapsed_s": 0.03,
+    "status": "FAIL",
+    "error_reason": "出数 0 行 (返回空表或路由冲突中断)"
+  },
+  {
+    "id": "Q088",
+    "question": "哪些节点达成率低于10%？",
+    "domain": "商用",
+    "ground_truth": "低达成节点列表",
+    "route_datasets": [
+      3
+    ],
+    "sql": "",
+    "rows_count": 0,
+    "first_row": {},
+    "elapsed_s": 35.55,
+    "status": "FAIL",
+    "error_reason": "出数 0 行 (返回空表或路由冲突中断)"
+  }
+]

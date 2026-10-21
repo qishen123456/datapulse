@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>智能问数工作流 · 真正并行并发与多发协同专业流程图</title>
+<style>
+:root{
+  --bg:#f4f7fb;--paper:#fff;--ink:#172437;--muted:#66758a;--line:#9aa8b8;--border:#d8e0ea;
+  --purple:#7556d8;--purple-soft:#f1edff;--green:#15966b;--green-soft:#e8f7f0;
+  --blue:#2475c7;--blue-soft:#eaf3ff;--amber:#b77914;--amber-soft:#fff6df;
+  --red:#c64a4a;--red-soft:#fff0f0;--teal:#087f8c;--teal-soft:#e6f7f8;
+  --shadow:0 3px 12px rgba(25,44,72,.07);
+}
+*{box-sizing:border-box} html,body{height:100%;margin:0;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+body{background:var(--bg);overflow:hidden}
+.topbar{height:66px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:22px;padding:0 22px;position:relative;z-index:20;box-shadow:0 1px 4px rgba(30,50,80,.04)}
+.brand{display:flex;align-items:center;gap:11px;min-width:320px}.brand-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(145deg,#6c5ce7,#2689c9);color:white;display:grid;place-items:center;font-weight:800;font-size:17px}.brand-title{font-size:15px;font-weight:760;letter-spacing:.1px}.brand-sub{font-size:11px;color:#718096;margin-top:2px}
+.tabs{display:flex;align-items:center;gap:5px;background:#f3f6fa;padding:4px;border-radius:9px;border:1px solid #e6ebf2;flex-wrap:nowrap}.tab{border:0;background:transparent;padding:8px 14px;border-radius:6px;font-size:12px;color:#607086;cursor:pointer;white-space:nowrap;font-weight:650}.tab:hover{background:#e9eef5}.tab.active{background:#fff;color:#28384f;box-shadow:0 1px 4px #d7e0ea;border:1px solid #e2e8f0}.actions{margin-left:auto;display:flex;align-items:center;gap:7px}.btn{border:1px solid var(--border);background:white;border-radius:7px;padding:8px 12px;color:#40516a;font-size:12px;cursor:pointer;font-weight:650;white-space:nowrap}.btn:hover{background:#f7f9fc;border-color:#aebdce}
+.legend{height:42px;display:flex;align-items:center;gap:17px;padding:0 24px;color:#65758b;font-size:11px;background:#fbfcfe;border-bottom:1px solid #e3e9f1;white-space:nowrap;overflow:auto}.legend-item{display:flex;align-items:center;gap:6px}.legend-dot{width:8px;height:8px;border-radius:3px;display:inline-block}.legend-diamond{height:11px;width:11px;transform:rotate(45deg);border:1.5px solid var(--amber);background:var(--amber-soft);display:inline-block}.legend-line{width:27px;height:0;border-top:2px solid #8796a9;display:inline-block}.legend-line.dashed{border-top-style:dashed;border-color:#9c75e4}
+.workspace{position:absolute;top:108px;bottom:0;left:0;right:0;overflow:hidden;background-color:#f4f7fb;background-image:radial-gradient(#dbe3ed 1px,transparent 1px);background-size:20px 20px;cursor:grab}.workspace.dragging{cursor:grabbing}.canvas{position:absolute;left:0;top:0;width:2800px;height:1680px;transform-origin:0 0}
+.lane{position:absolute;border:1px solid #dfe6ef;background:rgba(255,255,255,.56);border-radius:15px;pointer-events:none}.lane-head{position:absolute;top:-14px;left:18px;background:#f4f7fb;padding:3px 10px;color:#617188;font-weight:760;font-size:12px;letter-spacing:.25px}.lane-head small{font-size:10px;font-weight:550;color:#8a97a9;margin-left:7px}.lane.common{left:28px;top:34px;width:1355px;height:340px}.lane.basic{left:28px;top:420px;width:1920px;height:300px;border-color:#cce9dc;background:rgba(244,253,248,.68)}.lane.advanced{left:28px;top:760px;width:2720px;height:600px;border-color:#ddd3fb;background:rgba(249,247,255,.62)}.lane.memory{left:28px;top:1410px;width:2050px;height:215px;border-color:#c9e6eb;background:rgba(243,252,253,.8)}
+.node{position:absolute;width:196px;min-height:108px;background:var(--paper);border:1px solid #d7e0eb;border-radius:10px;box-shadow:var(--shadow);z-index:3;cursor:pointer;transition:box-shadow .15s,border-color .15s,opacity .15s;overflow:visible}.node:hover{border-color:#8a9ab0;box-shadow:0 8px 24px rgba(30,50,80,.14);z-index:8}.node.selected{outline:2px solid #6089ca;outline-offset:2px}.node.dim{opacity:.16;filter:grayscale(.8);pointer-events:none}.node .top{height:27px;border-radius:9px 9px 0 0;display:flex;align-items:center;justify-content:space-between;padding:0 9px;background:#f5f8fc;border-bottom:1px solid #edf1f6}.node .type{font-size:9.5px;font-weight:800;letter-spacing:.6px;color:#5b6d83;text-transform:uppercase}.node .step{font:10px ui-monospace,SFMono-Regular,Menlo,monospace;color:#8a98aa}.node .body{padding:9px 10px 10px;border-left:3px solid #8a9bb1;border-radius:0 0 9px 9px;min-height:78px}.node h3{font-size:12px;line-height:1.38;margin:0 0 4px;font-weight:760;color:#1b2a3d}.node p{font-size:10.5px;line-height:1.46;color:#66768b;margin:0}.node .role-badge{display:inline-block;font-size:9px;padding:1px 5px;border-radius:4px;background:#f0f4f9;color:#475569;margin-bottom:4px;font-weight:700}.node .io{margin-top:6px;padding-top:5px;border-top:1px solid #edf1f6;font:9px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;color:#5e7897;white-space:normal;overflow-wrap:anywhere}
+.node.supervisor .top{background:#f2edff}.node.supervisor .type{color:var(--purple)}.node.supervisor .body{border-left-color:var(--purple)}.node.supervisor .role-badge{background:#ede9fe;color:var(--purple)}
+.node.basic .top{background:#eaf8f1}.node.basic .type{color:var(--green)}.node.basic .body{border-left-color:var(--green)}.node.basic .role-badge{background:#dcfce7;color:var(--green)}
+.node.advanced .top{background:#f2edff}.node.advanced .type{color:var(--purple)}.node.advanced .body{border-left-color:var(--purple)}.node.advanced .role-badge{background:#ede9fe;color:var(--purple)}
+.node.data .top{background:#eaf3ff}.node.data .type{color:var(--blue)}.node.data .body{border-left-color:var(--blue)}.node.data .role-badge{background:#dbeafe;color:var(--blue)}
+.node.memory .top{background:#e8f8fa}.node.memory .type{color:var(--teal)}.node.memory .body{border-left-color:var(--teal)}.node.memory .role-badge{background:#ccfbf1;color:var(--teal)}
+.node.guard .top{background:#fff5df}.node.guard .type{color:var(--amber)}.node.guard .body{border-left-color:var(--amber)}.node.guard .role-badge{background:#fef3c7;color:var(--amber)}
+.node.error .top{background:#fff0f0}.node.error .type{color:var(--red)}.node.error .body{border-left-color:var(--red)}.node.error .role-badge{background:#fee2e2;color:var(--red)}
+.node.decision{width:156px;height:114px;min-height:114px;background:transparent;border:0;box-shadow:none;border-radius:0;overflow:visible}.node.decision:hover{box-shadow:none}.node.decision .diamond{position:absolute;inset:4px 12px;background:#fff8e6;border:1.5px solid #ddb45c;transform:rotate(45deg);border-radius:8px;box-shadow:var(--shadow)}.node.decision .decision-content{position:absolute;inset:16px 9px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 8px}.node.decision .type{font-size:9px;color:var(--amber);font-weight:800;letter-spacing:.4px;margin-bottom:6px}.node.decision h3{font-size:11.5px;line-height:1.36;margin:0}.node.decision p{font-size:9px;margin-top:5px;color:#8a713e}.node.decision .step{position:absolute;top:0;right:0}
+.node .pin{position:absolute;width:8px;height:8px;background:#fff;border:2px solid #8e9daf;border-radius:50%;z-index:5}.pin.l{left:-5px;top:calc(50% - 4px)}.pin.r{right:-5px;top:calc(50% - 4px)}.pin.t{top:-5px;left:calc(50% - 4px)}.pin.b{bottom:-5px;left:calc(50% - 4px)}
+svg.edges{position:absolute;inset:0;width:2800px;height:1680px;overflow:visible;pointer-events:none;z-index:2}.edge{fill:none;stroke:#8999ac;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}.edge.common{stroke:#8494a7}.edge.basic{stroke:#28a578;stroke-width:2}.edge.advanced{stroke:#8c70dc;stroke-width:2}.edge.memory{stroke:#148894;stroke-width:1.8;stroke-dasharray:5 5}.edge.branch{stroke:#c18b24;stroke-width:1.9}.edge.retry{stroke:#c85b5b;stroke-width:2.2;stroke-dasharray:6 5}.edge-label{position:absolute;z-index:5;background:#fff;border:1px solid #dce4ee;border-radius:5px;padding:3px 7px;font-size:9.5px;color:#627389;box-shadow:0 1px 3px rgba(20,40,70,.04);white-space:nowrap;pointer-events:none}.edge-label.green{border-color:#b7e1ce;color:#16845d}.edge-label.purple{border-color:#d4c8f9;color:#7757c9}.edge-label.amber{border-color:#efd59d;color:#9b6a12}.edge-label.red{border-color:#f0c7c7;color:#b34b4b}.edge-label.teal{border-color:#bde4e9;color:#087f8c}
+.parallel-badge{position:absolute;font-size:10px;font-weight:800;color:#7556d8;background:#f3edff;border:1px solid #d9c8fb;border-radius:4px;padding:2px 6px;z-index:2}
+.note{position:absolute;font-size:10px;color:#7c8ba0;background:rgba(255,255,255,.82);border:1px solid #e0e7ef;border-radius:6px;padding:6px 9px;z-index:1}.route-title{position:absolute;left:70px;font-size:11px;font-weight:800;letter-spacing:.5px;color:#5a6c83;z-index:1}.route-title .pill{display:inline-block;padding:3px 8px;border-radius:5px;margin-right:7px;background:#e5f7ee;color:#12875e}.route-title.purple .pill{background:#efe9ff;color:#7556d8}
+.drawer{position:fixed;z-index:30;right:0;top:66px;bottom:0;width:430px;max-width:92vw;background:#fff;border-left:1px solid var(--border);box-shadow:-12px 0 32px rgba(23,39,62,.12);transform:translateX(105%);transition:transform .22s;display:flex;flex-direction:column}.drawer.open{transform:translateX(0)}.drawer-head{display:flex;align-items:flex-start;justify-content:space-between;padding:19px 20px;border-bottom:1px solid #e8edf3}.drawer-kicker{font-size:10px;color:var(--purple);font-weight:850;letter-spacing:.7px}.drawer-head h2{font-size:17px;margin:6px 0 0}.close{border:0;background:#f1f4f8;width:30px;height:30px;border-radius:7px;font-size:19px;cursor:pointer;color:#5d6d82}.drawer-content{padding:18px 20px;overflow:auto}.detail-section{margin-bottom:19px}.detail-section h4{font-size:11px;color:#6b7b90;margin:0 0 8px;letter-spacing:.2px}.detail-section p,.detail-section li{font-size:12px;line-height:1.65;color:#3e5068}.detail-section p{margin:0}.detail-section ul{padding-left:18px;margin:0}.code{font:11px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;background:#f5f8fc;border:1px solid #e4eaf2;padding:10px;border-radius:7px;color:#365875;white-space:pre-wrap;overflow-wrap:anywhere}.skill-box{background:#fdf2f8;border:1px solid #fbcfe8;border-radius:7px;padding:8px 10px;font-size:11px;color:#9d174d;line-height:1.5;margin-bottom:14px}.callout{border-radius:8px;background:#f2f6fb;border:1px solid #e1e8f0;padding:10px 11px;font-size:11px;line-height:1.55;color:#5d6d82}.bottom-hint{position:absolute;bottom:14px;left:18px;color:#77869a;font-size:10px;background:rgba(255,255,255,.8);padding:6px 9px;border:1px solid #e1e7ef;border-radius:6px;z-index:10;pointer-events:none}.zoom-controls{position:absolute;right:18px;bottom:16px;display:flex;align-items:center;gap:4px;background:#fff;border:1px solid #dce4ed;border-radius:9px;padding:4px;box-shadow:0 2px 8px rgba(30,50,80,.08);z-index:12}.zoom-controls button{width:32px;height:30px;border:0;background:white;border-radius:6px;color:#53657b;font-size:15px;font-weight:700;cursor:pointer}.zoom-controls button:hover{background:#f2f5f9}.zoom-controls span{min-width:44px;text-align:center;font-size:10px;color:#6d7c90;font-variant-numeric:tabular-nums}
+@media(max-width:900px){.topbar{padding:0 10px;gap:8px}.brand{min-width:auto}.brand-sub{display:none}.brand-title{font-size:12px}.tabs{max-width:48vw;overflow:auto}.tab{padding:7px 9px}.actions .btn:nth-child(1){display:none}.legend{padding:0 12px}.drawer{top:0;z-index:40}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><div class="brand-mark">流程</div><div><div class="brand-title">智能问数 · 真实并行多发与主理人架构工作流</div><div class="brand-sub">四大独立泳道 · 真正并行扇出与汇聚 · 真实Skills库深度挂载</div></div></div>
+  <nav class="tabs" aria-label="流程视图">
+    <button class="tab active" data-view="all">全景视图</button><button class="tab" data-view="basic">普通问数 (低阶)</button><button class="tab" data-view="advanced">高级专家团 (高阶·真正并行)</button><button class="tab" data-view="memory">上下文与记忆服务</button>
+  </nav>
+  <div class="actions"><button class="btn" id="fitBtn">适配当前流程</button><button class="btn" id="drawerBtn">节点说明</button></div>
+</header>
+<div class="legend">
+  <span class="legend-item"><i class="legend-dot" style="background:#15966b"></i>普通问数 (低阶速通)</span>
+  <span class="legend-item"><i class="legend-dot" style="background:#7556d8"></i>主理人中枢 / 高级专家团</span>
+  <span class="legend-item"><i class="legend-dot" style="background:#2475c7"></i>三路并发取数 / 数据专家</span>
+  <span class="legend-item"><i class="legend-dot" style="background:#087f8c"></i>独立记忆与状态服务</span>
+  <span class="legend-item"><i class="legend-diamond"></i>条件判断 / 质量闸门</span>
+  <span class="legend-item"><i class="legend-line"></i>标准任务流转 (直角折线)</span>
+  <span class="legend-item"><i class="legend-line dashed"></i>定向缺陷返工 / 记忆回流</span>
+  <span style="margin-left:auto;color:#8a97a9">单击卡片查看岗位职责、输入输出契约、失败策略与真实挂载Skills</span>
+</div>
+<main class="workspace" id="workspace">
+  <div class="canvas" id="canvas">
+    <div class="lane common"><div class="lane-head">01 公共入口泳道 <small>所有问数共用 · 主理人接单，先恢复状态，再理解问题与分流</small></div></div>
+    <div class="lane basic"><div class="lane-head">02 普通问数泳道 · FAST TRACK <small>确定性优先 · 格物SQL快速复用 · 析微轻量出图 · 主理人秒级交付</small></div></div>
+    <div class="lane advanced"><div class="lane-head">03 高级问数泳道 · EXPERT TRACK (真正并行并发架构) <small>主理人制定DAG · 资产与语义并行探寻 · 三路SQL物理并发执行 · 知刑独立对拍 · 析微多维归因 · 定向返工</small></div></div>
+    <div class="lane memory"><div class="lane-head">04 独立上下文与记忆服务泳道 <small>跨轮状态权威持久化 · 候选提取 · 冲突审核 · 版本化写入 · 回归测试</small></div></div>
+    <div class="route-title" style="top:395px"><span class="pill">FAST</span>单指标 / 单表查询 / 低复杂度快速通道</div>
+    <div class="route-title purple" style="top:735px"><span class="pill">DEEP PARALLEL</span>跨表多维 / 三路并行物理取数 / 深度对拍归因大报告</div>
+    <div class="parallel-badge" style="left:780px;top:790px">⚡ 并发多发阶段：三路SQL同时物理执行，极大缩短TTI</div>
+    <svg class="edges" id="edges" viewBox="0 0 2800 1680" aria-label="流程连线">
+      <defs>
+        <marker id="arrow-gray" markerWidth="8" markerHeight="8" refX="6.7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#8999ac"/></marker>
+        <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6.7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#28a578"/></marker>
+        <marker id="arrow-purple" markerWidth="8" markerHeight="8" refX="6.7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#8c70dc"/></marker>
+        <marker id="arrow-amber" markerWidth="8" markerHeight="8" refX="6.7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#c18b24"/></marker>
+        <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="6.7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#c85b5b"/></marker>
+        <marker id="arrow-teal" markerWidth="8" markerHeight="8" refX="6.7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#148894"/></marker>
+      </defs>
+    </svg>
+    <div id="nodes"></div><div id="edgeLabels"></div>
+    <div class="note" style="left:1650px;top:55px">共享状态：task_state / context_version / evidence_refs</div>
+    <div class="note" style="left:1690px;top:1430px">权威独立服务：工作区状态 + 长期记忆严格版本化审查落库</div>
+  </div>
+  <div class="bottom-hint">提示：选择上方标签切换视图；点击任意卡片查看专家职责、代码映射与挂载 Skills。</div>
+  <div class="zoom-controls"><button id="zoomOut" title="缩小">−</button><span id="zoomLabel">100%</span><button id="zoomIn" title="放大">＋</button><button id="resetBtn" title="重置视图">适配</button></div>
+</main>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head"><div><div class="drawer-kicker" id="dKicker">WORKFLOW NODE</div><h2 id="dTitle">节点详情</h2></div><button class="close" id="closeDrawer" aria-label="关闭">×</button></div>
+  <div class="drawer-content">
+    <div class="skill-box" id="dSkillBox">⚡ 挂载 Skills: -</div>
+    <section class="detail-section"><h4>专家角色与岗位职责</h4><p id="dPurpose"></p></section>
+    <section class="detail-section"><h4>输入 / 读取</h4><div class="code" id="dInputs"></div></section>
+    <section class="detail-section"><h4>输出 / 写入</h4><div class="code" id="dOutputs"></div></section>
+    <section class="detail-section"><h4>判断条件与失败策略 (防死循环规则)</h4><p id="dFailure"></p></section>
+    <section class="detail-section"><h4>实现注意事项</h4><ul id="dNotes"></ul></section>
+    <div class="callout">提示：流程严格贯彻主理人中枢原则，所有专家独立产出只交回主理人，任何外部交互（包括澄清追问）必须由主理人拍板组织！</div>
+  </div>
+</aside>
+<script>
+const NODES = [
+  // ----------------------------------------------------
+  // 01 公共入口泳道 (COMMON)
+  // ----------------------------------------------------
+  {
+    id:'n01',track:'common',kind:'supervisor',type:'START',step:'01',
+    role:'主理人 · 接入中枢',
+    title:'主理人 · 接收用户问题',
+    desc:'建立请求身份与会话上下文链路。',
+    io:'query · user_id · session_id',x:55,y:135,w:196,h:104,
+    skills:'skills/superpowers-main/using-superpowers',
+    purpose:'【主理人】接单。接收自然语言问题、用户身份和当前会话标识，生成 request_id / trace_id。主理人确立会话所有权，所有专家产出必须向此链路归集。',
+    inputs:'query\nuser_id / tenant_id\nsession_id / conversation_id',
+    outputs:'request_id\ntrace_id\nrequest_status = RECEIVED',
+    failure:'缺少身份或会话凭证时，按系统授权策略补齐或拒绝处理；不能默认用共享用户身份。',
+    notes:['生成幂等请求 ID，避免重试导致重复执行。','先做认证和授权，再读取记忆或元数据。']
+  },
+  {
+    id:'n02',track:'common',kind:'memory',type:'CONTEXT',step:'02',
+    role:'管家 · 上下文专家',
+    title:'管家 · 恢复会话与工作区',
+    desc:'确定延续当前话题还是新建分析。',
+    io:'workspace_id · task_state',x:285,y:135,w:196,h:104,
+    skills:'skills/ECC-main/unified-memory',
+    purpose:'【管家】从独立记忆服务拉取历史工作区状态，进行指代消解（“这个”、“它”）与多轮条件继承，向主理人提交状态快照。',
+    inputs:'session_id\n用户当前指令\n可访问的 workspace 索引',
+    outputs:'workspace_id\nactive_task_id\nstate_snapshot_version',
+    failure:'找不到工作区时不得虚构历史；应说明未找到并提供新建分析或重新选择历史任务的路径。',
+    notes:['不要把聊天摘要当作完整任务状态。','校验工作区属主与权限。']
+  },
+  {
+    id:'n03',track:'common',kind:'data',type:'INTENT',step:'03',
+    role:'正名 · 业务语义专家',
+    title:'正名 · 解析问题与指代',
+    desc:'抽取指标、维度、时间、筛选条件。',
+    io:'metrics[] · dimensions[] · filters[]',x:520,y:135,w:196,h:104,
+    skills:'skills/ECC-main/intent-driven-development · skills/skills-1.3.1/domain-modeling',
+    purpose:'【正名】负责意图驱动建模，将用户提问转换为标准语义槽位，解析“上季度”、“同比”等相对时间，识别是否存在歧义并向主理人汇报。',
+    inputs:'当前用户问题\n近期对话必要片段\n当前 task_state',
+    outputs:'intent_spec\nslots: metric / period / dims / filters\nreference_resolution',
+    failure:'关键槽位存在多个合理解释时，向主理人报告歧义，不自行默选。',
+    notes:['区分替换条件和追加条件。','新指令只修改其明确指向的状态字段。']
+  },
+  {
+    id:'n04',track:'common',kind:'decision',type:'GATE',step:'04',
+    role:'主理人 · 裁定闸门',
+    title:'主理人：是否存在关键歧义？',
+    desc:'不影响结果的缺省项可按规则补齐。',
+    io:'needs_clarify:boolean',x:760,y:128,w:156,h:114,
+    skills:'skills/ECC-main/operator-approval-loop',
+    purpose:'【主理人】亲自裁决正名汇报的要素是否足以支撑查询。若缺少核心主指标或时间跨度严重模糊，主理人决定触发澄清。',
+    inputs:'intent_spec\n指标默认规则\n当前状态与有效记忆',
+    outputs:'needs_clarify\nclarification_reasons[]',
+    failure:'不能用模型自评置信度单独决定跳过澄清；优先检查具体歧义字段及默认规则。',
+    notes:['只问真正影响结果的缺失条件。','低风险默认值必须显式记录。']
+  },
+  {
+    id:'n05',track:'common',kind:'guard',type:'HUMAN INPUT',step:'04A',
+    role:'主理人 · 交互确认',
+    title:'主理人 · 生成澄清卡片并挂起',
+    desc:'提供2~4个明确选项，等待用户回答。',
+    io:'clarification_id · pending_slots[]',x:765,y:285,w:196,h:104,
+    skills:'skills/ECC-main/context-budget',
+    purpose:'【主理人】拍板组织人机交互：生成 2~4 个候选项卡片（如选择实收还是应收）发给用户，挂起当前轮次并持久化检查点，严格限制 ≤2 轮。',
+    inputs:'clarification_reasons[]\n候选口径 / 时间范围\nworkspace_id',
+    outputs:'clarification_id\npending_task_checkpoint\nawaiting_user = true',
+    failure:'用户未回复时保持挂起，不反复调用模型；回答返回时从检查点恢复并合并增量条件。',
+    notes:['保存等待前的状态版本。','用户回答后重新验证受影响的字段。']
+  },
+  {
+    id:'n06',track:'common',kind:'decision',type:'ROUTER',step:'05',
+    role:'主理人 · 定档分流',
+    title:'主理人：复杂度定档分流',
+    desc:'依据任务结构、跨表数和证据需求分流。',
+    io:'route = BASIC | ADVANCED',x:1005,y:128,w:166,h:114,
+    skills:'skills/ECC-main/cost-aware-llm-pipeline',
+    purpose:'【主理人】根据命题复杂度分流：单表指标走【普通问数泳道】；跨表、异动归因、时序预测走【高级专家团真正并行泳道】。',
+    inputs:'intent_spec\n候选数据集复杂度\n风险与成本预算',
+    outputs:'route\nroute_reason\nmax_steps / max_retries',
+    failure:'规则信号冲突时选取更安全路径或向用户澄清，不应因提示词写了“高级”就无条件启动全体 Agent。',
+    notes:['为简单查询设置快速通道。','为高阶任务设置调用预算和终止条件。']
+  },
+
+  // ----------------------------------------------------
+  // 02 普通问数泳道 · FAST TRACK
+  // ----------------------------------------------------
+  {
+    id:'b01',track:'basic',kind:'basic',type:'MATCH',step:'B01',
+    role:'格物 · SQL工程专家',
+    title:'格物 · 匹配 Golden SQL 模板',
+    desc:'先查可信题库，再判断参数能否安全替换。',
+    io:'golden_sql_id · match_score',x:70,y:505,w:196,h:104,
+    skills:'skills/ECC-main/postgres-patterns',
+    purpose:'【格物】在标准题集与已验证 Golden SQL 库中检索。命中相似度 ≥ 0.88 则参数化复用，免去 LLM 生成幻觉。',
+    inputs:'intent_spec\ndataset_id / metric_id\nGolden SQL 索引',
+    outputs:'candidate_query_refs[]\nmatch_reason\nrequired_parameters[]',
+    failure:'未命中或候选冲突时进入受控 SQL 生成；禁止仅凭文本相似度就把不适用的 SQL 当作可信模板。',
+    notes:['参数替换要使用绑定参数。','记录命中的规则及适用条件。']
+  },
+  {
+    id:'b02',track:'basic',kind:'data',type:'SQL PLAN',step:'B02',
+    role:'格物 · SQL工程专家',
+    title:'格物 · 受控生成单表 SQL',
+    desc:'明确字段、聚合粒度、过滤与排序。',
+    io:'query_plan · selected_fields[]',x:315,y:505,w:196,h:104,
+    skills:'skills/ECC-main/postgres-patterns',
+    purpose:'【格物】根据已授权单表宽表资产生成简洁查询，受严格 Prompt 约束，仅写只读 SELECT 语句。',
+    inputs:'candidate_query_refs[]\n数据字典 / 关联元数据\nintent_spec',
+    outputs:'query_plan\nselected_fields[]\naggregation_grain',
+    failure:'缺少字段、关联键或指标定义时返回配置缺口，不允许模型猜测物理表名继续执行。',
+    notes:['普通模式限制不必要的多表 Join。','保留业务口径与 SQL 的映射。']
+  },
+  {
+    id:'b03',track:'basic',kind:'decision',type:'SQL GUARD',step:'B03',
+    role:'知刑 · 独立审查专家',
+    title:'知刑：SQL 静态审查通过？',
+    desc:'只读限制、权限白名单、语法 AST 审查。',
+    io:'guard_passed:boolean',x:560,y:498,w:154,h:114,
+    skills:'skills/ECC-main/safety-guard',
+    purpose:'【知刑】运行 L0 确定性 AST 审查：校验是否仅为 SELECT/WITH，拦截 DROP/UPDATE/SELECT INTO，检查扫描范围。',
+    inputs:'SQL 草案\n用户 / 租户权限\nSQL 安全规则',
+    outputs:'guard_passed\nviolations[]\nnormalized_sql',
+    failure:'不通过时返回具体违规项给格物修复（≤2次）；超限后主理人中止并解释原因。',
+    notes:['不能仅靠另一个 LLM 口头审查。','执行前再次核实授权与语句类型。']
+  },
+  {
+    id:'b04',track:'basic',kind:'data',type:'EXECUTE',step:'B04',
+    role:'安全执行沙箱',
+    title:'物理沙箱受控只读执行',
+    desc:'超时15s、500行截断、审计日志记录。',
+    io:'query_run_id · result_ref',x:800,y:505,w:196,h:104,
+    skills:'skills/ECC-main/clickhouse-io · skills/ECC-main/safety-guard',
+    purpose:'以只读连接在物理沙箱执行，实施 statement_timeout=15s 超时中断、行数上限与全链路 trace 归档。',
+    inputs:'guard_passed SQL\n绑定参数\n执行策略',
+    outputs:'query_run_id\nresult_ref\nexecution_stats',
+    failure:'区分权限拒绝、语法错误、超时和临时网络错误；只对可安全重试的错误重试。',
+    notes:['不要把大结果直接塞进模型上下文。','保存结果引用、行数和执行耗时。']
+  },
+  {
+    id:'b05',track:'basic',kind:'decision',type:'RESULT CHECK',step:'B05',
+    role:'主理人 · 结果核验',
+    title:'主理人：结果有效且一致？',
+    desc:'检查空值、行数>0、时间边界。',
+    io:'result_valid:boolean',x:1040,y:498,w:154,h:114,
+    skills:'skills/ECC-main/verification-before-completion',
+    purpose:'【主理人】核验执行结果：0行则触发真实性说明兜底，有数据则交付析微提炼图表。',
+    inputs:'result_ref\nquery_plan\nmetric_definition',
+    outputs:'validation_report\nresult_valid\nvalidation_warnings[]',
+    failure:'异常时定位数据问题、口径问题或 SQL 问题，进入有限修复；不能把空结果直接解释为业务为零。',
+    notes:['检查重复 Join 导致的膨胀。','核对时间区间是否含首不含尾。']
+  },
+  {
+    id:'b06',track:'basic',kind:'basic',type:'PRESENT',step:'B06',
+    role:'析微 · 数据分析专家',
+    title:'析微 · 适配图表与提炼结论',
+    desc:'自适应指标卡、表格、趋势图，简短解释。',
+    io:'chart_spec · concise_summary',x:1285,y:505,w:196,h:104,
+    skills:'skills/ECC-main/dashboard-builder',
+    purpose:'【析微】轻量级输出：根据数据维度匹配 ECharts 配置，生成一句话结论，标明数据时点。',
+    inputs:'validated_result_ref\n用户展示偏好\nchart constraints',
+    outputs:'chart_spec\nsummary\ncolumn_metadata',
+    failure:'数据量不足或图表不适用时退回表格；没有证据的原因分析不得自动补写。',
+    notes:['图表数值必须来自执行结果。','附上时间范围、口径和数据时点。']
+  },
+  {
+    id:'b07',track:'basic',kind:'supervisor',type:'DELIVERY',step:'B07',
+    role:'主理人 · 交付门禁',
+    title:'主理人 · 普通模式终审交付',
+    desc:'统一答复、SQL 追溯、后续追问入口。',
+    io:'answer_packet · artifact_refs',x:1530,y:505,w:196,h:104,
+    skills:'skills/ECC-main/delivery-gate',
+    purpose:'【主理人】打包普通卡片交付，写回独立工作区检查点，输出后续追问入口。',
+    inputs:'validated_result_ref\nsummary + chart_spec\nvalidation_report',
+    outputs:'answer_packet\nworkspace_checkpoint\nfollow_up_context',
+    failure:'部分校验未通过时须标注限制；不得将未验证结果包装成确定结论。',
+    notes:['保存本轮最终状态和产物引用。','后续追问沿用工作区状态。']
+  },
+
+  // ----------------------------------------------------
+  // 03 高级问数泳道 · EXPERT TRACK (真正并行并发多发架构)
+  // ----------------------------------------------------
+  // 阶段 1：主理人 DAG 规划与前置并行探寻
+  {
+    id:'a01',track:'advanced',kind:'supervisor',type:'PLAN',step:'A01',
+    role:'主理人 · 任务总指挥',
+    title:'主理人 · 制定任务 DAG 并发图',
+    desc:'拆解子任务，启动问津与正名并行前置探寻。',
+    io:'task_graph · parallel_subtasks[]',x:60,y:980,w:196,h:104,
+    skills:'skills/superpowers-main/writing-plans · skills/superpowers-main/dispatching-parallel-agents',
+    purpose:'【主理人】将复杂命题分解为可独立执行的子任务 DAG，启动前置双路专家并发探寻。',
+    inputs:'intent_spec\nactive task state\n用户目标与预算',
+    outputs:'task_graph\nsubtasks[]\nparallel_groups[]\nacceptance_criteria',
+    failure:'任务计划存在循环依赖或超预算时先修订计划或请求澄清。',
+    notes:['主理人掌控并发调度权和熔断权。','设置三路并发子任务验收契约。']
+  },
+  {
+    id:'a02',track:'advanced',kind:'data',type:'DATA ASSETS',step:'A02',
+    role:'问津 · 资产路由专家',
+    title:'问津 · 探寻跨表与关联资产',
+    desc:'【前置并行路A】多源宽表、关联映射与时效检查。',
+    io:'asset_manifest · join_map',x:300,y:870,w:196,h:104,
+    skills:'skills/ECC-main/data-throughput-accelerator',
+    purpose:'【问津】并行探寻候选数据集、物理关联键与 Join 映射，向主理人提交资产清单。',
+    inputs:'子任务定义\n数据集书架\n用户授权范围',
+    outputs:'asset_manifest\nfield_mapping\njoin_map\ndata_freshness',
+    failure:'候选数据集不足或关系不明确时回交主理人，不自行发明表关系。',
+    notes:['保留数据集版本 ID。','跨源查询先检查可用连接池。']
+  },
+  {
+    id:'a03',track:'advanced',kind:'memory',type:'SEMANTICS',step:'A03',
+    role:'正名 · 业务语义专家',
+    title:'正名 · 检索口径与历史记忆',
+    desc:'【前置并行路B】指标定义、同义词、历史纠错案例。',
+    io:'semantic_bundle · memory_refs',x:300,y:1090,w:196,h:104,
+    skills:'skills/skills-1.3.1/domain-modeling · skills/ECC-main/unified-memory',
+    purpose:'【正名】并行检索权威指标库与独立记忆服务中的纠错历史，输出标准语义包。',
+    inputs:'intent_spec\nasset candidates\nmemory query scope',
+    outputs:'semantic_bundle\nmetric_version_refs\nrelevant_memory_refs',
+    failure:'权威配置与旧记忆冲突时以有效权威配置为准；口径存疑请求澄清。',
+    notes:['相似度不代表事实有效。','历史答案不替代物理查询。']
+  },
+  {
+    id:'a04',track:'advanced',kind:'advanced',type:'MERGE',step:'A04',
+    role:'主理人 · 材料汇聚',
+    title:'主理人 · 汇聚材料并冻结口径',
+    desc:'合并前置双路，冻结版本，开启三路并发执行！',
+    io:'analysis_spec · frozen_context_version',x:535,y:980,w:196,h:104,
+    skills:'skills/ECC-main/contract-first',
+    purpose:'【主理人】汇聚问津与正名的材料，冻结上下文版本，向格物同时下发【三路并行取数任务】！',
+    inputs:'asset_manifest\nsemantic_bundle\nsubtask statuses',
+    outputs:'analysis_spec\nfrozen_context_version\nparallel_query_specs[3]',
+    failure:'必需资产或口径缺失时不盲目下发查询；退回对应专家或请求确认。',
+    notes:['使用明确版本引用。','准备下发三路物理并发。']
+  },
+
+  // 阶段 2：三路 SQL 生产与物理沙箱并发执行 (Parallel Fan-out)
+  // 并发流 1: 核心指标事实流
+  {
+    id:'a05_1',track:'advanced',kind:'data',type:'PARALLEL SQL 1',step:'A05-1',
+    role:'格物 · 并发分支1',
+    title:'格物 · 核心指标事实取数',
+    desc:'【并发流1】构建主营收/销量大盘事实SQL。',
+    io:'sql_1 · fact_metrics_data',x:780,y:820,w:196,h:100,
+    skills:'skills/ECC-main/postgres-patterns · skills/ECC-main/safety-guard',
+    purpose:'【格物】负责主指标事实宽表取数，生成并执行高优先级核心聚合 SQL。',
+    inputs:'analysis_spec.query_1\nfrozen_version',
+    outputs:'result_fact_ref\nexecution_stats_1',
+    failure:'语法错误或超时触发自愈修复，限≤2次。',
+    notes:['带物理只读连接与15s超时。','独立返回数据帧引用。']
+  },
+  // 并发流 2: 维度与异动下钻流
+  {
+    id:'a05_2',track:'advanced',kind:'data',type:'PARALLEL SQL 2',step:'A05-2',
+    role:'格物 · 并发分支2',
+    title:'格物 · 多维异动下钻取数',
+    desc:'【并发流2】构建品类/区域/渠道下钻分析SQL。',
+    io:'sql_2 · drilldown_dims_data',x:780,y:980,w:196,h:100,
+    skills:'skills/ECC-main/clickhouse-io · skills/ECC-main/safety-guard',
+    purpose:'【格物】负责下钻明细与交叉维度数据拉取，与核心事实流同时并发执行！',
+    inputs:'analysis_spec.query_2\nfrozen_version',
+    outputs:'result_drill_ref\nexecution_stats_2',
+    failure:'多表Join膨胀时按白名单拦截。',
+    notes:['限制笛卡尔积。','与事实流并发执行缩短耗时。']
+  },
+  // 并发流 3: 历史基线与对拍流
+  {
+    id:'a05_3',track:'advanced',kind:'data',type:'PARALLEL SQL 3',step:'A05-3',
+    role:'格物 · 并发分支3',
+    title:'格物 · 历史同环比基线取数',
+    desc:'【并发流3】构建同期基线与多源对照组SQL。',
+    io:'sql_3 · baseline_history_data',x:780,y:1140,w:196,h:100,
+    skills:'skills/ECC-main/clickhouse-io · skills/ECC-main/safety-guard',
+    purpose:'【格物】负责拉取同期历史数据和多源对照组，供后续对拍与归因使用。',
+    inputs:'analysis_spec.query_3\nfrozen_version',
+    outputs:'result_baseline_ref\nexecution_stats_3',
+    failure:'历史数据缺失时标明基线不可用。',
+    notes:['时间窗口严格对齐。','为多路对拍提供客观参照。']
+  },
+
+  // 阶段 3：独立审查专家知刑 (对三路并发结果进行多路交叉审查与对拍)
+  {
+    id:'a06',track:'advanced',kind:'data',type:'INDEPENDENT REVIEW',step:'A06',
+    role:'知刑 · 独立审查专家',
+    title:'知刑 · 独立交叉审查与对拍',
+    desc:'非生成者自审！多路 SQL 结果 evidence_vote 对拍。',
+    io:'review_report · audit_passed',x:1040,y:980,w:196,h:104,
+    skills:'skills/superpowers-main/verification-before-completion · skills/skills-1.3.1/code-review',
+    purpose:'【知刑】独立质检人设：核查格物三路并发取数是否存在膨胀、粒度漂移与对拍矛盾，严禁格物自查自纠。',
+    inputs:'sql_1/2/3\nresult_refs[3]\nsecurity policy',
+    outputs:'review_report\naudit_passed\nrepair_requests[]',
+    failure:'审查不通过或对拍矛盾生成缺陷清单打回返工节点。',
+    notes:['安全校验由确定性规则兜底。','审查关联具体数据版本。']
+  },
+  {
+    id:'a07',track:'advanced',kind:'decision',type:'EVIDENCE GATE',step:'A07',
+    role:'主理人 · 对拍闸门',
+    title:'主理人：三路对拍与证据足够？',
+    desc:'三路数据一致闭合？覆盖度满足目标？',
+    io:'evidence_sufficient:boolean',x:1280,y:974,w:156,h:114,
+    skills:'skills/ECC-main/evidence_vote',
+    purpose:'【主理人】核对知刑审查结论与三路对拍结果：证据充足走向析微多维归因；矛盾或不足走向返工回流！',
+    inputs:'review_report\nresult_refs[3]\nacceptance_criteria',
+    outputs:'evidence_sufficient\nevidence_gaps[]',
+    failure:'证据不足或对拍冲突走向定向返工，限≤2轮。',
+    notes:['对拍不一致严禁少数服从多数。','保留三路证据引用。']
+  },
+  {
+    id:'a12',track:'advanced',kind:'error',type:'REPAIR',step:'A12',
+    role:'主理人 · 返工中枢',
+    title:'主理人 · 定向缺陷返工节点',
+    desc:'按缺陷类型定向打回对应并发分支，限次补查。',
+    io:'repair_plan · retry_count',x:1260,y:1280,w:196,h:96,
+    skills:'skills/ECC-main/autonomous-loops · skills/ECC-main/loop-design-check',
+    purpose:'【主理人】定向返工中枢：某一路数据出现冲突或语法错误时，仅定向回派该并发分支重算，不全链路重跑！',
+    inputs:'evidence_gaps[]\nreview_report\nretry budget',
+    outputs:'repair_plan\nretry_count\ntarget_branch_id',
+    failure:'超过重试次数或预算时熔断，进入带缺口交付。',
+    notes:['单节点重试上限≤2次。','禁止盲目无休止重新查询。']
+  },
+
+  // 阶段 4：扇入汇聚 (Fan-in Merge) 与多维深度归因
+  {
+    id:'a08',track:'advanced',kind:'advanced',type:'MERGE & ATTRIBUTION',step:'A08',
+    role:'析微 · 数据分析专家',
+    title:'析微 · 扇入多维深度归因',
+    desc:'汇聚三路验证数据，贡献率分解与假设检验。',
+    io:'attribution_findings · claim_evidence[]',x:1510,y:980,w:196,h:104,
+    skills:'skills/ECC-main/verification-loop · skills/ECC-main/deep-research',
+    purpose:'【析微】将三路验证通过的数据扇入汇聚，计算 Shapley 波动贡献率，检验异动假设，强制标明“相关性 ≠ 因果性”。',
+    inputs:'validated result_refs[3]\nanalysis_spec\nquality_report',
+    outputs:'attribution_findings\nclaim_evidence[]\nuncertainties[]',
+    failure:'无法从数据证实因果时，明确说明仅存在相关性，不伪造推论。',
+    notes:['标明贡献率计算分母。','严禁主观编造未验证结论。']
+  },
+  {
+    id:'a09',track:'advanced',kind:'advanced',type:'VISUALIZATION',step:'A09',
+    role:'表达与可视化专家',
+    title:'组织深度决策报告与多图联动',
+    desc:'动因下钻、敏感性推演、ECharts 多图联动。',
+    io:'report_packet · chart_specs[]',x:1750,y:980,w:196,h:104,
+    skills:'skills/ECC-main/dashboard-builder',
+    purpose:'将析微的归因成果编排为高管决策报告，配置多图联动看板、证据索引与管理行动建议。',
+    inputs:'attribution_findings\nclaim_evidence[]\nuser display preferences',
+    outputs:'report_packet\nchart_specs[]\nsource_refs[]',
+    failure:'图表数据与结论矛盾时退回修改；不填充未经验证的数据。',
+    notes:['图表绑定物理结果引用。','重要指标附口径与统计周期。']
+  },
+  {
+    id:'a10',track:'advanced',kind:'supervisor',type:'FINAL REVIEW',step:'A10',
+    role:'主理人 · 终审统领',
+    title:'主理人 · 全要素终审与交付',
+    desc:'核验目标覆盖、结论严密，加盖主理人签章交付！',
+    io:'final_answer · delivery_status',x:1990,y:980,w:196,h:104,
+    skills:'skills/ECC-main/delivery-gate',
+    purpose:'【主理人】全面终审：是否切中用户核心痛点？证据链是否闭合？无漏洞后正式对外统一交付！',
+    inputs:'report_packet\nreview_report\noriginal user goal',
+    outputs:'final_answer\nanswer_artifacts\nworkspace_checkpoint\ndelivery_status',
+    failure:'仍有重大争议时退回指定节点；预算用尽带缺口停止交付。',
+    notes:['主理人总揽全局并盖戳交付。','带完整证据链与溯源入口。']
+  },
+
+  // ----------------------------------------------------
+  // 04 独立上下文与记忆服务泳道 (MEMORY)
+  // ----------------------------------------------------
+  {
+    id:'m01',track:'memory',kind:'memory',type:'STATE STORE',step:'M01',
+    role:'独立记忆底座',
+    title:'持久化任务检查点',
+    desc:'状态版本、步骤产物与恢复位置。',
+    io:'state_snapshot · checkpoint_id',x:70,y:1470,w:196,h:104,
+    skills:'skills/ECC-main/unified-memory',
+    purpose:'独立记忆服务：全量落库每一轮任务的 TaskState 与产物引用，保证服务重启后可按检查点完整恢复。',
+    inputs:'task_state\nagent task statuses\nartifact refs',
+    outputs:'checkpoint_id\nstate_snapshot_version\nresume_from_node',
+    failure:'写入失败时不宣称任务可恢复；对关键状态使用事务或可靠重试，避免半写入状态。',
+    notes:['状态与聊天消息分开存储。','保存前后版本以处理并发更新。']
+  },
+  {
+    id:'m02',track:'memory',kind:'memory',type:'MEMORY RETRIEVAL',step:'M02',
+    role:'独立检索服务',
+    title:'检索相关长期记忆',
+    desc:'结构过滤 + 关键词 + 语义检索 + 时效判断。',
+    io:'memory_refs · retrieval_scores',x:305,y:1470,w:196,h:104,
+    skills:'skills/ECC-main/unified-memory',
+    purpose:'按用户、项目与数据集范围检索有效记忆，结合来源可信度与时效过滤，输出可信记忆引用。',
+    inputs:'current intent\nuser / tenant scope\nworkspace references',
+    outputs:'memory_refs[]\nsource refs\nvalidity metadata',
+    failure:'无有效记忆时返回空结果；不将无关记忆强行拼入上下文。',
+    notes:['历史答案不是当前数据库事实。','过期或撤销记忆默认不参与常规召回。']
+  },
+  {
+    id:'m03',track:'memory',kind:'memory',type:'MEMORY CANDIDATE',step:'M03',
+    role:'候选提取服务',
+    title:'提取记忆候选',
+    desc:'业务纠错、明确偏好、已验证案例。',
+    io:'memory_candidates[]',x:540,y:1470,w:196,h:104,
+    skills:'skills/ECC-main/continuous-learning-v2',
+    purpose:'从本轮已交付的已验证产物和用户明确反馈中提取记忆候选，严禁把未经证实的模型推论直接落库。',
+    inputs:'confirmed user corrections\nvalidated artifacts\nconversation deltas',
+    outputs:'memory_candidates[]\ncandidate type + scope\nsource evidence refs',
+    failure:'来源不清、仅有模型猜测或一次性临时条件，不升级为长期规则。',
+    notes:['区分用户偏好、个人规则和组织口径。','记忆提取可以异步执行。']
+  },
+  {
+    id:'m04',track:'memory',kind:'decision',type:'MEMORY GATE',step:'M04',
+    role:'冲突审核闸门',
+    title:'审核范围、冲突与有效性？',
+    desc:'候选是否可自动保存、待确认或拒绝？',
+    io:'memory_write_decision',x:780,y:1464,w:156,h:114,
+    skills:'skills/ECC-main/delivery-gate',
+    purpose:'独立记忆审计门禁：核验记忆来源、权限与版本冲突。业务口径变更必须走审核，严禁静默覆盖。',
+    inputs:'memory_candidates[]\nexisting active memories\nauthoritative config refs',
+    outputs:'write / ask / reject\nconflict_resolution\nversion plan',
+    failure:'冲突无法自动解决时保留旧有效版本并请求确认；不得静默覆盖权威指标口径。',
+    notes:['记录谁确认、何时生效、影响范围。','允许撤销和追溯。']
+  },
+  {
+    id:'m05',track:'memory',kind:'memory',type:'VERSIONED MEMORY',step:'M05',
+    role:'版本化写入底座',
+    title:'写入版本化记忆',
+    desc:'保留来源、状态、生效期和关联证据。',
+    io:'memory_id · version · status',x:1020,y:1470,w:196,h:104,
+    skills:'skills/ECC-main/unified-memory',
+    purpose:'将审核通过的记忆以版本化形式写入权威库，并同步更新向量与倒排索引，保留生效与失效历史。',
+    inputs:'approved memory candidate\nwrite decision\nsource refs',
+    outputs:'memory_id\nversion\nstatus / valid_from\nindex update status',
+    failure:'数据库写入和索引更新分开处理，保证可重建索引；不得让索引中的旧版本覆盖权威记录。',
+    notes:['先写权威记录，再更新检索索引。','提供搜索、编辑、过期、撤销入口。']
+  },
+  {
+    id:'m06',track:'memory',kind:'memory',type:'EVALUATION',step:'M06',
+    role:'回归评估服务',
+    title:'回归测试与反馈归因',
+    desc:'评估记忆是否召回、继承、纠错且未越权。',
+    io:'memory_metrics · regression_cases',x:1260,y:1470,w:196,h:104,
+    skills:'skills/ECC-main/eval-harness · skills/ECC-main/agent-eval',
+    purpose:'运行自动化基准测试套件，核验新写入的记忆是否引发口径漂移或越权访问，确保长期记忆质量。',
+    inputs:'memory changes\nconversation benchmark\nexpected state snapshots',
+    outputs:'evaluation report\nregression failures\nrelease decision',
+    failure:'回归测试失败时停止发布相关规则或检索变更，并保留可比较的基准记录。',
+    notes:['测错误记忆写入率，而不只测召回率。','模型、Prompt、语义配置变更均应回归。']
+  }
+];
+
+// 严格直角折线与真正并行连接
+const E = [
+  // 公共入口
+  {from:'n01',to:'n02',c:'common',p:[[251,185],[285,185]]},
+  {from:'n02',to:'n03',c:'common',p:[[481,185],[520,185]]},
+  {from:'n03',to:'n04',c:'common',p:[[716,185],[760,185]]},
+  {from:'n04',to:'n06',c:'common',label:'无关键歧义 (放行)',lx:940,ly:160,p:[[916,185],[1005,185]]},
+  {from:'n04',to:'n05',c:'branch',label:'主理人裁定澄清',tag:'amber',lx:852,ly:256,p:[[838,242],[838,285]]},
+  {from:'n05',to:'n03',c:'memory',label:'用户确认后重解析',tag:'teal',lx:650,ly:365,p:[[765,335],[740,335],[740,250],[615,250],[615,239]]},
+  {from:'n06',to:'b01',c:'basic',label:'普通 / 快速通道 (单表)',tag:'green',lx:750,ly:435,p:[[1088,242],[1088,455],[165,455],[165,505]]},
+  {from:'n06',to:'a01',c:'advanced',label:'高级专家团 (跨表/归因/预测)',tag:'purple',lx:940,ly:755,p:[[1088,242],[1088,775],[155,775],[155,980]]},
+
+  // 普通问数 FAST TRACK
+  {from:'b01',to:'b02',c:'basic',p:[[266,555],[315,555]]},
+  {from:'b02',to:'b03',c:'basic',p:[[511,555],[560,555]]},
+  {from:'b03',to:'b04',c:'basic',label:'通过',tag:'green',lx:740,ly:529,p:[[714,555],[800,555]]},
+  {from:'b03',to:'b02',c:'retry',label:'知刑打回: 格物修复',tag:'red',lx:440,ly:625,p:[[560,612],[560,660],[413,660],[413,609]]},
+  {from:'b04',to:'b05',c:'basic',p:[[996,555],[1040,555]]},
+  {from:'b05',to:'b06',c:'basic',label:'通过 (>0行)',tag:'green',lx:1230,ly:530,p:[[1194,555],[1285,555]]},
+  {from:'b05',to:'b02',c:'retry',label:'0行/异常: 限次重试',tag:'red',lx:700,ly:685,p:[[1117,612],[1117,692],[400,692],[400,609]]},
+  {from:'b06',to:'b07',c:'basic',p:[[1481,555],[1530,555]]},
+
+  // 高级专家团真正并行架构 (PARALLEL WORKFLOW)
+  // 1. 前置双路并行探寻
+  {from:'a01',to:'a02',c:'advanced',label:'前置并行探寻A: 资产',tag:'purple',lx:275,ly:900,p:[[256,1030],[275,1030],[275,920],[300,920]]},
+  {from:'a01',to:'a03',c:'advanced',label:'前置并行探寻B: 语义',tag:'purple',lx:275,ly:1070,p:[[256,1030],[275,1030],[275,1140],[300,1140]]},
+  {from:'a02',to:'a04',c:'advanced',p:[[496,920],[515,920],[515,1030],[535,1030]]},
+  {from:'a03',to:'a04',c:'advanced',p:[[496,1140],[515,1140],[515,1030],[535,1030]]},
+
+  // 2. 主理人材料冻结后，扇出下发三路物理并发执行 (Fan-out)
+  {from:'a04',to:'a05_1',c:'advanced',label:'并发分支1: 核心事实',tag:'purple',lx:755,ly:855,p:[[731,1030],[755,1030],[755,870],[780,870]]},
+  {from:'a04',to:'a05_2',c:'advanced',label:'并发分支2: 维度下钻',tag:'purple',lx:755,ly:1010,p:[[731,1030],[780,1030]]},
+  {from:'a04',to:'a05_3',c:'advanced',label:'并发分支3: 历史对拍',tag:'purple',lx:755,ly:1170,p:[[731,1030],[755,1030],[755,1190],[780,1190]]},
+
+  // 3. 三路并发物理执行结果，同时汇入知刑独立交叉审查
+  {from:'a05_1',to:'a06',c:'advanced',p:[[976,870],[1010,870],[1010,1030],[1040,1030]]},
+  {from:'a05_2',to:'a06',c:'advanced',p:[[976,1030],[1040,1030]]},
+  {from:'a05_3',to:'a06',c:'advanced',p:[[976,1190],[1010,1190],[1010,1030],[1040,1030]]},
+
+  // 4. 知刑审查通过 -> 主理人证据与对拍闸门
+  {from:'a06',to:'a07',c:'advanced',label:'知刑审查通过',tag:'purple',lx:1255,ly:1005,p:[[1236,1030],[1280,1030]]},
+  {from:'a07',to:'a08',c:'advanced',label:'对拍一致 (放行)',tag:'purple',lx:1470,ly:1005,p:[[1436,1030],[1510,1030]]},
+
+  // 5. 对拍冲突或缺陷 -> 定向打回返工节点 -> 定向回派对应分支
+  {from:'a07',to:'a12',c:'retry',label:'对拍冲突 / 证据不足',tag:'red',lx:1385,ly:1210,p:[[1358,1088],[1358,1280]]},
+  {from:'a12',to:'a05_2',c:'retry',label:'定向返工回流: 仅重算下钻分支 (限≤2轮)',tag:'red',lx:950,ly:1340,p:[[1260,1330],[878,1330],[878,1080]]},
+
+  // 6. 扇入多维深度归因 (Fan-in) -> 图表 -> 主理人终审
+  {from:'a08',to:'a09',c:'advanced',p:[[1706,1030],[1750,1030]]},
+  {from:'a09',to:'a10',c:'advanced',p:[[1946,1030],[1990,1030]]},
+
+  // 独立记忆服务连接
+  {from:'n02',to:'m02',c:'memory',label:'读取权威记忆',tag:'teal',lx:260,ly:1432,p:[[285,185],[40,185],[40,1442],[403,1442],[403,1470]]},
+  {from:'b07',to:'m03',c:'memory',label:'普通交付后提取候选',tag:'teal',lx:1030,ly:738,p:[[1628,609],[1628,735],[20,735],[20,1420],[638,1420],[638,1470]]},
+  {from:'a10',to:'m03',c:'memory',label:'已验证产物沉淀',tag:'teal',lx:1710,ly:1365,p:[[2088,1084],[2088,1395],[638,1395],[638,1470]]},
+  {from:'m01',to:'m02',c:'memory',label:'恢复工作区',tag:'teal',lx:270,ly:1445,p:[[266,1520],[305,1520]]},
+  {from:'m02',to:'m03',c:'memory',p:[[501,1520],[540,1520]]},
+  {from:'m03',to:'m04',c:'memory',p:[[736,1520],[780,1520]]},
+  {from:'m04',to:'m05',c:'memory',label:'审核批准写入',tag:'teal',lx:960,ly:1492,p:[[936,1520],[1020,1520]]},
+  {from:'m05',to:'m06',c:'memory',p:[[1216,1520],[1260,1520]]}
+];
+
+const canvas=document.getElementById('canvas'), workspace=document.getElementById('workspace'), nodeLayer=document.getElementById('nodes'), edgeSvg=document.getElementById('edges'), labelLayer=document.getElementById('edgeLabels');
+let scale=0.58, tx=20, ty=12, dragging=false, dragStart=null, activeView='all', selectedNode=null;
+const nodeById=Object.fromEntries(NODES.map(n=>[n.id,n]));
+
+function edgeMarker(c){return c==='basic'?'url(#arrow-green)':c==='advanced'?'url(#arrow-purple)':c==='branch'?'url(#arrow-amber)':c==='retry'?'url(#arrow-red)':c==='memory'?'url(#arrow-teal)':'url(#arrow-gray)'}
+function visibleTracks(view){if(view==='all')return new Set(['common','basic','advanced','memory']);if(view==='basic')return new Set(['common','basic']);if(view==='advanced')return new Set(['common','advanced']);return new Set(['common','memory']);}
+
+function renderNodes(){
+  nodeLayer.innerHTML='';
+  NODES.forEach(n=>{
+    const e=document.createElement('div');
+    e.id=n.id;
+    e.className='node '+n.kind+(n.kind==='decision'?' decision':'');
+    e.style.left=n.x+'px';e.style.top=n.y+'px';e.style.width=(n.w||196)+'px';
+    if(n.h)e.style.height=n.h+'px';
+
+    if(n.kind==='decision'){
+      e.innerHTML=`<div class="diamond"></div><div class="decision-content"><div class="type">${n.type}</div><h3>${n.title}</h3><p>${n.desc}</p></div><span class="step">${n.step}</span>`;
+    }else{
+      e.innerHTML=`
+        <div class="top"><span class="type">${n.type}</span><span class="step">${n.step}</span></div>
+        <div class="body">
+          <div class="role-badge">${n.role}</div>
+          <h3>${n.title}</h3>
+          <p>${n.desc}</p>
+          <div class="io">${n.io}</div>
+        </div>
+      `;
+    }
+
+    ['l','r','t','b'].forEach(p=>{const pin=document.createElement('i');pin.className='pin '+p;e.appendChild(pin)});
+    e.addEventListener('click',ev=>{ev.stopPropagation();openNode(n)});
+    nodeLayer.appendChild(e);
+  });
+}
+
+function renderEdges(){
+  edgeSvg.querySelectorAll('.edge-path').forEach(e=>e.remove());
+  labelLayer.innerHTML='';
+  E.forEach((ed,i)=>{
+    const path=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    path.classList.add('edge','edge-path',ed.c);
+    path.dataset.from=ed.from;path.dataset.to=ed.to;path.dataset.edge=i;
+    path.setAttribute('points',ed.p.map(p=>p.join(',')).join(' '));
+    path.setAttribute('marker-end',edgeMarker(ed.c));
+    edgeSvg.appendChild(path);
+
+    if(ed.label){
+      const l=document.createElement('div');
+      l.className='edge-label '+(ed.tag||'');
+      l.style.left=ed.lx+'px';l.style.top=ed.ly+'px';
+      l.dataset.from=ed.from;l.dataset.to=ed.to;
+      l.textContent=ed.label;
+      labelLayer.appendChild(l);
+    }
+  });
+}
+
+function updateTransform(){
+  canvas.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;
+  document.getElementById('zoomLabel').textContent=Math.round(scale*100)+'%';
+}
+
+function applyView(view,shouldFit=true){
+  activeView=view;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===view));
+  const vis=visibleTracks(view);
+  NODES.forEach(n=>{
+    const el=document.getElementById(n.id);
+    const show=vis.has(n.track);
+    el.style.display=show?'block':'none';
+    el.classList.toggle('dim',false);
+  });
+  document.querySelectorAll('.edge-path').forEach(p=>{
+    const a=nodeById[p.dataset.from],b=nodeById[p.dataset.to];
+    p.style.display=(vis.has(a.track)&&vis.has(b.track))?'':'none';
+  });
+  document.querySelectorAll('.edge-label').forEach(l=>{
+    const a=nodeById[l.dataset.from],b=nodeById[l.dataset.to];
+    l.style.display=(vis.has(a.track)&&vis.has(b.track))?'':'none';
+  });
+  document.querySelectorAll('.lane').forEach(l=>{
+    const yes=(view==='all')||(view==='basic'&&(l.classList.contains('common')||l.classList.contains('basic')))||(view==='advanced'&&(l.classList.contains('common')||l.classList.contains('advanced')))||(view==='memory'&&(l.classList.contains('common')||l.classList.contains('memory')));
+    l.style.display=yes?'':'none';
+  });
+  document.querySelectorAll('.route-title,.note,.parallel-badge').forEach(e=>{
+    if(view==='all')e.style.display='';
+    else if(e.classList.contains('route-title'))e.style.display=(view==='basic'&&e.classList.contains('purple'))||(view==='advanced'&&!e.classList.contains('purple'))?'none':'';
+    else if(e.classList.contains('parallel-badge'))e.style.display=view==='advanced'?'':'none';
+    else e.style.display=view==='memory'?'':'none';
+  });
+  if(shouldFit)fitVisible();
+}
+
+function fitVisible(){
+  const vis=visibleTracks(activeView);
+  const ns=NODES.filter(n=>vis.has(n.track));
+  if(!ns.length)return;
+  let minX=25,minY=25,maxX=2770,maxY=1640;
+  if(activeView==='basic'){minX=20;minY=30;maxX=1955;maxY=735;}
+  else if(activeView==='advanced'){minX=20;minY=30;maxX=2740;maxY=1380;}
+  else if(activeView==='memory'){minX=20;minY=30;maxX=2100;maxY=1640;}
+  const w=maxX-minX,h=maxY-minY,pad=44, s=Math.min((workspace.clientWidth-pad*2)/w,(workspace.clientHeight-pad*2)/h,1);
+  scale=Math.max(.22,s);
+  tx=(workspace.clientWidth-w*scale)/2-minX*scale;
+  ty=(workspace.clientHeight-h*scale)/2-minY*scale;
+  updateTransform();
+}
+
+function zoomAt(mult){
+  const cx=workspace.clientWidth/2,cy=workspace.clientHeight/2;
+  const px=(cx-tx)/scale,py=(cy-ty)/scale;
+  scale=Math.max(.22,Math.min(1.8,scale*mult));
+  tx=cx-px*scale;ty=cy-py*scale;
+  updateTransform();
+}
+
+function openNode(n){
+  selectedNode=n;
+  document.querySelectorAll('.node').forEach(e=>e.classList.toggle('selected',e.id===n.id));
+  document.getElementById('dKicker').textContent=`${n.track.toUpperCase()} · ${n.type} · ${n.step}`;
+  document.getElementById('dTitle').textContent=n.title;
+  document.getElementById('dSkillBox').textContent=`⚡ 挂载 Skills: ${n.skills || '原生确定性组件'}`;
+  document.getElementById('dPurpose').innerHTML=`<b>岗位：${n.role || '执行单元'}</b><br>${n.purpose}`;
+  document.getElementById('dInputs').textContent=n.inputs;
+  document.getElementById('dOutputs').textContent=n.outputs;
+  document.getElementById('dFailure').textContent=n.failure;
+  const ul=document.getElementById('dNotes');ul.innerHTML='';
+  n.notes.forEach(s=>{const li=document.createElement('li');li.textContent=s;ul.appendChild(li)});
+  document.getElementById('drawer').classList.add('open');
+}
+
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('open');
+  document.querySelectorAll('.node').forEach(e=>e.classList.remove('selected'));
+}
+
+renderNodes();renderEdges();applyView('all',false);fitVisible();
+
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>applyView(t.dataset.view,true)));
+document.getElementById('fitBtn').addEventListener('click',fitVisible);
+document.getElementById('resetBtn').addEventListener('click',fitVisible);
+document.getElementById('zoomIn').addEventListener('click',()=>zoomAt(1.15));
+document.getElementById('zoomOut').addEventListener('click',()=>zoomAt(.87));
+document.getElementById('drawerBtn').addEventListener('click',()=>{
+  if(selectedNode)openNode(selectedNode);
+  else openNode(nodeById[activeView==='advanced'?'a01':activeView==='basic'?'b01':activeView==='memory'?'m01':'n01']);
+});
+document.getElementById('closeDrawer').addEventListener('click',closeDrawer);
+
+workspace.addEventListener('pointerdown',e=>{
+  if(e.target.closest('.node')||e.target.closest('.zoom-controls'))return;
+  dragging=true;dragStart={x:e.clientX-tx,y:e.clientY-ty};
+  workspace.classList.add('dragging');workspace.setPointerCapture(e.pointerId);
+});
+workspace.addEventListener('pointermove',e=>{if(!dragging)return;tx=e.clientX-dragStart.x;ty=e.clientY-dragStart.y;updateTransform()});
+workspace.addEventListener('pointerup',()=>{dragging=false;workspace.classList.remove('dragging')});
+workspace.addEventListener('pointercancel',()=>{dragging=false;workspace.classList.remove('dragging')});
+workspace.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.deltaY<0?1.07:.93)},{passive:false});
+window.addEventListener('resize',()=>fitVisible());
+</script>
+</body>
+</html>

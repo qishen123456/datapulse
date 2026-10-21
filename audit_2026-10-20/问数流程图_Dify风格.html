@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataPulse 智能问数 · 主理人双轨工作流 (低阶 vs 高阶 + 真实Skills库)</title>
+<style>
+  :root {
+    --bg-canvas: #090D1A;
+    --dot-color: rgba(255, 255, 255, 0.08);
+    --panel-bg: rgba(18, 25, 44, 0.96);
+    --panel-border: rgba(255, 255, 255, 0.12);
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+    
+    /* 语义色 */
+    --c-supervisor: #8B5CF6;  /* 主理人紫 */
+    --c-basic: #10B981;       /* 低阶基础绿 */
+    --c-advanced: #A855F7;    /* 高阶深度紫 */
+    --c-intent: #06B6D4;      /* 意图青 */
+    --c-sql: #0284C7;         /* SQL蓝 */
+    --c-if: #F59E0B;          /* IF/ELSE 黄 */
+    --c-loop: #EC4899;        /* 轮回校验粉红 */
+    --c-guard: #EF4444;       /* 拦截红 */
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg-canvas);
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* 顶部全局导航 */
+  .dify-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 60px;
+    background: rgba(9, 13, 26, 0.95);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    z-index: 100;
+  }
+  .nav-left { display: flex; align-items: center; gap: 14px; }
+  .logo-tag {
+    background: linear-gradient(135deg, #7C3AED, #0284C7);
+    color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800;
+  }
+  .nav-title { font-size: 15px; font-weight: 800; color: #fff; }
+
+  /* 模式高亮过滤 */
+  .filter-box {
+    display: flex; background: rgba(255, 255, 255, 0.06); padding: 4px; border-radius: 8px; border: 1px solid var(--panel-border); gap: 4px;
+  }
+  .filter-btn {
+    padding: 6px 14px; border-radius: 6px; border: none; background: transparent;
+    color: var(--text-secondary); font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  }
+  .filter-btn.active.btn-all { background: #334155; color: #fff; }
+  .filter-btn.active.btn-basic { background: #059669; color: #fff; box-shadow: 0 2px 10px rgba(5,150,105,0.4); }
+  .filter-btn.active.btn-adv { background: #7C3AED; color: #fff; box-shadow: 0 2px 10px rgba(124,58,237,0.4); }
+
+  /* 画布视口 */
+  .viewport {
+    position: absolute;
+    top: 60px; left: 0; right: 0; bottom: 0;
+    overflow: hidden;
+    cursor: grab;
+    background-color: var(--bg-canvas);
+    background-image: radial-gradient(var(--dot-color) 1.2px, transparent 1.2px);
+    background-size: 24px 24px;
+  }
+  .viewport:active { cursor: grabbing; }
+
+  .stage {
+    position: absolute;
+    transform-origin: 0 0;
+    width: 5200px;
+    height: 2800px;
+  }
+
+  svg.wires {
+    position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5;
+  }
+
+  /* Dify 节点卡片标准规范 */
+  .dify-node {
+    position: absolute;
+    width: 320px;
+    background: var(--panel-bg);
+    border: 1.5px solid var(--panel-border);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, opacity 0.3s ease;
+  }
+  .dify-node:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+    border-color: #38BDF8;
+  }
+
+  /* 主理人专属超高亮卡片 */
+  .dify-node.node-supervisor {
+    border: 2px solid #8B5CF6;
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.16) 0%, rgba(20, 27, 45, 0.98) 100%);
+    box-shadow: 0 0 25px rgba(139, 92, 246, 0.25);
+  }
+
+  .node-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px 10px 0 0;
+  }
+  .node-type-badge {
+    display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 5px; text-transform: uppercase;
+  }
+  .node-role-name { font-size: 12px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px; }
+
+  .node-body { padding: 12px 14px; }
+  .node-title { font-size: 14.5px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .node-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 8px; }
+
+  .node-vars {
+    background: rgba(0, 0, 0, 0.35); border-radius: 6px; padding: 6px 10px;
+    font-family: ui-monospace, monospace; font-size: 11px; color: #38BDF8; line-height: 1.5; margin-bottom: 8px;
+  }
+  .node-vars .var-label { color: var(--text-muted); }
+
+  /* Skills 真实挂载标签 */
+  .skills-wrapper {
+    margin-top: 8px; display: flex; flex-direction: column; gap: 4px;
+  }
+  .skill-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10.5px; font-weight: 600; padding: 3px 8px; border-radius: 4px;
+    background: rgba(139, 92, 246, 0.12); color: #C4B5FD; border: 1px solid rgba(139, 92, 246, 0.3);
+    font-family: ui-monospace, monospace;
+  }
+  .skill-badge.skill-ecc { background: rgba(2, 132, 199, 0.15); color: #7DD3FC; border-color: rgba(2, 132, 199, 0.3); }
+  .skill-badge.skill-super { background: rgba(236, 72, 153, 0.15); color: #F472B6; border-color: rgba(236, 72, 153, 0.3); }
+
+  /* 端口 Ports */
+  .port {
+    position: absolute; width: 12px; height: 12px; border-radius: 50%;
+    background: #1E293B; border: 2px solid #64748B; z-index: 20; transition: transform 0.2s, border-color 0.2s;
+  }
+  .port:hover { transform: scale(1.3); border-color: #38BDF8; }
+  .port-in { left: -7px; top: 50%; transform: translateY(-50%); }
+  .port-out { right: -7px; top: 50%; transform: translateY(-50%); }
+
+  .port-if-true { right: -7px; top: 38%; transform: translateY(-50%); border-color: #10B981; background: #064E3B; }
+  .port-if-false { right: -7px; top: 72%; transform: translateY(-50%); border-color: #F59E0B; background: #78350F; }
+
+  .branch-label { position: absolute; right: 12px; font-size: 11px; font-weight: 800; font-family: ui-monospace, monospace; }
+  .branch-true { top: 32%; color: #34D399; }
+  .branch-false { top: 66%; color: #FBBF24; }
+
+  /* 色系 */
+  .type-supervisor .node-type-badge { background: #7C3AED; color: #fff; }
+  .type-supervisor .node-header { background: rgba(139, 92, 246, 0.18); }
+
+  .type-basic .node-type-badge { background: #059669; color: #fff; }
+  .type-basic .node-header { background: rgba(16, 185, 129, 0.15); }
+  .type-basic { border-color: rgba(16, 185, 129, 0.4); }
+
+  .type-adv .node-type-badge { background: #9333EA; color: #fff; }
+  .type-adv .node-header { background: rgba(168, 85, 247, 0.15); }
+  .type-adv { border-color: rgba(168, 85, 247, 0.4); }
+
+  .type-if .node-type-badge { background: #D97706; color: #fff; }
+  .type-if .node-header { background: rgba(245, 158, 11, 0.15); }
+  .type-if { border-color: rgba(245, 158, 11, 0.4); }
+
+  .type-guard .node-type-badge { background: #DC2626; color: #fff; }
+  .type-guard .node-header { background: rgba(239, 68, 68, 0.15); }
+  .type-guard { border-color: rgba(239, 68, 68, 0.4); }
+
+  /* 连线 */
+  .wire-main { stroke: #64748B; stroke-width: 2.2; fill: none; }
+  .wire-sup { stroke: #8B5CF6; stroke-width: 2.5; fill: none; }
+  .wire-basic { stroke: #10B981; stroke-width: 2.5; fill: none; }
+  .wire-adv { stroke: #A855F7; stroke-width: 2.5; fill: none; }
+  .wire-false { stroke: #F59E0B; stroke-width: 2.2; stroke-dasharray: 6 4; fill: none; }
+  .wire-retry { stroke: #EF4444; stroke-width: 3.2; stroke-dasharray: 8 5; fill: none; animation: dashMove 1s linear infinite; }
+
+  @keyframes dashMove { to { stroke-dashoffset: -26; } }
+
+  .edge-tag {
+    position: absolute; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px;
+    background: #090D16; border: 1px solid var(--panel-border); pointer-events: none; z-index: 15;
+    transform: translate(-50%, -50%); white-space: nowrap;
+  }
+  .edge-tag.tag-basic { border-color: #059669; color: #34D399; }
+  .edge-tag.tag-adv { border-color: #7C3AED; color: #C4B5FD; }
+  .edge-tag.tag-retry { border-color: #DC2626; color: #F87171; background: rgba(220, 38, 38, 0.2); }
+  .edge-tag.tag-false { border-color: #D97706; color: #FBBF24; }
+
+  /* 浮动工具 */
+  .float-controls {
+    position: absolute; bottom: 24px; right: 24px; display: flex;
+    background: var(--panel-bg); border: 1px solid var(--panel-border);
+    border-radius: 8px; padding: 4px; gap: 4px; z-index: 50;
+  }
+  .ctrl-btn {
+    width: 32px; height: 32px; border: none; background: transparent;
+    color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 800;
+  }
+  .ctrl-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+  /* 抽屉 */
+  .config-drawer {
+    position: fixed; top: 60px; right: 0; bottom: 0; width: 460px;
+    background: #101626; border-left: 1px solid var(--panel-border);
+    z-index: 90; transform: translateX(100%); transition: transform 0.25s ease;
+    display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.7);
+  }
+  .config-drawer.open { transform: translateX(0); }
+  .drawer-head { padding: 16px 20px; border-bottom: 1px solid var(--panel-border); display: flex; justify-content: space-between; align-items: center; }
+  .drawer-close { background: none; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer; }
+  .drawer-close:hover { color: #fff; }
+  .drawer-body { padding: 20px; overflow-y: auto; flex: 1; }
+  .code-block { background: #070B14; border: 1px solid var(--panel-border); border-radius: 6px; padding: 10px; font-family: ui-monospace, monospace; font-size: 11.5px; color: #38BDF8; margin: 8px 0 16px; white-space: pre-wrap; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<header class="dify-nav">
+  <div class="nav-left">
+    <span class="logo-tag">CENTRAL SUPERVISOR</span>
+    <span class="nav-title">DataPulse 主理人双轨工作流</span>
+    <span style="font-size:12px; color:var(--text-muted);">|</span>
+    <div class="filter-box">
+      <button class="filter-btn active btn-all" onclick="filterTrack('all')">全景视图 (全部)</button>
+      <button class="filter-btn btn-basic" onclick="filterTrack('basic')">🟢 低阶流程 (普通问数 Fast Track)</button>
+      <button class="filter-btn btn-adv" onclick="filterTrack('advanced')">🟣 高阶流程 (专家团 Deep Track)</button>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:10px; align-items:center;">
+    <span style="font-size:11.5px; color:#A78BFA; background:rgba(139,92,246,0.15); padding:3px 10px; border-radius:12px; border:1px solid rgba(139,92,246,0.3);">📦 挂载真实 Skills: ECC / Superpowers / 1.3.1</span>
+    <button style="padding:6px 12px; background:rgba(255,255,255,0.06); border:1px solid var(--panel-border); color:#fff; border-radius:6px; font-size:12px; cursor:pointer;" onclick="resetZoom()">⟲ 适配视口</button>
+  </div>
+</header>
+
+<div class="viewport" id="viewport">
+  <div class="stage" id="stage">
+    
+    <svg class="wires" id="wireLayer">
+      <defs>
+        <marker id="arrMain" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M 0 1.5 L 7 4.5 L 0 7.5 Z" fill="#64748B"/></marker>
+        <marker id="arrSup" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M 0 1.5 L 7 4.5 L 0 7.5 Z" fill="#8B5CF6"/></marker>
+        <marker id="arrBasic" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M 0 1.5 L 7 4.5 L 0 7.5 Z" fill="#10B981"/></marker>
+        <marker id="arrAdv" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M 0 1.5 L 7 4.5 L 0 7.5 Z" fill="#A855F7"/></marker>
+        <marker id="arrFalse" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M 0 1.5 L 7 4.5 L 0 7.5 Z" fill="#F59E0B"/></marker>
+        <marker id="arrRed" markerWidth="11" markerHeight="11" refX="8" refY="5.5" orient="auto"><path d="M 0 2 L 8 5.5 L 0 9 Z" fill="#EF4444"/></marker>
+      </defs>
+    </svg>
+
+    <div id="nodesContainer"></div>
+    <div id="tagsContainer"></div>
+
+  </div>
+
+  <div class="float-controls">
+    <button class="ctrl-btn" onclick="zoomIn()">+</button>
+    <button class="ctrl-btn" onclick="resetZoom()">1:1</button>
+    <button class="ctrl-btn" onclick="zoomOut()">-</button>
+  </div>
+</div>
+
+<!-- 抽屉 -->
+<div class="config-drawer" id="configDrawer">
+  <div class="drawer-head">
+    <div>
+      <div style="font-size:11px; font-weight:800; color:#8B5CF6;" id="drawerBadge">NODE</div>
+      <h3 style="font-size:15px; color:#fff;" id="drawerTitle">节点详情</h3>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">&times;</button>
+  </div>
+  <div class="drawer-body">
+    <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">所属赛道与角色</div>
+    <div style="font-family:ui-monospace, monospace; color:#38BDF8; font-size:12px; margin-bottom:14px;" id="drawerRole">-</div>
+
+    <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">挂载的真实项目 Skills 文件路径</div>
+    <div style="background:#070B14; border:1px solid #7C3AED; border-radius:6px; padding:10px; font-family:ui-monospace, monospace; font-size:11px; color:#C4B5FD; margin-bottom:14px;" id="drawerSkillPath">-</div>
+
+    <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">输入输出契约 (Schema)</div>
+    <div class="code-block" id="drawerSchema">{}</div>
+
+    <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">主理人中枢控制与容错规则</div>
+    <div style="font-size:12px; color:var(--text-secondary); line-height:1.6;" id="drawerDesc">-</div>
+  </div>
+</div>
+
+<script>
+// ========================================================
+// 节点定义：接入真实 skills 库文件，区分低阶与高阶
+// ========================================================
+
+const DIFY_NODES = [
+  // ------------------------------------------------------
+  // 公共主理人接入段
+  // ------------------------------------------------------
+  {
+    id: "n-start",
+    track: "common",
+    type: "type-supervisor",
+    badge: "START 01",
+    role: "入口",
+    title: "用户自然语言提问接入",
+    desc: "提问与凭证直通主理人，初始化全链路 trace_id 与 TaskState。",
+    vars: "inputs.sys.query\ninputs.session_id",
+    skills: ["skills/superpowers-main/using-superpowers"],
+    x: 50, y: 550,
+    ports: { in: false, out: true }
+  },
+  {
+    id: "n-supervisor-main",
+    track: "common",
+    type: "type-supervisor node-supervisor",
+    badge: "SUPERVISOR 02",
+    role: "主理人总控",
+    title: "主理人 · 任务接单与调度中枢",
+    desc: "会话与全流程状态所有者。首要分派给意图专家，掌控后续一切调度。",
+    vars: "task_state.session_id\ntask_state.status: 'PENDING'",
+    skills: [
+      "skills/ECC-main/agentic-engineering",
+      "skills/superpowers-main/dispatching-parallel-agents"
+    ],
+    x: 430, y: 550,
+    ports: { in: true, out: true }
+  },
+
+  // 意图理解专家（问津）
+  {
+    id: "n-expert-intent",
+    track: "common",
+    type: "type-intent",
+    badge: "EXPERT 03",
+    role: "问津 · 意图理解",
+    title: "意图理解专家 (问津)",
+    desc: "提取时间切片、度量主指标、维度；识别歧义并交回主理人裁定。",
+    vars: "outputs.extracted_metrics[]\noutputs.is_ambiguous: bool",
+    skills: [
+      "skills/ECC-main/intent-driven-development",
+      "skills/skills-1.3.1/domain-modeling"
+    ],
+    x: 820, y: 550,
+    ports: { in: true, out: true }
+  },
+
+  // 主理人裁决确认
+  {
+    id: "n-if-clarify",
+    track: "common",
+    type: "type-if",
+    badge: "IF/ELSE 04",
+    role: "主理人裁决",
+    title: "主理人裁定：是否需用户确认？",
+    desc: "要素缺失或歧义时，由主理人拍板向用户发起确认卡片；完备则进分档！",
+    vars: "task_state.needs_clarify == true",
+    skills: ["skills/ECC-main/operator-approval-loop"],
+    x: 1220, y: 550,
+    ports: { in: true, ifBranches: { trueLabel: "要素齐全", falseLabel: "有歧义 (主理人反问)" } }
+  },
+  {
+    id: "n-supervisor-clarify",
+    track: "common",
+    type: "type-guard",
+    badge: "SUPERVISOR 04-E",
+    role: "主理人交互",
+    title: "主理人 · 生成澄清确认卡片",
+    desc: "主理人挂起轮次，向用户抛出 2~4 个候选项，用户选择后重入主理人！",
+    vars: "outputs.clarify_card",
+    skills: ["skills/ECC-main/context-budget"],
+    x: 1220, y: 800,
+    ports: { in: true, out: false }
+  },
+
+  // 主理人复杂度分档（低阶 vs 高阶 分水岭！）
+  {
+    id: "n-if-complexity",
+    track: "common",
+    type: "type-if",
+    badge: "SWITCH 05",
+    role: "主理人定档",
+    title: "主理人：低阶基础 vs 高阶深度？",
+    desc: "单表指标查询走【低阶基础通道】；跨表、异动归因、预测推演走【高阶专家团】！",
+    vars: "task_state.complexity == 'BASIC' ? 'B' : 'A'",
+    skills: ["skills/ECC-main/task-sorting", "skills/ECC-main/cost-aware-llm-pipeline"],
+    x: 1620, y: 550,
+    ports: { in: true, ifBranches: { trueLabel: "高阶专家团 (Deep)", falseLabel: "低阶普通 (Fast)" } }
+  },
+
+  // ------------------------------------------------------
+  // 🟢 轨道 A：低阶流程 (普通精准问数 Fast Track - 极简快速)
+  // ------------------------------------------------------
+  {
+    id: "n-basic-sql",
+    track: "basic",
+    type: "type-basic",
+    badge: "FAST 06-L",
+    role: "格物 · 快速查数",
+    title: "格物 · Golden 复用与受控取数",
+    desc: "低阶管道：优先 Golden 命中；未命中受控生成单表 SQL，挂物理超时保护。",
+    vars: "outputs.basic_sql\noutputs.rows_data[]",
+    skills: [
+      "skills/ECC-main/postgres-patterns",
+      "skills/ECC-main/safety-guard"
+    ],
+    x: 2020, y: 750,
+    ports: { in: true, out: true }
+  },
+  {
+    id: "n-basic-analysis",
+    track: "basic",
+    type: "type-basic",
+    badge: "FAST 07-L",
+    role: "析微 · 极简提炼",
+    title: "析微 · 快速图表适配与结论",
+    desc: "轻量提炼一句话结论，自适应折线图/柱状图/指标卡，快速交付。",
+    vars: "outputs.card_summary\noutputs.echarts_cfg",
+    skills: ["skills/ECC-main/dashboard-builder"],
+    x: 2420, y: 750,
+    ports: { in: true, out: true }
+  },
+  {
+    id: "n-basic-deliver",
+    track: "basic",
+    type: "type-basic",
+    badge: "DELIVER 08-L",
+    role: "主理人交付",
+    title: "主理人 · 普通指标卡片交付",
+    desc: "秒级直出交付卡片，附带 SQL 审计抽屉入口，全链路低消耗闭环。",
+    vars: "outputs.basic_answer_card",
+    skills: ["skills/ECC-main/delivery-gate"],
+    x: 2820, y: 750,
+    ports: { in: true, out: false }
+  },
+
+  // ------------------------------------------------------
+  // 🟣 轨道 B：高阶流程 (专家团深度分析 Deep Track - 挂重型Skills+轮回校验)
+  // ------------------------------------------------------
+  {
+    id: "n-adv-supervisor-dag",
+    track: "advanced",
+    type: "type-adv node-supervisor",
+    badge: "SUPERVISOR 06-H",
+    role: "主理人规划",
+    title: "主理人 · 复杂任务 DAG 拆解与派发",
+    desc: "高阶中枢：从 7 专家池挑选全阵容，拆解为取数、独立审查、归因推演 3 个并行任务！",
+    vars: "outputs.dag_tasks: [T1, T2, T3]",
+    skills: [
+      "skills/superpowers-main/writing-plans",
+      "skills/superpowers-main/dispatching-parallel-agents"
+    ],
+    x: 2020, y: 320,
+    ports: { in: true, out: true }
+  },
+
+  // 高阶三专家并行执行
+  {
+    id: "n-adv-expert-sql",
+    track: "advanced",
+    type: "type-adv",
+    badge: "DEEP 07-H1",
+    role: "格物 · 深度SQL",
+    title: "SQL工程专家 (格物 · 跨表取数)",
+    desc: "多源宽表关联分析、复杂聚合与 Join，挂载 AST 与 15s 严格熔断防线。",
+    vars: "outputs.deep_sql_query",
+    skills: [
+      "skills/ECC-main/clickhouse-io",
+      "skills/ECC-main/safety-guard"
+    ],
+    x: 2420, y: 120,
+    ports: { in: true, out: true }
+  },
+  {
+    id: "n-adv-expert-review",
+    track: "advanced",
+    type: "type-adv",
+    badge: "DEEP 07-H2",
+    role: "知刑 · 独立审查",
+    title: "独立审查专家 (知刑 · 深度合规)",
+    desc: "fail-close 审查：聚合粒度、重复计数、口径漂移防范，非生成者自审！",
+    vars: "outputs.audit_passed: bool",
+    skills: [
+      "skills/skills-1.3.1/code-review",
+      "skills/superpowers-main/verification-before-completion"
+    ],
+    x: 2420, y: 320,
+    ports: { in: true, out: true }
+  },
+  {
+    id: "n-adv-expert-analysis",
+    track: "advanced",
+    type: "type-adv",
+    badge: "DEEP 07-H3",
+    role: "析微 · 深度归因",
+    title: "数据分析专家 (析微 · 归因推演)",
+    desc: "多维波动归因、贡献率拆解、多 SQL 对拍，强制标注：相关性 ≠ 因果性。",
+    vars: "outputs.attribution_report",
+    skills: [
+      "skills/ECC-main/verification-loop",
+      "skills/ECC-main/deep-research"
+    ],
+    x: 2420, y: 520,
+    ports: { in: true, out: true }
+  },
+
+  // 高阶交叉验证
+  {
+    id: "n-adv-if-conflict",
+    track: "advanced",
+    type: "type-if",
+    badge: "IF/ELSE 08-H",
+    role: "对拍仲裁",
+    title: "多路对拍与审查是否冲突？",
+    desc: "多 SQL 路径对拍是否一致？知刑审查与析微推演是否存在口径矛盾？",
+    vars: "outputs.is_consistent == true",
+    skills: ["skills/ECC-main/evidence_vote"],
+    x: 2820, y: 320,
+    ports: { in: true, ifBranches: { trueLabel: "一致闭合", falseLabel: "对拍冲突" } }
+  },
+
+  // 高阶主理人终审
+  {
+    id: "n-adv-supervisor-eval",
+    track: "advanced",
+    type: "type-adv node-supervisor",
+    badge: "SUPERVISOR 09-H",
+    role: "主理人终审",
+    title: "主理人 · 全要素综合终审",
+    desc: "主理人审核全部材料：证据是否支撑结论？是否存在未证实假设？评分达标才放行！",
+    vars: "eval_score >= 0.85",
+    skills: ["skills/ECC-main/delivery-gate"],
+    x: 3220, y: 320,
+    ports: { in: true, out: true }
+  },
+  {
+    id: "n-adv-if-eval-pass",
+    track: "advanced",
+    type: "type-if",
+    badge: "IF/ELSE 10-H",
+    role: "终审分支",
+    title: "主理人终审是否通过？",
+    desc: "综合评分 ≥ 0.85 则交付；存在漏洞或疑点，启动高阶轮回校验！",
+    vars: "eval_passed == true",
+    x: 3620, y: 320,
+    ports: { in: true, ifBranches: { trueLabel: "通过 (交付)", falseLabel: "不通过 (轮回打回)" } }
+  },
+
+  // 高阶轮回控制器
+  {
+    id: "n-adv-loop-ctrl",
+    track: "advanced",
+    type: "type-guard",
+    badge: "ITERATION 11-H",
+    role: "轮回控制器",
+    title: "主理人 · 轮回校验打回器",
+    desc: "生成缺陷清单打回！轮次 ≤ 2 回退主理人重新派工；超过 2 轮带缺口熔断交付！",
+    vars: "iteration_count += 1\nis_under_budget",
+    skills: [
+      "skills/ECC-main/autonomous-loops",
+      "skills/ECC-main/loop-design-check"
+    ],
+    x: 3620, y: 100,
+    ports: { in: true, ifBranches: { trueLabel: "轮次 ≤ 2 (重派)", falseLabel: "超限 (熔断)" } }
+  },
+
+  // 高阶终审交付
+  {
+    id: "n-adv-deliver",
+    track: "advanced",
+    type: "type-adv",
+    badge: "DELIVER 12-H",
+    role: "深度大报告",
+    title: "主理人 · 高管级深度决策报告",
+    desc: "交付包含动因下钻、敏感性推演、ECharts 联动看板与完整证据链的高级大报告。",
+    vars: "outputs.executive_report_packet",
+    skills: ["skills/ECC-main/delivery-gate"],
+    x: 4020, y: 320,
+    ports: { in: true, out: false }
+  },
+  {
+    id: "n-adv-fallback",
+    track: "advanced",
+    type: "type-guard",
+    badge: "FALLBACK 13-H",
+    role: "熔断交付",
+    title: "主理人 · 带缺口停止与交付",
+    desc: "轮回耗尽时停止。诚实交付已验证证据，标明未核验假设，杜绝死循环！",
+    vars: "outputs.partial_deliver_with_gap",
+    skills: ["skills/ECC-main/cost-aware-llm-pipeline"],
+    x: 4020, y: 100,
+    ports: { in: true, out: false }
+  }
+];
+
+// ========================================================
+// 连线：低阶单向流 + 高阶大轮回流
+// ========================================================
+const DIFY_WIRES = [
+  // 公共接入
+  { from: "n-start", to: "n-supervisor-main", type: "wire-main" },
+  { from: "n-supervisor-main", to: "n-expert-intent", type: "wire-sup", label: "主理人派发: 意图理解" },
+  { from: "n-expert-intent", to: "n-if-clarify", type: "wire-main" },
+  { from: "n-if-clarify", to: "n-supervisor-clarify", type: "wire-false", label: "ELSE: 有歧义 (主理人反问)", fromBranch: "false" },
+  { from: "n-if-clarify", to: "n-if-complexity", type: "wire-true", label: "IF: 要素完备 (主理人定档)", fromBranch: "true" },
+
+  // 低阶流程走向 (绿色快速通道)
+  { from: "n-if-complexity", to: "n-basic-sql", type: "wire-basic", label: "ELSE: 单表/简单指标 (低阶普通通道)", fromBranch: "false" },
+  { from: "n-basic-sql", to: "n-basic-analysis", type: "wire-basic" },
+  { from: "n-basic-analysis", to: "n-basic-deliver", type: "wire-basic", label: "主理人快速审核交付" },
+
+  // 高阶流程走向 (紫色深度专家团)
+  { from: "n-if-complexity", to: "n-adv-supervisor-dag", type: "wire-adv", label: "IF: 跨表/归因/预测 (高阶专家团)", fromBranch: "true" },
+  { from: "n-adv-supervisor-dag", to: "n-adv-expert-sql", type: "wire-adv", label: "派工: 跨表取数" },
+  { from: "n-adv-supervisor-dag", to: "n-adv-expert-review", type: "wire-adv", label: "派工: 独立审查" },
+  { from: "n-adv-supervisor-dag", to: "n-adv-expert-analysis", type: "wire-adv", label: "派工: 归因推演" },
+
+  { from: "n-adv-expert-sql", to: "n-adv-if-conflict", type: "wire-main" },
+  { from: "n-adv-expert-review", to: "n-adv-if-conflict", type: "wire-main" },
+  { from: "n-adv-expert-analysis", to: "n-adv-if-conflict", type: "wire-main" },
+
+  { from: "n-adv-if-conflict", to: "n-adv-supervisor-eval", type: "wire-true", label: "IF: 证据一致", fromBranch: "true" },
+  { from: "n-adv-if-conflict", to: "n-adv-supervisor-dag", type: "wire-false", label: "ELSE: 对拍冲突 (打回仲裁)", fromBranch: "false", isLoopBack: true },
+
+  { from: "n-adv-supervisor-eval", to: "n-adv-if-eval-pass", type: "wire-sup" },
+  { from: "n-adv-if-eval-pass", to: "n-adv-deliver", type: "wire-true", label: "IF: 评分≥0.85 (主理人交付)", fromBranch: "true" },
+  { from: "n-adv-if-eval-pass", to: "n-adv-loop-ctrl", type: "wire-false", label: "ELSE: 存疑 (打回轮回)", fromBranch: "false" },
+
+  // 高阶大红轮回线：高空回绕至【高阶主理人DAG拆解】！
+  { from: "n-adv-loop-ctrl", to: "n-adv-supervisor-dag", type: "wire-retry", label: "IF 轮次≤2: 主理人重派轮回校验", fromBranch: "true", isLoopBack: true },
+  { from: "n-adv-loop-ctrl", to: "n-adv-fallback", type: "wire-false", label: "ELSE: 熔断带缺口停止", fromBranch: "false" }
+];
+
+// ========================================================
+// 交互与渲染
+// ========================================================
+let scale = 0.62;
+let panX = 40;
+let panY = 80;
+let isDragging = false;
+let startX, startY;
+let activeTrack = 'all';
+
+const viewport = document.getElementById('viewport');
+const stage = document.getElementById('stage');
+const wireLayer = document.getElementById('wireLayer');
+const nodesContainer = document.getElementById('nodesContainer');
+const tagsContainer = document.getElementById('tagsContainer');
+
+function updateTransform() {
+  stage.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+}
+
+viewport.addEventListener('mousedown', (e) => {
+  if (e.target.closest('.dify-node') || e.target.closest('.float-controls')) return;
+  isDragging = true;
+  startX = e.clientX - panX;
+  startY = e.clientY - panY;
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  panX = e.clientX - startX;
+  panY = e.clientY - startY;
+  updateTransform();
+});
+
+window.addEventListener('mouseup', () => { isDragging = false; });
+
+viewport.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const factor = e.deltaY < 0 ? 1.08 : 0.92;
+  scale = Math.min(Math.max(0.25, scale * factor), 2.2);
+  updateTransform();
+}, { passive: false });
+
+function zoomIn() { scale = Math.min(2.2, scale * 1.15); updateTransform(); }
+function zoomOut() { scale = Math.max(0.25, scale * 0.85); updateTransform(); }
+function resetZoom() { scale = 0.62; panX = 40; panY = 80; updateTransform(); }
+
+// 过滤赛道
+function filterTrack(track) {
+  activeTrack = track;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if (track === 'all') document.querySelector('.btn-all').classList.add('active');
+  if (track === 'basic') document.querySelector('.btn-basic').classList.add('active');
+  if (track === 'advanced') document.querySelector('.btn-adv').classList.add('active');
+
+  const nodes = document.querySelectorAll('.dify-node');
+  nodes.forEach(node => {
+    const nData = DIFY_NODES.find(d => d.id === node.id);
+    if (!nData) return;
+
+    if (track === 'all') {
+      node.style.opacity = '1';
+      node.style.filter = 'none';
+    } else if (track === 'basic') {
+      if (nData.track === 'common' || nData.track === 'basic') {
+        node.style.opacity = '1'; node.style.filter = 'none';
+      } else {
+        node.style.opacity = '0.15'; node.style.filter = 'grayscale(1)';
+      }
+    } else if (track === 'advanced') {
+      if (nData.track === 'common' || nData.track === 'advanced') {
+        node.style.opacity = '1'; node.style.filter = 'none';
+      } else {
+        node.style.opacity = '0.15'; node.style.filter = 'grayscale(1)';
+      }
+    }
+  });
+}
+
+function renderNodes() {
+  nodesContainer.innerHTML = '';
+  DIFY_NODES.forEach((n) => {
+    const el = document.createElement('div');
+    el.className = `dify-node ${n.type}`;
+    el.id = n.id;
+    el.style.left = `${n.x}px`;
+    el.style.top = `${n.y}px`;
+    el.onclick = () => openDrawer(n);
+
+    let portsHtml = '';
+    if (n.ports.in) portsHtml += `<div class="port port-in"></div>`;
+    if (n.ports.out) portsHtml += `<div class="port port-out"></div>`;
+    if (n.ports.ifBranches) {
+      portsHtml += `
+        <div class="port port-if-true"></div>
+        <div class="branch-label branch-true">${n.ports.ifBranches.trueLabel}</div>
+        <div class="port port-if-false"></div>
+        <div class="branch-label branch-false">${n.ports.ifBranches.falseLabel}</div>
+      `;
+    }
+
+    let skillsBadges = '';
+    if (n.skills && n.skills.length > 0) {
+      skillsBadges = `<div class="skills-wrapper">` + n.skills.map(s => {
+        let cls = 'skill-badge';
+        if (s.includes('ECC')) cls += ' skill-ecc';
+        if (s.includes('superpowers')) cls += ' skill-super';
+        return `<span class="${cls}">⚡ ${s.split('/').pop()}</span>`;
+      }).join('') + `</div>`;
+    }
+
+    el.innerHTML = `
+      ${portsHtml}
+      <div class="node-header">
+        <span class="node-type-badge">${n.badge}</span>
+        <span class="node-role-name">${n.role}</span>
+      </div>
+      <div class="node-body">
+        <div class="node-title">${n.title}</div>
+        <div class="node-desc">${n.desc}</div>
+        <div class="node-vars"><span class="var-label">VAR: </span>${n.vars.replace(/\n/g, '<br><span class="var-label">VAR: </span>')}</div>
+        ${skillsBadges}
+      </div>
+    `;
+    nodesContainer.appendChild(el);
+  });
+}
+
+function renderWires() {
+  const defs = wireLayer.querySelector('defs').outerHTML;
+  wireLayer.innerHTML = defs;
+  tagsContainer.innerHTML = '';
+
+  DIFY_WIRES.forEach((w) => {
+    const src = document.getElementById(w.from);
+    const dst = document.getElementById(w.to);
+    if (!src || !dst) return;
+
+    const srcX = parseFloat(src.style.left);
+    const srcY = parseFloat(src.style.top);
+    const srcW = src.offsetWidth || 320;
+    const srcH = src.offsetHeight || 150;
+
+    const dstX = parseFloat(dst.style.left);
+    const dstY = parseFloat(dst.style.top);
+    const dstH = dst.offsetHeight || 150;
+
+    let p1x = srcX + srcW;
+    let p1y = srcY + srcH / 2;
+
+    if (w.fromBranch === 'true') {
+      p1y = srcY + srcH * 0.38;
+    } else if (w.fromBranch === 'false') {
+      p1y = srcY + srcH * 0.72;
+    }
+
+    let p2x = dstX;
+    let p2y = dstY + dstH / 2;
+
+    let pathStr = '';
+
+    if (w.isLoopBack || p2x < p1x) {
+      const topArcY = Math.min(srcY, dstY) - 130;
+      pathStr = `M ${p1x} ${p1y} C ${p1x + 90} ${p1y}, ${p1x + 90} ${topArcY}, ${p1x} ${topArcY} L ${p2x} ${topArcY} C ${p2x - 90} ${topArcY}, ${p2x - 90} ${p2y}, ${p2x} ${p2y}`;
+    } else {
+      const deltaX = (p2x - p1x) * 0.5;
+      pathStr = `M ${p1x} ${p1y} C ${p1x + deltaX} ${p1y}, ${p2x - deltaX} ${p2y}, ${p2x} ${p2y}`;
+    }
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathStr);
+    path.setAttribute('class', w.type);
+
+    let marker = 'url(#arrMain)';
+    if (w.type === 'wire-sup') marker = 'url(#arrSup)';
+    if (w.type === 'wire-basic') marker = 'url(#arrBasic)';
+    if (w.type === 'wire-adv') marker = 'url(#arrAdv)';
+    if (w.type === 'wire-false') marker = 'url(#arrFalse)';
+    if (w.type === 'wire-retry') marker = 'url(#arrRed)';
+    path.setAttribute('marker-end', marker);
+    wireLayer.appendChild(path);
+
+    if (w.label) {
+      let midX, midY;
+      if (w.isLoopBack) {
+        midX = (p1x + p2x) / 2;
+        midY = Math.min(srcY, dstY) - 130;
+      } else {
+        midX = (p1x + p2x) / 2;
+        midY = (p1y + p2y) / 2;
+      }
+
+      const tag = document.createElement('div');
+      tag.className = 'edge-tag';
+      if (w.type === 'wire-basic') tag.classList.add('tag-basic');
+      if (w.type === 'wire-adv') tag.classList.add('tag-adv');
+      if (w.type === 'wire-false') tag.classList.add('tag-false');
+      if (w.type === 'wire-retry') tag.classList.add('tag-retry');
+      tag.style.left = `${midX}px`;
+      tag.style.top = `${midY}px`;
+      tag.innerText = w.label;
+      tagsContainer.appendChild(tag);
+    }
+  });
+}
+
+function openDrawer(node) {
+  document.getElementById('drawerBadge').innerText = `${node.badge} · ${node.role}`;
+  document.getElementById('drawerTitle').innerText = node.title;
+  document.getElementById('drawerRole').innerText = `所属赛道: ${node.track.toUpperCase()} | 角色: ${node.role}`;
+  
+  const skillPaths = (node.skills || []).map(s => `• /Users/ltq/Desktop/ambitious/4.Lin_project/1.智能问数/${s}`).join('\n');
+  document.getElementById('drawerSkillPath').innerText = skillPaths || '无外部 Skills (原生轻量函数)';
+  
+  document.getElementById('drawerSchema').innerText = `{\n  "mapped_variables": "${node.vars.replace(/\n/g, ', ')}",\n  "status": "VALIDATED"\n}`;
+  document.getElementById('drawerDesc').innerHTML = `
+    <b>业务说明：</b>${node.desc}<br><br>
+    <b>赛道定位：</b>${node.track === 'basic' ? '【低阶基础通道】单表快速查数，追求毫秒级响应，低Token消耗。' : (node.track === 'advanced' ? '【高阶深度通道】跨表归因、时序推演，挂载复杂Skills并经主理人轮回校验。' : '【公共管控通道】由主理人全程接管，保障会话安全。')}<br><br>
+    <b>主理人控制铁律：</b>专家之间不共享中间状态，所有产出均回传主理人统一决策与交付！
+  `;
+  document.getElementById('configDrawer').classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('configDrawer').classList.remove('open');
+}
+
+window.onload = () => {
+  renderNodes();
+  setTimeout(renderWires, 80);
+  updateTransform();
+};
+</script>
+</body>
+</html>
