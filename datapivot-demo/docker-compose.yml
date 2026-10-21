@@ -1,0 +1,192 @@
+# =========================
+# AskDesk Docker Compose
+# 支持双模式：local（本地开发） / production（生产环境）
+#
+# 使用方式：
+#   本地开发：cp .env.local .env && docker-compose up -d
+#   生产部署：cp .env.production .env && docker-compose up -d
+# =========================
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: askdesk-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${ASKDESK_DB_DATABASE:-postgres}
+      POSTGRES_USER: ${ASKDESK_DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${ASKDESK_POSTGRES_PASSWORD:-${ASKDESK_DB_PASSWORD:-postgres}}
+      TZ: Asia/Shanghai
+    ports:
+      - "${ASKDESK_DOCKER_PG_PORT:-5433}:5432"
+    volumes:
+      - askdesk_pg_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ASKDESK_DB_USERNAME:-postgres} -d ${ASKDESK_DB_DATABASE:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks:
+      - askdesk-internal
+      - default
+
+  migrate:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: migrate
+      args:
+        APT_MIRROR: ${ASKDESK_APT_MIRROR-https://mirrors.aliyun.com}
+        PIP_INDEX_URL: ${ASKDESK_PIP_INDEX_URL-https://mirrors.aliyun.com/pypi/simple/}
+        PIP_TRUSTED_HOST: ${ASKDESK_PIP_TRUSTED_HOST-mirrors.aliyun.com}
+        PIP_TIMEOUT: ${ASKDESK_PIP_TIMEOUT-120}
+        PIP_RETRIES: ${ASKDESK_PIP_RETRIES-8}
+    container_name: askdesk-migrate
+    restart: "no"
+    env_file:
+      - .env
+    environment:
+      ASKDESK_DB_HOST: postgres
+      ASKDESK_DB_PORT: 5432
+      TZ: Asia/Shanghai
+      PYTHONUNBUFFERED: "1"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./config:/app/config
+    networks:
+      - askdesk-internal
+      - default
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: backend
+      args:
+        APT_MIRROR: ${ASKDESK_APT_MIRROR-https://mirrors.aliyun.com}
+        PIP_INDEX_URL: ${ASKDESK_PIP_INDEX_URL-https://mirrors.aliyun.com/pypi/simple/}
+        PIP_TRUSTED_HOST: ${ASKDESK_PIP_TRUSTED_HOST-mirrors.aliyun.com}
+        PIP_TIMEOUT: ${ASKDESK_PIP_TIMEOUT-120}
+        PIP_RETRIES: ${ASKDESK_PIP_RETRIES-8}
+    container_name: askdesk-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      ASKDESK_BACKEND_PORT: 5002
+      ASKDESK_BOOTSTRAP_SKIP_BUILTINS: ${ASKDESK_BOOTSTRAP_SKIP_BUILTINS:-1}
+      ASKDESK_BOOTSTRAP_SKIP_FIRST_IMPORT: ${ASKDESK_BOOTSTRAP_SKIP_FIRST_IMPORT:-1}
+      ASKDESK_FEISHU_SYNC_ON_STARTUP: ${ASKDESK_FEISHU_SYNC_ON_STARTUP:-auto}
+      ASKDESK_DB_HOST: postgres
+      ASKDESK_DB_PORT: 5432
+      # 后端代码只读 DATAPULSE_*：补齐关键连接项，保证全新克隆也能连上库
+      DATAPULSE_DB_HOST: postgres
+      DATAPULSE_DB_PORT: 5432
+      DATAPULSE_DB_DATABASE: postgres
+      DATAPULSE_DB_USERNAME: postgres
+      # 密码与 ASKDESK_DB_PASSWORD 同源，避免 .env 里明文/密文不一致导致连不上
+      DATAPULSE_DB_PASSWORD: ${ASKDESK_DB_PASSWORD}
+      DATAPULSE_CHROMA_PATH: /app/chroma_db
+      DATAPULSE_FEISHU_SYNC_ON_STARTUP: skip
+      # AI 模型：后端只读 DATAPULSE_AI_*，这里从 ASKDESK_AI_* 桥接
+      # （不桥接的话全新克隆拿不到 AI Key，问数无法调用大模型）
+      DATAPULSE_AI_LABEL: ${ASKDESK_AI_LABEL:-}
+      DATAPULSE_AI_PROVIDER: ${ASKDESK_AI_PROVIDER:-}
+      DATAPULSE_AI_MODEL: ${ASKDESK_AI_MODEL:-}
+      DATAPULSE_AI_BASE_URL: ${ASKDESK_AI_BASE_URL:-}
+      DATAPULSE_AI_API_KEY: ${ASKDESK_AI_API_KEY:-}
+      # 超管账号：登录代码只读 DATAPULSE_ADMIN_*，从 ASKDESK_ADMIN_* 桥接
+      # （密码沿用 enc 密文，后端 _env 会自动解密）
+      DATAPULSE_ADMIN_USERNAME: ${ASKDESK_ADMIN_USERNAME:-admin}
+      DATAPULSE_ADMIN_PASSWORD: ${ASKDESK_ADMIN_PASSWORD}
+      DATAPULSE_ADMIN_DISPLAY_NAME: ${ASKDESK_ADMIN_DISPLAY_NAME:-超级管理员}
+      ASKDESK_CHROMA_PATH: /app/chroma_db
+      ASKDESK_CONFIG_DIR: /app/config
+      ASKDESK_RUNTIME_BACKUP_DIR: /app/backups/runtime
+      TZ: Asia/Shanghai
+      PYTHONUNBUFFERED: "1"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    # === 端口暴露（local 模式启用，production 模式注释掉）===
+    ports:
+      - "${ASKDESK_BACKEND_PORT:-5002}:5002"
+    volumes:
+      - askdesk_chroma:/app/chroma_db
+      - ./logs:/app/logs
+      - ./backend/logs:/app/backend/logs
+      - ./config:/app/config
+      - ./backend/imports:/app/backend/imports
+      - ./backups:/app/backups
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request, sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:5002/api/health', timeout=3).status==200 else 1)\""]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks:
+      - askdesk-internal
+      - default
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NPM_REGISTRY: ${ASKDESK_NPM_REGISTRY:-https://registry.npmmirror.com}
+    container_name: askdesk-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    # === 端口暴露（local 模式启用，production 模式注释掉）===
+    ports:
+      - "${ASKDESK_FRONTEND_PORT:-8888}:80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    networks:
+      - askdesk-internal
+
+  # === Nginx 反向代理（仅生产模式启用）===
+  nginx:
+    image: nginx:alpine
+    container_name: askdesk-nginx
+    restart: unless-stopped
+    # 仅在 DEPLOY_MODE=production 时启动
+    profiles: ["production"]
+    ports:
+      - "${NGINX_PORT:-80}:80"
+      # 如果用 HTTPS，取消注释下面这行
+      # - "${NGINX_SSL_PORT:-443}:443"
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
+      # SSL 证书（如果用 HTTPS）
+      # - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - askdesk-internal
+
+volumes:
+  askdesk_pg_data:
+    # 演示版使用独立数据卷，不与 docker-setup 项目共用同一个卷：
+    #   1) 旧库残留的 schema（如视图列名「事业部」）会让本项目的迁移脚本报错；
+    #   2) scripts/load_demo_data.sh 会 DROP SCHEMA public CASCADE，
+    #      共用卷会误删另一项目的数据。
+    name: askdesk_pg_data
+  askdesk_chroma:
+    name: askdesk_chroma
+
+networks:
+  askdesk-internal:
+    driver: bridge
