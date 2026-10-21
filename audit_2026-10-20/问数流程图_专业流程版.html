@@ -1,765 +1,2042 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>智能问数工作流 · 真正并行并发与多发协同专业流程图</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>DataPulse · 普通与高级问数独立工作流</title>
 <style>
-:root{
-  --bg:#f4f7fb;--paper:#fff;--ink:#172437;--muted:#66758a;--line:#9aa8b8;--border:#d8e0ea;
-  --purple:#7556d8;--purple-soft:#f1edff;--green:#15966b;--green-soft:#e8f7f0;
-  --blue:#2475c7;--blue-soft:#eaf3ff;--amber:#b77914;--amber-soft:#fff6df;
-  --red:#c64a4a;--red-soft:#fff0f0;--teal:#087f8c;--teal-soft:#e6f7f8;
-  --shadow:0 3px 12px rgba(25,44,72,.07);
+
+:root{--bg:#F8FAFC;--text:#1e293b;--muted:#6c7a8e;--line:#e1e7ef;--accent:#087f68;--soft:#eef8f4;--wire:#86b9a9;--purple:#7554c4;--amber:#a36d25}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+button{font:inherit;cursor:pointer;color:inherit}
+button:focus-visible,a:focus-visible{outline:3px solid #8198dc;outline-offset:3px}
+button:disabled{opacity:.4;cursor:default}
+a{color:#71619b;text-decoration:none}
+.topbar{height:64px;border-bottom:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 32px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:700;font-size:16px;letter-spacing:-.4px}
+.mark{width:29px;height:29px;display:grid;place-items:center;background:#243148;color:#fff;border-radius:9px}
+.brand small{font-size:11px;font-weight:500;color:var(--muted);margin-left:12px;border-left:1px solid var(--line);padding-left:20px;letter-spacing:0}
+.toplinks{display:flex;gap:20px;font-size:11px;align-items:center}
+.tag{border:1px solid var(--line);border-radius:99px;padding:3px 9px;background:#fff;font-size:10px;color:var(--muted)}
+main{max-width:1510px;margin:auto;padding:32px}
+.intro{display:flex;align-items:flex-end;justify-content:space-between;gap:25px;margin-bottom:23px}
+.eyebrow{font:600 10px/1.6 ui-monospace,monospace;letter-spacing:1.7px;color:#746290}
+h1{font-size:29px;line-height:1.4;letter-spacing:-1px;margin:7px 0 9px}
+p{margin:0}
+.intro p{color:var(--muted);font-size:12px;max-width:800px}
+.intro-badge{color:#65768b;border-left:1px solid var(--line);padding-left:20px;font-size:11px;flex-shrink:0}
+.intro-badge strong{display:block;font-size:19px;color:#35475e}
+.workspace{border:1px solid #dce3ed;border-radius:14px;box-shadow:0 3px 6px #1b2f4910,0 15px 45px #1b2f4905;background:white;overflow:hidden}
+.toolbar{padding:12px 18px;display:flex;gap:16px;justify-content:space-between;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.tabs{display:flex;gap:4px;padding:4px;background:#f0f3f7;border-radius:8px}
+.tab{padding:7px 15px;font-size:12px;border:0;border-radius:6px;color:var(--muted);background:none}
+.tab[aria-selected=true]{background:#fff;color:#26364e;box-shadow:0 1px 5px #182b4612;font-weight:600}
+.controls{display:flex;align-items:center;gap:8px}
+.btn{white-space:nowrap;border:1px solid var(--line);border-radius:6px;background:white;padding:5px 10px;font-size:11px}
+.btn:hover{background:#f5f7fa}
+.primary{background:#27354d;color:white;border-color:#27354d}
+.primary:hover{background:#374961}
+.zoom{display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.zoom button{width:27px;height:28px;border:0;background:white}
+.zoom output{font:10px ui-monospace,monospace;min-width:43px;text-align:center}
+.mode-header{padding:20px 24px;display:flex;gap:22px;align-items:center;border-bottom:1px solid var(--line);background:linear-gradient(110deg,var(--soft),#fff 85%)}
+.mode-icon{height:37px;width:37px;background:#fff;border:1px solid var(--line);border-radius:11px;display:grid;place-items:center;color:var(--accent);font-size:20px;flex-shrink:0}
+.mode-header h2{font-size:18px;letter-spacing:-.4px;margin:0 0 4px}
+.mode-header p{font-size:11px;color:var(--muted)}
+.mode-meta{margin-left:auto;font-size:10px;text-align:right;color:var(--accent);flex-shrink:0}
+.mode-meta b{display:block;font:600 11px ui-monospace,monospace;margin-bottom:5px}
+.mode-high{--accent:#7554c4;--soft:#f5f1fc;--wire:#b3a0d7}
+.viewport{max-height:76vh;overflow:auto;background:radial-gradient(#dce3ed .7px,transparent .7px) 0 0/18px 18px,var(--bg);overscroll-behavior:contain}
+.sizer{position:relative;margin:auto}
+.diagram{position:absolute;left:0;top:0;width:1320px;padding:32px 105px 24px 28px;transform-origin:top left}
+.phase{display:grid;grid-template-columns:135px 1fr;gap:28px;margin-bottom:45px;position:relative;z-index:2;align-items:start}
+.phase-label{padding-top:9px}
+.phase-label>span{font:10px ui-monospace,monospace;color:#96a1b3;letter-spacing:1px}
+.phase-label h3{font-size:14px;margin:5px 0 6px;font-weight:650}
+.phase-label p{font-size:10px;color:var(--muted);line-height:1.8;max-width:124px}
+.phase-grid{display:grid;gap:24px;align-items:stretch;min-width:0}
+.phase-grid.single{grid-template-columns:1fr}
+.phase-grid.parallel,.phase-grid.serial,.phase-grid.branched,.phase-grid.exception{grid-template-columns:repeat(3,minmax(0,1fr))}
+.phase-grid.serial:has(>.node:nth-child(2):last-child){grid-template-columns:repeat(2,minmax(0,1fr))}
+.phase-grid.exception .node{border-color:#e8d3ad;background:#fffcf7}.phase-grid.exception .role{color:#a57934}.phase-grid.branched .node{border-top:2px solid var(--wire)}.phase-grid.alternative{grid-template-columns:repeat(2,minmax(0,1fr));gap:36px}
+.node{position:relative;display:flex;flex-direction:column;align-items:stretch;text-align:left;padding:16px 17px;background:#fff;border:1px solid #dce4ed;border-radius:11px;box-shadow:0 2px 4px #142f4b08,0 8px 24px #142f4b04;transition:border-color .18s,box-shadow .18s;min-width:0;width:100%}
+.node:hover{border-color:var(--wire);box-shadow:0 3px 18px #23364b14}
+.node-meta{display:flex;justify-content:space-between;font:10px/1.5 ui-monospace,monospace;letter-spacing:1px;color:#8c99ab;margin-bottom:7px}
+.role{font-size:10px;color:var(--accent);font-weight:600;margin-bottom:5px}
+.node strong{font-size:14px;line-height:1.5;letter-spacing:-.3px;font-weight:650}
+.desc{font-size:11px;line-height:1.8;color:var(--muted);display:block;margin:7px 0 11px}
+.skills{display:flex;gap:5px;flex-wrap:wrap;margin-top:auto}
+.skills span{font-size:9px;line-height:1.6;padding:3px 6px;border:1px solid #e5eaf2;border-radius:5px;background:#f7f9fb;color:#67778c}
+.phase-grid.single .node{display:grid;grid-template-columns:1fr 1.3fr;gap:0 30px;border-left:3px solid var(--accent)}
+.phase-grid.single .node .node-meta{grid-column:1/-1}
+.phase-grid.single .node .role,.phase-grid.single .node strong{grid-column:1}
+.phase-grid.single .node .desc{grid-column:2;grid-row:2/4;margin-top:0}
+.phase-grid.single .node .skills{grid-column:1/-1;margin-top:9px}
+.phase-grid.alternative .node:before{content:'策略 A · 优先';position:absolute;top:-12px;left:14px;background:var(--soft);border:1px solid var(--wire);color:var(--accent);border-radius:5px;padding:1px 7px;font-size:9px}
+.phase-grid.alternative .node+ .node:before{content:'策略 B · 未覆盖时'}
+.edges{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:1;pointer-events:none}
+.edges marker path{fill:none;stroke:var(--wire);stroke-width:1.5}
+.edges marker[id^=retry] path{stroke:#c59a57}
+.edge{fill:none;stroke:var(--wire);stroke-width:1.4;stroke-linejoin:round;stroke-linecap:round}
+.edge.exploration{stroke-dasharray:3 4}.edge.retry{stroke:#c59a57;stroke-dasharray:5 5}
+.edge-label{font:9px -apple-system,sans-serif;fill:#7e8c9f}
+.edge-label.retry-label{fill:#ac7d36}
+.edge-junction{fill:var(--wire);stroke:var(--bg);stroke-width:2}
+.recovery{display:grid;grid-template-columns:1fr 1.45fr;align-items:center;gap:30px;padding:18px;margin-left:163px;border:1px dashed #d8bb87;border-radius:12px;background:#fffbf4;position:relative;z-index:2}
+.recovery .node{border-color:#e8d8ba;background:#fffdfa;box-shadow:none}
+.recovery .role{color:#a27833}
+.recovery-note b{font-size:14px;color:#956b2d}
+.recovery-note p{font-size:11px;color:#8d795d;line-height:1.9;margin:8px 0}
+.recovery-note>span{font-size:10px;color:#9b835f}
+.end-note{margin:18px 0 0 163px;text-align:center;font-size:10px;color:#8994a3}
+.workspace-foot{padding:11px 18px;display:flex;justify-content:space-between;gap:15px;font-size:10px;color:var(--muted);border-top:1px solid var(--line)}
+.status{display:flex;gap:7px;align-items:center}
+.status:before{content:'';width:6px;height:6px;border-radius:50%;background:#a7b2c1}
+.status.running:before{background:#9473d2;animation:pulse 1s infinite}
+.legend{display:flex;gap:14px}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend i{width:16px;height:0;border-top:1px solid #8fb3a6}
+.legend .dashed{border-top:1px dashed #c59a57}
+.guide{margin-top:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:25px}
+.guide h3{font-size:12px;margin:0 0 7px}
+.guide p{font-size:11px;color:var(--muted);line-height:1.9}
+.footnote{margin-top:23px;display:flex;justify-content:space-between;gap:20px;font-size:10px;color:#8994a4}
+.node.active{border-color:var(--accent);box-shadow:0 0 0 3px var(--soft);background:#fbfdfc}
+.node.done .state{color:#168967}
+.node.retrying{border-color:#c59a57;background:#fff8e9}
+.node.selected{outline:2px solid var(--wire);outline-offset:3px}
+.motion .edge{stroke-dasharray:6 5;animation:flow 1.4s linear infinite}
+.motion .edge.retry{animation-direction:reverse}
+@keyframes flow{to{stroke-dashoffset:-22}
 }
-*{box-sizing:border-box} html,body{height:100%;margin:0;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
-body{background:var(--bg);overflow:hidden}
-.topbar{height:66px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:22px;padding:0 22px;position:relative;z-index:20;box-shadow:0 1px 4px rgba(30,50,80,.04)}
-.brand{display:flex;align-items:center;gap:11px;min-width:320px}.brand-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(145deg,#6c5ce7,#2689c9);color:white;display:grid;place-items:center;font-weight:800;font-size:17px}.brand-title{font-size:15px;font-weight:760;letter-spacing:.1px}.brand-sub{font-size:11px;color:#718096;margin-top:2px}
-.tabs{display:flex;align-items:center;gap:5px;background:#f3f6fa;padding:4px;border-radius:9px;border:1px solid #e6ebf2;flex-wrap:nowrap}.tab{border:0;background:transparent;padding:8px 14px;border-radius:6px;font-size:12px;color:#607086;cursor:pointer;white-space:nowrap;font-weight:650}.tab:hover{background:#e9eef5}.tab.active{background:#fff;color:#28384f;box-shadow:0 1px 4px #d7e0ea;border:1px solid #e2e8f0}.actions{margin-left:auto;display:flex;align-items:center;gap:7px}.btn{border:1px solid var(--border);background:white;border-radius:7px;padding:8px 12px;color:#40516a;font-size:12px;cursor:pointer;font-weight:650;white-space:nowrap}.btn:hover{background:#f7f9fc;border-color:#aebdce}
-.legend{height:42px;display:flex;align-items:center;gap:17px;padding:0 24px;color:#65758b;font-size:11px;background:#fbfcfe;border-bottom:1px solid #e3e9f1;white-space:nowrap;overflow:auto}.legend-item{display:flex;align-items:center;gap:6px}.legend-dot{width:8px;height:8px;border-radius:3px;display:inline-block}.legend-diamond{height:11px;width:11px;transform:rotate(45deg);border:1.5px solid var(--amber);background:var(--amber-soft);display:inline-block}.legend-line{width:27px;height:0;border-top:2px solid #8796a9;display:inline-block}.legend-line.dashed{border-top-style:dashed;border-color:#9c75e4}
-.workspace{position:absolute;top:108px;bottom:0;left:0;right:0;overflow:hidden;background-color:#f4f7fb;background-image:radial-gradient(#dbe3ed 1px,transparent 1px);background-size:20px 20px;cursor:grab}.workspace.dragging{cursor:grabbing}.canvas{position:absolute;left:0;top:0;width:2800px;height:1680px;transform-origin:0 0}
-.lane{position:absolute;border:1px solid #dfe6ef;background:rgba(255,255,255,.56);border-radius:15px;pointer-events:none}.lane-head{position:absolute;top:-14px;left:18px;background:#f4f7fb;padding:3px 10px;color:#617188;font-weight:760;font-size:12px;letter-spacing:.25px}.lane-head small{font-size:10px;font-weight:550;color:#8a97a9;margin-left:7px}.lane.common{left:28px;top:34px;width:1355px;height:340px}.lane.basic{left:28px;top:420px;width:1920px;height:300px;border-color:#cce9dc;background:rgba(244,253,248,.68)}.lane.advanced{left:28px;top:760px;width:2720px;height:600px;border-color:#ddd3fb;background:rgba(249,247,255,.62)}.lane.memory{left:28px;top:1410px;width:2050px;height:215px;border-color:#c9e6eb;background:rgba(243,252,253,.8)}
-.node{position:absolute;width:196px;min-height:108px;background:var(--paper);border:1px solid #d7e0eb;border-radius:10px;box-shadow:var(--shadow);z-index:3;cursor:pointer;transition:box-shadow .15s,border-color .15s,opacity .15s;overflow:visible}.node:hover{border-color:#8a9ab0;box-shadow:0 8px 24px rgba(30,50,80,.14);z-index:8}.node.selected{outline:2px solid #6089ca;outline-offset:2px}.node.dim{opacity:.16;filter:grayscale(.8);pointer-events:none}.node .top{height:27px;border-radius:9px 9px 0 0;display:flex;align-items:center;justify-content:space-between;padding:0 9px;background:#f5f8fc;border-bottom:1px solid #edf1f6}.node .type{font-size:9.5px;font-weight:800;letter-spacing:.6px;color:#5b6d83;text-transform:uppercase}.node .step{font:10px ui-monospace,SFMono-Regular,Menlo,monospace;color:#8a98aa}.node .body{padding:9px 10px 10px;border-left:3px solid #8a9bb1;border-radius:0 0 9px 9px;min-height:78px}.node h3{font-size:12px;line-height:1.38;margin:0 0 4px;font-weight:760;color:#1b2a3d}.node p{font-size:10.5px;line-height:1.46;color:#66768b;margin:0}.node .role-badge{display:inline-block;font-size:9px;padding:1px 5px;border-radius:4px;background:#f0f4f9;color:#475569;margin-bottom:4px;font-weight:700}.node .io{margin-top:6px;padding-top:5px;border-top:1px solid #edf1f6;font:9px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;color:#5e7897;white-space:normal;overflow-wrap:anywhere}
-.node.supervisor .top{background:#f2edff}.node.supervisor .type{color:var(--purple)}.node.supervisor .body{border-left-color:var(--purple)}.node.supervisor .role-badge{background:#ede9fe;color:var(--purple)}
-.node.basic .top{background:#eaf8f1}.node.basic .type{color:var(--green)}.node.basic .body{border-left-color:var(--green)}.node.basic .role-badge{background:#dcfce7;color:var(--green)}
-.node.advanced .top{background:#f2edff}.node.advanced .type{color:var(--purple)}.node.advanced .body{border-left-color:var(--purple)}.node.advanced .role-badge{background:#ede9fe;color:var(--purple)}
-.node.data .top{background:#eaf3ff}.node.data .type{color:var(--blue)}.node.data .body{border-left-color:var(--blue)}.node.data .role-badge{background:#dbeafe;color:var(--blue)}
-.node.memory .top{background:#e8f8fa}.node.memory .type{color:var(--teal)}.node.memory .body{border-left-color:var(--teal)}.node.memory .role-badge{background:#ccfbf1;color:var(--teal)}
-.node.guard .top{background:#fff5df}.node.guard .type{color:var(--amber)}.node.guard .body{border-left-color:var(--amber)}.node.guard .role-badge{background:#fef3c7;color:var(--amber)}
-.node.error .top{background:#fff0f0}.node.error .type{color:var(--red)}.node.error .body{border-left-color:var(--red)}.node.error .role-badge{background:#fee2e2;color:var(--red)}
-.node.decision{width:156px;height:114px;min-height:114px;background:transparent;border:0;box-shadow:none;border-radius:0;overflow:visible}.node.decision:hover{box-shadow:none}.node.decision .diamond{position:absolute;inset:4px 12px;background:#fff8e6;border:1.5px solid #ddb45c;transform:rotate(45deg);border-radius:8px;box-shadow:var(--shadow)}.node.decision .decision-content{position:absolute;inset:16px 9px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 8px}.node.decision .type{font-size:9px;color:var(--amber);font-weight:800;letter-spacing:.4px;margin-bottom:6px}.node.decision h3{font-size:11.5px;line-height:1.36;margin:0}.node.decision p{font-size:9px;margin-top:5px;color:#8a713e}.node.decision .step{position:absolute;top:0;right:0}
-.node .pin{position:absolute;width:8px;height:8px;background:#fff;border:2px solid #8e9daf;border-radius:50%;z-index:5}.pin.l{left:-5px;top:calc(50% - 4px)}.pin.r{right:-5px;top:calc(50% - 4px)}.pin.t{top:-5px;left:calc(50% - 4px)}.pin.b{bottom:-5px;left:calc(50% - 4px)}
-svg.edges{position:absolute;inset:0;width:2800px;height:1680px;overflow:visible;pointer-events:none;z-index:2}.edge{fill:none;stroke:#8999ac;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}.edge.common{stroke:#8494a7}.edge.basic{stroke:#28a578;stroke-width:2}.edge.advanced{stroke:#8c70dc;stroke-width:2}.edge.memory{stroke:#148894;stroke-width:1.8;stroke-dasharray:5 5}.edge.branch{stroke:#c18b24;stroke-width:1.9}.edge.retry{stroke:#c85b5b;stroke-width:2.2;stroke-dasharray:6 5}.edge-label{position:absolute;z-index:5;background:#fff;border:1px solid #dce4ee;border-radius:5px;padding:3px 7px;font-size:9.5px;color:#627389;box-shadow:0 1px 3px rgba(20,40,70,.04);white-space:nowrap;pointer-events:none}.edge-label.green{border-color:#b7e1ce;color:#16845d}.edge-label.purple{border-color:#d4c8f9;color:#7757c9}.edge-label.amber{border-color:#efd59d;color:#9b6a12}.edge-label.red{border-color:#f0c7c7;color:#b34b4b}.edge-label.teal{border-color:#bde4e9;color:#087f8c}
-.parallel-badge{position:absolute;font-size:10px;font-weight:800;color:#7556d8;background:#f3edff;border:1px solid #d9c8fb;border-radius:4px;padding:2px 6px;z-index:2}
-.note{position:absolute;font-size:10px;color:#7c8ba0;background:rgba(255,255,255,.82);border:1px solid #e0e7ef;border-radius:6px;padding:6px 9px;z-index:1}.route-title{position:absolute;left:70px;font-size:11px;font-weight:800;letter-spacing:.5px;color:#5a6c83;z-index:1}.route-title .pill{display:inline-block;padding:3px 8px;border-radius:5px;margin-right:7px;background:#e5f7ee;color:#12875e}.route-title.purple .pill{background:#efe9ff;color:#7556d8}
-.drawer{position:fixed;z-index:30;right:0;top:66px;bottom:0;width:430px;max-width:92vw;background:#fff;border-left:1px solid var(--border);box-shadow:-12px 0 32px rgba(23,39,62,.12);transform:translateX(105%);transition:transform .22s;display:flex;flex-direction:column}.drawer.open{transform:translateX(0)}.drawer-head{display:flex;align-items:flex-start;justify-content:space-between;padding:19px 20px;border-bottom:1px solid #e8edf3}.drawer-kicker{font-size:10px;color:var(--purple);font-weight:850;letter-spacing:.7px}.drawer-head h2{font-size:17px;margin:6px 0 0}.close{border:0;background:#f1f4f8;width:30px;height:30px;border-radius:7px;font-size:19px;cursor:pointer;color:#5d6d82}.drawer-content{padding:18px 20px;overflow:auto}.detail-section{margin-bottom:19px}.detail-section h4{font-size:11px;color:#6b7b90;margin:0 0 8px;letter-spacing:.2px}.detail-section p,.detail-section li{font-size:12px;line-height:1.65;color:#3e5068}.detail-section p{margin:0}.detail-section ul{padding-left:18px;margin:0}.code{font:11px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;background:#f5f8fc;border:1px solid #e4eaf2;padding:10px;border-radius:7px;color:#365875;white-space:pre-wrap;overflow-wrap:anywhere}.skill-box{background:#fdf2f8;border:1px solid #fbcfe8;border-radius:7px;padding:8px 10px;font-size:11px;color:#9d174d;line-height:1.5;margin-bottom:14px}.callout{border-radius:8px;background:#f2f6fb;border:1px solid #e1e8f0;padding:10px 11px;font-size:11px;line-height:1.55;color:#5d6d82}.bottom-hint{position:absolute;bottom:14px;left:18px;color:#77869a;font-size:10px;background:rgba(255,255,255,.8);padding:6px 9px;border:1px solid #e1e7ef;border-radius:6px;z-index:10;pointer-events:none}.zoom-controls{position:absolute;right:18px;bottom:16px;display:flex;align-items:center;gap:4px;background:#fff;border:1px solid #dce4ed;border-radius:9px;padding:4px;box-shadow:0 2px 8px rgba(30,50,80,.08);z-index:12}.zoom-controls button{width:32px;height:30px;border:0;background:white;border-radius:6px;color:#53657b;font-size:15px;font-weight:700;cursor:pointer}.zoom-controls button:hover{background:#f2f5f9}.zoom-controls span{min-width:44px;text-align:center;font-size:10px;color:#6d7c90;font-variant-numeric:tabular-nums}
-@media(max-width:900px){.topbar{padding:0 10px;gap:8px}.brand{min-width:auto}.brand-sub{display:none}.brand-title{font-size:12px}.tabs{max-width:48vw;overflow:auto}.tab{padding:7px 9px}.actions .btn:nth-child(1){display:none}.legend{padding:0 12px}.drawer{top:0;z-index:40}}
+@keyframes pulse{50%{opacity:.45}
+}
+dialog{position:fixed;right:0;top:0;bottom:0;left:auto;margin:0;width:450px;max-width:95vw;max-height:100%;height:100%;padding:0;border:0;border-left:1px solid var(--line);background:#fff;box-shadow:-10px 0 60px #14233825;color:var(--text)}
+dialog::backdrop{background:#18283d36;backdrop-filter:blur(2px)}
+.detail-head{display:flex;gap:15px;align-items:flex-start;justify-content:space-between;padding:23px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fffffff7;z-index:3}
+.detail-head h2{font-size:19px;line-height:1.5;letter-spacing:-.4px;margin:6px 0 0}
+.close{border:1px solid var(--line);background:#f7f9fb;border-radius:7px;width:30px;height:30px;flex-shrink:0}
+.detail-body{padding:23px}
+.detail-body section{margin-bottom:22px}
+.detail-body h3{font-size:10px;letter-spacing:1px;color:#8996a8;margin:0 0 7px}
+.detail-body p{font-size:12px;line-height:1.95;color:#50617a;overflow-wrap:anywhere}
+.detail-body .code{font:11px/1.9 ui-monospace,monospace;padding:11px;background:#f5f7fb;border:1px solid var(--line);border-radius:7px}
+.detail-body .fallback{padding:12px;background:#fffaf0;border-left:3px solid #d9bc85}
+.detail-body .fallback p{color:#8e764d}
+[hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}
+}
+@media(max-width:1000px){.brand small,.intro-badge,.toplinks .tag{display:none}
+.topbar{padding:0 20px}
+main{padding:25px 20px}
+.guide{gap:18px}
+.mode-header{padding:17px}
+}
+@media(max-width:620px){main{padding:22px 12px}
+.topbar{padding:0 15px}
+.brand{font-size:14px}
+.toplinks{font-size:10px}
+h1{font-size:24px}
+.toolbar{padding:10px;gap:10px}
+.tabs{width:100%;justify-content:center}
+.tab{flex:1;padding:7px 8px;font-size:11px}
+.controls{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.controls .zoom{justify-content:center}
+.mode-header{gap:12px}
+.mode-header h2{font-size:16px}
+.mode-meta{display:none}
+.mode-icon{width:30px;height:30px}
+.guide{grid-template-columns:1fr;gap:18px}
+.workspace-foot .legend{display:none}
+.footnote{flex-direction:column;gap:8px}
+.viewport{max-height:72vh}
+}
+@media print{.toolbar,.topbar,.guide,.footnote,.workspace-foot,dialog{display:none!important}
+main{padding:0}
+.workspace{border:0;box-shadow:none}
+.viewport{max-height:none;overflow:visible;background:none}
+.sizer{height:auto!important;width:100%!important}
+.diagram{position:relative;transform:none!important;width:100%;padding:20px 35px 10px 0}
+.phase{grid-template-columns:95px 1fr;gap:15px}
+.phase-label p{max-width:90px}
+.phase-grid{gap:15px}
+.node{padding:10px;break-inside:avoid;box-shadow:none}
+.node strong{font-size:11px}
+.desc{font-size:9px}
+.skills span{font-size:8px}
+.recovery{margin-left:110px}
+.end-note{margin-left:110px}
+.edges{display:none}
+body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+
+
 </style>
 </head>
 <body>
 <header class="topbar">
-  <div class="brand"><div class="brand-mark">流程</div><div><div class="brand-title">智能问数 · 真实并行多发与主理人架构工作流</div><div class="brand-sub">四大独立泳道 · 真正并行扇出与汇聚 · 真实Skills库深度挂载</div></div></div>
-  <nav class="tabs" aria-label="流程视图">
-    <button class="tab active" data-view="all">全景视图</button><button class="tab" data-view="basic">普通问数 (低阶)</button><button class="tab" data-view="advanced">高级专家团 (高阶·真正并行)</button><button class="tab" data-view="memory">上下文与记忆服务</button>
-  </nav>
-  <div class="actions"><button class="btn" id="fitBtn">适配当前流程</button><button class="btn" id="drawerBtn">节点说明</button></div>
-</header>
-<div class="legend">
-  <span class="legend-item"><i class="legend-dot" style="background:#15966b"></i>普通问数 (低阶速通)</span>
-  <span class="legend-item"><i class="legend-dot" style="background:#7556d8"></i>主理人中枢 / 高级专家团</span>
-  <span class="legend-item"><i class="legend-dot" style="background:#2475c7"></i>三路并发取数 / 数据专家</span>
-  <span class="legend-item"><i class="legend-dot" style="background:#087f8c"></i>独立记忆与状态服务</span>
-  <span class="legend-item"><i class="legend-diamond"></i>条件判断 / 质量闸门</span>
-  <span class="legend-item"><i class="legend-line"></i>标准任务流转 (直角折线)</span>
-  <span class="legend-item"><i class="legend-line dashed"></i>定向缺陷返工 / 记忆回流</span>
-  <span style="margin-left:auto;color:#8a97a9">单击卡片查看岗位职责、输入输出契约、失败策略与真实挂载Skills</span>
+<div class="brand">
+<span class="mark" aria-hidden="true">◈</span>DataPulse<small>Architecture / 问数工作流</small>
 </div>
-<main class="workspace" id="workspace">
-  <div class="canvas" id="canvas">
-    <div class="lane common"><div class="lane-head">01 公共入口泳道 <small>所有问数共用 · 主理人接单，先恢复状态，再理解问题与分流</small></div></div>
-    <div class="lane basic"><div class="lane-head">02 普通问数泳道 · FAST TRACK <small>确定性优先 · 格物SQL快速复用 · 析微轻量出图 · 主理人秒级交付</small></div></div>
-    <div class="lane advanced"><div class="lane-head">03 高级问数泳道 · EXPERT TRACK (真正并行并发架构) <small>主理人制定DAG · 资产与语义并行探寻 · 三路SQL物理并发执行 · 知刑独立对拍 · 析微多维归因 · 定向返工</small></div></div>
-    <div class="lane memory"><div class="lane-head">04 独立上下文与记忆服务泳道 <small>跨轮状态权威持久化 · 候选提取 · 冲突审核 · 版本化写入 · 回归测试</small></div></div>
-    <div class="route-title" style="top:395px"><span class="pill">FAST</span>单指标 / 单表查询 / 低复杂度快速通道</div>
-    <div class="route-title purple" style="top:735px"><span class="pill">DEEP PARALLEL</span>跨表多维 / 三路并行物理取数 / 深度对拍归因大报告</div>
-    <div class="parallel-badge" style="left:780px;top:790px">⚡ 并发多发阶段：三路SQL同时物理执行，极大缩短TTI</div>
-    <svg class="edges" id="edges" viewBox="0 0 2800 1680" aria-label="流程连线">
-      <defs>
-        <marker id="arrow-gray" markerWidth="8" markerHeight="8" refX="6.7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#8999ac"/></marker>
-        <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6.7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#28a578"/></marker>
-        <marker id="arrow-purple" markerWidth="8" markerHeight="8" refX="6.7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#8c70dc"/></marker>
-        <marker id="arrow-amber" markerWidth="8" markerHeight="8" refX="6.7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#c18b24"/></marker>
-        <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="6.7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#c85b5b"/></marker>
-        <marker id="arrow-teal" markerWidth="8" markerHeight="8" refX="6.7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#148894"/></marker>
-      </defs>
-    </svg>
-    <div id="nodes"></div><div id="edgeLabels"></div>
-    <div class="note" style="left:1650px;top:55px">共享状态：task_state / context_version / evidence_refs</div>
-    <div class="note" style="left:1690px;top:1430px">权威独立服务：工作区状态 + 长期记忆严格版本化审查落库</div>
-  </div>
-  <div class="bottom-hint">提示：选择上方标签切换视图；点击任意卡片查看专家职责、代码映射与挂载 Skills。</div>
-  <div class="zoom-controls"><button id="zoomOut" title="缩小">−</button><span id="zoomLabel">100%</span><button id="zoomIn" title="放大">＋</button><button id="resetBtn" title="重置视图">适配</button></div>
+<div class="toplinks">
+<a href="Agentic_BI架构升级方案.md">工程落地方案 ↗</a>
+<span class="tag">目标架构 · 待后端实施</span>
+</div>
+</header>
+<main>
+<section class="intro">
+<div>
+<div class="eyebrow">AGENTIC BI / INDEPENDENT WORKFLOWS</div>
+<h1>普通完整闭环，高阶展开到证据与方法。</h1>
+<p>普通问数完成可信查询与专业解读；高级问数开展假设驱动的并行研究。高阶42节点分别暴露语义计划、候选验证、执行回执、证据账本和分析算子；两模式独立运行。</p>
+</div>
+<div class="intro-badge">
+<strong>主理人 + 垂直专家</strong>两模式均校验组织树权限 · 复用现有隔离能力</div>
+</section>
+<section class="workspace" aria-label="普通与高级独立问数工作流">
+<div class="toolbar">
+<div class="tabs" role="tablist" aria-label="独立工作流">
+<button role="tab" class="tab" id="tab-low" data-mode="low" aria-selected="true" aria-controls="panel-low" tabindex="0">低阶问数 · 完整闭环</button>
+<button role="tab" class="tab" id="tab-high" data-mode="high" aria-selected="false" aria-controls="panel-high" tabindex="-1">高阶问数 · 42 节点</button>
+</div>
+<div class="controls">
+<button class="btn primary" id="play" type="button">▷ 演示本流程</button>
+<button class="btn" id="motion" type="button" aria-pressed="false">动效：关</button>
+<div class="zoom">
+<button type="button" id="out" aria-label="缩小">−</button>
+<output id="zoom-label">100%</output>
+<button type="button" id="in" aria-label="放大">+</button>
+</div>
+<button class="btn" id="fit" type="button">适应宽度</button>
+</div>
+</div>
+<section id="panel-low" class="mode-low" role="tabpanel" aria-labelledby="tab-low">
+<header class="mode-header">
+<span class="mode-icon" aria-hidden="true">◇</span>
+<div>
+<h2>低阶问数 · 标准专业协作</h2>
+<p>指标 / 明细 / 多条件 / 排名 / 同环比：保留语义解析、新 SQL 构造、审查验证、专业解读与主理人复核。</p>
+</div>
+<div class="mode-meta">
+<b>BASIC · 独立完整链路</b>独立入口 / 自愈 ≤ 2 次 / 无自动跨档</div>
+</header>
+<div class="viewport" id="viewport-low" tabindex="0" aria-label="低阶问数 · 标准专业协作画布">
+<div class="sizer" id="sizer-low">
+<div class="diagram" id="diagram-low">
+<svg class="edges" aria-hidden="true">
+<defs>
+<marker id="arr-low" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M1 1L9 5L1 9"/>
+</marker>
+<marker id="retry-low" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M1 1L9 5L1 9"/>
+</marker>
+</defs>
+<g class="edge-content">
+</g>
+</svg>
+<section class="phase" data-kind="single">
+<div class="phase-label">
+<span>01</span>
+<h3>立项</h3>
+<p>普通入口 · 本模式闭环</p>
+</div>
+<div class="phase-grid single">
+<button type="button" class="node" data-node="l0" aria-label="查看接单、鉴权与组织树权限校验详情"><span class="node-meta"><span>L0</span><span class="state">↗</span></span><span class="role">总主理人调用现有权限服务</span><strong>接单、鉴权与组织树权限校验</strong><span class="desc">普通问数入口必检：当前用户、可访问数据集和组织树范围。</span><span class="skills"><span>复用现有组织树权限</span><span>数据集准入 / 组织范围</span></span></button>
+</div>
+</section>
+<section class="phase" data-kind="parallel">
+<div class="phase-label">
+<span>02</span>
+<h3>准备与检索</h3>
+<p>可并行检索 · 只向主理人交接</p>
+</div>
+<div class="phase-grid parallel">
+<button type="button" class="node" data-node="l1" aria-label="查看恢复上下文与条件差量详情">
+<span class="node-meta">
+<span>L1</span>
+<span class="state">↗</span>
+</span>
+<span class="role">管家 · 上下文专家</span>
+<strong>恢复上下文与条件差量</strong>
+<span class="desc">恢复会话；区分沿用、替换、追加和删除条件。</span>
+<span class="skills">
+<span>服务端 TaskState</span>
+<span>条件 Patch / 来源</span>
+</span>
+</button>
+<button type="button" class="node" data-node="l2" aria-label="查看选择数据集与合法字段详情"><span class="node-meta"><span>L2</span><span class="state">↗</span></span><span class="role">问津 · 数据资产专家</span><strong>选择数据集与合法字段</strong><span class="desc">检索书架、字典与表关系，形成最小合法 Schema。</span><span class="skills"><span>Schema Linking</span><span>向量 + 主外键图</span></span></button>
+<button type="button" class="node" data-node="l3" aria-label="查看对齐业务与指标口径详情">
+<span class="node-meta">
+<span>L3</span>
+<span class="state">↗</span>
+</span>
+<span class="role">正名 · 业务语义专家</span>
+<strong>对齐业务与指标口径</strong>
+<span class="desc">确认指标定义、时间、维度、单位与聚合粒度。</span>
+<span class="skills">
+<span>Metric Alignment</span>
+<span>口径版本 / 可加性</span>
+</span>
+</button>
+</div>
+</section>
+<section class="phase" data-kind="single">
+<div class="phase-label">
+<span>03</span>
+<h3>确认规格</h3>
+<p>汇合裁定 · 有歧义先澄清</p>
+</div>
+<div class="phase-grid single">
+<button type="button" class="node" data-node="l4" aria-label="查看汇合与确认查询规格详情"><span class="node-meta"><span>L4</span><span class="state">↗</span></span><span class="role">总主理人 · 第一轮评议</span><strong>汇合与确认查询规格</strong><span class="desc">收齐专家产物，确认范围、数据集与口径；必要时澄清。</span><span class="skills"><span>QuerySpec 校验</span><span>澄清 ≤ 2 轮</span></span></button>
+</div>
+</section>
+<section class="phase" data-kind="alternative">
+<div class="phase-label">
+<span>04</span>
+<h3>查询构造</h3>
+<p>OR · 满足条件的策略择一</p>
+</div>
+<div class="phase-grid alternative">
+<button type="button" class="node" data-node="l5" aria-label="查看审核模板 / 语义编译详情">
+<span class="node-meta">
+<span>L5</span>
+<span class="state">↗</span>
+</span>
+<span class="role">格物 · SQL 工程专家</span>
+<strong>审核模板 / 语义编译</strong>
+<span class="desc">优先匹配金标适用条件，或用指标模型编译查询。</span>
+<span class="skills">
+<span>Golden SQL</span>
+<span>Metric Store Compiler</span>
+</span>
+</button>
+<button type="button" class="node" data-node="l6" aria-label="查看受约束生成 SQL详情">
+<span class="node-meta">
+<span>L6</span>
+<span class="state">↗</span>
+</span>
+<span class="role">格物 · SQL 工程专家</span>
+<strong>受约束生成 SQL</strong>
+<span class="desc">模板与编译均未覆盖时，依据查询规格生成新 SQL。</span>
+<span class="skills">
+<span>Schema 子图约束</span>
+<span>方言 / 参数绑定</span>
+</span>
+</button>
+</div>
+</section>
+<section class="phase" data-kind="serial">
+<div class="phase-label">
+<span>05</span>
+<h3>审查与执行</h3>
+<p>顺序依赖 · 三步均不可绕过</p>
+</div>
+<div class="phase-grid serial">
+<button type="button" class="node" data-node="l7" aria-label="查看独立审查与静态闸门详情">
+<span class="node-meta">
+<span>L7</span>
+<span class="state">↗</span>
+</span>
+<span class="role">审衡 · 独立审查专家 / 主理人裁决</span>
+<strong>独立审查与静态闸门</strong>
+<span class="desc">独立审语义与 SQL；AST、安全和权限规则强制执行。</span>
+<span class="skills">
+<span>AST / 方言检查</span>
+<span>粒度 / Join 审核</span>
+</span>
+</button>
+<button type="button" class="node" data-node="l8" aria-label="查看EXPLAIN 与沙箱试运行详情">
+<span class="node-meta">
+<span>L8</span>
+<span class="state">↗</span>
+</span>
+<span class="role">格物 · SQL 专家调用执行技能</span>
+<strong>EXPLAIN 与沙箱试运行</strong>
+<span class="desc">先检查成本和方言，再在受限环境验证查询。</span>
+<span class="skills">
+<span>EXPLAIN / Cost Gate</span>
+<span>只读沙箱 Dry-run</span>
+</span>
+</button>
+<button type="button" class="node" data-node="l9" aria-label="查看受控只读执行与回执详情"><span class="node-meta"><span>L9</span><span class="state">↗</span></span><span class="role">格物 · SQL 工程专家</span><strong>受控只读执行与回执</strong><span class="desc">只读事务、超时、行数和字节预算、取消传播。</span><span class="skills"><span>Read-only Executor</span><span>超时 / 限流 / Cancel</span><span>既有组织行过滤必经</span></span></button>
+</div>
+</section>
+<section class="phase" data-kind="serial">
+<div class="phase-label">
+<span>06</span>
+<h3>验证与复核</h3>
+<p>结果断言 → 分析 → 主理人签收</p>
+</div>
+<div class="phase-grid serial">
+<button type="button" class="node" data-node="l10" aria-label="查看结果合理性与口径断言详情">
+<span class="node-meta">
+<span>L10</span>
+<span class="state">↗</span>
+</span>
+<span class="role">审衡 · 独立校验 + 析微</span>
+<strong>结果合理性与口径断言</strong>
+<span class="desc">检查 Join 膨胀、空值、重复计数、单位和分母。</span>
+<span class="skills">
+<span>Result Assertions</span>
+<span>空值诊断 / 基数对照</span>
+</span>
+</button>
+<button type="button" class="node" data-node="l11" aria-label="查看分析、图表与故事化表达详情">
+<span class="node-meta">
+<span>L11</span>
+<span class="state">↗</span>
+</span>
+<span class="role">析微 · 数据分析专家</span>
+<strong>分析、图表与故事化表达</strong>
+<span class="desc">完成对比、趋势、排名等解读；每个数值引用结果。</span>
+<span class="skills">
+<span>Viz Recommendation</span>
+<span>证据化叙事</span>
+</span>
+</button>
+<button type="button" class="node" data-node="l12" aria-label="查看主理人综合复核与签收详情">
+<span class="node-meta">
+<span>L12</span>
+<span class="state">↗</span>
+</span>
+<span class="role">总主理人 · 唯一交付责任人</span>
+<strong>主理人综合复核与签收</strong>
+<span class="desc">综合问津、格物、析微与审查意见，核对证据完整性。</span>
+<span class="skills">
+<span>Answer Contract</span>
+<span>结论 / 证据一致性</span>
+</span>
+</button>
+</div>
+</section>
+<section class="phase" data-kind="single">
+<div class="phase-label">
+<span>07</span>
+<h3>交付与沉淀</h3>
+<p>签收后返回 · 状态可恢复</p>
+</div>
+<div class="phase-grid single">
+<button type="button" class="node" data-node="l13" aria-label="查看交付、检查点与反馈候选详情">
+<span class="node-meta">
+<span>L13</span>
+<span class="state">↗</span>
+</span>
+<span class="role">总主理人 + 管家</span>
+<strong>交付、检查点与反馈候选</strong>
+<span class="desc">统一返回答案、图表、口径与 SQL 追溯，保存本轮状态。</span>
+<span class="skills">
+<span>持久化 / 幂等</span>
+<span>审核后知识回流</span>
+</span>
+</button>
+</div>
+</section>
+<section class="recovery">
+<div class="recovery-note">
+<b>↶ 反思自愈旁路</b>
+<p>正常通过直接前进；仅失败进入。修复后返回被指定的节点，重新通过后续闸门。</p>
+<span>SQL 错误 → 格物　·　异常空值 → 问津　·　逻辑冲突 → 审衡 / 析微</span>
+</div>
+<button type="button" class="node" data-node="lr" aria-label="查看普通任务 · 反思与自愈详情">
+<span class="node-meta">
+<span>LR</span>
+<span class="state">↗</span>
+</span>
+<span class="role">总主理人 · 预算与返工控制</span>
+<strong>普通任务 · 反思与自愈</strong>
+<span class="desc">仅失败进入；SQL、异常空值、逻辑冲突和签收打回共用 ≤ 2 次。</span>
+<span class="skills">
+<span>task_retry_remaining = 2</span>
+<span>定向回流 / 原子扣减</span>
+</span>
+</button>
+</section>
+<div class="end-note">本模式独立结束：已完成 / 部分结果 / 等待澄清 / 明确失败。无自动跨模式跳转。</div>
+</div>
+</div>
+</div>
+</section>
+<section id="panel-high" class="mode-high" role="tabpanel" aria-labelledby="tab-high" hidden>
+<header class="mode-header">
+<span class="mode-icon" aria-hidden="true">⋈</span>
+<div>
+<h2>高阶问数 · 42 节点研究与验证工作流</h2>
+<p>语义编译 → 可信基线 → 方法与假设 → 三路候选/审查/取证 → 证据账本 → 受控计算 → 签收与回归</p>
+</div>
+<div class="mode-meta">
+<b>39 主流程 + 3 条件节点</b>13 个阶段 / A-B-C 三路证据链 / 全任务修复≤2</div>
+</header>
+<div class="viewport" id="viewport-high" tabindex="0" aria-label="高阶42节点工作流画布">
+<div class="sizer" id="sizer-high">
+<div class="diagram" id="diagram-high">
+<svg class="edges" aria-hidden="true">
+<defs>
+<marker id="arr-high" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M1 1L9 5L1 9"/>
+</marker>
+<marker id="retry-high" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M1 1L9 5L1 9"/>
+</marker>
+</defs>
+<g class="edge-content">
+</g>
+</svg>
+<section class="phase" data-kind="serial">
+<div class="phase-label">
+<span>01</span>
+<h3>接单与权限</h3>
+<p>独立高级任务 · 主理人立项</p>
+</div>
+<div class="phase-grid serial">
+<button type="button" class="node" data-node="h01" aria-label="查看高级接单与目标建档详情">
+<span class="node-meta">
+<span>H01</span>
+<span class="state">↗</span>
+</span>
+<span class="role">总主理人</span>
+<strong>高级接单与目标建档</strong>
+<span class="desc">定义问题对象、分析时间与交付问题；固定高级模式。</span>
+<span class="skills">
+<span>目标契约 / 模式锁定</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h02" aria-label="查看鉴权与组织树权限校验详情"><span class="node-meta"><span>H02</span><span class="state">↗</span></span><span class="role">总主理人调用现有权限服务</span><strong>鉴权与组织树权限校验</strong><span class="desc">高级问数同样必检；所有专家继承现有组织树授权范围。</span><span class="skills"><span>复用现有组织树权限</span><span>数据集准入 / 组织范围</span></span></button>
+<button type="button" class="node" data-node="h03" aria-label="查看创建研究任务与持久预算详情">
+<span class="node-meta">
+<span>H03</span>
+<span class="state">↗</span>
+</span>
+<span class="role">总主理人 / 编排运行时</span>
+<strong>创建研究任务与持久预算</strong>
+<span class="desc">独立任务、总预算、执行租约与检查点。</span>
+<span class="skills">
+<span>TaskState / Outbox</span>
+<span>共享修复额度 2</span>
+</span>
+</button>
+</div>
+</section>
+<section class="phase" data-kind="parallel">
+<div class="phase-label">
+<span>02</span>
+<h3>并行研究准备</h3>
+<p>三专家并行检索，交回主理人</p>
+</div>
+<div class="phase-grid parallel">
+<button type="button" class="node" data-node="h04" aria-label="查看恢复工作区与可信上下文详情">
+<span class="node-meta">
+<span>H04</span>
+<span class="state">↗</span>
+</span>
+<span class="role">管家 · 上下文专家</span>
+<strong>恢复工作区与可信上下文</strong>
+<span class="desc">读取确认过的条件、历史产物和待确认项。</span>
+<span class="skills">
+<span>条件 Patch / 证据过期检测</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h05" aria-label="查看检索指标、业务规则与分析手册详情">
+<span class="node-meta">
+<span>H05</span>
+<span class="state">↗</span>
+</span>
+<span class="role">正名 · 语义专家</span>
+<strong>检索指标、业务规则与分析手册</strong>
+<span class="desc">检索批准定义、业务日历与标准分析方法。</span>
+<span class="skills">
+<span>Semantic Retrieval</span>
+<span>Analysis Playbook</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h06" aria-label="查看检索资产、健康度与数据水位详情"><span class="node-meta"><span>H06</span><span class="state">↗</span></span><span class="role">问津 · 数据资产专家</span><strong>检索资产、健康度与数据水位</strong><span class="desc">确定数据源、表、字段、新鲜度与可查询范围。</span><span class="skills"><span>Catalog Retrieval</span><span>Watermark / Health Check</span></span></button>
+</div>
+</section>
+<section class="phase" data-kind="serial">
+<div class="phase-label">
+<span>03</span>
+<h3>链接与语义编译</h3>
+<p>实体值 → 关系子图 → 指标IR</p>
+</div>
+<div class="phase-grid serial">
+<button type="button" class="node" data-node="h07" aria-label="查看实体与数据库值对齐详情">
+<span class="node-meta">
+<span>H07</span>
+<span class="state">↗</span>
+</span>
+<span class="role">问津 · 实体链接专家</span>
+<strong>实体与数据库值对齐</strong>
+<span class="desc">把组织、产品、枚举值落到实际列和值。</span>
+<span class="skills">
+<span>Value Grounding</span>
+<span>别名 / 编辑距离 / 受权值索引</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h08" aria-label="查看Schema 子图与合法 Join 路径详情">
+<span class="node-meta">
+<span>H08</span>
+<span class="state">↗</span>
+</span>
+<span class="role">问津 · Schema 专家</span>
+<strong>Schema 子图与合法 Join 路径</strong>
+<span class="desc">向量召回后用关系图补齐键、基数与粒度。</span>
+<span class="skills">
+<span>Schema Linking</span>
+<span>向量 + 主外键图剪枝</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h09" aria-label="查看编译语义查询计划详情">
+<span class="node-meta">
+<span>H09</span>
+<span class="state">↗</span>
+</span>
+<span class="role">正名 + 语义编译器</span>
+<strong>编译语义查询计划</strong>
+<span class="desc">将指标、时间窗、维度、聚合与排除项编译成 IR。</span>
+<span class="skills">
+<span>SemanticPlan IR</span>
+<span>公式 / 可加性 / 单位</span>
+</span>
+</button>
+</div>
+</section>
+<section class="phase" data-kind="serial">
+<div class="phase-label">
+<span>04</span>
+<h3>规格与可信基线</h3>
+<p>冻结规格 → 基线查询 → 可比性</p>
+</div>
+<div class="phase-grid serial">
+<button type="button" class="node" data-node="h10" aria-label="查看主理人消歧与冻结研究规格详情"><span class="node-meta"><span>H10</span><span class="state">↗</span></span><span class="role">总主理人</span><strong>主理人消歧与冻结研究规格</strong><span class="desc">汇合上下文、资产与语义，签发唯一研究规格。</span><span class="skills"><span>Spec Gate</span><span>澄清最多 2 轮</span></span></button>
+<button type="button" class="node" data-node="h11" aria-label="查看建立当前值与比较基线详情"><span class="node-meta"><span>H11</span><span class="state">↗</span></span><span class="role">格物 · 基线查询专家</span><strong>建立当前值与比较基线</strong><span class="desc">使用受审定查询得到本期、基期与比较范围。</span><span class="skills"><span>Guarded Baseline Query</span><span>同窗 / 同组织 / 同币种</span><span>既有组织行过滤必经</span></span></button>
+<button type="button" class="node" data-node="h12" aria-label="查看基线质量与可比性验证详情">
+<span class="node-meta">
+<span>H12</span>
+<span class="state">↗</span>
+</span>
+<span class="role">审衡 · 数据质量专家</span>
+<strong>基线质量与可比性验证</strong>
+<span class="desc">先排除同步、重复、口径漂移造成的伪异动。</span>
+<span class="skills">
+<span>Freshness / Coverage Gate</span>
+<span>去重 / 口径漂移检测</span>
+</span>
+</button>
+</div>
+</section>
+<section class="phase" data-kind="serial">
+<div class="phase-label">
+<span>05</span>
+<h3>方法与假设派单</h3>
+<p>场景手册 → 可证伪假设 → DAG</p>
+</div>
+<div class="phase-grid serial">
+<button type="button" class="node" data-node="h13" aria-label="查看选择可复用分析方法详情">
+<span class="node-meta">
+<span>H13</span>
+<span class="state">↗</span>
+</span>
+<span class="role">筹策 · 规划专家</span>
+<strong>选择可复用分析方法</strong>
+<span class="desc">从场景手册选择量价、漏斗、分群或预测方法。</span>
+<span class="skills">
+<span>Playbook Match</span>
+<span>方法适用条件</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h14" aria-label="查看构建可证伪假设与反证计划详情">
+<span class="node-meta">
+<span>H14</span>
+<span class="state">↗</span>
+</span>
+<span class="role">筹策 + 垂直领域专家</span>
+<strong>构建可证伪假设与反证计划</strong>
+<span class="desc">每条假设定义支持证据、反证、基线与停止条件。</span>
+<span class="skills">
+<span>Hypothesis Contract</span>
+<span>反证 / 必要证据</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h15" aria-label="查看主理人编译 DAG 与资源派单详情">
+<span class="node-meta">
+<span>H15</span>
+<span class="state">↗</span>
+</span>
+<span class="role">总主理人 / 调度器</span>
+<strong>主理人编译 DAG 与资源派单</strong>
+<span class="desc">定义依赖、必要分支、并发令牌与每路查询预算。</span>
+<span class="skills">
+<span>DAG / Fan-out</span>
+<span>依赖就绪 / 单源配额</span>
+</span>
+</button>
+</div>
+</section>
+<section class="phase" data-kind="branched">
+<div class="phase-label">
+<span>06</span>
+<h3>专家取证计划</h3>
+<p>FAN-OUT · A / B / C 三路并发</p>
+</div>
+<div class="phase-grid branched">
+<button type="button" class="node" data-node="h16" aria-label="查看A 组 · 规模与流量取证计划详情">
+<span class="node-meta">
+<span>H16</span>
+<span class="state">↗</span>
+</span>
+<span class="role">运营领域专家</span>
+<strong>A 组 · 规模与流量取证计划</strong>
+<span class="desc">把规模变化假设转成分层/漏斗查询意图。</span>
+<span class="skills">
+<span>Domain QueryIntent</span>
+<span>维度 / 分群契约</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h17" aria-label="查看B 组 · 价格与转化取证计划详情">
+<span class="node-meta">
+<span>H17</span>
+<span class="state">↗</span>
+</span>
+<span class="role">财务领域专家</span>
+<strong>B 组 · 价格与转化取证计划</strong>
+<span class="desc">定义客单价、折扣和比率分子分母的查询。</span>
+<span class="skills">
+<span>Ratio Contract</span>
+<span>同口径分子 / 分母</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h18" aria-label="查看C 组 · 结构与预测取证计划详情">
+<span class="node-meta">
+<span>H18</span>
+<span class="state">↗</span>
+</span>
+<span class="role">产品 / 算法领域专家</span>
+<strong>C 组 · 结构与预测取证计划</strong>
+<span class="desc">定义产品/地区结构或按需预测输入。</span>
+<span class="skills">
+<span>Cohort / Feature Contract</span>
+<span>预测能力准入</span>
+</span>
+</button>
+</div>
+</section>
+<section class="phase" data-kind="branched">
+<div class="phase-label">
+<span>07</span>
+<h3>SQL 候选构造</h3>
+<p>三路分别构造 · 不提前合流</p>
+</div>
+<div class="phase-grid branched">
+<button type="button" class="node" data-node="h19" aria-label="查看A 组 · 构造与去重 SQL 候选详情">
+<span class="node-meta">
+<span>H19</span>
+<span class="state">↗</span>
+</span>
+<span class="role">格物 · Worker A</span>
+<strong>A 组 · 构造与去重 SQL 候选</strong>
+<span class="desc">审核模板/编译优先，必要时产生有差异的候选。</span>
+<span class="skills">
+<span>Candidate Generation</span>
+<span>参数化 / AST 指纹</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h20" aria-label="查看B 组 · 构造与去重 SQL 候选详情">
+<span class="node-meta">
+<span>H20</span>
+<span class="state">↗</span>
+</span>
+<span class="role">格物 · Worker B</span>
+<strong>B 组 · 构造与去重 SQL 候选</strong>
+<span class="desc">针对比率与价格问题构造候选，显式保留分母。</span>
+<span class="skills">
+<span>Candidate Generation</span>
+<span>语义计划编译</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h21" aria-label="查看C 组 · 构造与去重 SQL 候选详情">
+<span class="node-meta">
+<span>H21</span>
+<span class="state">↗</span>
+</span>
+<span class="role">格物 · Worker C</span>
+<strong>C 组 · 构造与去重 SQL 候选</strong>
+<span class="desc">构造结构分组或预测历史窗的只读查询。</span>
+<span class="skills">
+<span>Candidate Generation</span>
+<span>最小字段 / 特征时点</span>
+</span>
+</button>
+</div>
+</section>
+<section class="phase" data-kind="branched">
+<div class="phase-label">
+<span>08</span>
+<h3>独立候选验证</h3>
+<p>三路分别审查 · 硬规则不可覆盖</p>
+</div>
+<div class="phase-grid branched">
+<button type="button" class="node" data-node="h22" aria-label="查看A 组 · 独立审查与候选断言详情">
+<span class="node-meta">
+<span>H22</span>
+<span class="state">↗</span>
+</span>
+<span class="role">审衡 · Checker A</span>
+<strong>A 组 · 独立审查与候选断言</strong>
+<span class="desc">检查语义差异、聚合粒度、字段与 Join 基数。</span>
+<span class="skills">
+<span>SQL AST Gate</span>
+<span>Query TestPack</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h23" aria-label="查看B 组 · 独立审查与候选断言详情">
+<span class="node-meta">
+<span>H23</span>
+<span class="state">↗</span>
+</span>
+<span class="role">审衡 · Checker B</span>
+<strong>B 组 · 独立审查与候选断言</strong>
+<span class="desc">独立检查加权比率、零分母和金额单位。</span>
+<span class="skills">
+<span>SQL AST Gate</span>
+<span>Ratio / Unit Assertions</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h24" aria-label="查看C 组 · 独立审查与候选断言详情">
+<span class="node-meta">
+<span>H24</span>
+<span class="state">↗</span>
+</span>
+<span class="role">审衡 · Checker C</span>
+<strong>C 组 · 独立审查与候选断言</strong>
+<span class="desc">检查分群互斥、覆盖和预测时点合法性。</span>
+<span class="skills">
+<span>SQL AST Gate</span>
+<span>Cohort / Leakage Checks</span>
+</span>
+</button>
+</div>
+</section>
+<section class="phase" data-kind="branched">
+<div class="phase-label">
+<span>09</span>
+<h3>受控执行取证</h3>
+<p>三路独立计划 / 执行 / 数据断言</p>
+</div>
+<div class="phase-grid branched">
+<button type="button" class="node" data-node="h25" aria-label="查看A 组 · 计划、沙箱、执行与回执详情"><span class="node-meta"><span>H25</span><span class="state">↗</span></span><span class="role">格物 Worker A 调用 Stability Runtime</span><strong>A 组 · 计划、沙箱、执行与回执</strong><span class="desc">每候选 EXPLAIN，受限试跑后执行选定查询并断言。</span><span class="skills"><span>EXPLAIN / Dry-run</span><span>Read-only / Result Assertions</span><span>既有组织行过滤必经</span></span></button>
+<button type="button" class="node" data-node="h26" aria-label="查看B 组 · 计划、沙箱、执行与回执详情"><span class="node-meta"><span>H26</span><span class="state">↗</span></span><span class="role">格物 Worker B 调用 Stability Runtime</span><strong>B 组 · 计划、沙箱、执行与回执</strong><span class="desc">执行价格/转化取证，输出可重算的分子分母。</span><span class="skills"><span>EXPLAIN / Dry-run</span><span>比率 / 字节预算</span><span>既有组织行过滤必经</span></span></button>
+<button type="button" class="node" data-node="h27" aria-label="查看C 组 · 计划、沙箱、执行与回执详情"><span class="node-meta"><span>H27</span><span class="state">↗</span></span><span class="role">格物 Worker C 调用 Stability Runtime</span><strong>C 组 · 计划、沙箱、执行与回执</strong><span class="desc">受控取出结构或历史序列，保留完整性检查。</span><span class="skills"><span>EXPLAIN / Dry-run</span><span>Coverage / Snapshot Assertions</span><span>既有组织行过滤必经</span></span></button>
+</div>
+</section>
+<section class="phase" data-kind="serial">
+<div class="phase-label">
+<span>10</span>
+<h3>汇合、反证与裁定</h3>
+<p>FAN-IN · 必要证据到齐才裁定</p>
+</div>
+<div class="phase-grid serial">
+<button type="button" class="node" data-node="h28" aria-label="查看主理人 Fan-in 与证据账本详情">
+<span class="node-meta">
+<span>H28</span>
+<span class="state">↗</span>
+</span>
+<span class="role">总主理人 / Evidence Ledger</span>
+<strong>主理人 Fan-in 与证据账本</strong>
+<span class="desc">只收纳带检查回执的事实，等待必要分支。</span>
+<span class="skills">
+<span>Required Barrier</span>
+<span>Claim → Evidence → Query</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h29" aria-label="查看独立核对冲突与反证详情">
+<span class="node-meta">
+<span>H29</span>
+<span class="state">↗</span>
+</span>
+<span class="role">审衡 · 全局核验专家</span>
+<strong>独立核对冲突与反证</strong>
+<span class="desc">按值、定义与快照定位差异；记录不支持证据。</span>
+<span class="skills">
+<span>Contradiction Check</span>
+<span>总量 / 对照查询</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h30" aria-label="查看主理人研究裁定与停止闸门详情">
+<span class="node-meta">
+<span>H30</span>
+<span class="state">↗</span>
+</span>
+<span class="role">总主理人</span>
+<strong>主理人研究裁定与停止闸门</strong>
+<span class="desc">决定证据足够、需要返工、继续计划内探索或停止。</span>
+<span class="skills">
+<span>Hypothesis Status</span>
+<span>节点 / 查询 / 时间预算</span>
+</span>
+</button>
+</div>
+</section>
+<section class="phase" data-kind="serial">
+<div class="phase-label">
+<span>11</span>
+<h3>计算与稳健性</h3>
+<p>受控算子 → 贡献守恒 → 稳健验证</p>
+</div>
+<div class="phase-grid serial">
+<button type="button" class="node" data-node="h31" aria-label="查看受控 Python / 分析算子执行详情">
+<span class="node-meta">
+<span>H31</span>
+<span class="state">↗</span>
+</span>
+<span class="role">析微 · 算法分析专家</span>
+<strong>受控 Python / 分析算子执行</strong>
+<span class="desc">对已核验数据执行贡献分解、分群或模型计算。</span>
+<span class="skills">
+<span>Analysis IR / Operator Registry</span>
+<span>无网沙箱 / CPU / 内存</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h32" aria-label="查看贡献守恒与重复归因检查详情">
+<span class="node-meta">
+<span>H32</span>
+<span class="state">↗</span>
+</span>
+<span class="role">审衡 + 析微</span>
+<strong>贡献守恒与重复归因检查</strong>
+<span class="desc">检验量价交互、结构重叠与非可加指标。</span>
+<span class="skills">
+<span>Reconciliation</span>
+<span>交互项分摊 / 容差</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h33" aria-label="查看稳健性、对照与预测回测详情">
+<span class="node-meta">
+<span>H33</span>
+<span class="state">↗</span>
+</span>
+<span class="role">审衡 / 算法专家</span>
+<strong>稳健性、对照与预测回测</strong>
+<span class="desc">检查结论是否依赖单一窗口、异常点或泄漏。</span>
+<span class="skills">
+<span>Sensitivity / Negative Controls</span>
+<span>按需 Rolling Backtest</span>
+</span>
+</button>
+</div>
+</section>
+<section class="phase" data-kind="serial">
+<div class="phase-label">
+<span>12</span>
+<h3>声明、叙事与图表</h3>
+<p>因果边界 → 证据化叙事 → 选图</p>
+</div>
+<div class="phase-grid serial">
+<button type="button" class="node" data-node="h34" aria-label="查看置信边界与因果声明审查详情">
+<span class="node-meta">
+<span>H34</span>
+<span class="state">↗</span>
+</span>
+<span class="role">审衡 · 结论边界专家</span>
+<strong>置信边界与因果声明审查</strong>
+<span class="desc">区分贡献、相关线索、预测区间与因果证据。</span>
+<span class="skills">
+<span>Claim Type Gate</span>
+<span>证据等级 / 不确定性</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h35" aria-label="查看生成可追溯叙事计划详情">
+<span class="node-meta">
+<span>H35</span>
+<span class="state">↗</span>
+</span>
+<span class="role">析微 · 业务分析专家</span>
+<strong>生成可追溯叙事计划</strong>
+<span class="desc">组织结论、证据、解释、行动与待验证项。</span>
+<span class="skills">
+<span>StoryPlan</span>
+<span>数值单元格引用</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h36" aria-label="查看图表推荐与表达校验详情">
+<span class="node-meta">
+<span>H36</span>
+<span class="state">↗</span>
+</span>
+<span class="role">析微 · 可视化专家</span>
+<strong>图表推荐与表达校验</strong>
+<span class="desc">按目的选图，并核验图表字段、单位、总量和区间。</span>
+<span class="skills">
+<span>ChartSpec Validator</span>
+<span>误导性表达检查</span>
+</span>
+</button>
+</div>
+</section>
+<section class="phase" data-kind="serial">
+<div class="phase-label">
+<span>13</span>
+<h3>签收与质量闭环</h3>
+<p>主理人签收 → 交付 → 审核回流</p>
+</div>
+<div class="phase-grid serial">
+<button type="button" class="node" data-node="h37" aria-label="查看主理人最终签收详情">
+<span class="node-meta">
+<span>H37</span>
+<span class="state">↗</span>
+</span>
+<span class="role">总主理人 · 唯一交付责任人</span>
+<strong>主理人最终签收</strong>
+<span class="desc">核对目标覆盖、必要证据、方法、限制与全局预算。</span>
+<span class="skills">
+<span>Answer Contract</span>
+<span>证据覆盖率 / 签收规则</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h38" aria-label="查看交付报告与恢复检查点详情">
+<span class="node-meta">
+<span>H38</span>
+<span class="state">↗</span>
+</span>
+<span class="role">总主理人 + 管家</span>
+<strong>交付报告与恢复检查点</strong>
+<span class="desc">交付结论、图表、证据、SQL轨迹与工作区状态。</span>
+<span class="skills">
+<span>SSE / Artifact Store</span>
+<span>幂等交付 / Resume Cursor</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h39" aria-label="查看反馈候选、离线回归与发布详情">
+<span class="node-meta">
+<span>H39</span>
+<span class="state">↗</span>
+</span>
+<span class="role">资产治理负责人 / 运行时</span>
+<strong>反馈候选、离线回归与发布</strong>
+<span class="desc">把好案例变成经过审查和盲测的资产版本。</span>
+<span class="skills">
+<span>Human Review / Eval</span>
+<span>Semantic Release / Rollback</span>
+</span>
+</button>
+</div>
+</section>
+<section class="phase" data-kind="exception">
+<div class="phase-label">
+<span>EX</span>
+<h3>异常与恢复</h3>
+<p>条件旁路 · 不计入正常必经链</p>
+</div>
+<div class="phase-grid exception">
+<button type="button" class="node" data-node="h40" aria-label="查看错误分型与有界自愈详情">
+<span class="node-meta">
+<span>H40</span>
+<span class="state">↗</span>
+</span>
+<span class="role">总主理人 + 对应专家</span>
+<strong>错误分型与有界自愈</strong>
+<span class="desc">仅失败进入；全分支、全错误共用两枚返工令牌。</span>
+<span class="skills">
+<span>Typed Errors</span>
+<span>Atomic Retry Ledger</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h41" aria-label="查看主理人澄清与挂起恢复详情">
+<span class="node-meta">
+<span>H41</span>
+<span class="state">↗</span>
+</span>
+<span class="role">总主理人 + 用户</span>
+<strong>主理人澄清与挂起恢复</strong>
+<span class="desc">关键槽位/口径/实体歧义最多澄清两轮。</span>
+<span class="skills">
+<span>Clarification Gate</span>
+<span>Awaiting Input / Resume</span>
+</span>
+</button>
+<button type="button" class="node" data-node="h42" aria-label="查看明确停止与部分证据交付详情">
+<span class="node-meta">
+<span>H42</span>
+<span class="state">↗</span>
+</span>
+<span class="role">总主理人</span>
+<strong>明确停止与部分证据交付</strong>
+<span class="desc">按原因返回拒绝、失败、待确认或有边界部分结果。</span>
+<span class="skills">
+<span>Terminal Status</span>
+<span>Cancel / Release Resources</span>
+</span>
+</button>
+</div>
+</section>
+<div class="end-note">39 个主流程节点 + 3 个条件旁路节点 = 42 个可审查架构节点；正常任务按需执行，不要求42次模型调用。三条取证链直到H28才汇合。</div>
+</div>
+</div>
+</div>
+</section>
+<div class="workspace-foot">
+<div class="status" id="status" role="status" aria-live="polite">设计视图 · 演示为本地模拟，不连接数据源</div>
+<div class="legend">
+<span>
+<i>
+</i>正常依赖 / 分发汇合</span>
+<span>
+<i class="dashed">
+</i>失败旁路 / 定向修复</span>
+<span>点击节点查看完整契约</span>
+</div>
+</div>
+</section>
+<section class="guide">
+<article>
+<h3>01 / 流程独立，普通也有完整专业闭环</h3>
+<p>模板命中是 SQL 构造的加速策略；未命中可在普通流程内生成 SQL，审查、执行验证、分析和主理人签收仍保留。</p>
+</article>
+<article>
+<h3>02 / 专家向主理人交接，Skills 提供硬护栏</h3>
+<p>连线表示主理人调度下的产物依赖。并发只用于独立工作；口径、Schema、SQL、数据和图表都由可执行规则校验。</p>
+</article>
+<article>
+<h3>03 / 各任务共享两次返工，失败有明确终态</h3>
+<p>同一任务的所有分支共用两枚令牌。澄清最多两轮；预算耗尽则暂停或输出部分证据，不能自动换模式继续查询。</p>
+</article>
+</section>
+<footer class="footnote">
+<span>DataPulse · 2026.10.21 · 内联 CSS / JS / SVG · 无第三方运行依赖</span>
+<span>参考：<a href="https://wrenai.readme.io/reference/get_models">S1 · WrenAI</a> · <a href="https://arxiv.org/abs/2405.16755">S2 · CHESS</a> · <a href="https://arxiv.org/abs/2312.11242">S3 · MAC-SQL</a> · <a href="https://docs.thoughtspot.com/cloud/26.9.0.cl/semantic-layer/">S4 · ThoughtSpot</a> · <a href="https://docs.volcengine.com/docs/Dataagent/IntelligentQueryAgent?lang=zh">S5 · DataWind / Data Agent</a>
+</span>
+</footer>
 </main>
-<aside class="drawer" id="drawer">
-  <div class="drawer-head"><div><div class="drawer-kicker" id="dKicker">WORKFLOW NODE</div><h2 id="dTitle">节点详情</h2></div><button class="close" id="closeDrawer" aria-label="关闭">×</button></div>
-  <div class="drawer-content">
-    <div class="skill-box" id="dSkillBox">⚡ 挂载 Skills: -</div>
-    <section class="detail-section"><h4>专家角色与岗位职责</h4><p id="dPurpose"></p></section>
-    <section class="detail-section"><h4>输入 / 读取</h4><div class="code" id="dInputs"></div></section>
-    <section class="detail-section"><h4>输出 / 写入</h4><div class="code" id="dOutputs"></div></section>
-    <section class="detail-section"><h4>判断条件与失败策略 (防死循环规则)</h4><p id="dFailure"></p></section>
-    <section class="detail-section"><h4>实现注意事项</h4><ul id="dNotes"></ul></section>
-    <div class="callout">提示：流程严格贯彻主理人中枢原则，所有专家独立产出只交回主理人，任何外部交互（包括澄清追问）必须由主理人拍板组织！</div>
-  </div>
-</aside>
-<script>
-const NODES = [
-  // ----------------------------------------------------
-  // 01 公共入口泳道 (COMMON)
-  // ----------------------------------------------------
-  {
-    id:'n01',track:'common',kind:'supervisor',type:'START',step:'01',
-    role:'主理人 · 接入中枢',
-    title:'主理人 · 接收用户问题',
-    desc:'建立请求身份与会话上下文链路。',
-    io:'query · user_id · session_id',x:55,y:135,w:196,h:104,
-    skills:'skills/superpowers-main/using-superpowers',
-    purpose:'【主理人】接单。接收自然语言问题、用户身份和当前会话标识，生成 request_id / trace_id。主理人确立会话所有权，所有专家产出必须向此链路归集。',
-    inputs:'query\nuser_id / tenant_id\nsession_id / conversation_id',
-    outputs:'request_id\ntrace_id\nrequest_status = RECEIVED',
-    failure:'缺少身份或会话凭证时，按系统授权策略补齐或拒绝处理；不能默认用共享用户身份。',
-    notes:['生成幂等请求 ID，避免重试导致重复执行。','先做认证和授权，再读取记忆或元数据。']
+<dialog id="details" aria-labelledby="detail-title">
+<header class="detail-head">
+<div>
+<div class="eyebrow" id="detail-code">
+</div>
+<h2 id="detail-title">
+</h2>
+</div>
+<button class="close" id="close" type="button" aria-label="关闭节点详情">×</button>
+</header>
+<div class="detail-body" id="detail-body">
+</div>
+</dialog><script>
+'use strict';
+const HIGH_EDGES=[["h01", "h02", ""], ["h02", "h03", ""], ["h07", "h08", ""], ["h08", "h09", ""], ["h09", "h10", ""], ["h10", "h11", ""], ["h11", "h12", ""], ["h12", "h13", ""], ["h13", "h14", ""], ["h14", "h15", ""], ["h28", "h29", ""], ["h29", "h30", ""], ["h30", "h31", ""], ["h31", "h32", ""], ["h32", "h33", ""], ["h33", "h34", ""], ["h34", "h35", ""], ["h35", "h36", ""], ["h36", "h37", ""], ["h37", "h38", ""], ["h38", "h39", ""], ["h03", "h04", "准备分发"], ["h04", "h07", "准备汇合"], ["h03", "h05", "准备分发"], ["h05", "h07", "准备汇合"], ["h03", "h06", "准备分发"], ["h06", "h07", "准备汇合"], ["h15", "h16", "证据分发"], ["h16", "h19", ""], ["h19", "h22", ""], ["h22", "h25", ""], ["h25", "h28", "必要证据汇合"], ["h15", "h17", "证据分发"], ["h17", "h20", ""], ["h20", "h23", ""], ["h23", "h26", ""], ["h26", "h28", "必要证据汇合"], ["h15", "h18", "证据分发"], ["h18", "h21", ""], ["h21", "h24", ""], ["h24", "h27", ""], ["h27", "h28", "必要证据汇合"]];
+const DATA={
+  "l0": {
+    "title": "接单、鉴权与组织树权限校验",
+    "role": "总主理人调用现有权限服务",
+    "desc": "普通问数入口必检：当前用户、可访问数据集和组织树范围。",
+    "skills": [
+      "复用现有组织树权限",
+      "数据集准入 / 组织范围"
+    ],
+    "mechanism": "复用 organization_tree_store 与 data_permission_store 的现有规则，不另建组织树或数据权限体系。入口用 allowed_dataset_ids_for_user 取得可访问数据集；按数据集规则调用 user_org_scope_for_rule，取得组织范围。沿用现有 public/restricted/org_tree/disabled 与 super_admin 处理规则。 普通任务在权限确定后才恢复上下文、检索数据资产与分派查询。问津仅从允许的数据集中选择；之后每条正式、修复、基线和对照SQL都执行现有组织行过滤。",
+    "output": "basic_task_id + allowed_dataset_ids + dataset_org_scopes",
+    "fallback": "数据集不允许或问题指向越权组织时直接拒绝；不依赖模型提示词判断权限，不转高级绕过。",
+    "hook": "controllers/ask_chat.py:115/533/758 → data_permission_store.py:251/364/534；执行过滤见 four_agent_ask.py:9520",
+    "input": "current_user + question + selected_dataset_ids + 既有组织树/权限配置"
   },
-  {
-    id:'n02',track:'common',kind:'memory',type:'CONTEXT',step:'02',
-    role:'管家 · 上下文专家',
-    title:'管家 · 恢复会话与工作区',
-    desc:'确定延续当前话题还是新建分析。',
-    io:'workspace_id · task_state',x:285,y:135,w:196,h:104,
-    skills:'skills/ECC-main/unified-memory',
-    purpose:'【管家】从独立记忆服务拉取历史工作区状态，进行指代消解（“这个”、“它”）与多轮条件继承，向主理人提交状态快照。',
-    inputs:'session_id\n用户当前指令\n可访问的 workspace 索引',
-    outputs:'workspace_id\nactive_task_id\nstate_snapshot_version',
-    failure:'找不到工作区时不得虚构历史；应说明未找到并提供新建分析或重新选择历史任务的路径。',
-    notes:['不要把聊天摘要当作完整任务状态。','校验工作区属主与权限。']
+  "l1": {
+    "title": "恢复上下文与条件差量",
+    "role": "管家 · 上下文专家",
+    "desc": "恢复会话；区分沿用、替换、追加和删除条件。",
+    "skills": [
+      "服务端 TaskState",
+      "条件 Patch / 来源"
+    ],
+    "mechanism": "读取当前用户可访问会话与已确认口径；生成结构化条件差量，固定时区和业务日历。历史回答不是权威事实，前端历史只能作为待验证材料。",
+    "output": "context_packet + condition_patch + version",
+    "fallback": "指代不明提交主理人澄清；不虚构历史，服务重启从持久检查点恢复。",
+    "hook": "memory/short_term_memory.py:95 → context_service",
+    "input": "本模式 TaskState + 经授权的上游产物引用"
   },
-  {
-    id:'n03',track:'common',kind:'data',type:'INTENT',step:'03',
-    role:'正名 · 业务语义专家',
-    title:'正名 · 解析问题与指代',
-    desc:'抽取指标、维度、时间、筛选条件。',
-    io:'metrics[] · dimensions[] · filters[]',x:520,y:135,w:196,h:104,
-    skills:'skills/ECC-main/intent-driven-development · skills/skills-1.3.1/domain-modeling',
-    purpose:'【正名】负责意图驱动建模，将用户提问转换为标准语义槽位，解析“上季度”、“同比”等相对时间，识别是否存在歧义并向主理人汇报。',
-    inputs:'当前用户问题\n近期对话必要片段\n当前 task_state',
-    outputs:'intent_spec\nslots: metric / period / dims / filters\nreference_resolution',
-    failure:'关键槽位存在多个合理解释时，向主理人报告歧义，不自行默选。',
-    notes:['区分替换条件和追加条件。','新指令只修改其明确指向的状态字段。']
+  "l2": {
+    "title": "选择数据集与合法字段",
+    "role": "问津 · 数据资产专家",
+    "desc": "检索书架、字典与表关系，形成最小合法 Schema。",
+    "skills": [
+      "Schema Linking",
+      "向量 + 主外键图"
+    ],
+    "mechanism": "在权限范围内向量/BM25 混合召回数据集与字段，再以主外键图补齐连接路径。保留必要键、时间和权限字段；不使用不同领域的近义字段替换指标。 目录路由必须与 allowed_dataset_ids 求交，沿用 is_dataset_allowed，不把未授权数据集放入专家上下文。",
+    "output": "asset_packet + schema_subgraph + freshness",
+    "fallback": "召回不足扩大受权范围，仍不连通交主理人澄清；不猜字段和外键。",
+    "hook": "bookshelf_repository.py:131 / route_with_agent1",
+    "input": "本模式 TaskState + 经授权的上游产物引用"
   },
-  {
-    id:'n04',track:'common',kind:'decision',type:'GATE',step:'04',
-    role:'主理人 · 裁定闸门',
-    title:'主理人：是否存在关键歧义？',
-    desc:'不影响结果的缺省项可按规则补齐。',
-    io:'needs_clarify:boolean',x:760,y:128,w:156,h:114,
-    skills:'skills/ECC-main/operator-approval-loop',
-    purpose:'【主理人】亲自裁决正名汇报的要素是否足以支撑查询。若缺少核心主指标或时间跨度严重模糊，主理人决定触发澄清。',
-    inputs:'intent_spec\n指标默认规则\n当前状态与有效记忆',
-    outputs:'needs_clarify\nclarification_reasons[]',
-    failure:'不能用模型自评置信度单独决定跳过澄清；优先检查具体歧义字段及默认规则。',
-    notes:['只问真正影响结果的缺失条件。','低风险默认值必须显式记录。']
+  "l3": {
+    "title": "对齐业务与指标口径",
+    "role": "正名 · 业务语义专家",
+    "desc": "确认指标定义、时间、维度、单位与聚合粒度。",
+    "skills": [
+      "Metric Alignment",
+      "口径版本 / 可加性"
+    ],
+    "mechanism": "从批准语义版本读取指标公式、排除规则、时间口径与可加性；结合管家和问津的产物进行确定性一致性检查。初始检索可并行，最终对齐必须等待依赖。",
+    "output": "semantic_constraints + ambiguity_items",
+    "fallback": "两个有效口径冲突时必须由主理人组织用户确认，不以模型置信度覆盖业务选择。",
+    "hook": "书架 LLD / data_dictionary / semantic catalog",
+    "input": "本模式 TaskState + 经授权的上游产物引用"
   },
-  {
-    id:'n05',track:'common',kind:'guard',type:'HUMAN INPUT',step:'04A',
-    role:'主理人 · 交互确认',
-    title:'主理人 · 生成澄清卡片并挂起',
-    desc:'提供2~4个明确选项，等待用户回答。',
-    io:'clarification_id · pending_slots[]',x:765,y:285,w:196,h:104,
-    skills:'skills/ECC-main/context-budget',
-    purpose:'【主理人】拍板组织人机交互：生成 2~4 个候选项卡片（如选择实收还是应收）发给用户，挂起当前轮次并持久化检查点，严格限制 ≤2 轮。',
-    inputs:'clarification_reasons[]\n候选口径 / 时间范围\nworkspace_id',
-    outputs:'clarification_id\npending_task_checkpoint\nawaiting_user = true',
-    failure:'用户未回复时保持挂起，不反复调用模型；回答返回时从检查点恢复并合并增量条件。',
-    notes:['保存等待前的状态版本。','用户回答后重新验证受影响的字段。']
+  "l4": {
+    "title": "汇合与确认查询规格",
+    "role": "总主理人 · 第一轮评议",
+    "desc": "收齐专家产物，确认范围、数据集与口径；必要时澄清。",
+    "skills": [
+      "QuerySpec 校验",
+      "澄清 ≤ 2 轮"
+    ],
+    "mechanism": "三个专家只向主理人提交结构化交接包；主理人检查版本、权限与槽位，签发 QuerySpec。关键歧义则挂起，提出最少必要问题，用户确认后回本节点重新确认。 问题明确提及组织时复用 org_mention_permission_check，越权直接拒绝；用户澄清不能授权额外组织。",
+    "output": "confirmed QuerySpec 或 NEED_INPUT",
+    "fallback": "两轮仍不明确则暂停；普通模式保持不变，不能通过自动升级绕过缺失信息。",
+    "hook": "confirm-by-boss 接口 + ask_task_state",
+    "input": "本模式 TaskState + 经授权的上游产物引用"
   },
-  {
-    id:'n06',track:'common',kind:'decision',type:'ROUTER',step:'05',
-    role:'主理人 · 定档分流',
-    title:'主理人：复杂度定档分流',
-    desc:'依据任务结构、跨表数和证据需求分流。',
-    io:'route = BASIC | ADVANCED',x:1005,y:128,w:166,h:114,
-    skills:'skills/ECC-main/cost-aware-llm-pipeline',
-    purpose:'【主理人】根据命题复杂度分流：单表指标走【普通问数泳道】；跨表、异动归因、时序预测走【高级专家团真正并行泳道】。',
-    inputs:'intent_spec\n候选数据集复杂度\n风险与成本预算',
-    outputs:'route\nroute_reason\nmax_steps / max_retries',
-    failure:'规则信号冲突时选取更安全路径或向用户澄清，不应因提示词写了“高级”就无条件启动全体 Agent。',
-    notes:['为简单查询设置快速通道。','为高阶任务设置调用预算和终止条件。']
+  "l5": {
+    "title": "审核模板 / 语义编译",
+    "role": "格物 · SQL 工程专家",
+    "desc": "优先匹配金标适用条件，或用指标模型编译查询。",
+    "skills": [
+      "Golden SQL",
+      "Metric Store Compiler"
+    ],
+    "mechanism": "这是查询构造策略之一：用完整 QuerySpec、参数类型、语义/Schema 版本验证模板，符合才绑定参数。可编译指标走语义编译。它不是普通流程的全部，命中后仍过相同审查。",
+    "output": "SQL candidate + bound_params + provenance",
+    "fallback": "模板未命中且不能编译时选择右侧受约束生成；这是本模式内部策略切换，不消耗修复额度。",
+    "hook": "_select_sql_strategy / bs_golden_sql_samples",
+    "input": "本模式 TaskState + 经授权的上游产物引用"
   },
-
-  // ----------------------------------------------------
-  // 02 普通问数泳道 · FAST TRACK
-  // ----------------------------------------------------
-  {
-    id:'b01',track:'basic',kind:'basic',type:'MATCH',step:'B01',
-    role:'格物 · SQL工程专家',
-    title:'格物 · 匹配 Golden SQL 模板',
-    desc:'先查可信题库，再判断参数能否安全替换。',
-    io:'golden_sql_id · match_score',x:70,y:505,w:196,h:104,
-    skills:'skills/ECC-main/postgres-patterns',
-    purpose:'【格物】在标准题集与已验证 Golden SQL 库中检索。命中相似度 ≥ 0.88 则参数化复用，免去 LLM 生成幻觉。',
-    inputs:'intent_spec\ndataset_id / metric_id\nGolden SQL 索引',
-    outputs:'candidate_query_refs[]\nmatch_reason\nrequired_parameters[]',
-    failure:'未命中或候选冲突时进入受控 SQL 生成；禁止仅凭文本相似度就把不适用的 SQL 当作可信模板。',
-    notes:['参数替换要使用绑定参数。','记录命中的规则及适用条件。']
+  "l6": {
+    "title": "受约束生成 SQL",
+    "role": "格物 · SQL 工程专家",
+    "desc": "模板与编译均未覆盖时，依据查询规格生成新 SQL。",
+    "skills": [
+      "Schema 子图约束",
+      "方言 / 参数绑定"
+    ],
+    "mechanism": "仅向生成器提供确认的指标约束、合法 Schema 子图及审核样例；产出 SQL、参数、粒度和 Join 解释。允许普通模式新 SQL，不把普通模式缩成缓存检索。",
+    "output": "SQL candidate + grain + join_contract",
+    "fallback": "字段/口径缺失返回主理人；语法修复需领取本任务共享令牌，不能无限生成。",
+    "hook": "four_agent_ask.py:_agent2_generate_sql",
+    "input": "本模式 TaskState + 经授权的上游产物引用"
   },
-  {
-    id:'b02',track:'basic',kind:'data',type:'SQL PLAN',step:'B02',
-    role:'格物 · SQL工程专家',
-    title:'格物 · 受控生成单表 SQL',
-    desc:'明确字段、聚合粒度、过滤与排序。',
-    io:'query_plan · selected_fields[]',x:315,y:505,w:196,h:104,
-    skills:'skills/ECC-main/postgres-patterns',
-    purpose:'【格物】根据已授权单表宽表资产生成简洁查询，受严格 Prompt 约束，仅写只读 SELECT 语句。',
-    inputs:'candidate_query_refs[]\n数据字典 / 关联元数据\nintent_spec',
-    outputs:'query_plan\nselected_fields[]\naggregation_grain',
-    failure:'缺少字段、关联键或指标定义时返回配置缺口，不允许模型猜测物理表名继续执行。',
-    notes:['普通模式限制不必要的多表 Join。','保留业务口径与 SQL 的映射。']
+  "l7": {
+    "title": "独立审查与静态闸门",
+    "role": "审衡 · 独立审查专家 / 主理人裁决",
+    "desc": "独立审语义与 SQL；AST、安全和权限规则强制执行。",
+    "skills": [
+      "AST / 方言检查",
+      "粒度 / Join 审核"
+    ],
+    "mechanism": "独立审查者读取 QuerySpec 与 SQL，核对指标、时间边界、过滤、排序、聚合。确定性 AST 检查单语句、表列与函数白名单、写 CTE、SELECT INTO 和权限注入。主理人读取审查单，不用生成者自我背书。",
+    "output": "review_report + gate PASS / FAIL",
+    "fallback": "权限/危险 SQL 立即拒绝；可修复缺陷经主理人发回格物，消耗共享修复额度。",
+    "hook": "_agent3_review + ask_engine_sql.py:54（加固）",
+    "input": "本模式 TaskState + 经授权的上游产物引用"
   },
-  {
-    id:'b03',track:'basic',kind:'decision',type:'SQL GUARD',step:'B03',
-    role:'知刑 · 独立审查专家',
-    title:'知刑：SQL 静态审查通过？',
-    desc:'只读限制、权限白名单、语法 AST 审查。',
-    io:'guard_passed:boolean',x:560,y:498,w:154,h:114,
-    skills:'skills/ECC-main/safety-guard',
-    purpose:'【知刑】运行 L0 确定性 AST 审查：校验是否仅为 SELECT/WITH，拦截 DROP/UPDATE/SELECT INTO，检查扫描范围。',
-    inputs:'SQL 草案\n用户 / 租户权限\nSQL 安全规则',
-    outputs:'guard_passed\nviolations[]\nnormalized_sql',
-    failure:'不通过时返回具体违规项给格物修复（≤2次）；超限后主理人中止并解释原因。',
-    notes:['不能仅靠另一个 LLM 口头审查。','执行前再次核实授权与语句类型。']
+  "l8": {
+    "title": "EXPLAIN 与沙箱试运行",
+    "role": "格物 · SQL 专家调用执行技能",
+    "desc": "先检查成本和方言，再在受限环境验证查询。",
+    "skills": [
+      "EXPLAIN / Cost Gate",
+      "只读沙箱 Dry-run"
+    ],
+    "mechanism": "非执行式 EXPLAIN 检查扫描、关联基数和成本。需要运行校验时在脱敏只读副本限时试跑；支持方言适配。小样本通过不能证明全量业务正确，不默认用 EXPLAIN ANALYZE。",
+    "output": "plan_receipt + dialect_validation + cost_budget",
+    "fallback": "计划超限先优化或用批准物化视图；仍超限则停止并说明，不偷偷切到高阶或生产裸跑。",
+    "hook": "safety/plan_gate.py + dialect adapters（拟新增）",
+    "input": "本模式 TaskState + 经授权的上游产物引用"
   },
-  {
-    id:'b04',track:'basic',kind:'data',type:'EXECUTE',step:'B04',
-    role:'安全执行沙箱',
-    title:'物理沙箱受控只读执行',
-    desc:'超时15s、500行截断、审计日志记录。',
-    io:'query_run_id · result_ref',x:800,y:505,w:196,h:104,
-    skills:'skills/ECC-main/clickhouse-io · skills/ECC-main/safety-guard',
-    purpose:'以只读连接在物理沙箱执行，实施 statement_timeout=15s 超时中断、行数上限与全链路 trace 归档。',
-    inputs:'guard_passed SQL\n绑定参数\n执行策略',
-    outputs:'query_run_id\nresult_ref\nexecution_stats',
-    failure:'区分权限拒绝、语法错误、超时和临时网络错误；只对可安全重试的错误重试。',
-    notes:['不要把大结果直接塞进模型上下文。','保存结果引用、行数和执行耗时。']
+  "l9": {
+    "title": "受控只读执行与回执",
+    "role": "格物 · SQL 工程专家",
+    "desc": "只读事务、超时、行数和字节预算、取消传播。",
+    "skills": [
+      "Read-only Executor",
+      "超时 / 限流 / Cancel",
+      "既有组织行过滤必经"
+    ],
+    "mechanism": "通过审查的 SQL 使用独立连接；数据库只读角色和事务，适配 statement_timeout、流式限行、字节预算和真实取消。缓存命中也重验权限、口径版本和水位。 每条查询执行前复用 apply_row_level_filter(sql, current_user, dataset_id) 应用组织范围；修复后的SQL重新过滤。新执行器负责保证这些现有检查在全部入口被调用，不重新定义授权规则。",
+    "output": "result_ref + execution_receipt + watermark",
+    "fallback": "超时真实取消并回滚；可重试错误领取统一令牌。LIMIT 不能代替扫描成本控制。",
+    "hook": "datasource_router.py:192 / _execute_sql",
+    "input": "本模式 TaskState + 经授权的上游产物引用"
   },
-  {
-    id:'b05',track:'basic',kind:'decision',type:'RESULT CHECK',step:'B05',
-    role:'主理人 · 结果核验',
-    title:'主理人：结果有效且一致？',
-    desc:'检查空值、行数>0、时间边界。',
-    io:'result_valid:boolean',x:1040,y:498,w:154,h:114,
-    skills:'skills/ECC-main/verification-before-completion',
-    purpose:'【主理人】核验执行结果：0行则触发真实性说明兜底，有数据则交付析微提炼图表。',
-    inputs:'result_ref\nquery_plan\nmetric_definition',
-    outputs:'validation_report\nresult_valid\nvalidation_warnings[]',
-    failure:'异常时定位数据问题、口径问题或 SQL 问题，进入有限修复；不能把空结果直接解释为业务为零。',
-    notes:['检查重复 Join 导致的膨胀。','核对时间区间是否含首不含尾。']
+  "l10": {
+    "title": "结果合理性与口径断言",
+    "role": "审衡 · 独立校验 + 析微",
+    "desc": "检查 Join 膨胀、空值、重复计数、单位和分母。",
+    "skills": [
+      "Result Assertions",
+      "空值诊断 / 基数对照"
+    ],
+    "mechanism": "按指标契约核对粒度、唯一键、时间范围、单位、比率分母和总分容差；聚合后行数不能证明无重复 Join，需结合关系基数和受预算约束的对照统计。合法零值/无记录/全 NULL/未同步分别编码。",
+    "output": "PASS / EMPTY_VALID / FAIL + checks",
+    "fallback": "异常空值向问津核验对象和条件，逻辑冲突复审，均计入共享预算；禁止静默删除过滤条件。",
+    "hook": "skills/result_assert.py（拟新增）",
+    "input": "本模式 TaskState + 经授权的上游产物引用"
   },
-  {
-    id:'b06',track:'basic',kind:'basic',type:'PRESENT',step:'B06',
-    role:'析微 · 数据分析专家',
-    title:'析微 · 适配图表与提炼结论',
-    desc:'自适应指标卡、表格、趋势图，简短解释。',
-    io:'chart_spec · concise_summary',x:1285,y:505,w:196,h:104,
-    skills:'skills/ECC-main/dashboard-builder',
-    purpose:'【析微】轻量级输出：根据数据维度匹配 ECharts 配置，生成一句话结论，标明数据时点。',
-    inputs:'validated_result_ref\n用户展示偏好\nchart constraints',
-    outputs:'chart_spec\nsummary\ncolumn_metadata',
-    failure:'数据量不足或图表不适用时退回表格；没有证据的原因分析不得自动补写。',
-    notes:['图表数值必须来自执行结果。','附上时间范围、口径和数据时点。']
+  "l11": {
+    "title": "分析、图表与故事化表达",
+    "role": "析微 · 数据分析专家",
+    "desc": "完成对比、趋势、排名等解读；每个数值引用结果。",
+    "skills": [
+      "Viz Recommendation",
+      "证据化叙事"
+    ],
+    "mechanism": "根据用户目标做确定性计算，规则选择折线/条形/明细等；chart_spec 验证字段类型与数值。模型可解释业务含义，但不能补造结果或无证据原因；普通模式同样提供完整解读。",
+    "output": "findings + chart_spec + evidence_refs + limitations",
+    "fallback": "图表校验失败退回表格；叙事失败采用模板，数值不变。证据不足只说明观察到的现象。",
+    "hook": "_agent4_analysis + answer_contract（扩展）",
+    "input": "本模式 TaskState + 经授权的上游产物引用"
   },
-  {
-    id:'b07',track:'basic',kind:'supervisor',type:'DELIVERY',step:'B07',
-    role:'主理人 · 交付门禁',
-    title:'主理人 · 普通模式终审交付',
-    desc:'统一答复、SQL 追溯、后续追问入口。',
-    io:'answer_packet · artifact_refs',x:1530,y:505,w:196,h:104,
-    skills:'skills/ECC-main/delivery-gate',
-    purpose:'【主理人】打包普通卡片交付，写回独立工作区检查点，输出后续追问入口。',
-    inputs:'validated_result_ref\nsummary + chart_spec\nvalidation_report',
-    outputs:'answer_packet\nworkspace_checkpoint\nfollow_up_context',
-    failure:'部分校验未通过时须标注限制；不得将未验证结果包装成确定结论。',
-    notes:['保存本轮最终状态和产物引用。','后续追问沿用工作区状态。']
+  "l12": {
+    "title": "主理人综合复核与签收",
+    "role": "总主理人 · 唯一交付责任人",
+    "desc": "综合问津、格物、析微与审查意见，核对证据完整性。",
+    "skills": [
+      "Answer Contract",
+      "结论 / 证据一致性"
+    ],
+    "mechanism": "检查最初成功标准、条件继承、口径版本、SQL/结果断言、图表和叙述是否一致。收到冲突时形成缺陷单，定向或整轮要求专家复核，每次返工周期使用共享额度，不以多数投票替代证据。",
+    "output": "APPROVED / REWORK / PARTIAL / BLOCKED",
+    "fallback": "复核不通过走本模式自愈；预算耗尽输出可核实部分与缺口，不切换模式。",
+    "hook": "supervisor_reviewer / basic_workflow（拟扩展）",
+    "input": "本模式 TaskState + 经授权的上游产物引用"
   },
-
-  // ----------------------------------------------------
-  // 03 高级问数泳道 · EXPERT TRACK (真正并行并发多发架构)
-  // ----------------------------------------------------
-  // 阶段 1：主理人 DAG 规划与前置并行探寻
-  {
-    id:'a01',track:'advanced',kind:'supervisor',type:'PLAN',step:'A01',
-    role:'主理人 · 任务总指挥',
-    title:'主理人 · 制定任务 DAG 并发图',
-    desc:'拆解子任务，启动问津与正名并行前置探寻。',
-    io:'task_graph · parallel_subtasks[]',x:60,y:980,w:196,h:104,
-    skills:'skills/superpowers-main/writing-plans · skills/superpowers-main/dispatching-parallel-agents',
-    purpose:'【主理人】将复杂命题分解为可独立执行的子任务 DAG，启动前置双路专家并发探寻。',
-    inputs:'intent_spec\nactive task state\n用户目标与预算',
-    outputs:'task_graph\nsubtasks[]\nparallel_groups[]\nacceptance_criteria',
-    failure:'任务计划存在循环依赖或超预算时先修订计划或请求澄清。',
-    notes:['主理人掌控并发调度权和熔断权。','设置三路并发子任务验收契约。']
+  "l13": {
+    "title": "交付、检查点与反馈候选",
+    "role": "总主理人 + 管家",
+    "desc": "统一返回答案、图表、口径与 SQL 追溯，保存本轮状态。",
+    "skills": [
+      "持久化 / 幂等",
+      "审核后知识回流"
+    ],
+    "mechanism": "保存条件差量、批准语义版本、执行证据、专家交接、图表和结果状态。通过原 SSE/报告接口兼容输出。反馈进入候选队列，经审核、回归才发布金标。",
+    "output": "answer_envelope + checkpoint + feedback_candidate",
+    "fallback": "SSE 重连读取任务进度，不重复查数；持久化失败明确记录且禁止宣称恢复成功。",
+    "hook": "ask_chat / report_history / task_store",
+    "input": "本模式 TaskState + 经授权的上游产物引用"
   },
-  {
-    id:'a02',track:'advanced',kind:'data',type:'DATA ASSETS',step:'A02',
-    role:'问津 · 资产路由专家',
-    title:'问津 · 探寻跨表与关联资产',
-    desc:'【前置并行路A】多源宽表、关联映射与时效检查。',
-    io:'asset_manifest · join_map',x:300,y:870,w:196,h:104,
-    skills:'skills/ECC-main/data-throughput-accelerator',
-    purpose:'【问津】并行探寻候选数据集、物理关联键与 Join 映射，向主理人提交资产清单。',
-    inputs:'子任务定义\n数据集书架\n用户授权范围',
-    outputs:'asset_manifest\nfield_mapping\njoin_map\ndata_freshness',
-    failure:'候选数据集不足或关系不明确时回交主理人，不自行发明表关系。',
-    notes:['保留数据集版本 ID。','跨源查询先检查可用连接池。']
+  "lr": {
+    "title": "普通任务 · 反思与自愈",
+    "role": "总主理人 · 预算与返工控制",
+    "desc": "仅失败进入；SQL、异常空值、逻辑冲突和签收打回共用 ≤ 2 次。",
+    "skills": [
+      "task_retry_remaining = 2",
+      "定向回流 / 原子扣减"
+    ],
+    "mechanism": "创建普通任务时设 2 枚返工令牌。每次失败修复周期原子领取一枚，记录错误码、目标节点与改动。SQL 错误回格物，空值核验回问津，逻辑冲突回审查/析微。修复必须重新经过依赖闸门；成功分支不重复执行。",
+    "output": "repair_ticket + target_node + remaining_budget",
+    "fallback": "权限和危险 SQL 不重试；耗尽或 deadline 到停止，交付已核实部分/待确认项。本任务不自动进入高阶。",
+    "hook": "ask_retry_events + basic task budget（拟新增）",
+    "input": "本模式 TaskState + 经授权的上游产物引用"
   },
-  {
-    id:'a03',track:'advanced',kind:'memory',type:'SEMANTICS',step:'A03',
-    role:'正名 · 业务语义专家',
-    title:'正名 · 检索口径与历史记忆',
-    desc:'【前置并行路B】指标定义、同义词、历史纠错案例。',
-    io:'semantic_bundle · memory_refs',x:300,y:1090,w:196,h:104,
-    skills:'skills/skills-1.3.1/domain-modeling · skills/ECC-main/unified-memory',
-    purpose:'【正名】并行检索权威指标库与独立记忆服务中的纠错历史，输出标准语义包。',
-    inputs:'intent_spec\nasset candidates\nmemory query scope',
-    outputs:'semantic_bundle\nmetric_version_refs\nrelevant_memory_refs',
-    failure:'权威配置与旧记忆冲突时以有效权威配置为准；口径存疑请求澄清。',
-    notes:['相似度不代表事实有效。','历史答案不替代物理查询。']
+  "h01": {
+    "title": "高级接单与目标建档",
+    "role": "总主理人",
+    "desc": "定义问题对象、分析时间与交付问题；固定高级模式。",
+    "skills": [
+      "目标契约 / 模式锁定"
+    ],
+    "mechanism": "把业务请求记录为研究目标，不直接许诺原因。建立 owner、tenant 和追踪标识；允许明确的归因、下钻、预测目标。",
+    "output": "ResearchRequest + objective_id",
+    "fallback": "问题超出已授权数据/方法边界时停止或要求用户明确范围。",
+    "basis": "S6：本项目控制面设计",
+    "input": "用户问题 + 身份 + 当前高级会话",
+    "hook": "拟新增 advanced/control_plane.py",
+    "acceptance": "输出 ResearchRequest + objective_id；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
   },
-  {
-    id:'a04',track:'advanced',kind:'advanced',type:'MERGE',step:'A04',
-    role:'主理人 · 材料汇聚',
-    title:'主理人 · 汇聚材料并冻结口径',
-    desc:'合并前置双路，冻结版本，开启三路并发执行！',
-    io:'analysis_spec · frozen_context_version',x:535,y:980,w:196,h:104,
-    skills:'skills/ECC-main/contract-first',
-    purpose:'【主理人】汇聚问津与正名的材料，冻结上下文版本，向格物同时下发【三路并行取数任务】！',
-    inputs:'asset_manifest\nsemantic_bundle\nsubtask statuses',
-    outputs:'analysis_spec\nfrozen_context_version\nparallel_query_specs[3]',
-    failure:'必需资产或口径缺失时不盲目下发查询；退回对应专家或请求确认。',
-    notes:['使用明确版本引用。','准备下发三路物理并发。']
+  "h02": {
+    "title": "鉴权与组织树权限校验",
+    "role": "总主理人调用现有权限服务",
+    "desc": "高级问数同样必检；所有专家继承现有组织树授权范围。",
+    "skills": [
+      "复用现有组织树权限",
+      "数据集准入 / 组织范围"
+    ],
+    "mechanism": "复用 organization_tree_store 与 data_permission_store 的现有规则，不另建组织树或数据权限体系。入口用 allowed_dataset_ids_for_user 取得可访问数据集；按数据集规则调用 user_org_scope_for_rule，取得组织范围。沿用现有 public/restricted/org_tree/disabled 与 super_admin 处理规则。 高级工作区、资产检索与各并发分支都携带 current_user 和已允许的数据集范围；不得因为高级模式、并行专家、SQL修复或分析沙箱而扩大组织授权。工具执行约束是能力加固，不替代现有业务权限。",
+    "output": "allowed_dataset_ids + dataset_org_scopes + scope_hash",
+    "fallback": "现有规则判定拒绝即终止；权限变更后重新调用现有判定，不使用历史范围继续查询。",
+    "basis": "现有系统代码：组织树维护 + 数据集权限 + 组织范围 + SQL行过滤；两模式均复用",
+    "input": "current_user + question + selected_dataset_ids + 既有组织树/权限配置",
+    "hook": "data_permission_store.py:251/364/425/472/534；controllers/ask_chat.py:533/758；organization_tree_store.py:154",
+    "acceptance": "同一用户、相同数据集规则下，普通和高级得到一致的授权范围；并发与修复SQL均不超出此范围。"
   },
-
-  // 阶段 2：三路 SQL 生产与物理沙箱并发执行 (Parallel Fan-out)
-  // 并发流 1: 核心指标事实流
-  {
-    id:'a05_1',track:'advanced',kind:'data',type:'PARALLEL SQL 1',step:'A05-1',
-    role:'格物 · 并发分支1',
-    title:'格物 · 核心指标事实取数',
-    desc:'【并发流1】构建主营收/销量大盘事实SQL。',
-    io:'sql_1 · fact_metrics_data',x:780,y:820,w:196,h:100,
-    skills:'skills/ECC-main/postgres-patterns · skills/ECC-main/safety-guard',
-    purpose:'【格物】负责主指标事实宽表取数，生成并执行高优先级核心聚合 SQL。',
-    inputs:'analysis_spec.query_1\nfrozen_version',
-    outputs:'result_fact_ref\nexecution_stats_1',
-    failure:'语法错误或超时触发自愈修复，限≤2次。',
-    notes:['带物理只读连接与15s超时。','独立返回数据帧引用。']
+  "h03": {
+    "title": "创建研究任务与持久预算",
+    "role": "总主理人 / 编排运行时",
+    "desc": "独立任务、总预算、执行租约与检查点。",
+    "skills": [
+      "TaskState / Outbox",
+      "共享修复额度 2"
+    ],
+    "mechanism": "创建 advanced task、deadline、token 与查询数量预算，设置 repair_remaining=2；事务写 task 与 outbox，worker 租约接单。42 是架构节点数，不是42次模型调用。",
+    "output": "task_id + immutable_mode + lease + budget",
+    "fallback": "状态库不可用不查数；任务取消传播到所有租约与数据库连接。",
+    "basis": "S6：本项目耐久工作流设计",
+    "input": "H02 的批准输出",
+    "hook": "拟新增 advanced/control_plane.py",
+    "acceptance": "输出 task_id + immutable_mode + lease + budget；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
   },
-  // 并发流 2: 维度与异动下钻流
-  {
-    id:'a05_2',track:'advanced',kind:'data',type:'PARALLEL SQL 2',step:'A05-2',
-    role:'格物 · 并发分支2',
-    title:'格物 · 多维异动下钻取数',
-    desc:'【并发流2】构建品类/区域/渠道下钻分析SQL。',
-    io:'sql_2 · drilldown_dims_data',x:780,y:980,w:196,h:100,
-    skills:'skills/ECC-main/clickhouse-io · skills/ECC-main/safety-guard',
-    purpose:'【格物】负责下钻明细与交叉维度数据拉取，与核心事实流同时并发执行！',
-    inputs:'analysis_spec.query_2\nfrozen_version',
-    outputs:'result_drill_ref\nexecution_stats_2',
-    failure:'多表Join膨胀时按白名单拦截。',
-    notes:['限制笛卡尔积。','与事实流并发执行缩短耗时。']
+  "h04": {
+    "title": "恢复工作区与可信上下文",
+    "role": "管家 · 上下文专家",
+    "desc": "读取确认过的条件、历史产物和待确认项。",
+    "skills": [
+      "条件 Patch / 证据过期检测"
+    ],
+    "mechanism": "只读取当前用户可访问状态，区分新增、替换和删除条件。历史结论需验证水位和口径，不能作为数据库事实。",
+    "output": "ContextPacket + inherited_conditions",
+    "fallback": "指代未解析交 H41 澄清；过期证据仅作线索。",
+    "basis": "S6：上下文状态设计",
+    "input": "H03 的批准输出",
+    "hook": "拟新增 advanced/skills/semantic.py",
+    "acceptance": "输出 ContextPacket + inherited_conditions；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
   },
-  // 并发流 3: 历史基线与对拍流
-  {
-    id:'a05_3',track:'advanced',kind:'data',type:'PARALLEL SQL 3',step:'A05-3',
-    role:'格物 · 并发分支3',
-    title:'格物 · 历史同环比基线取数',
-    desc:'【并发流3】构建同期基线与多源对照组SQL。',
-    io:'sql_3 · baseline_history_data',x:780,y:1140,w:196,h:100,
-    skills:'skills/ECC-main/clickhouse-io · skills/ECC-main/safety-guard',
-    purpose:'【格物】负责拉取同期历史数据和多源对照组，供后续对拍与归因使用。',
-    inputs:'analysis_spec.query_3\nfrozen_version',
-    outputs:'result_baseline_ref\nexecution_stats_3',
-    failure:'历史数据缺失时标明基线不可用。',
-    notes:['时间窗口严格对齐。','为多路对拍提供客观参照。']
+  "h05": {
+    "title": "检索指标、业务规则与分析手册",
+    "role": "正名 · 语义专家",
+    "desc": "检索批准定义、业务日历与标准分析方法。",
+    "skills": [
+      "Semantic Retrieval",
+      "Analysis Playbook"
+    ],
+    "mechanism": "按业务域召回指标定义、排除项、日历、事件说明和分析手册，分别记录来源与批准状态；手册是研究计划模板，不是历史答案。",
+    "output": "DefinitionPack + playbook_candidates",
+    "fallback": "缺权威定义返回主理人，不把过时报告当现行口径。",
+    "basis": "S1：可审阅语义；S5：分析任务知识",
+    "input": "H03 的批准输出",
+    "hook": "拟新增 advanced/skills/semantic.py",
+    "acceptance": "输出 DefinitionPack + playbook_candidates；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
   },
-
-  // 阶段 3：独立审查专家知刑 (对三路并发结果进行多路交叉审查与对拍)
-  {
-    id:'a06',track:'advanced',kind:'data',type:'INDEPENDENT REVIEW',step:'A06',
-    role:'知刑 · 独立审查专家',
-    title:'知刑 · 独立交叉审查与对拍',
-    desc:'非生成者自审！多路 SQL 结果 evidence_vote 对拍。',
-    io:'review_report · audit_passed',x:1040,y:980,w:196,h:104,
-    skills:'skills/superpowers-main/verification-before-completion · skills/skills-1.3.1/code-review',
-    purpose:'【知刑】独立质检人设：核查格物三路并发取数是否存在膨胀、粒度漂移与对拍矛盾，严禁格物自查自纠。',
-    inputs:'sql_1/2/3\nresult_refs[3]\nsecurity policy',
-    outputs:'review_report\naudit_passed\nrepair_requests[]',
-    failure:'审查不通过或对拍矛盾生成缺陷清单打回返工节点。',
-    notes:['安全校验由确定性规则兜底。','审查关联具体数据版本。']
+  "h06": {
+    "title": "检索资产、健康度与数据水位",
+    "role": "问津 · 数据资产专家",
+    "desc": "确定数据源、表、字段、新鲜度与可查询范围。",
+    "skills": [
+      "Catalog Retrieval",
+      "Watermark / Health Check"
+    ],
+    "mechanism": "权限过滤后检索元数据与同步状态，标出可联接数据集、暂不可用源和迟到数据；不给模型全库结构。 目录路由必须与 allowed_dataset_ids 求交，沿用 is_dataset_allowed，不把未授权数据集放入专家上下文。",
+    "output": "AssetPack + source_watermarks",
+    "fallback": "源不可用时识别必要/可选证据，不自动改查其他模式。",
+    "basis": "S2：分层检索；水位治理为项目扩展",
+    "input": "H03 的批准输出",
+    "hook": "拟新增 advanced/skills/semantic.py",
+    "acceptance": "输出 AssetPack + source_watermarks；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
   },
-  {
-    id:'a07',track:'advanced',kind:'decision',type:'EVIDENCE GATE',step:'A07',
-    role:'主理人 · 对拍闸门',
-    title:'主理人：三路对拍与证据足够？',
-    desc:'三路数据一致闭合？覆盖度满足目标？',
-    io:'evidence_sufficient:boolean',x:1280,y:974,w:156,h:114,
-    skills:'skills/ECC-main/evidence_vote',
-    purpose:'【主理人】核对知刑审查结论与三路对拍结果：证据充足走向析微多维归因；矛盾或不足走向返工回流！',
-    inputs:'review_report\nresult_refs[3]\nacceptance_criteria',
-    outputs:'evidence_sufficient\nevidence_gaps[]',
-    failure:'证据不足或对拍冲突走向定向返工，限≤2轮。',
-    notes:['对拍不一致严禁少数服从多数。','保留三路证据引用。']
+  "h07": {
+    "title": "实体与数据库值对齐",
+    "role": "问津 · 实体链接专家",
+    "desc": "把组织、产品、枚举值落到实际列和值。",
+    "skills": [
+      "Value Grounding",
+      "别名 / 编辑距离 / 受权值索引"
+    ],
+    "mechanism": "先查受治理别名，再在授权的脱敏值索引上做精确/近似检索；记录列、规范值及歧义。不能为每次问数扫描所有原始敏感值。",
+    "output": "EntityBindings + unresolved_entities",
+    "fallback": "多候选会改变结果则转 H41；不能静默把数量改成金额。",
+    "basis": "S2：entity retrieval；索引隐私为项目设计",
+    "input": "H04 的批准输出 / H05 的批准输出 / H06 的批准输出",
+    "hook": "拟新增 advanced/skills/retrieval.py",
+    "acceptance": "输出 EntityBindings + unresolved_entities；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
   },
-  {
-    id:'a12',track:'advanced',kind:'error',type:'REPAIR',step:'A12',
-    role:'主理人 · 返工中枢',
-    title:'主理人 · 定向缺陷返工节点',
-    desc:'按缺陷类型定向打回对应并发分支，限次补查。',
-    io:'repair_plan · retry_count',x:1260,y:1280,w:196,h:96,
-    skills:'skills/ECC-main/autonomous-loops · skills/ECC-main/loop-design-check',
-    purpose:'【主理人】定向返工中枢：某一路数据出现冲突或语法错误时，仅定向回派该并发分支重算，不全链路重跑！',
-    inputs:'evidence_gaps[]\nreview_report\nretry budget',
-    outputs:'repair_plan\nretry_count\ntarget_branch_id',
-    failure:'超过重试次数或预算时熔断，进入带缺口交付。',
-    notes:['单节点重试上限≤2次。','禁止盲目无休止重新查询。']
+  "h08": {
+    "title": "Schema 子图与合法 Join 路径",
+    "role": "问津 · Schema 专家",
+    "desc": "向量召回后用关系图补齐键、基数与粒度。",
+    "skills": [
+      "Schema Linking",
+      "向量 + 主外键图剪枝"
+    ],
+    "mechanism": "合并问题语义和列说明召回；保留主外键、时间和权限字段，寻找批准路径。小 Schema 可以保留较全结构，避免过度剪枝丢召回。",
+    "output": "SchemaSubgraph + join_cardinality",
+    "fallback": "无合法路径明确不支持；扩大检索也受原权限范围限制。",
+    "basis": "S2：Schema Selector；图约束为项目扩展",
+    "input": "H07 的批准输出",
+    "hook": "拟新增 advanced/skills/retrieval.py",
+    "acceptance": "输出 SchemaSubgraph + join_cardinality；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
   },
-
-  // 阶段 4：扇入汇聚 (Fan-in Merge) 与多维深度归因
-  {
-    id:'a08',track:'advanced',kind:'advanced',type:'MERGE & ATTRIBUTION',step:'A08',
-    role:'析微 · 数据分析专家',
-    title:'析微 · 扇入多维深度归因',
-    desc:'汇聚三路验证数据，贡献率分解与假设检验。',
-    io:'attribution_findings · claim_evidence[]',x:1510,y:980,w:196,h:104,
-    skills:'skills/ECC-main/verification-loop · skills/ECC-main/deep-research',
-    purpose:'【析微】将三路验证通过的数据扇入汇聚，计算 Shapley 波动贡献率，检验异动假设，强制标明“相关性 ≠ 因果性”。',
-    inputs:'validated result_refs[3]\nanalysis_spec\nquality_report',
-    outputs:'attribution_findings\nclaim_evidence[]\nuncertainties[]',
-    failure:'无法从数据证实因果时，明确说明仅存在相关性，不伪造推论。',
-    notes:['标明贡献率计算分母。','严禁主观编造未验证结论。']
+  "h09": {
+    "title": "编译语义查询计划",
+    "role": "正名 + 语义编译器",
+    "desc": "将指标、时间窗、维度、聚合与排除项编译成 IR。",
+    "skills": [
+      "SemanticPlan IR",
+      "公式 / 可加性 / 单位"
+    ],
+    "mechanism": "建立指标 ID、表达式依赖、聚合粒度、财政日历、有效过滤和批准 Join 的中间表示；LLM 不可任意重定义指标公式。",
+    "output": "SemanticPlan + release_hash + required_slots",
+    "fallback": "冲突必须澄清或拒绝；不能仅按文本相似选口径。",
+    "basis": "S1：语义契约；S4：确定性查询生成",
+    "input": "H08 的批准输出",
+    "hook": "拟新增 advanced/skills/retrieval.py",
+    "acceptance": "输出 SemanticPlan + release_hash + required_slots；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
   },
-  {
-    id:'a09',track:'advanced',kind:'advanced',type:'VISUALIZATION',step:'A09',
-    role:'表达与可视化专家',
-    title:'组织深度决策报告与多图联动',
-    desc:'动因下钻、敏感性推演、ECharts 多图联动。',
-    io:'report_packet · chart_specs[]',x:1750,y:980,w:196,h:104,
-    skills:'skills/ECC-main/dashboard-builder',
-    purpose:'将析微的归因成果编排为高管决策报告，配置多图联动看板、证据索引与管理行动建议。',
-    inputs:'attribution_findings\nclaim_evidence[]\nuser display preferences',
-    outputs:'report_packet\nchart_specs[]\nsource_refs[]',
-    failure:'图表数据与结论矛盾时退回修改；不填充未经验证的数据。',
-    notes:['图表绑定物理结果引用。','重要指标附口径与统计周期。']
+  "h10": {
+    "title": "主理人消歧与冻结研究规格",
+    "role": "总主理人",
+    "desc": "汇合上下文、资产与语义，签发唯一研究规格。",
+    "skills": [
+      "Spec Gate",
+      "澄清最多 2 轮"
+    ],
+    "mechanism": "检查问题是否可回答、关键槽位、数据时间和成功标准。缺项走 H41 待用户确认，确认后返回本节点；只冻结显式批准的版本。 问题明确提及组织时复用 org_mention_permission_check，越权直接拒绝；用户澄清不能授权额外组织。",
+    "output": "AnalysisSpec + snapshot_policy + success_criteria",
+    "fallback": "歧义未解则等待，不自动开查；安全拒绝直达 H42。",
+    "basis": "S6：唯一权威规格与澄清设计",
+    "input": "H09 的批准输出",
+    "hook": "拟新增 advanced/control_plane.py",
+    "acceptance": "输出 AnalysisSpec + snapshot_policy + success_criteria；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
   },
-  {
-    id:'a10',track:'advanced',kind:'supervisor',type:'FINAL REVIEW',step:'A10',
-    role:'主理人 · 终审统领',
-    title:'主理人 · 全要素终审与交付',
-    desc:'核验目标覆盖、结论严密，加盖主理人签章交付！',
-    io:'final_answer · delivery_status',x:1990,y:980,w:196,h:104,
-    skills:'skills/ECC-main/delivery-gate',
-    purpose:'【主理人】全面终审：是否切中用户核心痛点？证据链是否闭合？无漏洞后正式对外统一交付！',
-    inputs:'report_packet\nreview_report\noriginal user goal',
-    outputs:'final_answer\nanswer_artifacts\nworkspace_checkpoint\ndelivery_status',
-    failure:'仍有重大争议时退回指定节点；预算用尽带缺口停止交付。',
-    notes:['主理人总揽全局并盖戳交付。','带完整证据链与溯源入口。']
+  "h11": {
+    "title": "建立当前值与比较基线",
+    "role": "格物 · 基线查询专家",
+    "desc": "使用受审定查询得到本期、基期与比较范围。",
+    "skills": [
+      "Guarded Baseline Query",
+      "同窗 / 同组织 / 同币种",
+      "既有组织行过滤必经"
+    ],
+    "mechanism": "通过共享安全查询运行时执行基线查询，完整经过 AST、计划、只读预算与结果断言；不是未审查的预查。明确日期闭开区间及季节/工作日调整。 每条查询执行前复用 apply_row_level_filter(sql, current_user, dataset_id) 应用组织范围；修复后的SQL重新过滤。新执行器负责保证这些现有检查在全部入口被调用，不重新定义授权规则。",
+    "output": "BaselineArtifact + current_ref + prior_ref",
+    "fallback": "同比基期缺失或源未同步时标明不可比；重做需共享令牌。",
+    "basis": "S5：问题定义后查询；安全基线为项目设计",
+    "input": "H10 的批准输出",
+    "hook": "拟新增 advanced/skills/retrieval.py",
+    "acceptance": "输出 BaselineArtifact + current_ref + prior_ref；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
   },
-
-  // ----------------------------------------------------
-  // 04 独立上下文与记忆服务泳道 (MEMORY)
-  // ----------------------------------------------------
-  {
-    id:'m01',track:'memory',kind:'memory',type:'STATE STORE',step:'M01',
-    role:'独立记忆底座',
-    title:'持久化任务检查点',
-    desc:'状态版本、步骤产物与恢复位置。',
-    io:'state_snapshot · checkpoint_id',x:70,y:1470,w:196,h:104,
-    skills:'skills/ECC-main/unified-memory',
-    purpose:'独立记忆服务：全量落库每一轮任务的 TaskState 与产物引用，保证服务重启后可按检查点完整恢复。',
-    inputs:'task_state\nagent task statuses\nartifact refs',
-    outputs:'checkpoint_id\nstate_snapshot_version\nresume_from_node',
-    failure:'写入失败时不宣称任务可恢复；对关键状态使用事务或可靠重试，避免半写入状态。',
-    notes:['状态与聊天消息分开存储。','保存前后版本以处理并发更新。']
+  "h12": {
+    "title": "基线质量与可比性验证",
+    "role": "审衡 · 数据质量专家",
+    "desc": "先排除同步、重复、口径漂移造成的伪异动。",
+    "skills": [
+      "Freshness / Coverage Gate",
+      "去重 / 口径漂移检测"
+    ],
+    "mechanism": "检查水位、覆盖率、重复键和历史口径；标记数据问题与真实业务变化。数据未齐不能被解释成业绩骤降。",
+    "output": "BaselineQuality + comparability_status",
+    "fallback": "不可比转 H42 部分/阻断状态，或 H40 修复可纠正查询错误；禁止补造基期。",
+    "basis": "S6：先数据质量后业务归因",
+    "input": "H11 的批准输出",
+    "hook": "拟新增 advanced/skills/retrieval.py",
+    "acceptance": "输出 BaselineQuality + comparability_status；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
   },
-  {
-    id:'m02',track:'memory',kind:'memory',type:'MEMORY RETRIEVAL',step:'M02',
-    role:'独立检索服务',
-    title:'检索相关长期记忆',
-    desc:'结构过滤 + 关键词 + 语义检索 + 时效判断。',
-    io:'memory_refs · retrieval_scores',x:305,y:1470,w:196,h:104,
-    skills:'skills/ECC-main/unified-memory',
-    purpose:'按用户、项目与数据集范围检索有效记忆，结合来源可信度与时效过滤，输出可信记忆引用。',
-    inputs:'current intent\nuser / tenant scope\nworkspace references',
-    outputs:'memory_refs[]\nsource refs\nvalidity metadata',
-    failure:'无有效记忆时返回空结果；不将无关记忆强行拼入上下文。',
-    notes:['历史答案不是当前数据库事实。','过期或撤销记忆默认不参与常规召回。']
+  "h13": {
+    "title": "选择可复用分析方法",
+    "role": "筹策 · 规划专家",
+    "desc": "从场景手册选择量价、漏斗、分群或预测方法。",
+    "skills": [
+      "Playbook Match",
+      "方法适用条件"
+    ],
+    "mechanism": "依据指标公式、可加性和问题目标选择方法及验收规则；收入量价结构方法不同于转化漏斗，不能所有问题固定三条假设。",
+    "output": "MethodContract + applicability + exclusions",
+    "fallback": "没有适用方法请求主理人限定目标，不能硬套模板。",
+    "basis": "S5：分析模板；方法契约为项目扩展",
+    "input": "H12 的批准输出",
+    "hook": "拟新增 advanced/skills/retrieval.py",
+    "acceptance": "输出 MethodContract + applicability + exclusions；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
   },
-  {
-    id:'m03',track:'memory',kind:'memory',type:'MEMORY CANDIDATE',step:'M03',
-    role:'候选提取服务',
-    title:'提取记忆候选',
-    desc:'业务纠错、明确偏好、已验证案例。',
-    io:'memory_candidates[]',x:540,y:1470,w:196,h:104,
-    skills:'skills/ECC-main/continuous-learning-v2',
-    purpose:'从本轮已交付的已验证产物和用户明确反馈中提取记忆候选，严禁把未经证实的模型推论直接落库。',
-    inputs:'confirmed user corrections\nvalidated artifacts\nconversation deltas',
-    outputs:'memory_candidates[]\ncandidate type + scope\nsource evidence refs',
-    failure:'来源不清、仅有模型猜测或一次性临时条件，不升级为长期规则。',
-    notes:['区分用户偏好、个人规则和组织口径。','记忆提取可以异步执行。']
+  "h14": {
+    "title": "构建可证伪假设与反证计划",
+    "role": "筹策 + 垂直领域专家",
+    "desc": "每条假设定义支持证据、反证、基线与停止条件。",
+    "skills": [
+      "Hypothesis Contract",
+      "反证 / 必要证据"
+    ],
+    "mechanism": "输出结构化假设而非隐式思维链。每个假设指定指标、维度、对照组、可观察预测、反证条件及是否可支持因果。",
+    "output": "HypothesisTree + falsification_rules",
+    "fallback": "不可检验假设标为未验证线索；不能写成已确认原因。",
+    "basis": "S3：分解任务；业务反证为项目设计",
+    "input": "H13 的批准输出",
+    "hook": "拟新增 advanced/skills/query_worker.py",
+    "acceptance": "输出 HypothesisTree + falsification_rules；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
   },
-  {
-    id:'m04',track:'memory',kind:'decision',type:'MEMORY GATE',step:'M04',
-    role:'冲突审核闸门',
-    title:'审核范围、冲突与有效性？',
-    desc:'候选是否可自动保存、待确认或拒绝？',
-    io:'memory_write_decision',x:780,y:1464,w:156,h:114,
-    skills:'skills/ECC-main/delivery-gate',
-    purpose:'独立记忆审计门禁：核验记忆来源、权限与版本冲突。业务口径变更必须走审核，严禁静默覆盖。',
-    inputs:'memory_candidates[]\nexisting active memories\nauthoritative config refs',
-    outputs:'write / ask / reject\nconflict_resolution\nversion plan',
-    failure:'冲突无法自动解决时保留旧有效版本并请求确认；不得静默覆盖权威指标口径。',
-    notes:['记录谁确认、何时生效、影响范围。','允许撤销和追溯。']
+  "h15": {
+    "title": "主理人编译 DAG 与资源派单",
+    "role": "总主理人 / 调度器",
+    "desc": "定义依赖、必要分支、并发令牌与每路查询预算。",
+    "skills": [
+      "DAG / Fan-out",
+      "依赖就绪 / 单源配额"
+    ],
+    "mechanism": "默认最多3个假设同时活动、单源2条查询；完整架构42节点不等于可无限扩树。运行时默认业务假设≤6、初始查询≤12，候选/对照查询也计入查询预算。",
+    "output": "ExecutableDAG + required_flags + work_orders",
+    "fallback": "环依赖、无预算、无执行能力均拒绝派单；不调用 basic_service.ask。",
+    "basis": "S3：依赖分解；配额为项目设计",
+    "input": "H14 的批准输出",
+    "hook": "拟新增 advanced/control_plane.py",
+    "acceptance": "输出 ExecutableDAG + required_flags + work_orders；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
   },
-  {
-    id:'m05',track:'memory',kind:'memory',type:'VERSIONED MEMORY',step:'M05',
-    role:'版本化写入底座',
-    title:'写入版本化记忆',
-    desc:'保留来源、状态、生效期和关联证据。',
-    io:'memory_id · version · status',x:1020,y:1470,w:196,h:104,
-    skills:'skills/ECC-main/unified-memory',
-    purpose:'将审核通过的记忆以版本化形式写入权威库，并同步更新向量与倒排索引，保留生效与失效历史。',
-    inputs:'approved memory candidate\nwrite decision\nsource refs',
-    outputs:'memory_id\nversion\nstatus / valid_from\nindex update status',
-    failure:'数据库写入和索引更新分开处理，保证可重建索引；不得让索引中的旧版本覆盖权威记录。',
-    notes:['先写权威记录，再更新检索索引。','提供搜索、编辑、过期、撤销入口。']
+  "h16": {
+    "title": "A 组 · 规模与流量取证计划",
+    "role": "运营领域专家",
+    "desc": "把规模变化假设转成分层/漏斗查询意图。",
+    "skills": [
+      "Domain QueryIntent",
+      "维度 / 分群契约"
+    ],
+    "mechanism": "输出订单量、活跃用户、组织/渠道分组与预期粒度，含可反驳本假设的结果。专家只向主理人交 QueryIntent。",
+    "output": "QueryIntent_A + expected_grain_A",
+    "fallback": "无法与批准指标匹配时提交缺口，不自行扩大查询范围。",
+    "basis": "S5：场景化分析；本项目专家任务",
+    "input": "H15 的批准输出",
+    "hook": "拟新增 advanced/skills/query_worker.py",
+    "acceptance": "输出 QueryIntent_A + expected_grain_A；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
   },
-  {
-    id:'m06',track:'memory',kind:'memory',type:'EVALUATION',step:'M06',
-    role:'回归评估服务',
-    title:'回归测试与反馈归因',
-    desc:'评估记忆是否召回、继承、纠错且未越权。',
-    io:'memory_metrics · regression_cases',x:1260,y:1470,w:196,h:104,
-    skills:'skills/ECC-main/eval-harness · skills/ECC-main/agent-eval',
-    purpose:'运行自动化基准测试套件，核验新写入的记忆是否引发口径漂移或越权访问，确保长期记忆质量。',
-    inputs:'memory changes\nconversation benchmark\nexpected state snapshots',
-    outputs:'evaluation report\nregression failures\nrelease decision',
-    failure:'回归测试失败时停止发布相关规则或检索变更，并保留可比较的基准记录。',
-    notes:['测错误记忆写入率，而不只测召回率。','模型、Prompt、语义配置变更均应回归。']
+  "h17": {
+    "title": "B 组 · 价格与转化取证计划",
+    "role": "财务领域专家",
+    "desc": "定义客单价、折扣和比率分子分母的查询。",
+    "skills": [
+      "Ratio Contract",
+      "同口径分子 / 分母"
+    ],
+    "mechanism": "输出分子/分母、含税/净额、币种和折扣口径；对收入数量×价格的交互项明确分摊规则。",
+    "output": "QueryIntent_B + ratio_contract_B",
+    "fallback": "零分母标不可计算，不能用0顶替；口径冲突交主理人。",
+    "basis": "S1 / S4：业务公式受治理；项目扩展",
+    "input": "H15 的批准输出",
+    "hook": "拟新增 advanced/skills/query_worker.py",
+    "acceptance": "输出 QueryIntent_B + ratio_contract_B；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h18": {
+    "title": "C 组 · 结构与预测取证计划",
+    "role": "产品 / 算法领域专家",
+    "desc": "定义产品/地区结构或按需预测输入。",
+    "skills": [
+      "Cohort / Feature Contract",
+      "预测能力准入"
+    ],
+    "mechanism": "结构贡献与量价贡献不能随意相加。预测意图才登记模型版本、训练窗、特征可用时点、基线和回测规则。",
+    "output": "QueryIntent_C + optional_forecast_spec",
+    "fallback": "预测不适用时仅做结构分析；不为满足三路示例编造预测需求。",
+    "basis": "S5：SQL/Python 分析；方法为项目设计",
+    "input": "H15 的批准输出",
+    "hook": "拟新增 advanced/skills/query_worker.py",
+    "acceptance": "输出 QueryIntent_C + optional_forecast_spec；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h19": {
+    "title": "A 组 · 构造与去重 SQL 候选",
+    "role": "格物 · Worker A",
+    "desc": "审核模板/编译优先，必要时产生有差异的候选。",
+    "skills": [
+      "Candidate Generation",
+      "参数化 / AST 指纹"
+    ],
+    "mechanism": "最多2个初始候选，来源与构造策略不同且去重；每个候选都遵守语义 IR。初始候选受总预算约束，失败后的改写才消耗修复令牌。",
+    "output": "Candidates_A + origin_refs",
+    "fallback": "无候选通过约束时走 H40，不无限采样。",
+    "basis": "S2：候选机制；数量与去重为项目设计",
+    "input": "H16 的批准输出",
+    "hook": "拟新增 advanced/skills/query_worker.py",
+    "acceptance": "输出 Candidates_A + origin_refs；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h20": {
+    "title": "B 组 · 构造与去重 SQL 候选",
+    "role": "格物 · Worker B",
+    "desc": "针对比率与价格问题构造候选，显式保留分母。",
+    "skills": [
+      "Candidate Generation",
+      "语义计划编译"
+    ],
+    "mechanism": "候选必须证明分子分母处于同时间/组织粒度；记录模板或模型版本和参数，不用相似 SQL 直接替代规格。",
+    "output": "Candidates_B + denominator_refs",
+    "fallback": "错误候选不可因能执行而被批准；修复走 H40。",
+    "basis": "S2 / S4：候选与确定性约束的组合",
+    "input": "H17 的批准输出",
+    "hook": "拟新增 advanced/skills/query_worker.py",
+    "acceptance": "输出 Candidates_B + denominator_refs；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h21": {
+    "title": "C 组 · 构造与去重 SQL 候选",
+    "role": "格物 · Worker C",
+    "desc": "构造结构分组或预测历史窗的只读查询。",
+    "skills": [
+      "Candidate Generation",
+      "最小字段 / 特征时点"
+    ],
+    "mechanism": "仅提取分析所需列与批准维度；预测取数不包含未来目标泄漏字段，候选绑定业务水位。",
+    "output": "Candidates_C + feature_time_constraints",
+    "fallback": "权限或未来字段越界立即拒绝，非修复放宽权限。",
+    "basis": "S2：候选；时点约束为项目设计",
+    "input": "H18 的批准输出",
+    "hook": "拟新增 advanced/skills/evidence.py",
+    "acceptance": "输出 Candidates_C + feature_time_constraints；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h22": {
+    "title": "A 组 · 独立审查与候选断言",
+    "role": "审衡 · Checker A",
+    "desc": "检查语义差异、聚合粒度、字段与 Join 基数。",
+    "skills": [
+      "SQL AST Gate",
+      "Query TestPack"
+    ],
+    "mechanism": "先跑确定性安全与语义规则，再对候选差异提出测试问题；可执行断言判断粒度/时间/权限，LLM软评审仅补充解释，不覆盖硬失败。",
+    "output": "ApprovedCandidates_A + check_receipts",
+    "fallback": "危险SQL拒绝；业务/语法缺陷由主理人定向 H40。",
+    "basis": "S2：UT启发；硬断言体系为项目设计",
+    "input": "H19 的批准输出",
+    "hook": "拟新增 advanced/skills/evidence.py",
+    "acceptance": "输出 ApprovedCandidates_A + check_receipts；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h23": {
+    "title": "B 组 · 独立审查与候选断言",
+    "role": "审衡 · Checker B",
+    "desc": "独立检查加权比率、零分母和金额单位。",
+    "skills": [
+      "SQL AST Gate",
+      "Ratio / Unit Assertions"
+    ],
+    "mechanism": "从规格推导检查项，拒绝直接平均比率、单位未换算和聚合前后过滤错位。硬规则与模型建议分别记分，不合成掩盖性总分。",
+    "output": "ApprovedCandidates_B + test_results",
+    "fallback": "两个安全候选业务含义仍不同则澄清/复核，不多数投票。",
+    "basis": "S2：候选验证；S4：强制业务语义",
+    "input": "H20 的批准输出",
+    "hook": "拟新增 advanced/skills/evidence.py",
+    "acceptance": "输出 ApprovedCandidates_B + test_results；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h24": {
+    "title": "C 组 · 独立审查与候选断言",
+    "role": "审衡 · Checker C",
+    "desc": "检查分群互斥、覆盖和预测时点合法性。",
+    "skills": [
+      "SQL AST Gate",
+      "Cohort / Leakage Checks"
+    ],
+    "mechanism": "审核组间是否重叠、漏分、含未来信息；至少一条独立反例检查候选的关键差异。软建议不能提升权限或改写权威口径。",
+    "output": "ApprovedCandidates_C + cohort_checks",
+    "fallback": "分群不可加时改用适用方法并记录，不能强凑总量。",
+    "basis": "S2：候选验证；项目分群约束",
+    "input": "H21 的批准输出",
+    "hook": "拟新增 advanced/skills/evidence.py",
+    "acceptance": "输出 ApprovedCandidates_C + cohort_checks；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h25": {
+    "title": "A 组 · 计划、沙箱、执行与回执",
+    "role": "格物 Worker A 调用 Stability Runtime",
+    "desc": "每候选 EXPLAIN，受限试跑后执行选定查询并断言。",
+    "skills": [
+      "EXPLAIN / Dry-run",
+      "Read-only / Result Assertions",
+      "既有组织行过滤必经"
+    ],
+    "mechanism": "非执行式EXPLAIN估算成本；需要时脱敏只读沙箱试跑。选择通过所有硬规则的候选，受控执行，检查重复键/空值/总分/时间；保存计划、参数哈希和数据水位。 每条查询执行前复用 apply_row_level_filter(sql, current_user, dataset_id) 应用组织范围；修复后的SQL重新过滤。新执行器负责保证这些现有检查在全部入口被调用，不重新定义授权规则。",
+    "output": "Evidence_A + execution_receipt + assertions",
+    "fallback": "超时取消；异常空值 H40 核验，合法空结果保留 EMPTY_VALID。",
+    "basis": "S3：工具反馈；本项目安全运行时",
+    "input": "H22 的批准输出",
+    "hook": "拟新增 advanced/skills/evidence.py",
+    "acceptance": "输出 Evidence_A + execution_receipt + assertions；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h26": {
+    "title": "B 组 · 计划、沙箱、执行与回执",
+    "role": "格物 Worker B 调用 Stability Runtime",
+    "desc": "执行价格/转化取证，输出可重算的分子分母。",
+    "skills": [
+      "EXPLAIN / Dry-run",
+      "比率 / 字节预算",
+      "既有组织行过滤必经"
+    ],
+    "mechanism": "独立只读连接与取消句柄，查询/内存/字节预算均生效。检查分母、单位与时间一致；缓存复用需重新鉴权和验证版本/水位。 每条查询执行前复用 apply_row_level_filter(sql, current_user, dataset_id) 应用组织范围；修复后的SQL重新过滤。新执行器负责保证这些现有检查在全部入口被调用，不重新定义授权规则。",
+    "output": "Evidence_B + numerator_ref + denominator_ref",
+    "fallback": "执行成功但断言失败不可进入可信证据账本；修复计入 H40。",
+    "basis": "S3：执行反馈；项目比率验证",
+    "input": "H23 的批准输出",
+    "hook": "拟新增 advanced/skills/evidence.py",
+    "acceptance": "输出 Evidence_B + numerator_ref + denominator_ref；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h27": {
+    "title": "C 组 · 计划、沙箱、执行与回执",
+    "role": "格物 Worker C 调用 Stability Runtime",
+    "desc": "受控取出结构或历史序列，保留完整性检查。",
+    "skills": [
+      "EXPLAIN / Dry-run",
+      "Coverage / Snapshot Assertions",
+      "既有组织行过滤必经"
+    ],
+    "mechanism": "小样本试跑只验证可行性，不证明业务正确。正式结果按批准分群、缺失与时点断言，截断结果不得承担全量归因。 每条查询执行前复用 apply_row_level_filter(sql, current_user, dataset_id) 应用组织范围；修复后的SQL重新过滤。新执行器负责保证这些现有检查在全部入口被调用，不重新定义授权规则。",
+    "output": "Evidence_C + coverage_receipt + snapshot_ref",
+    "fallback": "截断/缺失必需历史则 PARTIAL，不伪造完整贡献或预测。",
+    "basis": "S3：执行反馈；项目完整性校验",
+    "input": "H24 的批准输出",
+    "hook": "拟新增 advanced/skills/evidence.py",
+    "acceptance": "输出 Evidence_C + coverage_receipt + snapshot_ref；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h28": {
+    "title": "主理人 Fan-in 与证据账本",
+    "role": "总主理人 / Evidence Ledger",
+    "desc": "只收纳带检查回执的事实，等待必要分支。",
+    "skills": [
+      "Required Barrier",
+      "Claim → Evidence → Query"
+    ],
+    "mechanism": "证据分 FACT/DERIVED/HYPOTHESIS，分别记录SQL、参数、口径、快照、断言和访问范围。必要分支不齐不能完整签收，可选分支失败列缺口。",
+    "output": "EvidenceLedger + branch_status + missing_required",
+    "fallback": "跨水位不可比则阻断相应结论；不以其余专家赞成掩盖缺口。",
+    "basis": "S6：本项目事实与推论分层设计",
+    "input": "H25 的批准输出 / H26 的批准输出 / H27 的批准输出",
+    "hook": "拟新增 advanced/control_plane.py",
+    "acceptance": "输出 EvidenceLedger + branch_status + missing_required；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h29": {
+    "title": "独立核对冲突与反证",
+    "role": "审衡 · 全局核验专家",
+    "desc": "按值、定义与快照定位差异；记录不支持证据。",
+    "skills": [
+      "Contradiction Check",
+      "总量 / 对照查询"
+    ],
+    "mechanism": "同一事实冲突先查单位/时间/过滤/水位，再做受预算限制的批准对照查询。LLM多数票和加权信任分都不能证明数值正确。",
+    "output": "ConflictReport + counter_evidence + hard_checks",
+    "fallback": "可修正问题进入 H40；真实未决差异明确保留，不平均出折中答案。",
+    "basis": "S2：验证思想；独立事实核对为项目设计",
+    "input": "H28 的批准输出",
+    "hook": "拟新增 advanced/skills/analysis.py",
+    "acceptance": "输出 ConflictReport + counter_evidence + hard_checks；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h30": {
+    "title": "主理人研究裁定与停止闸门",
+    "role": "总主理人",
+    "desc": "决定证据足够、需要返工、继续计划内探索或停止。",
+    "skills": [
+      "Hypothesis Status",
+      "节点 / 查询 / 时间预算"
+    ],
+    "mechanism": "把假设标 SUPPORTED/REFUTED/UNRESOLVED，区分计划内新证据与重做失败工作。探索回 H14 前校验全局节点/查询/token预算；失败重做必须 H40。",
+    "output": "ResearchDecision + hypothesis_status + stop_reason",
+    "fallback": "证据不足不强行归因；预算耗尽走 H42 的部分/失败终态。",
+    "basis": "S6：有界研究控制面",
+    "input": "H29 的批准输出",
+    "hook": "拟新增 advanced/control_plane.py",
+    "acceptance": "输出 ResearchDecision + hypothesis_status + stop_reason；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h31": {
+    "title": "受控 Python / 分析算子执行",
+    "role": "析微 · 算法分析专家",
+    "desc": "对已核验数据执行贡献分解、分群或模型计算。",
+    "skills": [
+      "Analysis IR / Operator Registry",
+      "无网沙箱 / CPU / 内存"
+    ],
+    "mechanism": "优先登记算子与参数DSL，复杂时生成受限代码。沙箱无网、只挂载证据输入、CPU/内存/时间限额，输出可重算统计与算子版本；不能直接访问生产凭证。",
+    "output": "DerivedArtifacts + operator_version + input_refs",
+    "fallback": "非法算子/超限拒绝；不把Python eval或exec直接放进Flask进程。",
+    "basis": "S5：SQL/Python能力；沙箱与IR为项目设计",
+    "input": "H30 的批准输出",
+    "hook": "拟新增 advanced/skills/analysis.py",
+    "acceptance": "输出 DerivedArtifacts + operator_version + input_refs；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h32": {
+    "title": "贡献守恒与重复归因检查",
+    "role": "审衡 + 析微",
+    "desc": "检验量价交互、结构重叠与非可加指标。",
+    "skills": [
+      "Reconciliation",
+      "交互项分摊 / 容差"
+    ],
+    "mechanism": "选择与方法契约一致的分解；量价与渠道是不同解释视角，不直接相加；总分差异在指标规定容差内，残差必须显示。",
+    "output": "ReconciledContributions + residuals",
+    "fallback": "无法守恒则返工或展示未解释部分；不把残差抹平。",
+    "basis": "S6：本项目归因数学验证",
+    "input": "H31 的批准输出",
+    "hook": "拟新增 advanced/skills/analysis.py",
+    "acceptance": "输出 ReconciledContributions + residuals；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h33": {
+    "title": "稳健性、对照与预测回测",
+    "role": "审衡 / 算法专家",
+    "desc": "检查结论是否依赖单一窗口、异常点或泄漏。",
+    "skills": [
+      "Sensitivity / Negative Controls",
+      "按需 Rolling Backtest"
+    ],
+    "mechanism": "按选定方法做窗口敏感性、异常点处理和适用对照；预测才与季节/朴素基线滚动回测并出区间。检验方法需预先登记，不事后挑显著结果。",
+    "output": "RobustnessReport + forecast_validation_if_needed",
+    "fallback": "样本不足/回测不达标仅输出观察或趋势，标限制。",
+    "basis": "S5：分析扩展；统计门槛为项目设计",
+    "input": "H32 的批准输出",
+    "hook": "拟新增 advanced/skills/analysis.py",
+    "acceptance": "输出 RobustnessReport + forecast_validation_if_needed；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h34": {
+    "title": "置信边界与因果声明审查",
+    "role": "审衡 · 结论边界专家",
+    "desc": "区分贡献、相关线索、预测区间与因果证据。",
+    "skills": [
+      "Claim Type Gate",
+      "证据等级 / 不确定性"
+    ],
+    "mechanism": "每条声明匹配支持证据和反证；没有实验或识别设计不输出因果结论。置信度不是模型自报百分比，数值区间须有对应统计方法。",
+    "output": "ClaimSet + limitations + evidence_grade",
+    "fallback": "缺证据声明删除或降为待验证假设，不用高分掩盖。",
+    "basis": "S6：本项目声明准入契约",
+    "input": "H33 的批准输出",
+    "hook": "拟新增 advanced/skills/analysis.py",
+    "acceptance": "输出 ClaimSet + limitations + evidence_grade；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h35": {
+    "title": "生成可追溯叙事计划",
+    "role": "析微 · 业务分析专家",
+    "desc": "组织结论、证据、解释、行动与待验证项。",
+    "skills": [
+      "StoryPlan",
+      "数值单元格引用"
+    ],
+    "mechanism": "先产结构化段落计划，每个数字、图和建议引用Evidence Ledger；行动建议说明可检验后续措施，不把推测写入事实段。",
+    "output": "StoryPlan + claim_refs + action_hypotheses",
+    "fallback": "叙述无法回链则删除或用确定性模板。",
+    "basis": "S5：研究报告；引用契约为项目设计",
+    "input": "H34 的批准输出",
+    "hook": "拟新增 advanced/skills/report.py",
+    "acceptance": "输出 StoryPlan + claim_refs + action_hypotheses；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h36": {
+    "title": "图表推荐与表达校验",
+    "role": "析微 · 可视化专家",
+    "desc": "按目的选图，并核验图表字段、单位、总量和区间。",
+    "skills": [
+      "ChartSpec Validator",
+      "误导性表达检查"
+    ],
+    "mechanism": "趋势/差异/贡献/预测选择相应图表；拒绝不适用堆叠、双轴误读、漏掉置信区间与数值不一致；失败回可读表格。",
+    "output": "ValidatedChartSpec + chart_evidence_refs",
+    "fallback": "图表失败不阻塞已核实数据交付，但标降级表格；不能画未核验数值。",
+    "basis": "S5：图表/报告；项目确定性校验",
+    "input": "H35 的批准输出",
+    "hook": "拟新增 advanced/skills/report.py",
+    "acceptance": "输出 ValidatedChartSpec + chart_evidence_refs；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h37": {
+    "title": "主理人最终签收",
+    "role": "总主理人 · 唯一交付责任人",
+    "desc": "核对目标覆盖、必要证据、方法、限制与全局预算。",
+    "skills": [
+      "Answer Contract",
+      "证据覆盖率 / 签收规则"
+    ],
+    "mechanism": "逐项检查用户目标和图表/声明引用，确认分支状态、硬断言、口径与数据时点；返工归 H40，不能签收未核验推论。",
+    "output": "SignedAnswer + final_status + audit_signature",
+    "fallback": "必需证据缺失仅 PARTIAL/BLOCKED；不调用普通模式兜底。",
+    "basis": "S6：主理人签收设计",
+    "input": "H36 的批准输出",
+    "hook": "拟新增 advanced/control_plane.py",
+    "acceptance": "输出 SignedAnswer + final_status + audit_signature；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h38": {
+    "title": "交付报告与恢复检查点",
+    "role": "总主理人 + 管家",
+    "desc": "交付结论、图表、证据、SQL轨迹与工作区状态。",
+    "skills": [
+      "SSE / Artifact Store",
+      "幂等交付 / Resume Cursor"
+    ],
+    "mechanism": "先持久化最终产物引用和状态，再通过兼容SSE输出；每事件递增序号，重连按cursor恢复；权限变化重新鉴权。",
+    "output": "AnswerEnvelope + checkpoint + event_cursor",
+    "fallback": "存储/交付异常记录明确状态，不能重连就重查数据。",
+    "basis": "S6：可靠交付协议",
+    "input": "H37 的批准输出",
+    "hook": "拟新增 advanced/control_plane.py",
+    "acceptance": "输出 AnswerEnvelope + checkpoint + event_cursor；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h39": {
+    "title": "反馈候选、离线回归与发布",
+    "role": "资产治理负责人 / 运行时",
+    "desc": "把好案例变成经过审查和盲测的资产版本。",
+    "skills": [
+      "Human Review / Eval",
+      "Semantic Release / Rollback"
+    ],
+    "mechanism": "用户纠错生成候选，不直接改权威口径；与盲测隔离，经安全/业务回归、审核发布语义/模板版本，并支持回滚。",
+    "output": "ApprovedCandidate 或 review_queue + eval_run",
+    "fallback": "回归失败保留旧版本；研究任务已结束，发布流程是异步治理而非无限研究。",
+    "basis": "S1：可审阅语义；项目治理发布",
+    "input": "H38 的批准输出",
+    "hook": "拟新增 advanced/skills/report.py",
+    "acceptance": "输出 ApprovedCandidate 或 review_queue + eval_run；所有适用硬检查为PASS，不适用检查显式SKIP，缺检查数据为UNKNOWN。"
+  },
+  "h40": {
+    "title": "错误分型与有界自愈",
+    "role": "总主理人 + 对应专家",
+    "desc": "仅失败进入；全分支、全错误共用两枚返工令牌。",
+    "skills": [
+      "Typed Errors",
+      "Atomic Retry Ledger"
+    ],
+    "mechanism": "原子领取repair令牌，错误带目标节点、失效产物和必须重跑的闸门。SQL错误回原路候选构造，空值回实体/时间核验，逻辑冲突回证据核对；同一工单内禁止隐式嵌套重试。",
+    "output": "RepairTicket + target_node_ids + remaining",
+    "fallback": "耗尽/重复错误/deadline→H42；权限和危险SQL直接拒绝，不修改安全范围。",
+    "basis": "S3：工具反馈修正启发；预算与终态为本项目设计",
+    "input": "错误/澄清/停止事件 + 当前 TaskState",
+    "hook": "拟新增 advanced/control_plane.py + retry_ledger",
+    "acceptance": "所有事件有唯一ID、明确目标和终态，不存在绕过模式/权限/预算的路径。"
+  },
+  "h41": {
+    "title": "主理人澄清与挂起恢复",
+    "role": "总主理人 + 用户",
+    "desc": "关键槽位/口径/实体歧义最多澄清两轮。",
+    "skills": [
+      "Clarification Gate",
+      "Awaiting Input / Resume"
+    ],
+    "mechanism": "提出会改变答案的最少问题，保存待补槽位和候选；用户确认后回 H10 重审规格。澄清不是自动修复，两者各有预算；不默认升级或降级。",
+    "output": "ConfirmedSlots 或 WAITING_INPUT",
+    "fallback": "两轮未解保留待确认状态，不猜测、不后台继续查询。",
+    "basis": "S3：工具反馈修正启发；预算与终态为本项目设计",
+    "input": "错误/澄清/停止事件 + 当前 TaskState",
+    "hook": "拟新增 advanced/control_plane.py + retry_ledger",
+    "acceptance": "所有事件有唯一ID、明确目标和终态，不存在绕过模式/权限/预算的路径。"
+  },
+  "h42": {
+    "title": "明确停止与部分证据交付",
+    "role": "总主理人",
+    "desc": "按原因返回拒绝、失败、待确认或有边界部分结果。",
+    "skills": [
+      "Terminal Status",
+      "Cancel / Release Resources"
+    ],
+    "mechanism": "必要证据不齐、预算耗尽、不可比或安全拒绝进入不同终态；释放所有租约/连接。部分答案也须鉴权且仅引用已核验事实。终态记录取消/失败原因。",
+    "output": "DENIED / FAILED / PARTIAL / WAITING_INPUT",
+    "fallback": "不回退普通服务；不新建子任务重置两次修复额度。",
+    "basis": "S3：工具反馈修正启发；预算与终态为本项目设计",
+    "input": "错误/澄清/停止事件 + 当前 TaskState",
+    "hook": "拟新增 advanced/control_plane.py + retry_ledger",
+    "acceptance": "所有事件有唯一ID、明确目标和终态，不存在绕过模式/权限/预算的路径。"
   }
-];
-
-// 严格直角折线与真正并行连接
-const E = [
-  // 公共入口
-  {from:'n01',to:'n02',c:'common',p:[[251,185],[285,185]]},
-  {from:'n02',to:'n03',c:'common',p:[[481,185],[520,185]]},
-  {from:'n03',to:'n04',c:'common',p:[[716,185],[760,185]]},
-  {from:'n04',to:'n06',c:'common',label:'无关键歧义 (放行)',lx:940,ly:160,p:[[916,185],[1005,185]]},
-  {from:'n04',to:'n05',c:'branch',label:'主理人裁定澄清',tag:'amber',lx:852,ly:256,p:[[838,242],[838,285]]},
-  {from:'n05',to:'n03',c:'memory',label:'用户确认后重解析',tag:'teal',lx:650,ly:365,p:[[765,335],[740,335],[740,250],[615,250],[615,239]]},
-  {from:'n06',to:'b01',c:'basic',label:'普通 / 快速通道 (单表)',tag:'green',lx:750,ly:435,p:[[1088,242],[1088,455],[165,455],[165,505]]},
-  {from:'n06',to:'a01',c:'advanced',label:'高级专家团 (跨表/归因/预测)',tag:'purple',lx:940,ly:755,p:[[1088,242],[1088,775],[155,775],[155,980]]},
-
-  // 普通问数 FAST TRACK
-  {from:'b01',to:'b02',c:'basic',p:[[266,555],[315,555]]},
-  {from:'b02',to:'b03',c:'basic',p:[[511,555],[560,555]]},
-  {from:'b03',to:'b04',c:'basic',label:'通过',tag:'green',lx:740,ly:529,p:[[714,555],[800,555]]},
-  {from:'b03',to:'b02',c:'retry',label:'知刑打回: 格物修复',tag:'red',lx:440,ly:625,p:[[560,612],[560,660],[413,660],[413,609]]},
-  {from:'b04',to:'b05',c:'basic',p:[[996,555],[1040,555]]},
-  {from:'b05',to:'b06',c:'basic',label:'通过 (>0行)',tag:'green',lx:1230,ly:530,p:[[1194,555],[1285,555]]},
-  {from:'b05',to:'b02',c:'retry',label:'0行/异常: 限次重试',tag:'red',lx:700,ly:685,p:[[1117,612],[1117,692],[400,692],[400,609]]},
-  {from:'b06',to:'b07',c:'basic',p:[[1481,555],[1530,555]]},
-
-  // 高级专家团真正并行架构 (PARALLEL WORKFLOW)
-  // 1. 前置双路并行探寻
-  {from:'a01',to:'a02',c:'advanced',label:'前置并行探寻A: 资产',tag:'purple',lx:275,ly:900,p:[[256,1030],[275,1030],[275,920],[300,920]]},
-  {from:'a01',to:'a03',c:'advanced',label:'前置并行探寻B: 语义',tag:'purple',lx:275,ly:1070,p:[[256,1030],[275,1030],[275,1140],[300,1140]]},
-  {from:'a02',to:'a04',c:'advanced',p:[[496,920],[515,920],[515,1030],[535,1030]]},
-  {from:'a03',to:'a04',c:'advanced',p:[[496,1140],[515,1140],[515,1030],[535,1030]]},
-
-  // 2. 主理人材料冻结后，扇出下发三路物理并发执行 (Fan-out)
-  {from:'a04',to:'a05_1',c:'advanced',label:'并发分支1: 核心事实',tag:'purple',lx:755,ly:855,p:[[731,1030],[755,1030],[755,870],[780,870]]},
-  {from:'a04',to:'a05_2',c:'advanced',label:'并发分支2: 维度下钻',tag:'purple',lx:755,ly:1010,p:[[731,1030],[780,1030]]},
-  {from:'a04',to:'a05_3',c:'advanced',label:'并发分支3: 历史对拍',tag:'purple',lx:755,ly:1170,p:[[731,1030],[755,1030],[755,1190],[780,1190]]},
-
-  // 3. 三路并发物理执行结果，同时汇入知刑独立交叉审查
-  {from:'a05_1',to:'a06',c:'advanced',p:[[976,870],[1010,870],[1010,1030],[1040,1030]]},
-  {from:'a05_2',to:'a06',c:'advanced',p:[[976,1030],[1040,1030]]},
-  {from:'a05_3',to:'a06',c:'advanced',p:[[976,1190],[1010,1190],[1010,1030],[1040,1030]]},
-
-  // 4. 知刑审查通过 -> 主理人证据与对拍闸门
-  {from:'a06',to:'a07',c:'advanced',label:'知刑审查通过',tag:'purple',lx:1255,ly:1005,p:[[1236,1030],[1280,1030]]},
-  {from:'a07',to:'a08',c:'advanced',label:'对拍一致 (放行)',tag:'purple',lx:1470,ly:1005,p:[[1436,1030],[1510,1030]]},
-
-  // 5. 对拍冲突或缺陷 -> 定向打回返工节点 -> 定向回派对应分支
-  {from:'a07',to:'a12',c:'retry',label:'对拍冲突 / 证据不足',tag:'red',lx:1385,ly:1210,p:[[1358,1088],[1358,1280]]},
-  {from:'a12',to:'a05_2',c:'retry',label:'定向返工回流: 仅重算下钻分支 (限≤2轮)',tag:'red',lx:950,ly:1340,p:[[1260,1330],[878,1330],[878,1080]]},
-
-  // 6. 扇入多维深度归因 (Fan-in) -> 图表 -> 主理人终审
-  {from:'a08',to:'a09',c:'advanced',p:[[1706,1030],[1750,1030]]},
-  {from:'a09',to:'a10',c:'advanced',p:[[1946,1030],[1990,1030]]},
-
-  // 独立记忆服务连接
-  {from:'n02',to:'m02',c:'memory',label:'读取权威记忆',tag:'teal',lx:260,ly:1432,p:[[285,185],[40,185],[40,1442],[403,1442],[403,1470]]},
-  {from:'b07',to:'m03',c:'memory',label:'普通交付后提取候选',tag:'teal',lx:1030,ly:738,p:[[1628,609],[1628,735],[20,735],[20,1420],[638,1420],[638,1470]]},
-  {from:'a10',to:'m03',c:'memory',label:'已验证产物沉淀',tag:'teal',lx:1710,ly:1365,p:[[2088,1084],[2088,1395],[638,1395],[638,1470]]},
-  {from:'m01',to:'m02',c:'memory',label:'恢复工作区',tag:'teal',lx:270,ly:1445,p:[[266,1520],[305,1520]]},
-  {from:'m02',to:'m03',c:'memory',p:[[501,1520],[540,1520]]},
-  {from:'m03',to:'m04',c:'memory',p:[[736,1520],[780,1520]]},
-  {from:'m04',to:'m05',c:'memory',label:'审核批准写入',tag:'teal',lx:960,ly:1492,p:[[936,1520],[1020,1520]]},
-  {from:'m05',to:'m06',c:'memory',p:[[1216,1520],[1260,1520]]}
-];
-
-const canvas=document.getElementById('canvas'), workspace=document.getElementById('workspace'), nodeLayer=document.getElementById('nodes'), edgeSvg=document.getElementById('edges'), labelLayer=document.getElementById('edgeLabels');
-let scale=0.58, tx=20, ty=12, dragging=false, dragStart=null, activeView='all', selectedNode=null;
-const nodeById=Object.fromEntries(NODES.map(n=>[n.id,n]));
-
-function edgeMarker(c){return c==='basic'?'url(#arrow-green)':c==='advanced'?'url(#arrow-purple)':c==='branch'?'url(#arrow-amber)':c==='retry'?'url(#arrow-red)':c==='memory'?'url(#arrow-teal)':'url(#arrow-gray)'}
-function visibleTracks(view){if(view==='all')return new Set(['common','basic','advanced','memory']);if(view==='basic')return new Set(['common','basic']);if(view==='advanced')return new Set(['common','advanced']);return new Set(['common','memory']);}
-
-function renderNodes(){
-  nodeLayer.innerHTML='';
-  NODES.forEach(n=>{
-    const e=document.createElement('div');
-    e.id=n.id;
-    e.className='node '+n.kind+(n.kind==='decision'?' decision':'');
-    e.style.left=n.x+'px';e.style.top=n.y+'px';e.style.width=(n.w||196)+'px';
-    if(n.h)e.style.height=n.h+'px';
-
-    if(n.kind==='decision'){
-      e.innerHTML=`<div class="diamond"></div><div class="decision-content"><div class="type">${n.type}</div><h3>${n.title}</h3><p>${n.desc}</p></div><span class="step">${n.step}</span>`;
-    }else{
-      e.innerHTML=`
-        <div class="top"><span class="type">${n.type}</span><span class="step">${n.step}</span></div>
-        <div class="body">
-          <div class="role-badge">${n.role}</div>
-          <h3>${n.title}</h3>
-          <p>${n.desc}</p>
-          <div class="io">${n.io}</div>
-        </div>
-      `;
-    }
-
-    ['l','r','t','b'].forEach(p=>{const pin=document.createElement('i');pin.className='pin '+p;e.appendChild(pin)});
-    e.addEventListener('click',ev=>{ev.stopPropagation();openNode(n)});
-    nodeLayer.appendChild(e);
-  });
-}
-
-function renderEdges(){
-  edgeSvg.querySelectorAll('.edge-path').forEach(e=>e.remove());
-  labelLayer.innerHTML='';
-  E.forEach((ed,i)=>{
-    const path=document.createElementNS('http://www.w3.org/2000/svg','polyline');
-    path.classList.add('edge','edge-path',ed.c);
-    path.dataset.from=ed.from;path.dataset.to=ed.to;path.dataset.edge=i;
-    path.setAttribute('points',ed.p.map(p=>p.join(',')).join(' '));
-    path.setAttribute('marker-end',edgeMarker(ed.c));
-    edgeSvg.appendChild(path);
-
-    if(ed.label){
-      const l=document.createElement('div');
-      l.className='edge-label '+(ed.tag||'');
-      l.style.left=ed.lx+'px';l.style.top=ed.ly+'px';
-      l.dataset.from=ed.from;l.dataset.to=ed.to;
-      l.textContent=ed.label;
-      labelLayer.appendChild(l);
-    }
-  });
-}
-
-function updateTransform(){
-  canvas.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;
-  document.getElementById('zoomLabel').textContent=Math.round(scale*100)+'%';
-}
-
-function applyView(view,shouldFit=true){
-  activeView=view;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===view));
-  const vis=visibleTracks(view);
-  NODES.forEach(n=>{
-    const el=document.getElementById(n.id);
-    const show=vis.has(n.track);
-    el.style.display=show?'block':'none';
-    el.classList.toggle('dim',false);
-  });
-  document.querySelectorAll('.edge-path').forEach(p=>{
-    const a=nodeById[p.dataset.from],b=nodeById[p.dataset.to];
-    p.style.display=(vis.has(a.track)&&vis.has(b.track))?'':'none';
-  });
-  document.querySelectorAll('.edge-label').forEach(l=>{
-    const a=nodeById[l.dataset.from],b=nodeById[l.dataset.to];
-    l.style.display=(vis.has(a.track)&&vis.has(b.track))?'':'none';
-  });
-  document.querySelectorAll('.lane').forEach(l=>{
-    const yes=(view==='all')||(view==='basic'&&(l.classList.contains('common')||l.classList.contains('basic')))||(view==='advanced'&&(l.classList.contains('common')||l.classList.contains('advanced')))||(view==='memory'&&(l.classList.contains('common')||l.classList.contains('memory')));
-    l.style.display=yes?'':'none';
-  });
-  document.querySelectorAll('.route-title,.note,.parallel-badge').forEach(e=>{
-    if(view==='all')e.style.display='';
-    else if(e.classList.contains('route-title'))e.style.display=(view==='basic'&&e.classList.contains('purple'))||(view==='advanced'&&!e.classList.contains('purple'))?'none':'';
-    else if(e.classList.contains('parallel-badge'))e.style.display=view==='advanced'?'':'none';
-    else e.style.display=view==='memory'?'':'none';
-  });
-  if(shouldFit)fitVisible();
-}
-
-function fitVisible(){
-  const vis=visibleTracks(activeView);
-  const ns=NODES.filter(n=>vis.has(n.track));
-  if(!ns.length)return;
-  let minX=25,minY=25,maxX=2770,maxY=1640;
-  if(activeView==='basic'){minX=20;minY=30;maxX=1955;maxY=735;}
-  else if(activeView==='advanced'){minX=20;minY=30;maxX=2740;maxY=1380;}
-  else if(activeView==='memory'){minX=20;minY=30;maxX=2100;maxY=1640;}
-  const w=maxX-minX,h=maxY-minY,pad=44, s=Math.min((workspace.clientWidth-pad*2)/w,(workspace.clientHeight-pad*2)/h,1);
-  scale=Math.max(.22,s);
-  tx=(workspace.clientWidth-w*scale)/2-minX*scale;
-  ty=(workspace.clientHeight-h*scale)/2-minY*scale;
-  updateTransform();
-}
-
-function zoomAt(mult){
-  const cx=workspace.clientWidth/2,cy=workspace.clientHeight/2;
-  const px=(cx-tx)/scale,py=(cy-ty)/scale;
-  scale=Math.max(.22,Math.min(1.8,scale*mult));
-  tx=cx-px*scale;ty=cy-py*scale;
-  updateTransform();
-}
-
-function openNode(n){
-  selectedNode=n;
-  document.querySelectorAll('.node').forEach(e=>e.classList.toggle('selected',e.id===n.id));
-  document.getElementById('dKicker').textContent=`${n.track.toUpperCase()} · ${n.type} · ${n.step}`;
-  document.getElementById('dTitle').textContent=n.title;
-  document.getElementById('dSkillBox').textContent=`⚡ 挂载 Skills: ${n.skills || '原生确定性组件'}`;
-  document.getElementById('dPurpose').innerHTML=`<b>岗位：${n.role || '执行单元'}</b><br>${n.purpose}`;
-  document.getElementById('dInputs').textContent=n.inputs;
-  document.getElementById('dOutputs').textContent=n.outputs;
-  document.getElementById('dFailure').textContent=n.failure;
-  const ul=document.getElementById('dNotes');ul.innerHTML='';
-  n.notes.forEach(s=>{const li=document.createElement('li');li.textContent=s;ul.appendChild(li)});
-  document.getElementById('drawer').classList.add('open');
-}
-
-function closeDrawer(){
-  document.getElementById('drawer').classList.remove('open');
-  document.querySelectorAll('.node').forEach(e=>e.classList.remove('selected'));
-}
-
-renderNodes();renderEdges();applyView('all',false);fitVisible();
-
-document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>applyView(t.dataset.view,true)));
-document.getElementById('fitBtn').addEventListener('click',fitVisible);
-document.getElementById('resetBtn').addEventListener('click',fitVisible);
-document.getElementById('zoomIn').addEventListener('click',()=>zoomAt(1.15));
-document.getElementById('zoomOut').addEventListener('click',()=>zoomAt(.87));
-document.getElementById('drawerBtn').addEventListener('click',()=>{
-  if(selectedNode)openNode(selectedNode);
-  else openNode(nodeById[activeView==='advanced'?'a01':activeView==='basic'?'b01':activeView==='memory'?'m01':'n01']);
-});
-document.getElementById('closeDrawer').addEventListener('click',closeDrawer);
-
-workspace.addEventListener('pointerdown',e=>{
-  if(e.target.closest('.node')||e.target.closest('.zoom-controls'))return;
-  dragging=true;dragStart={x:e.clientX-tx,y:e.clientY-ty};
-  workspace.classList.add('dragging');workspace.setPointerCapture(e.pointerId);
-});
-workspace.addEventListener('pointermove',e=>{if(!dragging)return;tx=e.clientX-dragStart.x;ty=e.clientY-dragStart.y;updateTransform()});
-workspace.addEventListener('pointerup',()=>{dragging=false;workspace.classList.remove('dragging')});
-workspace.addEventListener('pointercancel',()=>{dragging=false;workspace.classList.remove('dragging')});
-workspace.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.deltaY<0?1.07:.93)},{passive:false});
-window.addEventListener('resize',()=>fitVisible());
-</script>
-</body>
-</html>
+};
+const $=id=>document.getElementById(id);
+let mode='low',zoom=1,autoFit=true,timer=null,lastNode=null,motion=false;
+const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+function elements(){return {panel:$('panel-'+mode),canvas:$('diagram-'+mode),viewport:$('viewport-'+mode),sizer:$('sizer-'+mode)};}
+function drawEdges(){const {canvas}=elements();const svg=canvas.querySelector('.edges'),g=svg.querySelector('.edge-content');g.replaceChildren();const origin=canvas.getBoundingClientRect();const rect=el=>{const r=el.getBoundingClientRect();return {x:(r.x-origin.x)/zoom,y:(r.y-origin.y)/zoom,w:r.width/zoom,h:r.height/zoom};};const make=(tag,attrs)=>{const el=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v]of Object.entries(attrs))el.setAttribute(k,v);g.append(el);return el;};const path=(d,retry=false)=>make('path',{d,class:'edge'+(retry?' retry':''),'marker-end':'url(#'+(retry?'retry-':'arr-')+mode+')'});const label=(x,y,text,retry=false)=>{const el=make('text',{x,y,class:'edge-label'+(retry?' retry-label':'')});el.textContent=text;};if(mode==='high'){
+const rnode=id=>rect(canvas.querySelector('[data-node="'+id+'"]'));
+for(const [a,b,text]of HIGH_EDGES){const ra=rnode(a),rb=rnode(b);if(Math.abs(ra.y-rb.y)<4){path('M'+(ra.x+ra.w)+' '+(ra.y+ra.h/2)+'H'+(rb.x-5));}else{const mid=(ra.y+ra.h+rb.y)/2;path('M'+(ra.x+ra.w/2)+' '+(ra.y+ra.h)+'V'+mid+'H'+(rb.x+rb.w/2)+'V'+(rb.y-5));if(text&&a==='h15')label(rb.x+rb.w/2+5,rb.y-13,'FAN-OUT');if(text&&b==='h28')label(rb.x+rb.w/2+8,rb.y-13,'FAN-IN');}}
+const side=(a,b,rail,caption)=>{const ra=rnode(a),rb=rnode(b);path('M'+(ra.x+ra.w/2)+' '+(ra.y+ra.h)+'V'+(ra.y+ra.h+15)+'H'+rail+'V'+(rb.y-16)+'H'+(rb.x+rb.w/2)+'V'+(rb.y-4),true);if(caption)label(1100,ra.y-9,caption,true);};
+side('h30','h40',1250,'失败→自愈');side('h40','h19',1292,'↶ 返回原失败取证链');side('h10','h41',1235,'歧义→澄清');side('h41','h10',1274,'↶ 确认后重审规格');const exA=rnode('h30'),exB=rnode('h14');make('path',{d:'M'+(exA.x+exA.w/2)+' '+(exA.y+exA.h)+'V'+(exA.y+exA.h+22)+'H1307V'+(exB.y-29)+'H'+(exB.x+exB.w/2)+'V'+(exB.y-4),class:'edge exploration','marker-end':'url(#arr-high)'});label(1100,exB.y-16,'↶ 总预算内继续假设');
+const end=rnode('h42'),repair=rnode('h40');path('M'+(repair.x+repair.w/2)+' '+(repair.y+repair.h)+'V'+(repair.y+repair.h+15)+'H'+(end.x+end.w/2)+'V'+(end.y+end.h+3),true);label(end.x,end.y+end.h+30,'额度耗尽 / 安全拒绝 / 截止时间 → 明确终态',true);
+svg.setAttribute('viewBox','0 0 1320 '+canvas.scrollHeight);return;}
+const phases=[...canvas.querySelectorAll('.phase')];let previous=[];
+for(const phase of phases){const type=phase.dataset.kind,cards=[...phase.querySelectorAll('.node')],rs=cards.map(rect);if(previous.length){const target=type==='serial'?[rs[0]]:rs;const source=previous;const middle=(Math.max(...source.map(r=>r.y+r.h))+Math.min(...target.map(r=>r.y)))/2;const sx=source.map(r=>r.x+r.w/2),tx=target.map(r=>r.x+r.w/2);if(source.length===1&&target.length===1){path('M'+sx[0]+' '+(source[0].y+source[0].h)+'V'+middle+'H'+tx[0]+'V'+(target[0].y-5));}else{for(const r of source)make('path',{d:'M'+(r.x+r.w/2)+' '+(r.y+r.h)+'V'+middle,class:'edge'});make('path',{d:'M'+Math.min(...sx,...tx)+' '+middle+'H'+Math.max(...sx,...tx),class:'edge'});for(const r of target)path('M'+(r.x+r.w/2)+' '+middle+'V'+(r.y-5));label(Math.max(...sx,...tx)+8,middle-5,target.length>1?(type==='alternative'?'OR · 策略择一':'FAN-OUT'):'FAN-IN');}}
+if(type==='serial'){for(let i=0;i<rs.length-1;i++){const a=rs[i],b=rs[i+1];path('M'+(a.x+a.w)+' '+(a.y+a.h/2)+'H'+(b.x-5));}previous=[rs[rs.length-1]];}else previous=rs;}
+const retryEl=canvas.querySelector('.recovery .node'),rr=rect(retryEl),rail=1263;const sources=(mode==='low'?['l7','l9','l10','l12']:['h6','h7','h8','h10','h11','h13']).map(id=>canvas.querySelector('[data-node="'+id+'"]')).filter(Boolean);const rightmost=sources.filter(el=>{const r=rect(el);return r.x+r.w>1050;});for(const el of rightmost){const r=rect(el);path('M'+(r.x+r.w)+' '+(r.y+r.h/2)+'H'+rail+'V'+(rr.y+rr.h/2)+'H'+(rr.x+rr.w+4),true);}label(rail-8,rr.y-13,'失败 → 自愈',true);
+const target=rect(canvas.querySelector('[data-node="'+(mode==='low'?'l6':'h5')+'"]'));const returnRail=1296;path('M'+(rr.x+rr.w)+' '+(rr.y+rr.h*.7)+'H'+returnRail+'V'+(target.y+target.h*.7)+'H'+(target.x+target.w+5),true);label(1100,target.y-12,'↶ 修复工单返回指定节点',true);svg.setAttribute('viewBox','0 0 1320 '+canvas.scrollHeight);}
+function measure(){const {canvas,sizer}=elements();canvas.style.transform='scale('+zoom+')';sizer.style.width=(1320*zoom)+'px';sizer.style.height=(canvas.scrollHeight*zoom)+'px';$('zoom-label').textContent=Math.round(zoom*100)+'%';$('in').disabled=zoom>=1.6;$('out').disabled=zoom<=.35;drawEdges();}
+function fit(){autoFit=true;zoom=Math.max(.35,Math.min(1,(elements().viewport.clientWidth-16)/1320));measure();}
+function setStatus(text,running=false){$('status').textContent=text;$('status').classList.toggle('running',running);}
+function stop(reset=true){clearTimeout(timer);timer=null;$('play').textContent='▷ 演示本流程';if(reset){document.querySelectorAll('.node').forEach(el=>{el.classList.remove('active','done','retrying');el.querySelector('.state').textContent='↗';});setStatus('设计视图 · 演示为本地模拟，不连接数据源');}}
+function choose(next){stop();mode=next;for(const name of ['low','high']){$('panel-'+name).hidden=name!==mode;const tab=$('tab-'+name);tab.setAttribute('aria-selected',String(name===mode));tab.tabIndex=name===mode?0:-1;}elements().viewport.scrollTop=0;elements().viewport.scrollLeft=0;fit();}
+for(const tab of document.querySelectorAll('[role=tab]')){tab.addEventListener('click',()=>choose(tab.dataset.mode));tab.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const next=e.key==='Home'?'low':e.key==='End'?'high':mode==='low'?'high':'low';choose(next);$('tab-'+next).focus();}});}
+function openNode(id){const n=DATA[id];lastNode=document.querySelector('[data-node="'+id+'"]');lastNode.classList.add('selected');$('detail-title').textContent=n.title;$('detail-code').textContent=(id.startsWith('l')?'BASIC':'ADVANCED')+' / '+id.toUpperCase();const body=$('detail-body');body.replaceChildren();for(const [key,title,cls]of [['role','负责人 / ROLE',''],['input','输入 / INPUT','code'],['skills','注入的工程技能 / SKILLS',''],['mechanism','干预机制 / MECHANISM',''],['output','输出 / OUTPUT','code'],['fallback','兜底与停止 / FALLBACK','fallback'],['hook','代码接入点 / INTEGRATION','code'],['basis','一手依据与本项目扩展 / BASIS',''],['acceptance','可验证验收条件 / ACCEPTANCE','']]){if(!n[key])continue;const s=document.createElement('section'),h=document.createElement('h3'),p=document.createElement('p');h.textContent=title;p.textContent=Array.isArray(n[key])?n[key].join(' / '):(n[key]||'沿用普通完整闭环的节点契约；本轮仅展开高级架构。');if(cls==='fallback')s.className=cls;else p.className=cls;s.append(h,p);body.append(s);}$('details').showModal();$('details').scrollTop=0;}
+document.querySelectorAll('[data-node]').forEach(el=>el.addEventListener('click',()=>openNode(el.dataset.node)));$('close').addEventListener('click',()=>$('details').close());$('details').addEventListener('close',()=>{document.querySelectorAll('.selected').forEach(el=>el.classList.remove('selected'));if(lastNode)lastNode.focus({preventScroll:true});});$('details').addEventListener('click',e=>{const r=$('details').getBoundingClientRect();if(e.target===$('details')&&e.clientX<r.left)$('details').close();});
+$('in').addEventListener('click',()=>{autoFit=false;zoom=Math.min(1.6,zoom+.1);measure();});$('out').addEventListener('click',()=>{autoFit=false;zoom=Math.max(.35,zoom-.1);measure();});$('fit').addEventListener('click',fit);$('motion').addEventListener('click',()=>{motion=!motion;document.querySelectorAll('.diagram').forEach(el=>el.classList.toggle('motion',motion));$('motion').setAttribute('aria-pressed',String(motion));$('motion').textContent='动效：'+(motion?'开':'关');});
+const lowSteps=[['l0'],['l1','l2','l3'],['l4'],['l6'],['l7'],['l8'],['l9'],['l10'],['lr'],['l6'],['l7'],['l8'],['l9'],['l10'],['l11'],['l12'],['l13']];
+const highSteps=[["h01"], ["h02"], ["h03"], ["h04", "h05", "h06"], ["h07"], ["h08"], ["h09"], ["h10"], ["h11"], ["h12"], ["h13"], ["h14"], ["h15"], ["h16", "h17", "h18"], ["h19", "h20", "h21"], ["h22", "h23", "h24"], ["h25", "h26", "h27"], ["h28"], ["h29"], ["h40"], ["h20"], ["h23"], ["h26"], ["h28"], ["h29"], ["h30"], ["h31"], ["h32"], ["h33"], ["h34"], ["h35"], ["h36"], ["h37"], ["h38"], ["h39"]];
+$('play').addEventListener('click',()=>{if(timer!==null){stop();return;}stop();const steps=mode==='low'?lowSteps:highSteps;let index=0,previous=[];$('play').textContent='□ 停止演示';function tick(){for(const id of previous){const el=document.querySelector('[data-node="'+id+'"]');el.classList.remove('active','retrying');el.classList.add('done');el.querySelector('.state').textContent='✓';}if(index>=steps.length){setStatus('模拟完成 · '+(mode==='low'?'普通完整闭环':'高级42节点研究')+' · 本任务使用 1 次修复，剩余 1 次 · 未跨模式');stop(false);return;}const ids=steps[index];for(const id of ids){const el=document.querySelector('[data-node="'+id+'"]');el.classList.remove('done');el.classList.add((id.endsWith('r')||id==='h40')?'retrying':'active');el.querySelector('.state').textContent=(id.endsWith('r')||id==='h40')?'↶':'●';}setStatus('模拟 '+(index+1)+'/'+steps.length+' · '+ids.map(id=>DATA[id].title).join(' / ')+(ids.some(id=>(id.endsWith('r')||id==='h40'))?' · 领取返工令牌，修复后重过闸门':''),true);document.querySelector('[data-node="'+ids[0]+'"]').scrollIntoView({block:'nearest',inline:'nearest',behavior:reduced.matches?'instant':'smooth'});previous=ids;index++;timer=setTimeout(tick,1100);}tick();});
+new ResizeObserver(()=>{if(autoFit)fit();else measure();}).observe($('viewport-low'));new ResizeObserver(()=>{if(mode==='high'){if(autoFit)fit();else measure();}}).observe($('viewport-high'));
+window.addEventListener('beforeprint',()=>stop());window.addEventListener('afterprint',measure);document.fonts.ready.then(fit);choose('high');
+</script></body></html>
