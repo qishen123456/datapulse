@@ -1,0 +1,35 @@
+{
+  "status": "passed",
+  "data_version": "gas-demo-v1",
+  "scenario_revision": "realism-v2",
+  "organization_nodes": 43,
+  "rows": {
+    "gas_org": 43,
+    "gas_sales_monthly": 2640,
+    "gas_supply_monthly": 990,
+    "gas_profit_monthly": 396,
+    "gas_ar_monthly": 3960,
+    "gas_growth_monthly": 1320,
+    "gas_safety_monthly": 792,
+    "gas_network_assets": 12000,
+    "gas_hazard_orders": 120
+  },
+  "annual_sales_m3": {
+    "2024": 1850000000,
+    "2025": 1903162340,
+    "2026": 1420333560
+  },
+  "checks": [
+    "组织编码/名称/路径/父子关系",
+    "业务主键唯一",
+    "高压输配不落销售",
+    "年度气量锚点",
+    "采购量价及组织供销差",
+    "量价及稽核差异",
+    "实抄估抄守恒",
+    "应收滚动/账龄平衡",
+    "销售与应收账单勾稽",
+    "用户数滚动",
+    "管网里程及隐患组织关联"
+  ]
+}

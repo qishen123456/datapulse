@@ -1,0 +1,9 @@
+[
+  {
+    "code": "AUDIT_PRICE_01",
+    "table": "gas_sales_monthly",
+    "business_key": "2025-08:SHAHU-S1-W1:商业",
+    "expected_difference_yuan": 80000.0,
+    "explanation": "模拟账单录入差异；不是计价公式错误"
+  }
+]

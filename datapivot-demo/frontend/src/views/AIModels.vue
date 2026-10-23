@@ -1,12 +1,15 @@
 <template>
-  <div class="cs-page" v-loading="loading">
+  <div class="module-layout-v4 cs-page" v-loading="loading">
+    <header class="cs-page-heading">
+      <div><h1>模型服务</h1><p>管理供应商通道、模型清单与连接设置。</p></div>
+      <el-button v-if="isFeatureEnabled('ai_channel_edit')" type="primary" @click="openAddChannel"><el-icon><Plus /></el-icon>新建通道</el-button>
+    </header>
     <div class="cs-layout">
       <!-- ===== LEFT: Channel List ===== -->
       <aside class="cs-sidebar">
         <div class="cs-sidebar-head">
           <div>
-            <div class="cs-sidebar-kicker">MODEL ROUTES</div>
-            <div class="cs-sidebar-title">模型通道</div>
+            <div class="cs-sidebar-title">供应商通道</div>
           </div>
           <span class="cs-sidebar-count">{{ channels.length }}</span>
         </div>
@@ -15,6 +18,8 @@
             v-for="ch in channels" :key="ch.key"
             class="cs-ch-item"
             :class="{ 'is-active': selectedChannelKey === ch.key }"
+            role="button" tabindex="0" :aria-pressed="selectedChannelKey === ch.key"
+            @keydown.enter.self="selectChannel(ch.key)" @keydown.space.self.prevent="selectChannel(ch.key)"
             @click="selectChannel(ch.key)"
           >
             <span class="cs-ch-icon" v-html="channelIconSvg(ch)"></span>
@@ -31,12 +36,6 @@
               @change="toggleChannelActive(ch, $event)"
             />
           </div>
-        </div>
-        <div class="cs-sidebar-footer">
-          <el-button v-if="isFeatureEnabled('ai_channel_edit')" type="primary" class="cs-add-btn" @click="openAddChannel">
-            <el-icon><Plus /></el-icon>
-            <span>新建通道</span>
-          </el-button>
         </div>
       </aside>
 
@@ -102,7 +101,11 @@
           </div>
         </section>
 
-        <section class="cs-config-grid">
+        <nav class="cs-detail-tabs" aria-label="通道配置">
+          <button type="button" :aria-pressed="channelTab === 'models'" @click="channelTab = 'models'">模型清单 <span>{{ activeChannel.models.length }}</span></button>
+          <button type="button" :aria-pressed="channelTab === 'connection'" @click="channelTab = 'connection'">连接设置</button>
+        </nav>
+        <section v-show="channelTab === 'connection'" class="cs-config-grid">
           <!-- API Key Section -->
           <div class="cs-config-card cs-config-card-key">
             <div class="cs-section-head">
@@ -146,7 +149,7 @@
         </section>
 
         <!-- Models Section -->
-        <section class="cs-model-panel">
+        <section v-show="channelTab === 'models'" class="cs-model-panel">
           <div class="cs-models-header">
             <div>
               <div class="cs-models-label">模型资产</div>
@@ -190,7 +193,7 @@
                   :loading="testingId === model.id"
                   @click="testModel(model)"
                 >测试</el-button>
-                <el-button v-if="isFeatureEnabled('ai_model_edit')" text size="small" @click="openEditModel(model)">
+                <el-button v-if="isFeatureEnabled('ai_model_edit')" text size="small" :aria-label="`配置模型 ${model.name || model.model}`" @click="openEditModel(model)">
                   <el-icon><Setting /></el-icon>
                 </el-button>
                 <el-popconfirm v-if="isFeatureEnabled('ai_model_edit')" title="确认删除此模型？" @confirm="deleteModel(model.id)">
@@ -213,7 +216,7 @@
 
       <!-- Empty State -->
       <main class="cs-main cs-empty" v-else>
-        <div class="cs-empty-text">请在左侧选择或添加一个通道</div>
+        <div class="cs-empty-text">请选择或添加一个供应商通道</div>
       </main>
     </div>
 
@@ -279,6 +282,7 @@
 </template>
 
 <script setup>
+import "../styles/module-interiors.css"
 import { ref, computed, reactive, onMounted, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus, Edit, Delete, ArrowDown, Setting, View, Hide } from '@element-plus/icons-vue'
@@ -291,6 +295,7 @@ const { isFeatureEnabled, loadFeatureFlags } = useFeatureFlags()
 const testingId = ref(null)
 const testResults = reactive({})
 const selectedChannelKey = ref(null)
+const channelTab = ref('models')
 const channelTesting = ref(null)
 const channelTestResult = reactive({})
 const showApiKey = ref(false)
@@ -704,7 +709,7 @@ onMounted(() => {
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 6px;
   background:
-    radial-gradient(circle at 82% 8%, rgba(13, 148, 136, 0.13), transparent 28%),
+    radial-gradient(circle at 82% 8%, rgba(29, 78, 216, 0.13), transparent 28%),
     radial-gradient(circle at 30% 0%, rgba(0, 0, 0, 0.09), transparent 24%),
     linear-gradient(135deg, #F2F5F4 0%, #F2F5F4 45%, #ffffff 100%);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.78);
@@ -743,7 +748,7 @@ onMounted(() => {
 }
 
 .cs-sidebar-kicker {
-  color: #0D9488;
+  color: #1d4ed8;
   font-size: 9px;
   font-weight: 850;
   letter-spacing: 0.14em;
@@ -764,11 +769,11 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #0F766E;
+  color: #1e40af;
   font-size: 12px;
   font-weight: 850;
-  background: #F0FDFA;
-  border: 1px solid rgba(13, 148, 136, 0.16);
+  background: #eff6ff;
+  border: 1px solid rgba(29, 78, 216, 0.16);
 }
 
 .cs-sidebar-scroll {
@@ -796,16 +801,16 @@ onMounted(() => {
 
 .cs-ch-item:hover {
   transform: translateY(-1px);
-  border-color: rgba(13, 148, 136, 0.2);
+  border-color: rgba(29, 78, 216, 0.2);
   background: #ffffff;
   box-shadow: 0 12px 26px rgba(0, 0, 0, 0.08);
 }
 
 .cs-ch-item.is-active {
-  border-color: rgba(13, 148, 136, 0.32);
+  border-color: rgba(29, 78, 216, 0.32);
   background:
     linear-gradient(135deg, rgba(236, 254, 255, 0.9), rgba(255, 255, 255, 0.96));
-  box-shadow: 0 2px 8px rgba(13, 25, 24, 0.08), inset 3px 0 0 #0D9488;
+  box-shadow: 0 2px 8px rgba(13, 25, 24, 0.08), inset 3px 0 0 #1d4ed8;
 }
 
 .cs-ch-icon {
@@ -816,7 +821,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: linear-gradient(135deg, #1A1A1A 0%, #0D9488 100%);
+  background: linear-gradient(135deg, #1A1A1A 0%, #1d4ed8 100%);
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
 }
 
@@ -893,7 +898,7 @@ onMounted(() => {
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 6px;
   background:
-    radial-gradient(circle at 4% 10%, rgba(13, 148, 136, 0.16), transparent 32%),
+    radial-gradient(circle at 4% 10%, rgba(29, 78, 216, 0.16), transparent 32%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(248, 249, 250, 0.88));
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.055), inset 0 1px 0 rgba(255, 255, 255, 0.88);
 }
@@ -917,7 +922,7 @@ onMounted(() => {
   cursor: pointer;
   background:
     radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.34), transparent 26%),
-    linear-gradient(135deg, #111827 0%, #1A1A1A 48%, #0D9488 100%);
+    linear-gradient(135deg, #111827 0%, #1A1A1A 48%, #1d4ed8 100%);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
   transition: all var(--duration-normal, 220ms) var(--ease-out);
 }
@@ -933,7 +938,7 @@ onMounted(() => {
 
 .cs-provider-kicker {
   margin-bottom: 4px;
-  color: #0D9488;
+  color: #1d4ed8;
   font-size: 10px;
   font-weight: 850;
   letter-spacing: 0.12em;
@@ -1040,7 +1045,7 @@ onMounted(() => {
 
 .cs-config-card-key {
   background:
-    radial-gradient(circle at 100% 0%, rgba(13, 148, 136, 0.12), transparent 30%),
+    radial-gradient(circle at 100% 0%, rgba(29, 78, 216, 0.12), transparent 30%),
     rgba(255, 255, 255, 0.84);
 }
 
@@ -1115,11 +1120,11 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #0F766E;
+  color: #1e40af;
   font-size: 12px;
   font-weight: 900;
-  background: #F0FDFA;
-  border: 1px solid rgba(13, 148, 136, 0.16);
+  background: #eff6ff;
+  border: 1px solid rgba(29, 78, 216, 0.16);
 }
 
 .cs-models-spacer {
@@ -1145,7 +1150,7 @@ onMounted(() => {
 
 .cs-model-row:hover {
   transform: translateY(-1px);
-  border-color: rgba(13, 148, 136, 0.18);
+  border-color: rgba(29, 78, 216, 0.18);
   box-shadow: 0 14px 26px rgba(0, 0, 0, 0.08);
 }
 
@@ -1168,8 +1173,8 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: #F0FDFA;
-  border: 1px solid rgba(13, 148, 136, 0.12);
+  background: #eff6ff;
+  border: 1px solid rgba(29, 78, 216, 0.12);
 }
 
 .cs-ch-icon :deep(.cs-tech-icon),
@@ -1188,7 +1193,7 @@ onMounted(() => {
 
 .cs-ch-icon,
 .cs-provider-icon {
-  color: #F0FDFA;
+  color: #eff6ff;
 }
 
 .cs-ch-icon :deep(.cs-tech-icon) {
@@ -1205,7 +1210,7 @@ onMounted(() => {
 }
 
 .cs-model-emoji {
-  color: #0D9488;
+  color: #1d4ed8;
 }
 
 .cs-model-emoji :deep(.cs-tech-icon) {
@@ -1258,7 +1263,7 @@ onMounted(() => {
 }
 
 .cs-model-dot.is-err {
-  background: #0D9488;
+  background: #1d4ed8;
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.12);
 }
 
@@ -1309,11 +1314,11 @@ onMounted(() => {
 
 .cs-icon-option:hover,
 .cs-icon-option.is-active {
-  border-color: rgba(13, 148, 136, 0.3);
+  border-color: rgba(29, 78, 216, 0.3);
   background:
     radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.9), transparent 30%),
-    linear-gradient(135deg, #F0FDFA 0%, #ffffff 100%);
-  color: #0F766E;
+    linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+  color: #1e40af;
   transform: translateY(-1px);
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
 }
@@ -1326,7 +1331,7 @@ onMounted(() => {
 .cs-add-model-bar {
   margin-top: 12px;
   padding: 14px;
-  border: 1px dashed rgba(13, 148, 136, 0.22);
+  border: 1px dashed rgba(29, 78, 216, 0.22);
   border-radius: 6px;
   text-align: center;
   background: rgba(236, 254, 255, 0.38);
@@ -1388,4 +1393,27 @@ onMounted(() => {
     justify-content: flex-start;
   }
 }
+
+/* Model workspace: channel catalog above an independent model/connection editor. */
+.cs-page{height:auto;min-height:100%;color:#18222f}
+.cs-page-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:24px}
+.cs-page-heading h1{margin:0;font-size:24px;font-weight:600;letter-spacing:-.6px}.cs-page-heading p{margin:8px 0 0;font-size:13px;color:#778292}
+.cs-layout{display:block;flex:none;overflow:visible;border:0;border-radius:0;background:none;box-shadow:none}.cs-layout::before{display:none}
+.cs-sidebar{width:100%;min-width:0;max-height:none;border:0;background:transparent;backdrop-filter:none;margin-bottom:20px}
+.cs-sidebar-head{padding:0 0 12px;justify-content:flex-start;align-items:center;gap:10px}.cs-sidebar-title{margin:0;font-size:12px;font-weight:500;color:#758294}.cs-sidebar-count{height:20px;min-width:22px;padding:0 6px;border:0;background:#e9edf2;color:#62738a;font-size:11px;font-weight:500}
+.cs-sidebar-scroll{display:flex;flex:none;gap:10px;overflow-x:auto;padding:1px 1px 10px;scroll-snap-type:x proximity}
+.cs-ch-item{flex:0 0 225px;min-height:76px;box-sizing:border-box;margin:0;padding:14px;border:1px solid #e1e5eb;border-radius:10px;background:white;box-shadow:none;scroll-snap-align:start;transition:background .15s,border-color .15s}
+.cs-ch-item:hover{transform:none;background:#fafbfd;border-color:#bfcbd9;box-shadow:none}.cs-ch-item.is-active{background:#f1f5fa;border-color:#809bb9;box-shadow:inset 0 -2px 0 #52779f}.cs-ch-item:focus-visible{outline:2px solid #52779f;outline-offset:2px}
+.cs-ch-icon,.cs-provider-icon{background:#4a627f;box-shadow:none;border-radius:9px}.cs-ch-icon{width:30px;height:30px}.cs-ch-name{font-size:12px;font-weight:600}.cs-ch-meta{font-size:10px;color:#7d8898}.cs-ch-switch{margin-left:0}
+.cs-main{padding:0;min-height:390px;background:#fff;border:1px solid #e1e5eb;border-radius:12px;overflow:hidden}
+.cs-hero{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:24px;margin:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.cs-provider-icon{width:42px;height:42px}.cs-provider-icon:hover{transform:none;box-shadow:none;background:#365f91}.cs-provider-title{font-size:21px;font-weight:600;letter-spacing:-.5px}.cs-provider-kicker{font-size:10px;letter-spacing:.03em;color:#8490a1;font-weight:500}.cs-provider-url-sub{font-size:11px;color:#7c8797}.cs-hero-main{flex:1;min-width:0}
+.cs-hero-stats{display:flex;align-items:center;gap:24px;align-self:center}.cs-stat-card{min-width:0;padding:0 0 0 20px;background:none;border:0;border-left:1px solid #e7ebf0;border-radius:0;max-width:180px}.cs-stat-card span{font-size:11px;color:#8a94a2;font-weight:400}.cs-stat-card strong{font-size:14px;line-height:1.4;font-weight:600;margin-top:5px;overflow-wrap:anywhere}
+.cs-detail-tabs{display:flex;gap:24px;padding:0 24px;border-bottom:1px solid #e7ebf0}.cs-detail-tabs button{display:flex;align-items:center;gap:8px;cursor:pointer;padding:14px 0;border:0;border-bottom:2px solid transparent;background:none;color:#758294;font-family:inherit;font-size:13px;font-weight:500}.cs-detail-tabs button[aria-pressed=true]{color:#294d77;border-bottom-color:#426b99}.cs-detail-tabs button span{font-size:10px;padding:1px 5px;border-radius:4px;background:#f0f3f7;color:#758294}
+.cs-config-grid{padding:24px;margin:0;gap:20px;grid-template-columns:1fr 1fr}.cs-config-card{padding:20px;border:1px solid #e5e9ef;background:#fafbfc;box-shadow:none;border-radius:9px}.cs-config-card-key{background:#fafbfc}.cs-section-label{font-weight:600}.cs-section-desc{color:#8390a1}
+.cs-model-panel{padding:24px;margin:0;border:0;border-radius:0;box-shadow:none;background:transparent}.cs-models-header{gap:10px;margin-bottom:20px}.cs-models-label{font-size:14px;font-weight:600}.cs-models-count{background:#f0f3f7;color:#6d7f94;border:0;font-size:11px}.cs-models-desc{font-size:12px;color:#8390a1}
+.cs-model-list{display:flex;flex-direction:column;gap:0}.cs-model-row,.cs-model-row.is-default,.cs-model-row.is-inactive{margin:0;padding:18px 8px;border:0;border-top:1px solid #edf0f4;border-radius:0;background:transparent;box-shadow:none;opacity:1}.cs-model-row:hover{transform:none;background:#fafbfc;box-shadow:none}.cs-model-emoji{background:#edf2f7;border:0;color:#597697}.cs-model-emoji :deep(svg){stroke:#597697}.cs-model-name{font-size:13px;font-weight:500}.cs-model-id{font-size:11px;color:#8993a1}.cs-add-model-bar{margin:12px 0 0;padding:16px 0 0;border:0;border-top:1px solid #e7ebf0;border-radius:0;background:none;text-align:left}
+@media(max-width:1100px){.cs-hero{align-items:flex-start;flex-direction:column}.cs-hero-stats{align-self:stretch;gap:24px}.cs-stat-card:first-child{border:0;padding-left:0}}
+@media(max-width:650px){.cs-page-heading{align-items:flex-start}.cs-page-heading h1{font-size:22px}.cs-page-heading p{max-width:190px;line-height:1.7}.cs-page-heading .el-button{margin-top:4px}.cs-hero{padding:20px}.cs-hero-stats{gap:18px}.cs-stat-card{padding-left:18px}.cs-stat-card strong{font-size:12px}.cs-config-grid{grid-template-columns:1fr;padding:16px}.cs-model-panel{padding:18px 16px}.cs-detail-tabs{padding:0 20px}.cs-provider-title{font-size:19px}.cs-models-desc{max-width:170px;line-height:1.6}.cs-model-row{gap:10px}.cs-model-actions{padding-left:44px}.cs-model-emoji{flex-shrink:0}.cs-provider-copy{min-width:0}.cs-provider-name-input{width:100%}}
+
 </style>

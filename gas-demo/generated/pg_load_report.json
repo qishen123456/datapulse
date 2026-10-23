@@ -1,0 +1,168 @@
+{
+  "status": "passed",
+  "mode": "apply",
+  "checked_at": "2026-10-23T15:42:32.454552+00:00",
+  "origin": "local_simulation",
+  "feishu_used": false,
+  "organization_nodes": 43,
+  "tables": [
+    {
+      "table": "raw_gas_org",
+      "rows": 43,
+      "before": 43,
+      "upserted": 0,
+      "removed": 0
+    },
+    {
+      "table": "raw_gas_sales_monthly",
+      "rows": 2640,
+      "before": 2640,
+      "upserted": 0,
+      "removed": 0
+    },
+    {
+      "table": "raw_gas_supply_monthly",
+      "rows": 990,
+      "before": 990,
+      "upserted": 0,
+      "removed": 0
+    },
+    {
+      "table": "raw_gas_profit_monthly",
+      "rows": 396,
+      "before": 396,
+      "upserted": 0,
+      "removed": 0
+    },
+    {
+      "table": "raw_gas_ar_monthly",
+      "rows": 3960,
+      "before": 3960,
+      "upserted": 2640,
+      "removed": 0
+    },
+    {
+      "table": "raw_gas_growth_monthly",
+      "rows": 1320,
+      "before": 1320,
+      "upserted": 0,
+      "removed": 0
+    },
+    {
+      "table": "raw_gas_safety_monthly",
+      "rows": 792,
+      "before": 792,
+      "upserted": 0,
+      "removed": 0
+    },
+    {
+      "table": "raw_gas_network_assets",
+      "rows": 12000,
+      "before": 240,
+      "upserted": 12000,
+      "removed": 240
+    },
+    {
+      "table": "raw_gas_hazard_orders",
+      "rows": 120,
+      "before": 120,
+      "upserted": 120,
+      "removed": 0
+    }
+  ],
+  "views": [
+    {
+      "view": "v_gas_ar",
+      "rows": 3960
+    },
+    {
+      "view": "v_gas_ar_summary",
+      "rows": 2640
+    },
+    {
+      "view": "v_gas_growth",
+      "rows": 1320
+    },
+    {
+      "view": "v_gas_hazards",
+      "rows": 120
+    },
+    {
+      "view": "v_gas_network",
+      "rows": 12000
+    },
+    {
+      "view": "v_gas_org",
+      "rows": 43
+    },
+    {
+      "view": "v_gas_profit",
+      "rows": 396
+    },
+    {
+      "view": "v_gas_profit_inputs",
+      "rows": 396
+    },
+    {
+      "view": "v_gas_safety",
+      "rows": 792
+    },
+    {
+      "view": "v_gas_sales",
+      "rows": 2640
+    },
+    {
+      "view": "v_gas_supply_balance",
+      "rows": 330
+    },
+    {
+      "view": "v_gas_supply_sources",
+      "rows": 990
+    }
+  ],
+  "datasets": [
+    {
+      "id": 64,
+      "code": "GAS_BIZ",
+      "name": "江城燃气·经营与供销差",
+      "views": [
+        "v_gas_sales",
+        "v_gas_supply_sources",
+        "v_gas_supply_balance",
+        "v_gas_profit",
+        "v_gas_growth",
+        "v_gas_org"
+      ],
+      "queries_checked": 6
+    },
+    {
+      "id": 65,
+      "code": "GAS_AR",
+      "name": "江城燃气·应收回款与稽核",
+      "views": [
+        "v_gas_ar",
+        "v_gas_ar_summary",
+        "v_gas_sales",
+        "v_gas_org"
+      ],
+      "queries_checked": 6
+    },
+    {
+      "id": 66,
+      "code": "GAS_SAFE",
+      "name": "江城燃气·安全与管网治理",
+      "views": [
+        "v_gas_safety",
+        "v_gas_hazards",
+        "v_gas_network",
+        "v_gas_org"
+      ],
+      "queries_checked": 6
+    }
+  ],
+  "period": {
+    "from": "2024-01",
+    "to": "2026-09"
+  },
+  "total_rows": 22261
+}

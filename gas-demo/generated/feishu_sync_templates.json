@@ -1,0 +1,121 @@
+{
+  "sync_configs": [
+    {
+      "name": "江城燃气·gas_org",
+      "description": "模拟数据；飞书接通前保持停用",
+      "target_table": "raw_gas_org",
+      "app_id": "",
+      "app_secret": "",
+      "base_id": "",
+      "table_id": "",
+      "view_id": "",
+      "sync_mode": "full",
+      "sync_frequency": "60",
+      "is_active": false
+    },
+    {
+      "name": "江城燃气·gas_sales_monthly",
+      "description": "模拟数据；飞书接通前保持停用",
+      "target_table": "raw_gas_sales_monthly",
+      "app_id": "",
+      "app_secret": "",
+      "base_id": "",
+      "table_id": "",
+      "view_id": "",
+      "sync_mode": "full",
+      "sync_frequency": "60",
+      "is_active": false
+    },
+    {
+      "name": "江城燃气·gas_supply_monthly",
+      "description": "模拟数据；飞书接通前保持停用",
+      "target_table": "raw_gas_supply_monthly",
+      "app_id": "",
+      "app_secret": "",
+      "base_id": "",
+      "table_id": "",
+      "view_id": "",
+      "sync_mode": "full",
+      "sync_frequency": "60",
+      "is_active": false
+    },
+    {
+      "name": "江城燃气·gas_profit_monthly",
+      "description": "模拟数据；飞书接通前保持停用",
+      "target_table": "raw_gas_profit_monthly",
+      "app_id": "",
+      "app_secret": "",
+      "base_id": "",
+      "table_id": "",
+      "view_id": "",
+      "sync_mode": "full",
+      "sync_frequency": "60",
+      "is_active": false
+    },
+    {
+      "name": "江城燃气·gas_ar_monthly",
+      "description": "模拟数据；飞书接通前保持停用",
+      "target_table": "raw_gas_ar_monthly",
+      "app_id": "",
+      "app_secret": "",
+      "base_id": "",
+      "table_id": "",
+      "view_id": "",
+      "sync_mode": "full",
+      "sync_frequency": "60",
+      "is_active": false
+    },
+    {
+      "name": "江城燃气·gas_growth_monthly",
+      "description": "模拟数据；飞书接通前保持停用",
+      "target_table": "raw_gas_growth_monthly",
+      "app_id": "",
+      "app_secret": "",
+      "base_id": "",
+      "table_id": "",
+      "view_id": "",
+      "sync_mode": "full",
+      "sync_frequency": "60",
+      "is_active": false
+    },
+    {
+      "name": "江城燃气·gas_safety_monthly",
+      "description": "模拟数据；飞书接通前保持停用",
+      "target_table": "raw_gas_safety_monthly",
+      "app_id": "",
+      "app_secret": "",
+      "base_id": "",
+      "table_id": "",
+      "view_id": "",
+      "sync_mode": "full",
+      "sync_frequency": "60",
+      "is_active": false
+    },
+    {
+      "name": "江城燃气·gas_network_assets",
+      "description": "模拟数据；飞书接通前保持停用",
+      "target_table": "raw_gas_network_assets",
+      "app_id": "",
+      "app_secret": "",
+      "base_id": "",
+      "table_id": "",
+      "view_id": "",
+      "sync_mode": "full",
+      "sync_frequency": "60",
+      "is_active": false
+    },
+    {
+      "name": "江城燃气·gas_hazard_orders",
+      "description": "模拟数据；飞书接通前保持停用",
+      "target_table": "raw_gas_hazard_orders",
+      "app_id": "",
+      "app_secret": "",
+      "base_id": "",
+      "table_id": "",
+      "view_id": "",
+      "sync_mode": "full",
+      "sync_frequency": "60",
+      "is_active": false
+    }
+  ]
+}

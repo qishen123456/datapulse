@@ -1,0 +1,62 @@
+{
+  "status": "passed",
+  "results": [
+    {
+      "path": "/ask",
+      "brand": "DataPulse\n脉策智能",
+      "accent": "rgb(29, 78, 216)",
+      "nav": "rgb(29, 78, 216)",
+      "width": 1440,
+      "viewport": 1440
+    },
+    {
+      "path": "/sql-debug",
+      "brand": "DataPulse\n脉策智能",
+      "accent": "rgb(29, 78, 216)",
+      "nav": "rgb(29, 78, 216)",
+      "width": 1440,
+      "viewport": 1440
+    },
+    {
+      "path": "/datasets",
+      "brand": "DataPulse\n脉策智能",
+      "accent": "rgb(29, 78, 216)",
+      "nav": "rgb(29, 78, 216)",
+      "width": 1440,
+      "viewport": 1440
+    },
+    {
+      "path": "/agents",
+      "brand": "DataPulse\n脉策智能",
+      "accent": "rgb(29, 78, 216)",
+      "nav": "rgb(29, 78, 216)",
+      "width": 1440,
+      "viewport": 1440
+    },
+    {
+      "path": "/report-config",
+      "brand": "DataPulse\n脉策智能",
+      "accent": "rgb(29, 78, 216)",
+      "nav": "rgb(29, 78, 216)",
+      "width": 1440,
+      "viewport": 1440
+    },
+    {
+      "path": "/organization-trees",
+      "brand": "DataPulse\n脉策智能",
+      "accent": "rgb(29, 78, 216)",
+      "nav": "rgb(29, 78, 216)",
+      "width": 1440,
+      "viewport": 1440
+    },
+    {
+      "path": "/admin-console",
+      "brand": "DataPulse\n脉策智能",
+      "accent": "rgb(29, 78, 216)",
+      "nav": null,
+      "width": 1440,
+      "viewport": 1440
+    }
+  ],
+  "errors": []
+}

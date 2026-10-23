@@ -1,0 +1,115 @@
+{
+  "status": "passed",
+  "checks": {
+    "branch_monthly_sales": [
+      {
+        "month": "2026-08",
+        "branch_name": "临港分公司",
+        "volume_m3": "22378914"
+      },
+      {
+        "month": "2026-09",
+        "branch_name": "临港分公司",
+        "volume_m3": "20638653"
+      },
+      {
+        "month": "2026-08",
+        "branch_name": "沙湖分公司",
+        "volume_m3": "25855488"
+      },
+      {
+        "month": "2026-09",
+        "branch_name": "沙湖分公司",
+        "volume_m3": "26874162"
+      },
+      {
+        "month": "2026-08",
+        "branch_name": "滨江分公司",
+        "volume_m3": "23205999"
+      },
+      {
+        "month": "2026-09",
+        "branch_name": "滨江分公司",
+        "volume_m3": "24131444"
+      },
+      {
+        "month": "2026-08",
+        "branch_name": "经开分公司",
+        "volume_m3": "41752601"
+      },
+      {
+        "month": "2026-09",
+        "branch_name": "经开分公司",
+        "volume_m3": "41090081"
+      },
+      {
+        "month": "2026-08",
+        "branch_name": "高新分公司",
+        "volume_m3": "30742887"
+      },
+      {
+        "month": "2026-09",
+        "branch_name": "高新分公司",
+        "volume_m3": "31382980"
+      }
+    ],
+    "aged_debt": [
+      {
+        "branch_name": "临港分公司",
+        "closing_yuan": "3450727.65",
+        "aging_365_plus_yuan": "0.0"
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "closing_yuan": "89165105.71",
+        "aging_365_plus_yuan": "9167089.15"
+      },
+      {
+        "branch_name": "滨江分公司",
+        "closing_yuan": "5594040.68",
+        "aging_365_plus_yuan": "0.0"
+      },
+      {
+        "branch_name": "经开分公司",
+        "closing_yuan": "4291275.36",
+        "aging_365_plus_yuan": "0.0"
+      },
+      {
+        "branch_name": "高新分公司",
+        "closing_yuan": "3656734.06",
+        "aging_365_plus_yuan": "0.0"
+      }
+    ],
+    "network": [
+      {
+        "sections": 12000,
+        "length_km": "17000.00",
+        "min_km": "0.14",
+        "max_km": "2.7",
+        "not_in_gis": 1207
+      }
+    ],
+    "open_hazards": [
+      {
+        "severity": "一般",
+        "total": 15,
+        "overdue": 11
+      },
+      {
+        "severity": "重大",
+        "total": 2,
+        "overdue": 2
+      }
+    ],
+    "ar_reconciliation": [
+      {
+        "invalid": 0
+      }
+    ],
+    "hazard_join": [
+      {
+        "invalid": 0
+      }
+    ]
+  }
+}

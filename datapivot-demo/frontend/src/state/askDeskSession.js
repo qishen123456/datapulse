@@ -1,7 +1,9 @@
 import { computed, reactive } from 'vue'
-import { confirmByBossStream, sendAskChatStream } from '../api/index.js'
+import { emptyWorkflow, reduceWorkflow } from './askWorkflow.js'
+import { confirmByBossStream, sendAskChatStream, cancelAskRun } from '../api/index.js'
 
 const STORAGE_KEY = 'askdesk-session-v1'
+const executionId = () => window.crypto?.randomUUID ? window.crypto.randomUUID().replaceAll('-', '') : Array.from(window.crypto.getRandomValues(new Uint8Array(16)), x => x.toString(16).padStart(2,'0')).join('')
 
 const createSessionId = () => {
   if (window.crypto?.randomUUID) return window.crypto.randomUUID()
@@ -255,6 +257,8 @@ const state = reactive({
   conversationSessionId: '',
   isHistoricalSnapshot: false,
   liveParseBar: null,
+  workflow: emptyWorkflow(),
+  requestedFlow: '',
 })
 
 let phaseTimer = null
@@ -342,7 +346,7 @@ const clearTracePacing = () => {
   resolveTracePacingWaiters()
 }
 
-const shouldPaceTraceKey = (key) => new Set([
+const shouldPaceTraceKey = (key) => !state.workflow.run_id && new Set([
   'trace-route',
   'trace-context',
   'trace-agent2',
@@ -999,7 +1003,8 @@ const applyTraceEventNow = (payload = {}) => {
   }
 
   const meta = getTraceStageMeta(stage, event)
-  const key = normalizeTraceStageKey(stage)
+  const baseKey = normalizeTraceStageKey(stage)
+  const key = event.branch_id ? `${baseKey}:${event.branch_id}:${event.attempt || 0}` : baseKey
   const normalizedStatus = normalizeTraceStatus(event.status, stage)
   const detailLines = buildTraceDetailLines(stage, event.status, event)
   const thought = buildTraceThought(stage, event.status, event)
@@ -1192,6 +1197,10 @@ const pickDatasetConfirmationOption = (data = {}, selectedIds = []) => {
 }
 
 const consumeStreamEvent = (eventName, payload, finalPayloadRef) => {
+  if (eventName === 'workflow') {
+    state.workflow = reduceWorkflow(state.workflow, payload.event)
+    return
+  }
   if (eventName === 'trace') {
     applyTraceEvent(payload)
     return
@@ -1714,10 +1723,10 @@ const settleRealtimeTimeline = () => {
   const settledAt = new Date().toISOString()
   const settledAtMs = Date.parse(settledAt) || Date.now()
   state.logs = state.logs.map((log) => {
-    const status = ['error', 'warning'].includes(log?.status) ? log.status : 'success'
+    const status = ['running','pending'].includes(log?.status) ? 'warning' : log.status
     const startedAtMs = Number(log?.startedAtMs)
     const duration = Number.isFinite(startedAtMs)
-      ? Math.max(Number(log?.duration || 0), settledAtMs - startedAtMs)
+      ? (Number(log?.duration) > 0 ? Number(log.duration) : log.status==='running' ? settledAtMs-startedAtMs : undefined)
       : log?.duration
     return createTimelineEvent({
       ...log,
@@ -1758,11 +1767,11 @@ const settleUserCanceledTimeline = () => {
       return createTimelineEvent({
         ...log,
         status: 'warning',
-        summary: '用户已取消，本节点已停止。',
-        detail: '用户已取消本轮问数，当前节点不会继续执行。',
+        summary: '已请求停止，正在等待当前操作退出。',
+        detail: '已请求取消本轮问数，后续步骤不再启动。',
         detailLines: uniqueLines([
           ...(Array.isArray(log?.detailLines) ? log.detailLines : []),
-          '已收到取消指令，当前节点已停止。',
+          '已收到停止指令；当前操作可能仍在退出中。',
         ]),
         liveThoughtLines: [],
         pulseText: '',
@@ -1780,10 +1789,10 @@ const settleUserCanceledTimeline = () => {
     kind: 'system',
     toolType: 'default',
     summary: '你已手动取消本轮问数。',
-    detail: '本轮问数已停止，不会继续生成 SQL、查询结果或报告。',
+    detail: '已请求停止。正在执行的模型调用或不支持取消的数据库操作会在返回或超时后退出，后续步骤不再启动。',
     detailLines: [
       '已收到取消指令。',
-      '本轮问数已停止，不会继续生成 SQL、查询结果或报告。',
+      '已请求停止。正在执行的模型调用或不支持取消的数据库操作会在返回或超时后退出，后续步骤不再启动。',
       '如需重新分析，可以调整问题后再次发送。',
     ],
     status: 'warning',
@@ -1799,6 +1808,8 @@ const finalizeFromResult = async (data) => {
   lastHeartbeatLineAt = 0
 
   state.result = data
+  if (data?.workflow) state.workflow = { ...state.workflow, ...data.workflow }
+  if (data?.aborted) { settleUserCanceledTimeline(); return }
   state.currentSessionId = data?.session_id || state.currentSessionId
   state.conversationSessionId = data?.conversation_session_id || state.conversationSessionId || createSessionId()
   const routedDatasetIds = normalizeSelectedDatasetIds(data?.route?.dataset_ids)
@@ -1857,6 +1868,9 @@ const startAsk = async (question, selectedDatasetInput, modelId, options) => {
   }
   activeAbortController = new AbortController()
 
+  const clientRunId = executionId()
+  state.workflow = { ...emptyWorkflow(), run_id: clientRunId, flow: options?.askFlow || 'basic', status: 'running' }
+  state.requestedFlow = options?.askFlow || ''
   state.question = normalizedQuestion
   state.selectedDatasetId = carrySelectedIds.length === 1 ? carrySelectedIds[0] : state.selectedDatasetId
   state.status = 'running'
@@ -1880,6 +1894,10 @@ const startAsk = async (question, selectedDatasetInput, modelId, options) => {
       selected,
       (eventName, payload) => {
         if (currentRunToken !== runToken) return
+        if (eventName === 'workflow') {
+          state.workflow = reduceWorkflow(state.workflow, payload.event)
+          return
+        }
         if (eventName === 'trace') {
           applyTraceEvent(payload)
           return
@@ -1898,7 +1916,7 @@ const startAsk = async (question, selectedDatasetInput, modelId, options) => {
       modelId || undefined,
       state.conversationSessionId,
       undefined,
-      options || undefined,
+      { ...options, executionId: clientRunId },
     )
     if (currentRunToken !== runToken) return null
     if (!finalPayload) {
@@ -1942,7 +1960,7 @@ const startAsk = async (question, selectedDatasetInput, modelId, options) => {
         )
       }
     }
-    if (!finalPayload?.requires_confirmation) {
+    if (!finalPayload?.requires_confirmation && !state.workflow.run_id) {
       const elapsedMs = Date.now() - new Date(state.startedAt).getTime()
       await waitForTracePacing()
       appendLog({
@@ -2018,6 +2036,8 @@ const submitBossConfirmation = async (selectedOption, context = {}) => {
   }
 
   const currentRunToken = ++runToken
+  const clientRunId = executionId()
+  state.workflow = { ...emptyWorkflow(), run_id: clientRunId, flow: state.result?.workflow?.flow || state.requestedFlow || 'basic', status: 'running' }
   state.status = 'running'
   setLogStatus('boss-confirm', 'success', optionLabel, {
     summary: '已提交确认选项，任务继续进入执行流程。',
@@ -2041,6 +2061,9 @@ const submitBossConfirmation = async (selectedOption, context = {}) => {
       selected_option: optionLabel,
       option_id: optionId || undefined,
       selected_dataset_ids: selectedDatasetIds.length > 0 ? selectedDatasetIds : undefined,
+      execution_id: clientRunId,
+      plan_branch_ids: typeof selectedOption === 'object' ? selectedOption.plan_branch_ids : undefined,
+      ask_flow: state.result?.workflow?.flow || undefined,
     }, activeAbortController.signal, () => currentRunToken !== runToken)
 
     if (currentRunToken !== runToken) return null
@@ -2114,6 +2137,13 @@ const resetSession = () => {
 }
 
 const stopAsk = () => {
+  runToken += 1
+  const runId = state.workflow?.run_id
+  if (runId && state.status === 'running') {
+    cancelAskRun(runId).catch(() => {
+      state.error = '连接已断开，未确认服务端停止；当前数据库操作受超时限制。'
+    })
+  }
   if (activeAbortController) {
     activeAbortController.abort()
     activeAbortController = null

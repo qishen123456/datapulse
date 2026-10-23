@@ -50,7 +50,7 @@ const routes = [
     path: '/agents',
     name: 'Agents',
     component: viewLoaders.AgentManagement,
-    meta: { title: '智能体管理', roles: ['super_admin', 'admin'] }
+    meta: { title: '专家协作', roles: ['super_admin', 'admin'] }
   },
   {
     path: '/datasets',
@@ -86,7 +86,7 @@ const routes = [
     path: '/advanced-capabilities',
     name: 'AdvancedCapabilities',
     component: viewLoaders.AdvancedCapabilities,
-    meta: { title: '进阶能力', roles: ['super_admin', 'admin'] }
+    meta: { title: '技能与工具', roles: ['super_admin', 'admin'] }
   },
   {
     path: '/feishu-sync',

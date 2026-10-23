@@ -83,8 +83,8 @@ const steps = computed(() => {
   height: 24px;
   padding: 0 10px;
   border-radius: 4px;
-  background: #F0FDFA;
-  color: #0D9488;
+  background: #eff6ff;
+  color: #1d4ed8;
   font-size: 11px;
   font-weight: 700;
 }
@@ -113,8 +113,8 @@ const steps = computed(() => {
   width: 30px;
   height: 30px;
   border-radius: 4px;
-  background: linear-gradient(180deg, #F0FDFA 0%, #F0FDFA 100%);
-  color: #0D9488;
+  background: linear-gradient(180deg, #eff6ff 0%, #eff6ff 100%);
+  color: #1d4ed8;
   font-size: 11px;
   font-weight: 700;
   display: flex;

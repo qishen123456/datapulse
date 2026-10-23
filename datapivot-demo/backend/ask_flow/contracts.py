@@ -18,6 +18,7 @@ class AskRequest:
     conversation_history: Optional[List[Dict[str, Any]]] = None
     current_user: Optional[Dict[str, Any]] = None
     requested_flow: str = ""
+    execution_id: str = ""
 
 
 @dataclass
@@ -27,9 +28,11 @@ class ConfirmRequest:
     selected_dataset_ids: Optional[List[int]] = None
     allowed_dataset_ids: Optional[List[int]] = None
     option_id: str = ""
+    plan_branch_ids: Optional[List[str]] = None
     live_callback: LiveCallback = None
     current_user: Optional[Dict[str, Any]] = None
     requested_flow: str = ""
+    execution_id: str = ""
 
 
 @dataclass

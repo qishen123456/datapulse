@@ -1,0 +1,61 @@
+{
+  "version": "gas-knowledge-20261022",
+  "checked_at": "2026-10-22T02:14:02.648881+00:00",
+  "datasets": [
+    {
+      "id": 64,
+      "code": "GAS_BIZ",
+      "name": "江城燃气·经营与供销差",
+      "lld_version": 2,
+      "views": 6,
+      "fields": 110,
+      "relations": 5,
+      "metrics": 12,
+      "agent_prompts": 4,
+      "regression_cases": 4,
+      "synonyms": 17,
+      "queries": 12,
+      "common_questions": 12,
+      "profile": "generic"
+    },
+    {
+      "id": 65,
+      "code": "GAS_AR",
+      "name": "江城燃气·应收回款与稽核",
+      "lld_version": 2,
+      "views": 4,
+      "fields": 75,
+      "relations": 3,
+      "metrics": 9,
+      "agent_prompts": 4,
+      "regression_cases": 4,
+      "synonyms": 14,
+      "queries": 12,
+      "common_questions": 12,
+      "profile": "generic"
+    },
+    {
+      "id": 66,
+      "code": "GAS_SAFE",
+      "name": "江城燃气·安全与管网治理",
+      "lld_version": 2,
+      "views": 4,
+      "fields": 64,
+      "relations": 4,
+      "metrics": 8,
+      "agent_prompts": 4,
+      "regression_cases": 4,
+      "synonyms": 14,
+      "queries": 12,
+      "common_questions": 12,
+      "profile": "generic"
+    }
+  ],
+  "query_checks": 36,
+  "status": "passed",
+  "organization_nodes": 43,
+  "permission_changed": false,
+  "bottom_tables_changed": false,
+  "feishu_connected": false,
+  "backup": "/app/backups/gas-knowledge/20261022-101402"
+}

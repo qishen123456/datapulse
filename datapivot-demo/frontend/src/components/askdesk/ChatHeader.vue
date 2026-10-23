@@ -3,23 +3,26 @@
     <div class="ax-header-left">
       <div class="ax-header-copy">
         <div class="ax-title-row">
-          <div class="ax-title">当前会话</div>
-          <span class="ax-workspace-badge">经营助手</span>
+          <div class="ax-title">分析工作台</div>
+
         </div>
       </div>
     </div>
 
     <div class="ax-header-right">
+      <button class="ax-text-btn ax-history-trigger" type="button" @click="$emit('showHistory')"><el-icon><Clock /></el-icon><span>最近分析</span></button>
       <button v-if="allowNewChat" class="ax-solid-btn" type="button" @click="$emit('newChat')">新会话</button>
       <button v-if="allowTogglePanel" class="ax-text-btn" type="button" @click="$emit('togglePanel')">
-        {{ showPanel ? '隐藏详情' : '显示详情' }}
+        {{ showPanel ? '收起分析过程' : '分析过程' }}
       </button>
     </div>
   </div>
 </template>
 
 <script setup>
+import { Clock } from '@element-plus/icons-vue'
 defineProps({
+  flow:{type:String,default:'basic'},
   showPanel: {
     type: Boolean,
     default: true
@@ -38,6 +41,9 @@ defineEmits(['togglePanel', 'newChat', 'showHistory'])
 </script>
 
 <style scoped>
+.ax-history-trigger{display:inline-flex;align-items:center;gap:7px}
+.ax-header{flex-wrap:wrap}
+
 .ax-header {
   min-height: 56px;
   padding: 12px 0;
@@ -88,7 +94,7 @@ defineEmits(['togglePanel', 'newChat', 'showHistory'])
   padding: 0;
   border-radius: 999px;
   background: transparent;
-  color: #0D9488;
+  color: #386553;
   font-size: 12px;
   font-weight: 800;
   box-shadow: none;
@@ -133,18 +139,18 @@ defineEmits(['togglePanel', 'newChat', 'showHistory'])
 }
 
 .ax-solid-btn {
-  border: 1px solid rgba(13, 148, 136, 0.42);
+  border: 1px solid rgba(29, 78, 216, 0.42);
   background: #FFFFFF;
-  color: #0D9488;
+  color: #386553;
   box-shadow:
-    0 10px 20px rgba(13, 148, 136, 0.06),
+    0 10px 20px rgba(29, 78, 216, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .ax-solid-btn:hover {
-  border-color: rgba(13, 148, 136, 0.58);
-  background: rgba(13, 148, 136, 0.04);
-  color: #0D9488;
+  border-color: rgba(29, 78, 216, 0.58);
+  background: rgba(29, 78, 216, 0.04);
+  color: #386553;
   transform: translateY(-1px);
 }
 

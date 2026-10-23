@@ -117,8 +117,14 @@ class ShortTermMemoryStore:
         return f"{base}\n本轮追问：{text}\n请沿用上一轮的数据集、统计层级、指标口径和时间范围，只替换或补充本轮追问明确表达的对象。"
 
     @staticmethod
+    def references_previous(text: str) -> bool:
+        return any(token in str(text or '') for token in ('刚才', '上一问', '上一轮', '上轮', '沿用'))
+
+    @staticmethod
     def _looks_like_followup(text: str) -> bool:
         compact = text.replace(" ", "")
+        if ShortTermMemoryStore.references_previous(text):
+            return True
         if len(compact) <= 12 and any(token in compact for token in ("那", "也", "呢", "对比", "相比", "继续", "这个", "它")):
             return True
         # 纯指标追问（达成率/完成率/多少/咋样）需沿用上轮主体，识别为追问；

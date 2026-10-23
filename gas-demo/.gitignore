@@ -1,0 +1,4 @@
+scripts/node_modules
+generated/model.json
+generated/local_installation.json
+__pycache__/

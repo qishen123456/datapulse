@@ -1,0 +1,7 @@
+# Use from project root together with datapivot-demo/docker-compose.yml.
+# These verified images contain the dual-path workspace changes already built locally.
+services:
+  backend:
+    image: datapulse-upgrade-backend:gas-demo
+  frontend:
+    image: datapulse-upgrade-frontend:studio

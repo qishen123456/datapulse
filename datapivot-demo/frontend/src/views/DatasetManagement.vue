@@ -1,75 +1,44 @@
 <template>
-  <div class="dataset-page">
-    <el-row :gutter="18">
-      <el-col :span="6">
-        <el-card class="glass-card sidebar-card">
-          <template #header>
-            <div class="header-row">
-              <div class="panel-title">数据集列表</div>
-              <div class="header-actions compact-actions">
-                <el-button v-if="isFeatureEnabled('dataset_prompt_generate')" plain size="small" @click="openPromptDatasetDialog">提示词生成</el-button>
-                <el-button v-if="isFeatureEnabled('dataset_create')" type="primary" size="small" @click="createDataset">新建</el-button>
-              </div>
-            </div>
-          </template>
-
-          <div class="toolbar-col">
-            <el-input v-model="searchKeyword" clearable placeholder="搜索数据集名称/编码..." size="small" />
-            <el-radio-group v-model="listStatusFilter" size="small" class="dataset-status-filter">
-              <el-radio-button value="all">全部 {{ datasetStatusCounts.all }}</el-radio-button>
-              <el-radio-button value="active">启用 {{ datasetStatusCounts.active }}</el-radio-button>
-              <el-radio-button value="inactive">停用 {{ datasetStatusCounts.inactive }}</el-radio-button>
-            </el-radio-group>
-            <el-select v-model="listFilterSourceId" clearable placeholder="按来源筛选" size="small">
-              <el-option label="全部来源" value="" />
-              <el-option v-for="source in dataSources" :key="source.id" :label="source.name" :value="source.id" />
-            </el-select>
+  <div class="module-layout-v4 dataset-page">
+    <header class="dataset-page-heading">
+      <div><span class="dataset-eyebrow">数据资产 / DATASETS</span><h1>数据集</h1><p>连接业务口径、数据模型与问数知识。</p></div>
+      <div class="header-actions">
+        <el-button v-if="isFeatureEnabled('dataset_prompt_generate')" plain @click="openPromptDatasetDialog">从业务描述生成</el-button>
+        <el-button v-if="isFeatureEnabled('dataset_create')" type="primary" @click="createDataset">新建数据集</el-button>
+      </div>
+    </header>
+    <div class="dataset-workspace">
+      <aside class="dataset-catalog" aria-label="数据集目录">
+        <div class="catalog-heading"><strong>资产目录</strong><span>{{ datasetStatusCounts.all }}</span></div>
+        <div class="toolbar-col">
+          <el-input v-model="searchKeyword" clearable placeholder="搜索名称或编码" aria-label="搜索数据集" />
+          <div class="dataset-status-filter" role="group" aria-label="数据集状态筛选">
+            <button v-for="filter in [{key:'all',label:'全部'},{key:'active',label:'启用'},{key:'inactive',label:'停用'}]" :key="filter.key" type="button" :aria-pressed="listStatusFilter === filter.key" @click="listStatusFilter=filter.key">{{ filter.label }}<span>{{ datasetStatusCounts[filter.key] }}</span></button>
           </div>
-
-          <el-scrollbar height="calc(100vh - 340px)">
-            <div
-              v-for="item in filteredDatasets"
-              :key="item.id"
-              class="dataset-tile"
-              :class="{ active: selectedDatasetId === item.id, inactive: item.is_active === false, readonly: item.dataset_readonly }"
-              @click="onSelectDataset(item)"
-            >
-              <div class="dataset-tile-head">
-                <div class="dataset-tile-title">{{ item.dataset_name || '未命名数据集' }}</div>
-                <div class="dataset-tile-tags">
-                  <el-tag v-if="item.dataset_readonly" size="small" effect="plain" type="warning">只读</el-tag>
-                  <el-tag v-else-if="item.can_edit" size="small" effect="plain" type="success">可编辑</el-tag>
-                  <el-tag size="small" effect="plain" :type="item.is_active === false ? 'info' : 'success'">
-                    {{ item.is_active === false ? '停用' : '启用' }}
-                  </el-tag>
-                </div>
-              </div>
-              <div class="dataset-tile-meta">{{ item.dataset_code }}</div>
-              <div class="dataset-tile-sub">
-                SQL {{ item.golden_sql_count || 0 }} · {{ sourceNameById(item.source_id) }}
-              </div>
-            </div>
-            <el-empty v-if="filteredDatasets.length === 0" description="没有匹配的数据集" :image-size="60" />
-          </el-scrollbar>
-        </el-card>
-      </el-col>
-
-      <el-col :span="18">
-        <el-card class="glass-card">
-          <template #header>
-            <div class="header-row">
-              <div class="panel-title">
-                {{ canViewDatasetShelfDetails ? '数据集书架维护' : '数据集信息' }}
-                <el-tag v-if="isDirty" type="warning" size="small" effect="plain" style="margin-left:8px">有未保存修改</el-tag>
-              </div>
-              <div class="header-actions">
-                <el-button v-if="isFeatureEnabled('dataset_autofill')" plain :disabled="!selectedDatasetId || !selectedCanEdit" @click="autofillSelectedDataset">智能补齐</el-button>
-                <el-button v-if="isFeatureEnabled('dataset_delete')" type="danger" plain @click="removeDataset" :disabled="!selectedCanDelete">删除</el-button>
-                <el-button v-if="canSaveShelfContent" type="primary" :disabled="!isDirty || !canSaveShelfContent" @click="saveFull">保存书架内容</el-button>
-              </div>
-            </div>
-          </template>
-
+          <el-select v-model="listFilterSourceId" clearable placeholder="所有数据来源" size="small" aria-label="按数据来源筛选">
+            <el-option label="全部来源" value="" />
+            <el-option v-for="source in dataSources" :key="source.id" :label="source.name" :value="source.id" />
+          </el-select>
+        </div>
+        <div class="dataset-catalog-list" v-loading="datasetsLoading">
+          <button v-for="item in filteredDatasets" :key="item.id" type="button" class="dataset-tile" :class="{active:selectedDatasetId===item.id,inactive:item.is_active===false}" :aria-pressed="selectedDatasetId===item.id" @click="onSelectDataset(item)">
+            <span class="dataset-tile-head"><span class="dataset-asset-icon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="3" stroke="currentColor"/><path d="M3 8h14M8 8v9" stroke="currentColor"/></svg></span><span class="dataset-tile-title">{{ item.dataset_name || '未命名数据集' }}</span></span>
+            <span class="dataset-tile-meta">{{ item.dataset_code }}</span>
+            <span class="dataset-tile-sub"><span class="asset-state" :class="{inactive:item.is_active===false}">{{ item.is_active===false?'已停用':'已启用' }}</span><span>{{ item.dataset_readonly?'只读':item.can_edit?'可维护':'' }}</span><span>{{ item.golden_sql_count || 0 }} 个 SQL 样例</span></span>
+          </button>
+          <el-empty v-if="!datasetsLoading && filteredDatasets.length===0" description="没有匹配的数据集" :image-size="60" />
+        </div>
+        <div class="catalog-footnote">数据范围与维护权限由组织策略控制</div>
+      </aside>
+      <main class="dataset-editor">
+        <header class="dataset-identity">
+          <div class="dataset-identity-copy"><div class="dataset-identity-line"><span class="dataset-eyebrow">{{ datasetForm.dataset_code || 'ASSET WORKSPACE' }}</span><span v-if="selectedDatasetId" class="asset-state" :class="{inactive:datasetForm.is_active===false}">{{ datasetForm.is_active===false?'已停用':'已启用' }}</span><span v-if="isDirty" class="dirty-indicator">未保存</span></div><h2>{{ datasetForm.dataset_name || '选择一个数据集' }}</h2><div v-if="selectedDatasetId" class="dataset-identity-meta"><span>{{ datasetForm.business_domain || '未设置业务域' }}</span><i></i><span>{{ sourceNameById(datasetForm.source_id) }}</span><i></i><span>{{ full.schema_definition.length }} 张表 · {{ full.data_dictionary.length }} 个字段</span></div></div>
+          <div class="header-actions">
+            <el-button v-if="isFeatureEnabled('dataset_autofill')" plain :disabled="!selectedDatasetId || !selectedCanEdit" @click="autofillSelectedDataset">智能补齐</el-button>
+            <el-button v-if="canSaveShelfContent" type="primary" :disabled="!isDirty || !canSaveShelfContent" @click="saveFull">保存修改</el-button>
+          </div>
+        </header>
+        <div class="dataset-editor-body">
           <el-empty v-if="!selectedDatasetId" description="请选择一个数据集后开始维护。" />
           <template v-else>
             <el-alert
@@ -80,58 +49,29 @@
               show-icon
               class="readonly-alert"
             />
-            <el-form label-width="120px" class="base-form" :disabled="!selectedCanEdit">
-              <el-row :gutter="14">
-                <el-col :span="8"><el-form-item label="数据集编码"><el-input v-model="datasetForm.dataset_code" @input="markDirty" /></el-form-item></el-col>
-                <el-col :span="8"><el-form-item label="数据集名称"><el-input v-model="datasetForm.dataset_name" @input="markDirty" /></el-form-item></el-col>
-                <el-col :span="8"><el-form-item label="业务域"><el-input v-model="datasetForm.business_domain" @input="markDirty" /></el-form-item></el-col>
-              </el-row>
-              <el-row :gutter="14">
-                <el-col :span="8">
-                  <el-form-item label="默认来源(可空)">
-                    <el-select v-model="datasetForm.source_id" clearable style="width:100%" @change="markDirty">
-                      <el-option v-for="source in dataSources" :key="source.id" :label="source.name" :value="source.id" />
-                    </el-select>
-                  </el-form-item>
-                </el-col>
-                <el-col :span="8"><el-form-item label="启用状态"><el-switch v-model="datasetForm.is_active" @change="markDirty" /></el-form-item></el-col>
-                <el-col :span="8"><el-form-item label="描述"><el-input v-model="datasetForm.description" @input="markDirty" /></el-form-item></el-col>
-              </el-row>
-            </el-form>
-
-            <el-alert
-              v-if="qualitySummary && canViewDatasetShelfDetails"
-              :title="`书架健康度 ${qualitySummary.score} / 100 · ${qualitySummary.label}`"
-              :type="qualityAlertType"
-              :closable="false"
-              show-icon
-              class="quality-alert"
-            >
-              <template #default>
-                <div class="quality-overview">
-                  <el-progress :percentage="qualitySummary.score" :stroke-width="10" :show-text="false" />
-                  <div class="quality-checks">
-                    <el-tag
-                      v-for="item in qualitySummary.checks"
-                      :key="item.key"
-                      size="small"
-                      effect="plain"
-                      :type="qualityCheckTagType(item.status)"
-                    >
-                      {{ item.label }} {{ item.score }}/{{ item.max_score }}
-                    </el-tag>
-                  </div>
-                  <div v-if="qualitySummary.gaps?.length" class="quality-gaps">
-                    <div v-for="(gap, index) in qualitySummary.gaps.slice(0, 4)" :key="index">{{ gap }}</div>
-                  </div>
-                </div>
-              </template>
-            </el-alert>
+            <details :key="selectedDatasetId" class="dataset-properties">
+              <summary><span>基础属性</span><span class="properties-summary">名称、来源与启用状态</span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m6 3 5 5-5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+              <div class="dataset-properties-body">
+                <el-form label-position="top" class="base-form" :disabled="!selectedCanEdit">
+                  <el-form-item label="数据集编码"><el-input v-model="datasetForm.dataset_code" @input="markDirty" /></el-form-item>
+                  <el-form-item label="数据集名称"><el-input v-model="datasetForm.dataset_name" @input="markDirty" /></el-form-item>
+                  <el-form-item label="业务域"><el-input v-model="datasetForm.business_domain" @input="markDirty" /></el-form-item>
+                  <el-form-item label="默认数据来源"><el-select v-model="datasetForm.source_id" clearable style="width:100%" @change="markDirty"><el-option v-for="source in dataSources" :key="source.id" :label="source.name" :value="source.id" /></el-select></el-form-item>
+                  <el-form-item label="描述" class="property-description"><el-input v-model="datasetForm.description" @input="markDirty" /></el-form-item>
+                  <el-form-item label="参与问数"><el-switch v-model="datasetForm.is_active" @change="markDirty" /><span class="property-switch-note">{{ datasetForm.is_active?'启用':'停用' }}</span></el-form-item>
+                </el-form>
+                <div class="property-danger"><span>删除后，关联的知识配置将一并移除。</span><el-button v-if="isFeatureEnabled('dataset_delete')" type="danger" link @click="removeDataset" :disabled="!selectedCanDelete">删除数据集</el-button></div>
+              </div>
+            </details>
+            <details v-if="qualitySummary && canViewDatasetShelfDetails" class="quality-disclosure">
+              <summary><span class="quality-score">{{ qualitySummary.score }}<small>/100</small></span><div class="quality-summary-copy"><strong>知识完整性<span>{{ qualitySummary.label }}</span></strong><span>{{ qualitySummary.gaps?.length?`${qualitySummary.gaps.length} 项内容待完善`:'当前配置已覆盖主要问数知识' }}</span></div><div class="quality-track" aria-hidden="true"><i :style="{width:`${qualitySummary.score}%`}"></i></div><span class="quality-detail-label">查看检查项</span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m6 3 5 5-5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+              <div class="quality-overview"><div class="quality-checks"><span v-for="item in qualitySummary.checks" :key="item.key" class="quality-check"><span>{{ item.label }}</span><strong>{{ item.score }}<small>/{{ item.max_score }}</small></strong></span></div><div v-if="qualitySummary.gaps?.length" class="quality-gaps"><div v-for="(gap,index) in qualitySummary.gaps" :key="index">{{ gap }}</div></div></div>
+            </details>
 
             <div v-if="!canViewDatasetShelfDetails" class="readonly-summary-card">
               <div class="readonly-summary-title">当前账号仅开放数据集基础信息</div>
               <div class="readonly-summary-desc">
-                书架维护内容、训练样例、DDL 和 Agent 提示词仅对有维护权限的账号展示；SQL 调试请到智能问数首页使用调试台。
+                书架维护内容、训练样例、DDL 和 专家提示词仅对有维护权限的账号展示；SQL 调试请到智能问数首页使用调试台。
               </div>
               <div class="readonly-summary-grid">
                 <div>
@@ -153,7 +93,11 @@
               </div>
             </div>
 
-            <el-tabs v-else v-model="activeTab">
+            <section v-else class="knowledge-workspace">
+              <div class="knowledge-category-nav" role="group" aria-label="知识资产分类"><button v-for="group in assetGroups" :key="group.id" type="button" :aria-pressed="activeAssetGroup.id===group.id" @click="activeTab=group.items[0].key">{{ group.label }}<span>{{ group.items.length }}</span></button></div>
+              <nav class="knowledge-section-nav" aria-label="知识配置分区"><button v-for="item in activeAssetGroup.items" :key="item.key" type="button" :aria-current="activeTab===item.key?'page':undefined" @click="activeTab=item.key">{{ item.label }}<span>{{ assetCount(item.key) }}</span></button></nav>
+              <div class="knowledge-section-intro"><div><h3>{{ activeAssetSection.label }}</h3><p>{{ activeAssetSection.description }}</p></div><span>{{ assetCount(activeTab) }} 项配置</span></div>
+              <el-tabs v-model="activeTab" class="knowledge-content-tabs">
               <!-- 常见问题 -->
               <el-tab-pane label="常见问题" name="common_questions">
                 <div v-if="canUseDatasetAction('question', 'create')" class="toolbar"><el-button size="small" @click="openItemEditor('question', -1)">新增常见问题</el-button></div>
@@ -291,11 +235,11 @@
                 </el-table>
               </el-tab-pane>
 
-              <!-- Agent 提示片段 -->
-              <el-tab-pane label="Agent 提示片段" name="prompts">
+              <!-- 专家提示片段 -->
+              <el-tab-pane label="专家提示片段" name="prompts">
                 <div v-if="canUseDatasetAction('prompt', 'create')" class="toolbar"><el-button size="small" @click="openItemEditor('prompt', -1)">新增片段</el-button></div>
                 <el-table :data="full.agent_prompts" border size="small">
-                  <el-table-column label="Agent" width="90"><template #default="{ row }">Agent{{ row.agent_no }}</template></el-table-column>
+                  <el-table-column label="协作角色" width="140"><template #default="{ row }">{{ {1:'主理人',2:'查询专家',3:'核验专家',4:'分析与报告专家'}[row.agent_no] || `角色 ${row.agent_no}` }}</template></el-table-column>
                   <el-table-column label="Key" width="150"><template #default="{ row }">{{ row.prompt_key }}</template></el-table-column>
                   <el-table-column label="内容预览" min-width="300"><template #default="{ row }"><div class="text-preview">{{ (row.prompt_content || '').slice(0, 120) || '(空)' }}</div></template></el-table-column>
                   <el-table-column label="操作" width="130">
@@ -365,11 +309,12 @@
                   </el-table-column>
                 </el-table>
               </el-tab-pane>
-            </el-tabs>
+              </el-tabs>
+            </section>
           </template>
-        </el-card>
-      </el-col>
-    </el-row>
+        </div>
+      </main>
+    </div>
 
     <!-- ========== 通用编辑弹窗 ========== -->
     <el-dialog v-model="itemEditorVisible" :title="itemEditorTitle" width="680px" destroy-on-close top="6vh">
@@ -462,7 +407,7 @@
         </el-form-item>
       </el-form>
 
-      <!-- Agent 提示词编辑 -->
+      <!-- 专家提示词编辑 -->
       <el-form v-if="itemEditorType === 'prompt'" label-width="90px">
         <el-row :gutter="12">
           <el-col :span="8">
@@ -512,7 +457,7 @@
           type="info"
           :closable="false"
           show-icon
-          title="把 DDL、fields 字段字典、LLD、Agent2/Agent4 提示词、示例 SQL 粘贴进来，系统会生成一套新的数据集书架内容。"
+          title="把 DDL、fields 字段字典、LLD、查询与报告专家 提示词、示例 SQL 粘贴进来，系统会生成一套新的数据集书架内容。"
         />
         <div v-if="promptDatasetLoading || promptDatasetStatus" class="prompt-progress-panel">
           <div class="prompt-progress-head">
@@ -535,7 +480,7 @@
             </div>
           </div>
           <div class="prompt-progress-note">
-            AI 正在阅读大段文档并生成 DDL、字段字典、Golden SQL 和 Agent Prompt，复杂提示词通常需要 1-5 分钟。页面有耗时和阶段反馈，失败后会给出具体原因和建议。
+            AI 正在阅读大段文档并生成 DDL、字段字典、Golden SQL 和 专家提示词，复杂提示词通常需要 1-5 分钟。页面有耗时和阶段反馈，失败后会给出具体原因和建议。
           </div>
         </div>
         <el-form label-width="112px" class="prompt-generate-form">
@@ -567,7 +512,7 @@
               :rows="16"
               resize="vertical"
               class="mono-textarea"
-              placeholder="粘贴 DDL、字段字典、业务口径、报告要求、Agent 提示词、示例 SQL 等内容..."
+              placeholder="粘贴 DDL、字段字典、业务口径、报告要求、专家提示词、示例 SQL 等内容..."
             />
           </el-form-item>
         </el-form>
@@ -703,6 +648,7 @@
 </template>
 
 <script setup>
+import "../styles/module-interiors.css"
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -719,8 +665,28 @@ import {
   mergeAutofillCollection,
 } from '../utils/datasetAutofillPromptMining.js'
 
+const assetGroups = [
+  {id:'business',label:'业务知识',items:[
+    {key:'common_questions',label:'常见问题',description:'让用户从熟悉的业务问题开始，提供可直接发起的提问入口。',collection:'common_questions'},
+    {key:'synonyms',label:'术语与别名',description:'对齐业务习惯用语与标准名称，帮助主理人识别数据范围。',collection:'synonyms'},
+    {key:'lld',label:'业务口径',description:'记录业务定义、统计边界和数据使用约束。',collection:'lld_documents'},
+    {key:'prompts',label:'专家知识',description:'为协作角色补充当前数据集的领域知识与处理要求。',collection:'agent_prompts'}]},
+  {id:'model',label:'数据模型',items:[
+    {key:'dictionary',label:'字段字典',description:'建立物理字段与业务含义的对应关系，为查询生成提供依据。',collection:'data_dictionary'},
+    {key:'schema',label:'表与关联',description:'维护可查询的表结构与连接关系。',collection:'schema_definition'},
+    {key:'transforms',label:'数据转换',description:'维护原始数据到分析表或视图的转换任务。'}]},
+  {id:'quality',label:'质量与接入',items:[
+    {key:'golden',label:'SQL 样例',description:'保存经过核对的查询样例，供查询专家参考。',collection:'golden_sql_samples'},
+    {key:'regression_cases',label:'标准题集',description:'定义代表性业务问题及预期结果，用于验证问数质量。',collection:'regression_cases'},
+    {key:'external',label:'外部配置',description:'维护飞书与其他外部系统在当前数据集上的接入配置。',collection:'external_configs'}]}
+]
+const activeAssetGroup = computed(()=>assetGroups.find(group=>group.items.some(item=>item.key===activeTab.value)) || assetGroups[0])
+const activeAssetSection = computed(()=>activeAssetGroup.value.items.find(item=>item.key===activeTab.value) || activeAssetGroup.value.items[0])
+const assetCount = key => key==='transforms'?transforms.value.length:(full[assetGroups.flatMap(group=>group.items).find(item=>item.key===key)?.collection] || []).length
+
 // ========== 基础状态 ==========
 const datasets = ref([])
+const datasetsLoading = ref(true)
 const dataSources = ref([])
 const listFilterSourceId = ref('')
 const listStatusFilter = ref('active')
@@ -1400,7 +1366,7 @@ const buildGenericAutofillTemplate = () => {
       ...promptQuestions.map((item, index) => ({
         case_type: 'prompt_example',
         question_text: item.question,
-        expected_focus: '应优先参考已维护 Agent2/Agent4 中的样例 SQL 和业务逻辑。',
+        expected_focus: '应优先参考已维护 查询与报告专家 中的样例 SQL 和业务逻辑。',
         expected_intent: 'generate_sql',
         sort_order: 40 + index * 10,
         is_active: true,
@@ -1449,7 +1415,7 @@ const autofillSelectedDataset = async () => {
     return
   }
   try {
-    await ElMessageBox.confirm(`将根据「${selectedDatasetName.value}」当前已维护的 DDL 和基础信息，重点补齐字段字典与 4 个 Agent Prompt（尤其 Agent2 SQL 生成、Agent4 报告解读），并补充少量常见问题和 Golden SQL 样例。确认继续？`, '智能补齐数据集', {
+    await ElMessageBox.confirm(`将根据「${selectedDatasetName.value}」当前已维护的 DDL 和基础信息，重点补齐字段字典与 4 个 专家提示词（尤其 查询专家 SQL 生成、Agent4 报告解读），并补充少量常见问题和 Golden SQL 样例。确认继续？`, '智能补齐数据集', {
       type: 'info',
       confirmButtonText: '开始补齐',
       cancelButtonText: '取消',
@@ -1486,7 +1452,7 @@ const autofillSelectedDataset = async () => {
   activeTab.value = 'prompts'
   markDirty()
   if (!isSyybDataset.value && template.__meta?.prompt_sql_count) {
-    ElMessage.success(`已从 Agent2/Agent4 提取 ${template.__meta.prompt_sql_count} 条样例 SQL，并保留原有 Prompt 内容。`)
+    ElMessage.success(`已从 查询与报告专家 提取 ${template.__meta.prompt_sql_count} 条样例 SQL，并保留原有 Prompt 内容。`)
   }
   await saveFull()
 }
@@ -1522,7 +1488,7 @@ const itemDraftJson = ref('{}')
 const EDITOR_TITLES = {
   question: '编辑常见问题', regression: '编辑标准题集', synonym: '编辑路由词/别名', lld: '编辑 LLD 文档',
   dict: '编辑数据字典', relation: '编辑表关联', golden: '编辑 Golden SQL',
-  prompt: '编辑 Agent 提示片段', extcfg: '编辑外部配置'
+  prompt: '编辑 专家提示片段', extcfg: '编辑外部配置'
 }
 const COLLECTIONS = {
   question: 'common_questions', regression: 'regression_cases', synonym: 'synonyms', lld: 'lld_documents',
@@ -1698,7 +1664,11 @@ const applyDataset = (d) => {
 }
 const resetFull = () => { FULL_COLLECTION_KEYS.forEach(key => { full[key] = [] }); qualitySummary.value = null }
 
-const loadDatasets = async () => { datasets.value = (await getBookshelfDatasets({ include_inactive: 1 })).datasets || [] }
+const loadDatasets = async () => {
+  datasetsLoading.value = true
+  try { datasets.value = (await getBookshelfDatasets({ include_inactive: 1 })).datasets || [] }
+  finally { datasetsLoading.value = false }
+}
 const loadDataSources = async () => {
   dataSources.value = (await getDataSources()).databases || []
   if (!newDatasetSourceId.value && dataSources.value.length > 0) newDatasetSourceId.value = dataSources.value[0].id
@@ -1934,7 +1904,7 @@ const generateDatasetFromPrompt = async () => {
     }, {
       signal: promptDatasetAbortController.signal,
     })
-    setPromptDatasetStage(2, 'AI 已返回，正在检查 LLD、DDL、字段字典、Golden SQL 和 Agent Prompt 是否完整...', 76)
+    setPromptDatasetStage(2, 'AI 已返回，正在检查 LLD、DDL、字段字典、Golden SQL 和 专家提示词 是否完整...', 76)
     const validationErrors = generated.validation_errors || []
     if (validationErrors.length) {
       setPromptDatasetStage(2, '生成结果未达到保存标准，请按弹窗提示补充底稿后重试。', 76)
@@ -1959,7 +1929,7 @@ const generateDatasetFromPrompt = async () => {
     createdDatasetId = created.dataset?.id
     if (!createdDatasetId) throw new Error('数据集创建成功但未返回 ID')
 
-    setPromptDatasetStage(4, '正在保存书架内容：LLD、DDL、字段字典、Golden SQL、Agent Prompt...', 92)
+    setPromptDatasetStage(4, '正在保存书架内容：LLD、DDL、字段字典、Golden SQL、专家提示词...', 92)
     await saveBookshelfDatasetFull(createdDatasetId, buildGeneratedFullPayload(generated.payload || {}, sourceId))
     setPromptDatasetStage(4, '保存完成，正在刷新数据集列表...', 100)
     promptDatasetVisible.value = false
@@ -2235,42 +2205,35 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.dataset-page { min-height: calc(100vh - 150px); }
-.glass-card { border: 1px solid var(--border, #E5E7EB); background: var(--bg-card, #fff); border-radius: var(--radius-card, 5px); box-shadow: var(--shadow-xs); }
-.sidebar-card { min-height: calc(100vh - 150px); }
-.panel-title { font-size: 18px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; color: var(--text-title, #111827); }
-.header-row { display: flex; align-items: center; justify-content: space-between; }
-.header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.compact-actions { gap: 6px; }
-.toolbar-col { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
-.dataset-status-filter { width: 100%; }
-.dataset-status-filter :deep(.el-radio-button) { flex: 1; }
-.dataset-status-filter :deep(.el-radio-button__inner) { width: 100%; padding-left: 8px; padding-right: 8px; }
-.dataset-tile { padding: 5px 6px; border-radius: var(--radius-card, 5px); margin-bottom: 4px; border: 1px solid var(--border, #E5E7EB); background: var(--bg-card, #fff); cursor: pointer; transition: all var(--duration-normal, 220ms) var(--ease-out); }
-.dataset-tile:hover { border-color: var(--border-hover, #D1D5DB); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
-.dataset-tile.active { border-color: var(--color-primary, #0D9488); background: var(--color-primary-light, #F0FDFA); box-shadow: var(--shadow-md); }
-.dataset-tile.inactive { background: #F2F5F4; }
-.dataset-tile.readonly { background: #FFFBEB; }
-.dataset-tile-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-.dataset-tile-tags { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
-.dataset-tile-title { font-weight: 700; font-size: 14px; color: var(--text-title, #111827); }
-.dataset-tile.inactive .dataset-tile-title { color: var(--text-body, #6B7280); }
-.dataset-tile-meta { margin-top: 3px; font-size: 11px; color: var(--text-muted, #9CA3AF); }
-.dataset-tile-sub { margin-top: 4px; font-size: 11px; color: var(--text-muted, #9CA3AF); }
-.readonly-alert { margin-bottom: 12px; }
-.readonly-summary-card { border: 1px solid #E5E7EB; border-radius: 4px; padding: 6px; background: #F2F5F4; }
-.readonly-summary-title { font-size: 16px; font-weight: 700; color: var(--text-title, #111827); }
-.readonly-summary-desc { margin-top: 6px; color: var(--text-muted, #9CA3AF); font-size: 13px; }
-.readonly-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
-.readonly-summary-grid div { border: 1px solid #E5E7EB; border-radius: 4px; background: #fff; padding: 5px; min-width: 0; }
-.readonly-summary-grid span { display: block; font-size: 12px; color: var(--text-muted, #9CA3AF); margin-bottom: 6px; }
-.readonly-summary-grid strong { display: block; font-size: 14px; color: var(--text-title, #111827); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.base-form { margin-bottom: 10px; }
-.quality-alert { margin-bottom: 14px; }
-.quality-overview { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
-.quality-checks { display: flex; flex-wrap: wrap; gap: 8px; }
-.quality-gaps { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--text-body, #6B7280); line-height: 1.6; }
-.toolbar { margin-bottom: 10px; display: flex; gap: 8px; }
+.dataset-page { min-width:0; color:#18222f; }
+.dataset-page-heading {display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:24px;}
+.dataset-eyebrow{font-size:10px;letter-spacing:1.3px;color:#76818f;font-weight:600;}
+.dataset-page-heading h1{font-size:25px;font-weight:600;letter-spacing:-.6px;margin:7px 0 6px;}
+.dataset-page-heading p{font-size:13px;color:#74808d;}
+.dataset-workspace{display:grid;grid-template-columns:270px minmax(0,1fr);border:1px solid #e1e5ea;border-radius:12px;background:#fff;overflow:hidden;min-height:650px;}
+.dataset-catalog{display:flex;flex-direction:column;min-width:0;background:#fafbfc;border-right:1px solid #e5e8ed;}
+.catalog-heading{display:flex;align-items:center;justify-content:space-between;padding:22px 18px 14px;}
+.catalog-heading strong{font-size:13px;font-weight:600;}.catalog-heading>span{font-size:11px;color:#738192;padding:2px 7px;border-radius:5px;background:#edf0f4;}
+.toolbar-col{display:flex;flex-direction:column;gap:12px;padding:0 14px 16px;border-bottom:1px solid #e9ecf0;}
+.dataset-status-filter{display:flex;gap:3px;background:#eef1f4;border-radius:6px;padding:3px;}
+.dataset-status-filter button{display:flex;justify-content:center;gap:7px;flex:1;align-items:center;color:#7a8592;font-size:11px;min-height:27px;border-radius:4px;}
+.dataset-status-filter button[aria-pressed=true]{background:#fff;color:#26364b;box-shadow:0 1px 3px #14273d0d;}.dataset-status-filter button>span{font-size:10px;opacity:.75;}
+.dataset-catalog-list{flex:1;padding:10px 8px;overflow:auto;max-height:calc(100dvh - 375px);min-height:280px;}
+.dataset-tile{display:block;width:100%;text-align:left;padding:14px 12px;border:1px solid transparent;border-radius:7px;margin:2px 0 6px;background:transparent;transition:background .15s,border-color .15s;}
+.dataset-tile:hover{background:#f0f3f6;}.dataset-tile.active{background:#fff;border-color:#d5dfe9;box-shadow:0 2px 5px #1a2d4306;}
+.dataset-tile-head{display:flex;align-items:flex-start;gap:10px;}.dataset-asset-icon{width:23px;height:23px;flex:none;color:#6d839b;}.dataset-asset-icon svg{width:20px;height:20px;}.dataset-tile.active .dataset-asset-icon{color:#365f91;}
+.dataset-tile-title{font-size:13px;font-weight:600;line-height:1.65;color:#354154;overflow-wrap:anywhere;}.dataset-tile-meta{display:block;margin:5px 0 9px 33px;font-size:10px;letter-spacing:.5px;color:#7b8795;}.dataset-tile-sub{display:flex;flex-wrap:wrap;gap:9px;font-size:10px;color:#89929d;margin-left:33px;}.asset-state{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:500;color:#51836f;white-space:nowrap;}.asset-state:before{content:'';width:5px;height:5px;border-radius:50%;background:#519577;}.asset-state.inactive{color:#8e96a0;}.asset-state.inactive:before{background:#a1a8b0;}.dataset-tile.inactive .dataset-tile-title{color:#8a939f;}
+.catalog-footnote{margin-top:auto;padding:16px 18px;border-top:1px solid #e8ebef;font-size:10px;line-height:1.6;color:#8c96a2;}
+.dataset-editor{min-width:0;background:#fff;}.dataset-identity{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:24px 26px;border-bottom:1px solid #e9edf1;}.dataset-identity-copy{min-width:0;}.dataset-identity-line{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}.dataset-identity h2{font-size:20px;font-weight:600;line-height:1.6;margin:8px 0 6px;letter-spacing:-.4px;}.dataset-identity-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:#798592;font-size:11px;}.dataset-identity-meta i{width:3px;height:3px;border-radius:50%;background:#c4cbd3;}.dirty-indicator{color:#a47c35;font-size:10px;background:#fcf6e9;padding:2px 7px;border-radius:4px;}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}.header-actions :deep(.el-button+.el-button){margin-left:0;}.dataset-editor-body{padding:0 26px 26px;}
+.dataset-properties{border-bottom:1px solid #eceff3;}.dataset-properties summary{display:flex;align-items:center;gap:14px;list-style:none;padding:16px 0;font-size:12px;color:#435164;cursor:pointer;}.dataset-properties summary::-webkit-details-marker,.quality-disclosure summary::-webkit-details-marker{display:none;}.properties-summary{font-size:11px;color:#8b95a2;}.dataset-properties summary svg,.quality-disclosure summary svg{width:12px;height:12px;margin-left:auto;color:#8593a3;transition:transform .15s;}.dataset-properties[open] summary svg,.quality-disclosure[open] summary svg{transform:rotate(90deg);}.dataset-properties-body{padding:4px 0 20px;}.base-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 18px;}.base-form :deep(.el-form-item__label){font-size:11px!important;color:#6f7b8c;line-height:1.6!important;margin-bottom:7px;}.property-description{grid-column:span 2;}.property-switch-note{font-size:11px;color:#6e7d8d;margin-left:10px;}.property-danger{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:8px;font-size:11px;color:#9099a5;}
+.quality-disclosure{margin:16px 0;border:1px solid #e6ebee;border-radius:7px;}.quality-disclosure>summary{display:flex;align-items:center;gap:16px;padding:13px 16px;cursor:pointer;list-style:none;}.quality-score{font-size:23px;letter-spacing:-.6px;color:#3d6b5c;font-variant-numeric:tabular-nums;}.quality-score small{font-size:10px;color:#90a196;margin-left:3px;}.quality-summary-copy{display:flex;flex-direction:column;gap:4px;font-size:11px;color:#89948f;}.quality-summary-copy strong{font-size:12px;font-weight:500;color:#45584e;}.quality-summary-copy strong span{font-size:10px;color:#7a9585;margin-left:12px;}.quality-track{height:4px;background:#edf1ef;border-radius:4px;max-width:160px;flex:1;margin-left:auto;overflow:hidden;}.quality-track i{display:block;height:100%;background:#6d9b84;border-radius:4px;}.quality-detail-label{font-size:10px;color:#7c8b85;}.quality-disclosure summary svg{margin-left:0;}.quality-overview{padding:0 16px 16px;}.quality-checks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;}.quality-check{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:#7a8790;padding:9px 0;border-top:1px solid #edf0f2;}.quality-check strong{font-weight:500;color:#4f6f60;white-space:nowrap;}.quality-check small{font-size:10px;color:#a0a9af;}.quality-gaps{font-size:11px;line-height:1.7;color:#957a46;margin-top:10px;}
+.knowledge-workspace{margin-top:23px;min-width:0;}.knowledge-category-nav{display:flex;align-items:center;gap:24px;border-bottom:1px solid #e9edf1;}.knowledge-category-nav button{font-size:13px;font-weight:500;color:#8a94a1;padding:0 0 12px;border-bottom:2px solid transparent;display:flex;align-items:center;gap:7px;}.knowledge-category-nav button[aria-pressed=true]{color:#365f91;border-color:#365f91;}.knowledge-category-nav button span{font-size:10px;background:#f0f3f7;color:#8c99a8;min-width:18px;text-align:center;line-height:17px;border-radius:4px;}.knowledge-section-nav{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0 22px;}.knowledge-section-nav button{font-size:11px;color:#7c8897;padding:7px 11px;border:1px solid transparent;border-radius:5px;}.knowledge-section-nav button span{font-size:10px;color:#9aa6b4;margin-left:7px;}.knowledge-section-nav button[aria-current=page]{color:#385b85;background:#f1f5f9;border-color:#e2e9f1;}.knowledge-section-intro{display:flex;justify-content:space-between;gap:16px;margin-bottom:20px;align-items:flex-start;}.knowledge-section-intro h3{font-size:15px;font-weight:600;color:#283647;margin-bottom:6px;}.knowledge-section-intro p{font-size:11px;line-height:1.7;color:#82909d;}.knowledge-section-intro>span{font-size:10px;color:#96a0ac;white-space:nowrap;padding-top:2px;}.knowledge-content-tabs :deep(>.el-tabs__header){display:none;}.knowledge-content-tabs :deep(.el-tabs__content){min-width:0;overflow:hidden;}.knowledge-content-tabs :deep(.el-table){--el-table-border-color:#e9edf2;--el-table-header-bg-color:#f8fafb;font-size:12px;}.knowledge-content-tabs :deep(.el-table th.el-table__cell){font-weight:500;font-size:11px;color:#7b8795;}.knowledge-content-tabs :deep(.el-table .el-table__cell){padding:11px 0;}.knowledge-content-tabs :deep(.el-table--border .el-table__cell){border-right:none;}.knowledge-content-tabs :deep(.el-table--border::after){display:none;}.toolbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px;}.toolbar :deep(.el-button+.el-button){margin-left:0;}
+.readonly-alert{margin:16px 0;}.readonly-summary-card{padding:22px;border:1px solid #e7ebf0;border-radius:8px;background:#fafbfc;margin-top:20px;}.readonly-summary-title{font-size:14px;font-weight:600;}.readonly-summary-desc{font-size:12px;color:#83909d;line-height:1.8;margin:9px 0 20px;}.readonly-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;}.readonly-summary-grid span{display:block;font-size:10px;color:#8794a3;margin-bottom:6px;}.readonly-summary-grid strong{font-size:12px;color:#536276;}
+.dataset-page button:focus-visible,.dataset-page summary:focus-visible{outline:2px solid #6c8cad;outline-offset:3px;}
+@media(max-width:1300px){.dataset-workspace{grid-template-columns:230px minmax(0,1fr);}.dataset-identity{align-items:flex-start;flex-direction:column;}.dataset-identity .header-actions{width:100%;justify-content:flex-start;}.quality-track{max-width:90px;}.quality-checks{grid-template-columns:repeat(2,minmax(0,1fr));}.base-form{grid-template-columns:repeat(2,minmax(0,1fr));}.property-description{grid-column:span 1;}}
+@media(max-width:900px){.dataset-workspace{grid-template-columns:1fr;}.dataset-catalog{border-right:0;border-bottom:1px solid #e5e8ed;}.catalog-heading{padding:16px 18px 10px;}.toolbar-col{display:grid;grid-template-columns:minmax(150px,1fr) minmax(180px,1fr);}.toolbar-col>.el-select{display:flex;grid-column:1/-1;}.dataset-catalog-list{display:flex;gap:8px;min-height:0;max-height:220px;overflow:auto;padding:10px 14px;}.dataset-tile{min-width:230px;max-width:270px;}.catalog-footnote{display:none;}.dataset-page-heading{align-items:flex-start;}.dataset-page-heading .header-actions{max-width:50%;}}
+@media(max-width:600px){.dataset-page-heading{flex-direction:column;gap:15px;}.dataset-page-heading .header-actions{max-width:none;}.dataset-identity{padding:20px;}.dataset-editor-body{padding:0 16px 20px;}.dataset-identity h2{font-size:18px;}.quality-track,.quality-detail-label{display:none;}.quality-disclosure>summary{gap:12px;}.quality-disclosure summary svg{margin-left:auto;}.knowledge-category-nav{gap:18px;}.knowledge-category-nav button{font-size:12px;}.base-form{grid-template-columns:1fr;}.toolbar-col{display:flex;}.dataset-catalog-list{max-height:165px;}.properties-summary{font-size:10px;}.quality-checks{grid-template-columns:1fr;}.knowledge-section-intro>span{display:none;}.readonly-summary-grid{grid-template-columns:1fr;}}
 .section-title { margin: 18px 0 10px; font-weight: 700; font-size: 14px; color: var(--text-title, #111827); }
 .muted-text { color: var(--text-muted, #9CA3AF); font-size: 12px; line-height: 1.5; }
 .text-preview { font-size: 12px; color: var(--text-body, #6B7280); line-height: 1.5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 400px; }
@@ -2297,8 +2260,8 @@ onUnmounted(() => {
   background: #F2F5F4;
 }
 .prompt-progress-panel {
-  border: 1px solid #F0FDFA;
-  background: linear-gradient(180deg, #F2F5F4 0%, #F0FDFA 100%);
+  border: 1px solid #eff6ff;
+  background: linear-gradient(180deg, #F2F5F4 0%, #eff6ff 100%);
   border-radius: 4px;
   padding: 14px 16px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
@@ -2323,7 +2286,7 @@ onUnmounted(() => {
 }
 .prompt-progress-head em {
   flex: 0 0 auto;
-  color: #0D9488;
+  color: #1d4ed8;
   font-style: normal;
   font-weight: 600;
 }
@@ -2364,14 +2327,14 @@ onUnmounted(() => {
 }
 .prompt-stage.done,
 .prompt-stage.active {
-  border-color: #F0FDFA;
-  color: #0D9488;
+  border-color: #eff6ff;
+  color: #1d4ed8;
   background: #ECFDF5;
 }
 .prompt-stage.done span,
 .prompt-stage.active span {
   color: #fff;
-  background: #0D9488;
+  background: #1d4ed8;
 }
 .prompt-stage.active {
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);

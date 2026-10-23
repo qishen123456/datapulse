@@ -131,7 +131,7 @@ const normalizedSteps = computed(() => {
 
 .ax-check.loading {
   color: #1A1A1A;
-  background: #F0FDFA;
+  background: #eff6ff;
 }
 
 .ax-thinking-body {
@@ -210,7 +210,7 @@ const normalizedSteps = computed(() => {
 }
 
 .ax-step-status.running {
-  background: #F0FDFA;
+  background: #eff6ff;
   color: #1A1A1A;
 }
 
@@ -225,7 +225,7 @@ const normalizedSteps = computed(() => {
 }
 
 .ax-step-status.error {
-  background: #F0FDFA;
+  background: #eff6ff;
   color: #1A1A1A;
 }
 

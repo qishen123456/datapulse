@@ -1,13 +1,15 @@
 <template>
   <div class="rc-page" v-loading="loading">
+    <header class="report-settings-heading"><div><span>输出配置</span><h1>报告模板</h1><p>为每个数据集定义展示口径、图表与结果契约。</p></div><span class="report-config-count">{{ datasets.length }} 个数据集</span></header>
     <div class="rc-layout">
       <!-- LEFT: Dataset List -->
       <aside class="rc-sidebar">
-        <div class="rc-sidebar-title">数据集</div>
+        <div class="rc-sidebar-title">选择数据集 <span>{{ datasets.length }}</span></div><div class="rc-search"><el-input v-model="datasetSearch" clearable placeholder="搜索名称或编码" aria-label="搜索报告数据集" /></div>
         <div class="rc-sidebar-scroll">
           <div
-            v-for="ds in datasets" :key="ds.id"
+            v-for="ds in visibleDatasets" :key="ds.id"
             class="rc-ds-item"
+            role="button" tabindex="0" @keydown.enter="selectDataset(ds.id)"
             :class="{ 'is-active': selectedDatasetId === ds.id }"
             @click="selectDataset(ds.id)"
           >
@@ -18,7 +20,7 @@
             </div>
             <span v-if="ds._hasConfig" class="rc-ds-badge">已配</span>
           </div>
-          <div v-if="!datasets.length" class="rc-ds-empty">暂无数据集</div>
+          <div v-if="!visibleDatasets.length" class="rc-ds-empty">没有匹配的数据集</div>
         </div>
       </aside>
 
@@ -36,15 +38,19 @@
           </div>
         </div>
 
+        <div class="rc-card" style="margin:0 0 16px;padding:16px 20px">
+          <div style="display:flex;align-items:center;gap:16px"><strong style="font-size:13px">结果契约</strong><el-select v-model="configForm.profile" style="width:220px" :disabled="!isFeatureEnabled('report_template_edit')"><el-option label="通用数据画布" value="generic"/><el-option label="已配置组织指标契约" value="hierarchy"/></el-select></div>
+          <p class="rc-help-text" style="margin-top:12px">普通问数使用数据简报，高阶研究使用计划与证据报告。通用契约不会自动加入任务金额、达成率或风险灯；业务口径仍由当前数据集维护。</p>
+        </div>
         <el-tabs v-model="activeTab" class="rc-tabs">
           <!-- Visual Editor -->
           <el-tab-pane label="可视化编辑" name="visual">
             <div class="rc-form-grid">
               <!-- Column Mapping Card -->
-              <div class="rc-card">
+              <div v-if="configForm.profile !== 'generic'" class="rc-card">
                 <div class="rc-card-title">列映射</div>
                 <div class="rc-card-body">
-                  <div class="rc-help-text">这里是 SQL 结果的标准列名，不要求源表物理存在。Agent2 会按下方 SQL 输出契约把源字段投影成这些列。</div>
+                  <div class="rc-help-text">这里是 SQL 结果的标准列名，不要求源表物理存在。查询专家会按下方 SQL 输出契约把源字段投影成这些列。</div>
                   <div class="rc-field-grid">
                     <div class="rc-field">
                       <label>节点名称列</label>
@@ -70,12 +76,12 @@
                 <div class="rc-card-title">源数据结构与报告意图</div>
                 <div class="rc-card-body">
                   <div class="rc-field">
-                    <label>业务背景 / Agent 参考口径</label>
+                    <label>业务背景 / 专家参考口径</label>
                     <el-input v-model="configForm.businessContext" type="textarea" :rows="3" size="small" placeholder="例如：源数据没有父子字段，组织链路由 SQL 从战区/片区/客户经理字段生成。" />
                   </div>
                   <div class="rc-field" style="margin-top:12px">
-                    <label>Agent4 写作口径</label>
-                    <el-input v-model="configForm.agentReportGuidance" type="textarea" :rows="2" size="small" placeholder="例如：结构由系统生成，Agent4 只补洞察、风险解释和建议。" />
+                    <label>报告专家写作口径</label>
+                    <el-input v-model="configForm.agentReportGuidance" type="textarea" :rows="2" size="small" placeholder="例如：结构由系统生成，报告专家只补洞察、风险解释和建议。" />
                   </div>
                 </div>
               </div>
@@ -101,7 +107,7 @@
                 </div>
               </div>
 
-              <div class="rc-card rc-card-wide">
+              <div v-if="configForm.profile !== 'generic'" class="rc-card rc-card-wide">
                 <div class="rc-card-title">意图策略</div>
                 <div class="rc-card-body">
                   <div class="rc-help-text">按数据集独立配置排名、TopN、最高/最低、目标层级和默认排序指标。问数时只读取当前数据集策略，不影响其他数据集。</div>
@@ -349,7 +355,7 @@
       <main class="rc-main rc-main-empty" v-else>
         <div class="rc-empty-hint">
           <el-icon :size="40" color="#D1D5DB"><Grid /></el-icon>
-          <p>请在左侧选择一个数据集进行配置</p>
+          <p>选择上方数据集，配置报告结构与展示口径</p>
         </div>
       </main>
     </div>
@@ -368,6 +374,8 @@ const loading = ref(false)
 const saving = ref(false)
 const { isFeatureEnabled, loadFeatureFlags } = useFeatureFlags()
 const datasets = ref([])
+const datasetSearch=ref('')
+const visibleDatasets=computed(()=>datasets.value.filter(ds=>`${ds.dataset_name || ''} ${ds.dataset_code || ''}`.toLowerCase().includes(datasetSearch.value.trim().toLowerCase())))
 const selectedDatasetId = ref(null)
 const activeTab = ref('visual')
 const jsonText = ref('')
@@ -375,6 +383,7 @@ const intentPoliciesText = ref('{}')
 const hasConfig = ref(false)
 
 const configForm = ref({
+  profile:'generic',
   nameColumn: '', parentColumn: '', trackColumn: '', levelColumn: '',
   reportTitle: '', riskThreshold: 80,
   metrics: [], signalRules: [], sections: ['core', 'group', 'risk', 'strategy'],
@@ -414,6 +423,7 @@ const splitFlexibleList = (value) => String(value || '')
   .filter(Boolean)
 
 const ensureRankingPolicy = () => {
+  if(configForm.value.profile==='generic') return configForm.value.intentPolicies?.ranking || {}
   if (!configForm.value.intentPolicies || typeof configForm.value.intentPolicies !== 'object') {
     configForm.value.intentPolicies = {}
   }
@@ -523,6 +533,7 @@ const loadDatasets = async () => {
   try {
     const r = await api.get('/bookshelves/datasets')
     datasets.value = (r?.datasets || r || []).map(ds => ({ ...ds, _hasConfig: false }))
+    if (!selectedDatasetId.value && datasets.value.length) selectDataset(datasets.value[0].id)
     // Check which have configs
     for (const ds of datasets.value) {
       try {
@@ -546,6 +557,7 @@ const loadConfig = async (dsId) => {
     hasConfig.value = !!(r.config)
     const cfg = r.config || r.default_config || {}
     Object.assign(configForm.value, {
+      profile:cfg.profile || 'hierarchy',
       nameColumn: cfg.nameColumn || '',
       parentColumn: cfg.parentColumn || '',
       trackColumn: cfg.trackColumn || '',
@@ -630,7 +642,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.rc-page { height: 100%; display: flex; flex-direction: column; }
+.rc-page { height: 100%; display: flex; flex-direction: column; min-height:620px; }
+.report-settings-heading{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:0 0 22px}.report-settings-heading>div>span{font-size:10px;letter-spacing:1px;color:#8a95a3}.report-settings-heading h1{font-size:23px;line-height:1.4;letter-spacing:-.65px;font-weight:650;margin:6px 0 7px;color:#18222f}.report-settings-heading p{font-size:12px;color:#7a8695}.report-config-count{font-size:11px;color:#84909f}.rc-search{padding:12px}.rc-sidebar-title{display:flex;justify-content:space-between}.rc-sidebar-title>span{font-size:10px;color:#9aa5b3}.rc-main{min-width:0}.rc-ds-item{padding:12px!important;margin-bottom:4px!important}.rc-ds-item.is-active{box-shadow:none!important}.rc-ds-meta{line-height:1.8}
+@media(max-width:1000px){.rc-sidebar{width:200px!important;min-width:200px!important}.rc-main{padding:20px!important}.rc-main-header{flex-wrap:wrap;gap:14px}}
+@media(max-width:640px){.rc-page{height:auto;min-height:0}.rc-layout{flex-direction:column}.rc-sidebar{width:100%!important;min-width:0!important;max-height:250px}.rc-main{overflow:visible}.rc-main-title{font-size:14px!important;flex-wrap:wrap}.rc-form-grid,.rc-field-grid{grid-template-columns:1fr!important}.report-config-count{display:none}}
 
 .rc-layout {
   flex: 1; display: flex; min-height: 0;
@@ -662,10 +677,10 @@ onMounted(() => {
   cursor: pointer; transition: all var(--duration-fast, 150ms) ease;
   margin-bottom: 2px;
 }
-.rc-ds-item:hover { background: rgba(13, 148, 136, 0.04); }
+.rc-ds-item:hover { background: rgba(29, 78, 216, 0.04); }
 .rc-ds-item.is-active {
-  background: var(--color-primary-light, #F0FDFA);
-  box-shadow: inset 3px 0 0 var(--color-primary, #0D9488);
+  background: var(--color-primary-light, #eff6ff);
+  box-shadow: inset 3px 0 0 var(--color-primary, #1d4ed8);
 }
 .rc-ds-icon { font-size: 16px; color: var(--text-muted, #9CA3AF); flex-shrink: 0; }
 .rc-ds-meta { flex: 1; min-width: 0; }

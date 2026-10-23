@@ -2,11 +2,15 @@
   <div class="ax-page">
     <div class="ax-shell">
       <section class="ax-workspace" :class="{ 'is-detail-hidden': !detailPanelVisible }">
-        <!-- 📌 豆包式左侧历史会话侧边栏 -->
+        <!-- 历史按需打开，不占用分析画布 -->
         <SessionSidebar
+          ref="historyPanelRef"
+          :busy="isRunning"
+          :allow-new-chat="featureAccess.ask_new_chat"
           :sessions="historySessions"
           :active-session-id="activeHistoryId"
           :allow-clear="canUseFeature('app_history_clear')"
+          :allow-delete="canUseFeature('app_history_delete')"
           @new-chat="handleNewChat"
           @select-session="handleSelectHistorySession"
           @delete-session="handleDeleteHistorySession"
@@ -18,8 +22,9 @@
           <!-- 头部组件-->
           <div class="ax-content-track ax-header-track">
             <ChatHeader
+              :flow="requestedFlow"
               :show-panel="detailPanelVisible"
-              :allow-toggle-panel="featureAccess.debug_execution_trace"
+              :allow-toggle-panel="featureAccess.debug_execution_trace && featureAccess.ask_field_execution_trace"
               :allow-new-chat="featureAccess.ask_new_chat"
               @toggle-panel="togglePanel"
               @new-chat="handleNewChat"
@@ -39,7 +44,7 @@
             <span class="ax-readonly-banner-text">
               <template v-if="runningTaskStatus === 'running'">正在查看历史任务，后台有任务正在执行中，点击此处跳回执行中的任务</template>
               <template v-else-if="runningTaskStatus === 'pending_confirmation'">后台任务需要确认口径，点击此处返回确认</template>
-              <template v-else-if="runningTaskStatus === 'completed'">后台任务已执行完成，点击此处查看结果</template>
+              <template v-else-if="runningTaskStatus === 'completed'">后台任务已执行完成，点击此处查看结果</template><template v-else-if="runningTaskStatus === 'partial'">后台任务仅形成部分结果，点击此处查看待完成项</template>
               <template v-else>后台任务执行失败，点击此处查看详情</template>
             </span>
             <!-- i18n: datapulse.task.readonlyBanner -->
@@ -51,6 +56,8 @@
             <!-- 欢迎首屏 -->
             <WelcomeScreen
               v-if="messages.length === 0"
+              :flow="requestedFlow"
+              :welcome-text="requestedFlow === 'advanced' ? '从一个业务疑问开始，先制定计划，再用证据逐步验证。' : '把业务问题交给我，获取口径清晰、可以核对的答案。'"
               :common-questions="commonQuestions"
               :common-questions-loading="commonQuestionsLoading"
               :allow-quick-ask="featureAccess.ask_quick_ask"
@@ -116,16 +123,25 @@
                       @ask="handleParseBarAsk(msg, $event)"
                     />
 
-                    <!-- 执行进度卡-->
-                    <LiveExecutionFeed
-                      v-if="shouldShowLiveFeed(msg)"
-                      :logs="displayLogs"
-                      :mode="getLiveFeedMode(msg)"
-                      :max-items="6"
-                      :elapsed-label="getMessageElapsedLabel(msg)"
-                      :force-expanded="isViewingReadonly"
+                    <AskProcessView
+                      v-if="workflowFor(msg)?.run_id"
+                      :workflow="workflowFor(msg)"
+                      :result="msg.data"
+                      :status="msg.loading ? 'running' : msg.data?.aborted ? 'canceled' : msg.data?.error ? 'error' : 'completed'"
+                      :readonly="isViewingReadonly"
+                      :allow-inspector="featureAccess.debug_execution_trace && featureAccess.ask_field_execution_trace"
+                      :allow-retry="featureAccess.ask_quick_ask && featureAccess.ask_send_question && !isViewingReadonly && !isRunning"
+                      @inspect="openActivityInspector(msg,$event)"
+                      @retry="draftAnswerFollowUp(msg.data?.question || '')"
+                      :busy="Boolean(msg.loading || confirmationSubmitting[msg.id])"
+                      :allow-technical="featureAccess.debug_execution_trace && featureAccess.ask_field_generated_sql"
+                      :render-chart="renderChartSpec"
+                      :allow-auto-chart="featureAccess.ask_chart_auto_infer"
+                      :allow-download="featureAccess.ask_report_download"
+                      @download-report="downloadResearchReport(msg)"
+                      @start-plan="doConfirm({ label: '确认研究计划', plan_branch_ids: $event }, msg)"
                     />
-                    <PlanCard :route="msg.data?.route" />
+                    <PlanCard v-else :route="msg.data?.route" />
 
                     <!-- 错字短路纠正卡（第 0 层快检命中：只出此卡，不进流水线） -->
                     <div v-if="msg.data?.early_clarify" class="ax-early-clarify">
@@ -212,7 +228,7 @@
                     />
 
                     <!-- 确认口径卡-->
-                    <div v-if="shouldShowResultHandoff(msg)" class="ax-flow-handoff">
+                    <div v-if="!msg.data?.workflow && shouldShowResultHandoff(msg)" class="ax-flow-handoff">
                       <div class="ax-flow-handoff-top">
                         <div class="ax-flow-handoff-kicker">执行已完成</div>
                         <span v-if="getAskFlowLabel(msg)" class="ax-flow-badge" :class="getAskFlowClass(msg)">
@@ -293,12 +309,12 @@
                     </div>
 
                     <div
-                      v-if="shouldShowResultChain(msg)"
+                      v-if="!msg.data?.research && shouldShowResultChain(msg)"
                       class="ax-result-chain"
                       :ref="el => setResultChainRef(msg.id, el)"
                     >
                     <ResultDigestCard
-                      v-if="getReport(msg) || getPrimaryDataset(msg)"
+                      v-if="!(msg.data?.research || msg.data?.research_plan) && (getReport(msg) || getPrimaryDataset(msg))"
                       :title="getResultTitle(msg)"
                       :display-title="msg.data?.display_title || ''"
                       :question="msg.data?.question || session.state.question"
@@ -310,7 +326,14 @@
                       :flow-class="getAskFlowClass(msg)"
                       :flow-hint="getAskFlowHint(msg)"
                       :show-details-button="featureAccess.ask_report_details"
+                      :allow-download="featureAccess.ask_report_download"
+                      :allow-technical="featureAccess.debug_execution_trace && featureAccess.ask_field_generated_sql"
+                      :allow-auto-chart="featureAccess.ask_chart_auto_infer"
+                      :render-chart="renderChartSpec"
+                      :allow-follow-up="featureAccess.ask_quick_ask && featureAccess.ask_send_question && !isRunning && !isViewingReadonly"
+                      @follow-up="draftAnswerFollowUp"
                       @view-details="openDetailPanel(msg)"
+                      @view-report="openMessageReport(msg.data)"
                     />
 
                     <div
@@ -324,48 +347,6 @@
                       </div>
                     </div>
 
-                    <div
-                      v-if="getVisualPreviews(msg).length"
-                      class="ax-inline-visuals"
-                      :class="{ 'is-single': getVisualPreviews(msg).length === 1 }"
-                    >
-                      <div class="ax-inline-visuals-head">
-                        <div>
-                          <div class="ax-inline-visuals-kicker">REPORT VISUALS</div>
-                          <div class="ax-inline-visuals-title">关键图表预览</div>
-                          <div class="ax-inline-visuals-caption">按当前结果自动提取关键图表，保留最值得先看的那几张。</div>
-                        </div>
-                      </div>
-
-                      <div class="ax-inline-visuals-grid" :class="{ 'is-single': getVisualPreviews(msg).length === 1 }">
-                        <div
-                          v-for="preview in getVisualPreviews(msg)"
-                          :key="`inline-${msg.id}-${preview.key}`"
-                          class="ax-inline-visual-card"
-                        >
-                          <div class="ax-inline-visual-card-head">
-                            <div>
-                              <div class="ax-inline-visual-card-title">{{ preview.chartSpec?.title || preview.dataset.dataset_name }}</div>
-                              <div class="ax-inline-visual-card-subtitle">{{ preview.dataset.dataset_name }}</div>
-                            </div>
-                            <button v-if="featureAccess.chart_viewer" class="ax-ghost-btn" @click="openChartViewer(preview.chartSpec, `${preview.dataset.dataset_name} 图表预览`)">
-                              放大查看
-                            </button>
-                          </div>
-
-                          <div v-if="preview.chartSpec?.chartType === 'metric'" class="ax-insight-metric">
-                            <div class="ax-insight-metric-value">{{ preview.chartSpec.value }}</div>
-                            <div class="ax-insight-metric-label">{{ preview.chartSpec.label }}</div>
-                          </div>
-                          <div
-                            v-else-if="preview.chartSpec"
-                            class="ax-inline-visual-chart"
-                            :ref="el => initPreviewChart(el, preview.chartSpec, `inline-${msg.id}-${preview.key}`)"
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-
                     <!-- 状态提示卡-->
                     </div>
                     <div v-if="msg.data?.aborted" class="ax-card ax-cancel-card">
@@ -375,10 +356,10 @@
                       <div class="ax-cancel-copy">
                         <div class="ax-cancel-kicker">FLOW INTERRUPTED</div>
                         <div class="ax-cancel-title">本轮问数已取消</div>
-                        <div class="ax-cancel-desc">执行链路已关闭，不会继续生成 SQL、图表或报告。</div>
+                        <div class="ax-cancel-desc">已请求停止。正在执行的操作将在返回或超时后退出，后续步骤不再启动。</div>
                       </div>
                     </div>
-                    <div v-if="msg.data?.error" class="ax-card ax-error-card">
+                    <div v-if="msg.data?.error" class="ax-card ax-error-card" role="alert">
                       <span>❌</span>
                       <span>{{ msg.data.error }}</span>
                     </div>
@@ -391,7 +372,11 @@
 
           <!-- 底部输入区-->
           <div class="ax-content-track ax-composer-track">
+            <QuestionQueue :items="questionQueue" :paused="queuePaused" :reason="queueReason" :busy="isRunning" :disabled="isViewingReadonly || !featureAccess.ask_send_question" @resume="resumeQuestionQueue" @pause="pauseQuestionQueue('已手动暂停，当前问题继续执行')" @remove="removeQueuedQuestion" @edit="editQueuedQuestion" @move-up="questionQueue=moveQuestionUp(questionQueue,$event)" @clear="clearQuestionQueue" />
+            <div v-if="queueDraftFlow" class="queue-draft-context">正在编辑队列问题 · {{ queueDraftFlow==='advanced'?'高阶研究':'普通问数' }}<button @click="queueDraftFlow=''">改用当前模式</button></div>
             <ComposerArea
+              :queue-mode="isRunning || questionQueue.length>0 || session.state.status==='waiting_confirmation'"
+              :flow="queueDraftFlow || requestedFlow"
               :class="{ 'ax-composer-narrow': !detailPanelVisible }"
               v-model:query="query"
               v-model:dataset-id="datasetId"
@@ -406,7 +391,7 @@
               :allow-model-select="featureAccess.ask_model_select"
               :status-text="isRunning || session.state.status === 'completed' ? statusBarText : ''"
               :status-elapsed="isRunning ? `${elapsed}s` : ''"
-              :status-tone="session.state.status"
+              :status-tone="taskOutcome(session.state.result,{status:session.state.status,busy:isRunning,workflow:session.state.workflow}).status"
               :status-flow-label="activeAskFlowLabel"
               :status-flow-class="activeAskFlowClass"
               :status-flow-hint="activeAskFlowLabel ? activeAskFlowHint : ''"
@@ -421,12 +406,21 @@
         <transition name="ax-panel-slide">
           <div v-if="detailPanelVisible" class="ax-detail-panel-container">
             <ReasoningPanel
-              :logs="displayLogs"
-              :status="session.state.status"
+              :logs="inspectionBusy || inspectionResult === session.state.result ? displayLogs : []"
+              :status="inspectionBusy ? 'running' : ''"
+              :workflow="inspectionWorkflow"
+              :result="inspectionResult"
+              :busy="inspectionBusy"
+              :allow-technical="featureAccess.ask_field_generated_sql"
+              :allow-retry="featureAccess.ask_quick_ask && featureAccess.ask_send_question && !isViewingReadonly && !isRunning"
+              :focus-phase="inspectorFocusPhase"
+              :allow-report="featureAccess.ask_report_details"
+              @view-report="openMessageReport(inspectionResult)"
+              @retry="draftAnswerFollowUp(inspectionResult?.question || session.state.question)"
               @close="togglePanel"
             >
               <template #content="{ log, index }">
-                <div v-if="log.sql" class="ax-log-section">
+                <div v-if="log.sql && featureAccess.ask_field_generated_sql" class="ax-log-section">
                   <div class="ax-log-section-title">{{ log.sqlTitle || '生成 SQL' }}</div>
                   <SqlBlock :sql="log.sql" :allow-copy="featureAccess.ask_sql_copy" />
                 </div>
@@ -447,453 +441,9 @@
                   </div>
                 </div>
 
-                <div v-if="log.markdown && !(log.kind === 'report-stage' && hasSideReport)" class="ax-log-section">
-                  <div class="ax-log-section-title">{{ log.kind === 'report-stage' ? '报告内容' : '节点摘要' }}</div>
-                  <div class="ax-log-markdown" v-html="renderMd(log.markdown)"></div>
-                </div>
               </template>
             </ReasoningPanel>
 
-            <section v-if="hasSideReport" ref="sideReportRef" class="ax-side-report">
-                <div class="ax-side-report-head">
-                  <div ref="sideReportHeadRef" class="ax-side-report-titlebar">
-                    <div>
-                      <h3 class="ax-side-report-title">业绩分析报告</h3>
-                      <div v-if="activeAskFlowLabel" class="ax-side-flow-line">
-                        <span :class="['ax-flow-badge', activeAskFlowClass]">{{ activeAskFlowLabel }}</span>
-                        <small>{{ activeAskFlowHint }}</small>
-                      </div>
-                    </div>
-                    <button v-if="featureAccess.report_fullscreen" class="ax-primary-btn ax-side-fullscreen-btn" @click="openFullScreenReport">
-                      <span class="ax-btn-label">全屏报告</span>
-                    </button>
-                  </div>
-                  <div v-if="sideConfidenceBadges.length" class="ax-side-confidence" aria-label="路由与结果可信度">
-                    <span
-                      v-for="badge in sideConfidenceBadges"
-                      :key="badge.label"
-                      class="ax-side-confidence-chip"
-                      :class="`is-${badge.tone}`"
-                    >
-                      {{ badge.label }}：{{ badge.value }}
-                    </span>
-                  </div>
-                  <div v-if="routeDecisionDetail" class="ax-route-decision">
-                    {{ routeDecisionDetail }}
-                  </div>
-                </div>
-
-                <section
-                  v-if="businessDrillReport"
-                  class="ax-side-section ax-business-report"
-                  :class="{ 'is-single-focus': businessDrillReport.isSingleFocus }"
-                >
-                  <div v-if="businessDrillReport.primaryAnswer" class="ax-filter-answer-card">
-                    <div class="ax-filter-answer-head">
-                      <div>
-                        <div class="ax-side-section-title">{{ businessDrillReport.primaryAnswer.title || '主回答' }}</div>
-                        <p class="ax-business-summary-text">{{ businessDrillReport.primaryAnswer.text }}</p>
-                      </div>
-                      <span class="ax-business-risk-pill" :class="businessDrillReport.answerMode === 'ranking' ? 'good' : 'warn'">
-                        {{ businessDrillReport.primaryAnswer.targetLevel || businessDrillReport.compareLevelLabel }}
-                      </span>
-                    </div>
-                  </div>
-                  <div v-if="businessDrillReport.filterAnswer" class="ax-filter-answer-card">
-                    <div class="ax-filter-answer-head">
-                      <div>
-                        <div class="ax-side-section-title">{{ businessDrillReport.filterAnswer.title || '命中结果' }}</div>
-                        <p class="ax-business-summary-text">{{ businessDrillReport.filterAnswer.text }}</p>
-                      </div>
-                      <span class="ax-business-risk-pill" :class="businessDrillReport.filterAnswer.nodes?.length ? 'warn' : 'good'">
-                        {{ businessDrillReport.filterAnswer.nodes?.length || 0 }} 个
-                      </span>
-                    </div>
-                    <div v-if="businessDrillReport.filterAnswer.nodes?.length" class="ax-filter-answer-list">
-                      <button
-                        v-for="node in businessDrillReport.filterAnswer.nodes"
-                        :key="`filter-answer-${node.id}`"
-                        class="ax-filter-answer-row"
-                        type="button"
-                        @click="toggleOfficeDrill(node.id)"
-                      >
-                        <span class="ax-filter-answer-name">{{ node.name }}</span>
-                        <span class="ax-filter-answer-metric">{{ node.metricLabel }} {{ node.metricValue }}</span>
-                        <span v-if="node.tag" class="ax-detail-tag" :class="node.tone">{{ node.tag }}</span>
-                      </button>
-                    </div>
-                  </div>
-                  <div
-                    v-if="businessNarrativeSections.length"
-                    class="ax-management-narrative"
-                    :class="{ 'is-single-focus': businessDrillReport.isSingleFocus }"
-                  >
-                    <article
-                      v-for="section in businessNarrativeSections"
-                      :key="section.title"
-                      class="ax-management-narrative-card"
-                    >
-                      <div class="ax-management-narrative-title">{{ section.title }}</div>
-                      <div class="ax-report-md ax-report-md-compact ax-management-narrative-body" v-html="renderReportMd(section.body)"></div>
-                    </article>
-                  </div>
-                  <div class="ax-business-summary">
-                    <div>
-                      <div class="ax-side-section-title">核心业绩看板</div>
-                      <p class="ax-business-summary-text">{{ sideBusinessSummaryText }}</p>
-                    </div>
-                    <span class="ax-business-risk-pill" :class="businessDrillReport.riskTone">{{ businessDrillReport.riskLabel }}</span>
-                  </div>
-                  <div class="ax-kpi-shelf ax-kpi-shelf-compact">
-                    <div
-                      v-for="metric in sideBusinessMetricCards"
-                      :key="`${metric.subject || 'metric'}-${metric.label}`"
-                      class="ax-kpi-card"
-                      :class="[
-                        { 'is-subject-metric': metric.subject, 'is-explained': metric.hint },
-                        metric.tone ? `is-tone-${metric.tone}` : ''
-                      ]"
-                      :style="metric.accentStyle"
-                    >
-                      <div v-if="metric.subject" class="ax-kpi-subject">{{ metric.subject }}</div>
-                      <div class="ax-kpi-value">{{ metric.value }}</div>
-                      <div class="ax-kpi-label">{{ metric.label }}</div>
-                      <div v-if="metric.hint" class="ax-kpi-hint">{{ metric.hint }}</div>
-                    </div>
-                  </div>
-                  <div v-if="businessDrillReport.officeCompareSpec" class="ax-office-overview-card">
-                    <div class="ax-office-overview-head">
-                      <div>
-                        <div class="ax-side-section-title">各{{ businessDrillReport.compareLevelLabel }}对比分析</div>
-                        <p class="ax-chart-copy">{{ businessDrillReport.officeCompareText }}</p>
-                      </div>
-                    </div>
-                    <div class="ax-compare-matrix is-compact">
-                      <div class="ax-compare-row is-head">
-                        <span>{{ businessDrillReport.compareLevelLabel }}</span>
-                        <span>总任务</span>
-                        <span>已完成</span>
-                        <span>缺口</span>
-                        <span>达成率</span>
-                        <span>进度</span>
-                        <span>标签</span>
-                      </div>
-                      <button
-                        v-for="(office, officeIndex) in businessDrillReport.offices"
-                        :key="`side-compare-row-${office.id}`"
-                        class="ax-compare-row"
-                        :style="getOfficeAccentStyle(office, officeIndex)"
-                        type="button"
-                        @click="canToggleOffice(office) && toggleOfficeDrill(office.id)"
-                      >
-                        <span class="ax-detail-name">{{ office.name }}</span>
-                        <span>{{ getOfficeKpiLabel(office, 'task') }}</span>
-                        <span>{{ getOfficeKpiLabel(office, 'actual') }}</span>
-                        <span>{{ getOfficeKpiLabel(office, 'remain') }}</span>
-                        <span class="ax-detail-rate" :class="office.tone">{{ office.rateLabel }}</span>
-                        <span class="ax-detail-progress">
-                          <i class="ax-office-bar-track"><b class="is-rate" :class="office.tone" :style="{ width: `${office.progress}%` }"></b></i>
-                        </span>
-                        <span class="ax-detail-tag" :class="office.tone">{{ office.tag }}</span>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="ax-office-card-list">
-                    <article
-                      v-for="(office, officeIndex) in businessDrillReport.offices"
-                      :key="`side-office-${office.id}`"
-                      class="ax-office-card"
-                      :style="getOfficeAccentStyle(office, officeIndex)"
-                    >
-                      <button
-                        class="ax-office-card-head"
-                        type="button"
-                        :aria-expanded="String(isOfficeExpanded(office.id))"
-                        @click="canToggleOffice(office) && toggleOfficeDrill(office.id)"
-                      >
-                        <div class="ax-office-head-main">
-                          <div class="ax-office-name">{{ office.name }} <span class="ax-office-tag">{{ office.tag }}</span></div>
-                          <div class="ax-office-subtitle">{{ getOfficeSubtitle(office, businessDrillReport) }}</div>
-                        </div>
-                        <span class="ax-office-head-actions">
-                          <span class="ax-office-rate" :class="office.tone">{{ office.rateLabel }}<small v-if="office.rankLabel">{{ office.rankLabel }}</small></span>
-                          <span
-                            v-if="canToggleOffice(office)"
-                            class="ax-office-drill-toggle"
-                            :class="{ 'is-open': isOfficeExpanded(office.id) }"
-                            :title="isOfficeExpanded(office.id) ? '收起明细' : getOfficeToggleTitle(office, businessDrillReport)"
-                          >
-                            <span>{{ isOfficeExpanded(office.id) ? '收起' : '下钻' }}</span>
-                            <i></i>
-                          </span>
-                          <span v-else class="ax-office-leaf-pill">当前最细层</span>
-                        </span>
-                      </button>
-                      <div class="ax-office-kpis">
-                        <span v-for="item in office.kpis" :key="item.label">{{ item.label }} {{ item.value }}</span>
-                      </div>
-                      <p class="ax-office-copy">{{ office.summary }}</p>
-                      <div v-if="canToggleOffice(office) && isOfficeExpanded(office.id)" class="ax-office-drill">
-                        <div class="ax-drill-path">
-                          <span>{{ office.name }}</span>
-                          <i></i>
-                          <strong>{{ businessDrillReport.detailLevelLabel }}</strong>
-                        </div>
-                        <div class="ax-drill-insight-grid">
-                          <div class="ax-drill-insight-card is-good">
-                            <span>下钻亮点</span>
-                            <strong>{{ getDrillBestText(office) }}</strong>
-                          </div>
-                          <div class="ax-drill-insight-card is-risk">
-                            <span>重点压力</span>
-                            <strong>{{ getDrillWorstText(office) }}</strong>
-                          </div>
-                        </div>
-                        <p class="ax-chart-copy ax-chart-copy-drill">{{ office.chartText }}</p>
-                        <div v-if="office.detailRows?.length" class="ax-office-detail-wrap">
-                          <div class="ax-drill-table-head">
-                            <span>{{ businessDrillReport.detailLevelLabel }}明细</span>
-                            <small>按达成率排序，点击上层卡片可收起</small>
-                          </div>
-                          <div class="ax-office-detail-table">
-                            <div class="ax-office-detail-row is-head">
-                              <span>{{ businessDrillReport.detailLevelLabel }}</span>
-                              <span>任务/已完成</span>
-                              <span>剩余缺口</span>
-                              <span>达成率</span>
-                              <span>达成进度</span>
-                              <span>标签</span>
-                            </div>
-                            <div v-for="person in office.detailRows" :key="`${office.id}-${person.name}`" class="ax-office-detail-row">
-                              <span class="ax-detail-name">{{ person.name }}</span>
-                              <span>{{ person.taskLabel }} / {{ person.actualLabel }}</span>
-                              <span>{{ person.remainLabel }}</span>
-                              <span class="ax-detail-rate" :class="person.tone">{{ person.rateLabel }}</span>
-                              <span class="ax-detail-progress">
-                                <i class="ax-office-bar-track"><b class="is-rate" :class="person.tone" :style="{ width: `${person.progress}%` }"></b></i>
-                              </span>
-                              <span class="ax-detail-tag" :class="person.tone">{{ person.label }}</span>
-                            </div>
-                          </div>
-                          <div v-if="office.drillGroups?.length" class="ax-rep-drill-list">
-                            <div class="ax-rep-drill-title">继续下钻到业务员</div>
-                            <article
-                              v-for="group in office.drillGroups"
-                              :key="`${office.id}-${group.id}`"
-                              class="ax-rep-drill-card"
-                            >
-                              <button
-                                class="ax-rep-drill-head"
-                                type="button"
-                                @click="toggleOfficeDrill(`rep-${office.id}-${group.id}`)"
-                              >
-                                <div class="ax-office-head-main">
-                                  <div class="ax-rep-drill-name">{{ group.name }} <span class="ax-office-tag">{{ group.tag }}</span></div>
-                                  <div class="ax-rep-drill-subtitle">{{ group.childCount }} 个{{ group.detailLevelLabel }} · {{ group.parentName || office.name }}</div>
-                                </div>
-                                <span class="ax-office-head-actions">
-                                  <span class="ax-office-rate" :class="group.tone">{{ group.rateLabel }}</span>
-                                  <span
-                                    class="ax-office-drill-toggle is-small"
-                                    :class="{ 'is-open': isOfficeExpanded(`rep-${office.id}-${group.id}`) }"
-                                    :title="isOfficeExpanded(`rep-${office.id}-${group.id}`) ? '收起业务员明细' : '展开业务员明细'"
-                                  >
-                                    <span>{{ isOfficeExpanded(`rep-${office.id}-${group.id}`) ? '收起' : '业务员' }}</span>
-                                    <i></i>
-                                  </span>
-                                </span>
-                              </button>
-                              <p v-if="group.summary" class="ax-rep-drill-summary">{{ group.summary }}</p>
-                              <div v-if="isOfficeExpanded(`rep-${office.id}-${group.id}`)" class="ax-office-detail-table ax-rep-person-table">
-                                <div class="ax-office-detail-row is-head">
-                                  <span>{{ group.detailLevelLabel }}</span>
-                                  <span>任务/已完成</span>
-                                  <span>剩余缺口</span>
-                                  <span>达成率</span>
-                                  <span>达成进度</span>
-                                  <span>标签</span>
-                                </div>
-                                <div v-for="person in group.detailRows" :key="`${office.id}-${group.id}-${person.name}`" class="ax-office-detail-row">
-                                  <span class="ax-detail-name">{{ person.name }}</span>
-                                  <span>{{ person.taskLabel }} / {{ person.actualLabel }}</span>
-                                  <span>{{ person.remainLabel }}</span>
-                                  <span class="ax-detail-rate" :class="person.tone">{{ person.rateLabel }}</span>
-                                  <span class="ax-detail-progress">
-                                    <i class="ax-office-bar-track"><b class="is-rate" :class="person.tone" :style="{ width: `${person.progress}%` }"></b></i>
-                                  </span>
-                                  <span class="ax-detail-tag" :class="person.tone">{{ person.label }}</span>
-                                </div>
-                              </div>
-                            </article>
-                          </div>
-                        </div>
-                        <div v-else class="ax-office-empty-drill">
-                          {{ getOfficeEmptyDrillText(office, businessDrillReport) }}
-                        </div>
-                      </div>
-                    </article>
-                  </div>
-                </section>
-
-                <section v-if="!businessDrillReport && sideReportCharts.length" class="ax-side-section ax-side-chart-gallery">
-                  <div class="ax-side-section-head">
-                    <div>
-                      <div class="ax-side-section-title">图表分析</div>
-                      <div class="ax-side-dataset-name">按报告配置拆出的独立图表</div>
-                    </div>
-                  </div>
-                  <div class="ax-side-chart-grid">
-                    <article
-                      v-for="chart in sideReportCharts"
-                      :key="chart.key"
-                      class="ax-side-extra-chart-card"
-                    >
-                      <div class="ax-side-extra-chart-head">
-                        <div class="ax-side-extra-chart-title">{{ chart.chartSpec.title || chart.caption }}</div>
-                        <button v-if="featureAccess.chart_viewer" class="ax-ghost-btn ax-side-extra-chart-action" @click="openChartViewer(chart.chartSpec, `${chart.dataset.dataset_name} ${chart.chartSpec.title || chart.caption}`)">
-                          查看
-                        </button>
-                      </div>
-                      <div
-                        v-if="chart.chartSpec.chartType === 'metric'"
-                        class="ax-insight-metric ax-insight-metric-compact"
-                      >
-                        <div class="ax-insight-metric-value">{{ chart.chartSpec.value }}</div>
-                        <div class="ax-insight-metric-label">{{ chart.chartSpec.label }}</div>
-                      </div>
-                      <div
-                        v-else
-                        class="ax-side-extra-chart-canvas"
-                        :ref="el => initPreviewChart(el, chart.chartSpec, chart.key)"
-                      ></div>
-                    </article>
-                  </div>
-                </section>
-
-                <div
-                  v-if="!businessDrillReport"
-                  v-for="preview in resultPreviews"
-                  :key="preview.key"
-                  class="ax-side-section"
-                  :class="{ 'ax-preview': preview.dataset.rows?.length }"
-                >
-                  <div class="ax-side-section-head">
-                    <div>
-                      <div class="ax-side-section-title">{{ preview.caption }}</div>
-                      <div class="ax-side-dataset-name">{{ preview.dataset.dataset_name }}</div>
-                    </div>
-                    <div class="ax-side-meta">
-                      <span class="ax-side-meta-chip">{{ preview.dataset.rows?.length || 0 }} 行</span>
-                      <span class="ax-side-meta-chip">{{ preview.dataset.columns?.length || 0 }} 列</span>
-                    </div>
-                  </div>
-
-                  <div v-if="preview.metricCards.length" class="ax-kpi-shelf">
-                    <div v-for="metric in preview.metricCards" :key="metric.label" class="ax-kpi-card">
-                      <div class="ax-kpi-value">{{ metric.value }}</div>
-                      <div class="ax-kpi-label">{{ metric.label }}</div>
-                    </div>
-                  </div>
-
-                  <div v-if="preview.chartSpec?.chartType === 'metric' && !preview.extraCharts?.length" class="ax-insight-metric">
-                    <div class="ax-insight-metric-value">{{ preview.chartSpec.value }}</div>
-                    <div class="ax-insight-metric-label">{{ preview.chartSpec.label }}</div>
-                  </div>
-
-                  <div v-else-if="preview.chartSpec" class="ax-main-chart" :ref="el => initPreviewChart(el, preview.chartSpec, preview.key)"></div>
-                  <div v-if="preview.chartSpec" class="ax-chart-actions">
-                    <button v-if="featureAccess.chart_viewer" class="ax-ghost-btn" @click="openChartViewer(preview.chartSpec, `${preview.dataset.dataset_name} 图表预览`)">放大查看</button>
-                  </div>
-
-                  <div v-if="preview.extraCharts?.length" class="ax-side-extra-charts">
-                    <article
-                      v-for="(chartSpec, chartIndex) in preview.extraCharts.slice(0, 2)"
-                      :key="`${preview.key}-extra-${chartIndex}`"
-                      class="ax-side-extra-chart-card"
-                    >
-                      <div class="ax-side-extra-chart-head">
-                        <div class="ax-side-extra-chart-title">{{ chartSpec.title || `图表 ${chartIndex + 1}` }}</div>
-                        <button v-if="featureAccess.chart_viewer" class="ax-ghost-btn ax-side-extra-chart-action" @click="openChartViewer(chartSpec, `${preview.dataset.dataset_name} ${chartSpec.title || `图表 ${chartIndex + 1}`}`)">
-                          查看
-                        </button>
-                      </div>
-                      <div
-                        v-if="chartSpec.chartType === 'metric'"
-                        class="ax-insight-metric ax-insight-metric-compact"
-                      >
-                        <div class="ax-insight-metric-value">{{ chartSpec.value }}</div>
-                        <div class="ax-insight-metric-label">{{ chartSpec.label }}</div>
-                      </div>
-                      <div
-                        v-else
-                        class="ax-side-extra-chart-canvas"
-                        :ref="el => initPreviewChart(el, chartSpec, `${preview.key}-extra-${chartIndex}`)"
-                      ></div>
-                    </article>
-                  </div>
-
-                  <div v-if="preview.dataset.rows?.length" class="ax-preview-table">
-                    <el-table :data="preview.dataset.rows.slice(0, 6)" size="small" style="width:100%">
-                      <el-table-column v-for="c in preview.dataset.columns" :key="c" :prop="c" :label="c" min-width="140" />
-                    </el-table>
-                  </div>
-                </div>
-
-                <div v-if="latestReport && !businessDrillReport" class="ax-side-section ax-report-view">
-                  <div class="ax-side-section-title">完整报告</div>
-                  <div class="ax-chart-actions">
-                    <button v-if="featureAccess.report_fullscreen" class="ax-ghost-btn" @click="openReportViewer">全屏查看</button>
-                  </div>
-                  <ul class="ax-report-bullet-list ax-report-bullet-list-compact">
-                    <li v-for="(item, index) in reportSummaryBullets.slice(0, 4)" :key="index">{{ item }}</li>
-                  </ul>
-                  <div class="ax-report-sections">
-                    <article
-                      v-for="(section, index) in reportNarrativeSections.slice(0, 3)"
-                      :key="`${section.title}-${index}`"
-                      class="ax-report-section-card"
-                    >
-                      <div class="ax-report-section-title">{{ section.title }}</div>
-                      <div class="ax-report-md ax-report-md-compact" v-html="renderReportMd(section.body)"></div>
-                    </article>
-                  </div>
-                  <div v-if="reportTableBlocks.length" class="ax-report-table-stack">
-                    <article
-                      v-for="block in reportTableBlocks.slice(0, 2)"
-                      :key="`side-${block.key}`"
-                      class="ax-report-table-card"
-                    >
-                      <div class="ax-report-table-head">
-                        <div>
-                          <div class="ax-report-table-title">{{ block.title }}</div>
-                          <div class="ax-report-table-desc">{{ block.description }}</div>
-                        </div>
-                        <span class="ax-side-meta-chip">{{ block.rows.length }} 行</span>
-                      </div>
-                      <div class="ax-preview-table ax-preview-table-report">
-                        <el-table :data="block.rows.slice(0, 6)" size="small" style="width:100%">
-                          <el-table-column
-                            v-for="column in block.columns"
-                            :key="column"
-                            :prop="column"
-                            :label="column"
-                            min-width="120"
-                          />
-                        </el-table>
-                      </div>
-                    </article>
-                  </div>
-                  <div v-if="!reportNarrativeSections.length" class="ax-report-md" v-html="renderReportMd(latestReport)"></div>
-                  <div class="ax-download-row">
-                    <button v-if="featureAccess.report_fullscreen" class="ax-secondary-btn" @click="openReportViewer">
-                      <span class="ax-btn-label">查看大图</span>
-                    </button>
-                    <button v-if="featureAccess.ask_report_download" class="ax-primary-btn" @click="downloadLatestReport">
-                      <span class="ax-btn-label">下载报告</span>
-                    </button>
-                  </div>
-                </div>
-              </section>
             </div>
           </transition>
       </section>
@@ -910,8 +460,8 @@
     >
       <div class="ax-report-dialog-body">
         <div class="ax-report-dialog-head">
-          <div class="ax-report-dialog-title-block">
-            <h3 class="ax-report-dialog-title">业绩分析报告</h3>
+              <div class="ax-report-dialog-title-block">
+            <h3 class="ax-report-dialog-title">数据分析报告</h3>
             <p v-if="reportViewerTitle" class="ax-report-dialog-subtitle">{{ reportViewerTitle }}</p>
           </div>
           <div class="ax-report-dialog-actions">
@@ -923,337 +473,7 @@
             </button>
           </div>
         </div>
-        <div :class="['ax-report-dialog-content', `is-template-${reportSceneTemplate}`]">
-          <div class="ax-report-dialog-overview">
-            <section class="ax-report-stage-section ax-report-stage-summary">
-              <div class="ax-report-stage-title">{{ reportOverviewTitle }}</div>
-              <ul class="ax-report-bullet-list">
-                <li v-for="(item, index) in reportSummaryBullets" :key="index">{{ item }}</li>
-              </ul>
-            </section>
-
-            <section v-if="reportDialogMetricCards.length" class="ax-report-stage-section ax-report-stage-metrics">
-              <div class="ax-report-stage-title">关键指标</div>
-              <div class="ax-kpi-shelf">
-                <div
-                  v-for="metric in reportDialogMetricCards"
-                  :key="metric.label"
-                  class="ax-kpi-card"
-                  :class="[
-                    { 'is-subject-metric': metric.subject, 'is-explained': metric.hint },
-                    metric.tone ? `is-tone-${metric.tone}` : ''
-                  ]"
-                  :style="metric.accentStyle"
-                >
-                  <div v-if="metric.subject" class="ax-kpi-subject">{{ metric.subject }}</div>
-                  <div class="ax-kpi-value">{{ metric.value }}</div>
-                  <div class="ax-kpi-label">{{ metric.label }}</div>
-                  <div v-if="metric.hint" class="ax-kpi-hint">{{ metric.hint }}</div>
-                </div>
-              </div>
-            </section>
-          </div>
-
-          <section v-if="dialogBusinessDrillReport?.primaryAnswer" class="ax-report-stage-section">
-            <div class="ax-filter-answer-card">
-              <div class="ax-filter-answer-head">
-                <div>
-                  <div class="ax-report-stage-title">{{ dialogBusinessDrillReport.primaryAnswer.title || '主回答' }}</div>
-                  <p class="ax-business-summary-text">{{ dialogBusinessDrillReport.primaryAnswer.text }}</p>
-                </div>
-                <span class="ax-business-risk-pill" :class="dialogBusinessDrillReport.answerMode === 'ranking' ? 'good' : 'warn'">
-                  {{ dialogBusinessDrillReport.primaryAnswer.targetLevel || dialogBusinessDrillReport.compareLevelLabel }}
-                </span>
-              </div>
-            </div>
-          </section>
-
-          <section v-if="dialogBusinessDrillReport?.filterAnswer" class="ax-report-stage-section">
-            <div class="ax-filter-answer-card">
-              <div class="ax-filter-answer-head">
-                <div>
-                  <div class="ax-report-stage-title">{{ dialogBusinessDrillReport.filterAnswer.title || '命中结果' }}</div>
-                  <p class="ax-business-summary-text">{{ dialogBusinessDrillReport.filterAnswer.text }}</p>
-                </div>
-                <span class="ax-business-risk-pill" :class="dialogBusinessDrillReport.filterAnswer.nodes?.length ? 'warn' : 'good'">
-                  {{ dialogBusinessDrillReport.filterAnswer.nodes?.length || 0 }} 个
-                </span>
-              </div>
-              <div v-if="dialogBusinessDrillReport.filterAnswer.nodes?.length" class="ax-filter-answer-list">
-                <button
-                  v-for="node in dialogBusinessDrillReport.filterAnswer.nodes"
-                  :key="`dialog-filter-answer-${node.id}`"
-                  class="ax-filter-answer-row"
-                  type="button"
-                  @click="toggleOfficeDrill(node.id)"
-                >
-                  <span class="ax-filter-answer-name">{{ node.name }}</span>
-                  <span class="ax-filter-answer-metric">{{ node.metricLabel }} {{ node.metricValue }}</span>
-                  <span v-if="node.tag" class="ax-detail-tag" :class="node.tone">{{ node.tag }}</span>
-                </button>
-              </div>
-            </div>
-          </section>
-
-          <section v-if="dialogBusinessDrillReport && businessNarrativeSections.length" class="ax-report-stage-section ax-report-narrative-stage">
-            <div class="ax-report-stage-title">经营解读</div>
-            <div
-              class="ax-management-narrative is-dialog"
-              :class="{ 'is-single-focus': dialogBusinessDrillReport.isSingleFocus }"
-            >
-              <article
-                v-for="section in businessNarrativeSections"
-                :key="`dialog-narrative-${section.title}`"
-                class="ax-management-narrative-card"
-              >
-                <div class="ax-management-narrative-title">{{ section.title }}</div>
-                <div class="ax-report-md ax-report-md-compact ax-management-narrative-body" v-html="renderReportMd(section.body)"></div>
-              </article>
-            </div>
-          </section>
-
-          <section v-if="dialogBusinessDrillReport && reportHasDrillableOffices(dialogBusinessDrillReport)" class="ax-report-stage-section ax-office-report-stage">
-            <div class="ax-report-stage-title">{{ dialogReportStageTitle }}</div>
-            <div v-if="dialogCoreConclusion" class="ax-report-core-conclusion">
-              <span>核心判断</span>
-              <strong>{{ dialogCoreConclusion }}</strong>
-            </div>
-            <div v-if="dialogBusinessDrillReport.offices?.length" class="ax-report-chart-card ax-office-overview-dialog">
-              <div class="ax-report-chart-head">
-                <div>
-                  <div class="ax-report-chart-title">各{{ dialogBusinessDrillReport.compareLevelLabel }}对比分析</div>
-                  <div class="ax-report-chart-subtitle">{{ dialogBusinessDrillReport.officeCompareText }}</div>
-                </div>
-              </div>
-              <div class="ax-compare-matrix">
-                <div class="ax-compare-row is-head">
-                  <span>{{ dialogBusinessDrillReport.compareLevelLabel }}</span>
-                  <span>总任务</span>
-                  <span>已完成</span>
-                  <span>剩余缺口</span>
-                  <span>达成率</span>
-                  <span>达成进度</span>
-                  <span>标签</span>
-                </div>
-                <button
-                  v-for="(office, officeIndex) in dialogBusinessDrillReport.offices"
-                  :key="`compare-row-${office.id}`"
-                  class="ax-compare-row"
-                  :style="getOfficeAccentStyle(office, officeIndex)"
-                  type="button"
-                  @click="canToggleOffice(office) && toggleOfficeDrill(office.id)"
-                >
-                  <span class="ax-detail-name">{{ office.name }}</span>
-                  <span>{{ getOfficeKpiLabel(office, 'task') }}</span>
-                  <span>{{ getOfficeKpiLabel(office, 'actual') }}</span>
-                  <span>{{ getOfficeKpiLabel(office, 'remain') }}</span>
-                  <span class="ax-detail-rate" :class="office.tone">{{ office.rateLabel }}</span>
-                  <span class="ax-detail-progress">
-                    <i class="ax-office-bar-track"><b class="is-rate" :class="office.tone" :style="{ width: `${office.progress}%` }"></b></i>
-                  </span>
-                  <span class="ax-detail-tag" :class="office.tone">{{ office.tag }}</span>
-                </button>
-              </div>
-            </div>
-            <div class="ax-office-report-grid">
-              <article
-                v-for="(office, officeIndex) in dialogBusinessDrillReport.offices"
-                :key="`dialog-office-${office.id}`"
-                class="ax-office-card ax-office-card-dialog"
-                :style="getOfficeAccentStyle(office, officeIndex)"
-              >
-                <button
-                  class="ax-office-card-head"
-                  type="button"
-                  :aria-expanded="String(isOfficeExpanded(office.id))"
-                  @click="canToggleOffice(office) && toggleOfficeDrill(office.id)"
-                >
-                  <div class="ax-office-head-main">
-                    <div class="ax-office-name">{{ office.name }} <span class="ax-office-tag">{{ office.tag }}</span></div>
-                    <div class="ax-office-subtitle">{{ getOfficeSubtitle(office, dialogBusinessDrillReport) }}</div>
-                  </div>
-                  <span class="ax-office-head-actions">
-                    <span class="ax-office-rate" :class="office.tone">{{ office.rateLabel }}<small v-if="office.rankLabel">{{ office.rankLabel }}</small></span>
-                    <span
-                      v-if="canToggleOffice(office)"
-                      class="ax-office-drill-toggle"
-                      :class="{ 'is-open': isOfficeExpanded(office.id) }"
-                      :title="isOfficeExpanded(office.id) ? '收起明细' : getOfficeToggleTitle(office, dialogBusinessDrillReport)"
-                    >
-                      <span>{{ isOfficeExpanded(office.id) ? '收起' : '下钻' }}</span>
-                      <i></i>
-                    </span>
-                    <span v-else class="ax-office-leaf-pill">当前最细层</span>
-                  </span>
-                </button>
-                <p class="ax-office-copy">{{ office.summary }}</p>
-                <div v-if="canToggleOffice(office) && isOfficeExpanded(office.id)" class="ax-office-drill is-dialog">
-                  <div class="ax-drill-path">
-                    <span>{{ office.name }}</span>
-                    <i></i>
-                    <strong>{{ dialogBusinessDrillReport.detailLevelLabel }}</strong>
-                  </div>
-                  <div class="ax-drill-insight-grid">
-                    <div class="ax-drill-insight-card is-good">
-                      <span>下钻亮点</span>
-                      <strong>{{ getDrillBestText(office) }}</strong>
-                    </div>
-                    <div class="ax-drill-insight-card is-risk">
-                      <span>重点压力</span>
-                      <strong>{{ getDrillWorstText(office) }}</strong>
-                    </div>
-                  </div>
-                  <p class="ax-chart-copy ax-chart-copy-drill">{{ office.chartText }}</p>
-                  <div v-if="office.detailRows?.length" class="ax-office-detail-wrap is-dialog">
-                    <div class="ax-drill-table-head">
-                      <span>{{ dialogBusinessDrillReport.detailLevelLabel }}明细</span>
-                      <small>按达成率排序，点击上层卡片可收起</small>
-                    </div>
-                    <div class="ax-office-detail-table">
-                      <div class="ax-office-detail-row is-head">
-                        <span>{{ dialogBusinessDrillReport.detailLevelLabel }}</span>
-                        <span>任务/已完成</span>
-                        <span>剩余缺口</span>
-                        <span>达成率</span>
-                        <span>达成进度</span>
-                        <span>标签</span>
-                      </div>
-                      <div v-for="person in office.detailRows" :key="`${office.id}-${person.name}`" class="ax-office-detail-row">
-                        <span class="ax-detail-name">{{ person.name }}</span>
-                        <span>{{ person.taskLabel }} / {{ person.actualLabel }}</span>
-                        <span>{{ person.remainLabel }}</span>
-                        <span class="ax-detail-rate" :class="person.tone">{{ person.rateLabel }}</span>
-                        <span class="ax-detail-progress">
-                          <i class="ax-office-bar-track"><b class="is-rate" :class="person.tone" :style="{ width: `${person.progress}%` }"></b></i>
-                        </span>
-                        <span class="ax-detail-tag" :class="person.tone">{{ person.label }}</span>
-                      </div>
-                    </div>
-                    <div v-if="office.drillGroups?.length" class="ax-rep-drill-list is-dialog">
-                      <div class="ax-rep-drill-title">继续下钻到业务员</div>
-                      <article
-                        v-for="group in office.drillGroups"
-                        :key="`${office.id}-${group.id}`"
-                        class="ax-rep-drill-card"
-                      >
-                        <button
-                          class="ax-rep-drill-head"
-                          type="button"
-                          @click="toggleOfficeDrill(`rep-${office.id}-${group.id}`)"
-                        >
-                          <div class="ax-office-head-main">
-                            <div class="ax-rep-drill-name">{{ group.name }} <span class="ax-office-tag">{{ group.tag }}</span></div>
-                            <div class="ax-rep-drill-subtitle">{{ group.childCount }} 个{{ group.detailLevelLabel }} · {{ group.parentName || office.name }}</div>
-                          </div>
-                          <span class="ax-office-head-actions">
-                            <span class="ax-office-rate" :class="group.tone">{{ group.rateLabel }}</span>
-                            <span
-                              class="ax-office-drill-toggle is-small"
-                              :class="{ 'is-open': isOfficeExpanded(`rep-${office.id}-${group.id}`) }"
-                              :title="isOfficeExpanded(`rep-${office.id}-${group.id}`) ? '收起业务员明细' : '展开业务员明细'"
-                            >
-                              <span>{{ isOfficeExpanded(`rep-${office.id}-${group.id}`) ? '收起' : '业务员' }}</span>
-                              <i></i>
-                            </span>
-                          </span>
-                        </button>
-                        <p v-if="group.summary" class="ax-rep-drill-summary">{{ group.summary }}</p>
-                        <div v-if="isOfficeExpanded(`rep-${office.id}-${group.id}`)" class="ax-office-detail-table ax-rep-person-table">
-                          <div class="ax-office-detail-row is-head">
-                            <span>{{ group.detailLevelLabel }}</span>
-                            <span>任务/已完成</span>
-                            <span>剩余缺口</span>
-                            <span>达成率</span>
-                            <span>达成进度</span>
-                            <span>标签</span>
-                          </div>
-                          <div v-for="person in group.detailRows" :key="`${office.id}-${group.id}-${person.name}`" class="ax-office-detail-row">
-                            <span class="ax-detail-name">{{ person.name }}</span>
-                            <span>{{ person.taskLabel }} / {{ person.actualLabel }}</span>
-                            <span>{{ person.remainLabel }}</span>
-                            <span class="ax-detail-rate" :class="person.tone">{{ person.rateLabel }}</span>
-                            <span class="ax-detail-progress">
-                              <i class="ax-office-bar-track"><b class="is-rate" :class="person.tone" :style="{ width: `${person.progress}%` }"></b></i>
-                            </span>
-                            <span class="ax-detail-tag" :class="person.tone">{{ person.label }}</span>
-                          </div>
-                        </div>
-                      </article>
-                    </div>
-                  </div>
-                  <div v-else class="ax-office-empty-drill">
-                    {{ getOfficeEmptyDrillText(office, dialogBusinessDrillReport) }}
-                  </div>
-                </div>
-              </article>
-            </div>
-          </section>
-
-          <section v-else-if="reportDialogCharts.length" class="ax-report-stage-section">
-            <div class="ax-report-stage-title">图表分析</div>
-            <div class="ax-report-chart-grid">
-              <article v-for="block in reportDialogCharts" :key="block.key" class="ax-report-chart-card">
-                <div class="ax-report-chart-head">
-                  <div>
-                    <div class="ax-report-chart-title">{{ block.dataset.dataset_name }}</div>
-                    <div class="ax-report-chart-subtitle">{{ block.chartSpec.title || '图表预览' }}</div>
-                  </div>
-                  <button v-if="featureAccess.chart_viewer" class="ax-ghost-btn" @click="openChartViewer(block.chartSpec, `${block.dataset.dataset_name} 图表预览`)">放大查看</button>
-                </div>
-                <div v-if="block.chartSpec.chartType === 'metric'" class="ax-insight-metric ax-insight-metric-report">
-                  <div class="ax-insight-metric-value">{{ block.chartSpec.value }}</div>
-                  <div class="ax-insight-metric-label">{{ block.chartSpec.label }}</div>
-                </div>
-                <div v-else class="ax-report-chart-canvas" :ref="el => initPreviewChart(el, block.chartSpec, `report-${block.key}`)"></div>
-              </article>
-            </div>
-          </section>
-
-          <section v-if="!dialogBusinessDrillReport && reportTableBlocks.length" class="ax-report-stage-section">
-            <div class="ax-report-stage-title">数据表洞察</div>
-            <div class="ax-report-table-grid">
-              <article
-                v-for="block in reportTableBlocks"
-                :key="`dialog-${block.key}`"
-                class="ax-report-table-card ax-report-table-card-dialog"
-              >
-                <div class="ax-report-table-head">
-                  <div>
-                    <div class="ax-report-table-title">{{ block.title }}</div>
-                    <div class="ax-report-table-desc">{{ block.description }}</div>
-                  </div>
-                  <span class="ax-side-meta-chip">{{ block.rows.length }} 行</span>
-                </div>
-                <div class="ax-preview-table ax-preview-table-report ax-preview-table-report-dialog">
-                  <el-table :data="block.rows" size="small" style="width:100%">
-                    <el-table-column
-                      v-for="column in block.columns"
-                      :key="column"
-                      :prop="column"
-                      :label="column"
-                      min-width="140"
-                    />
-                  </el-table>
-                </div>
-              </article>
-            </div>
-          </section>
-
-          <section v-if="!dialogBusinessDrillReport" class="ax-report-stage-section">
-            <div class="ax-report-stage-title">完整解读</div>
-            <div class="ax-report-sections">
-              <article
-                v-for="(section, index) in reportNarrativeSections"
-                :key="`${section.title}-${index}`"
-                class="ax-report-section-card ax-report-section-card-dialog"
-              >
-                <div class="ax-report-section-title">{{ section.title }}</div>
-                <div class="ax-report-md" v-html="renderReportMd(section.body)"></div>
-              </article>
-            </div>
-            <div v-if="!reportNarrativeSections.length" class="ax-report-md" v-html="renderReportMd(reportViewerReport || latestReport)"></div>
-          </section>
-        </div>
+        <iframe class="html-report-reader" title="完整 HTML 分析报告" sandbox="" :srcdoc="reportViewerResearch ? buildResearchReportHtml(reportViewerResearch,{allowAutoChart:featureAccess.ask_chart_auto_infer}) : answerHtml(reportViewerTitle,reportViewerDatasets,reportViewerReport)"></iframe>
       </div>
     </el-dialog>
 
@@ -1317,22 +537,27 @@
 import { computed, nextTick, onActivated, onDeactivated, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { marked } from 'marked'
+import { buildResearchReportHtml } from '../utils/researchReport'
 import * as echarts from 'echarts'
-import { getBookshelfDatasets, getCommonQuestions, getActiveAIModels, recordParseBarFeedback } from '../api/index'
+import { getBookshelfDatasets, getCommonQuestions, getActiveAIModels, recordParseBarFeedback, getAskCapabilities } from '../api/index'
 import { useDataPulseSession } from '../state/askDeskSession'
 import { getSessionCache, setSessionCache } from '../state/sessionCache'
 import { useFeatureFlags } from '../state/featureFlags'
 
 import SessionSidebar from '../components/askdesk/SessionSidebar.vue'
 import ChatHeader from '../components/askdesk/ChatHeader.vue'
-import WelcomeScreen from '../components/askdesk/WelcomeScreen.vue'
+import WelcomeScreen from '../components/askdesk/ExploreWelcome.vue'
 import UserBubble from '../components/askdesk/UserBubble.vue'
 import PlanCard from '../components/askdesk/PlanCard.vue'
 import ParseBar from '../components/askdesk/ParseBar.vue'
 import ThinkingCard from '../components/askdesk/ThinkingCard.vue'
-import LiveExecutionFeed from '../components/askdesk/LiveExecutionFeed.vue'
-import ResultDigestCard from '../components/askdesk/ResultDigestCard.vue'
+import {taskOutcome} from '../state/askWorkflow'
+import QuestionQueue from '../components/askdesk/QuestionQueue.vue'
+import {queuedQuestion,appendQuestion,moveQuestionUp,queuePauseReason} from '../state/questionQueue'
+import AskProcessView from '../components/askdesk/AskProcessView.vue'
+import ResultDigestCard from '../components/askdesk/AnswerCanvas.vue'
 import ComposerArea from '../components/askdesk/ComposerArea.vue'
+import {answerHtml} from '../utils/answerPresentation'
 import ReasoningPanel from '../components/askdesk/ReasoningPanel.vue'
 import SqlBlock from '../components/askdesk/SqlBlock.vue'
 
@@ -1346,6 +571,12 @@ const session = useDataPulseSession()
 const { isFeatureEnabled, loadFeatureFlags } = useFeatureFlags()
 const smartFeatureKeys = [
   'debug_execution_trace',
+  'ask_field_execution_trace',
+  'ask_field_generated_sql',
+  'ask_field_dataset_hit',
+  'ask_field_error_detail',
+  'ask_field_confidence',
+  'ask_field_token_usage',
   'ask_new_chat',
   'ask_quick_ask',
   'ask_quick_refresh',
@@ -1399,6 +630,36 @@ const {
   switchViewToRunning,
   switchViewToDefault,
 } = useDataPulseTaskView()
+const askCapabilities = ref({ advancedAvailable: false })
+const requestedFlow = ref('basic')
+let capabilityRequest = 0
+const refreshAskCapabilities = async () => {
+  const seq = ++capabilityRequest
+  try {
+    const response = await getAskCapabilities(datasetId.value)
+    if (seq !== capabilityRequest) return
+    askCapabilities.value = response.data || {}
+    showAskFlowBadge.value = false
+    requestedFlow.value = askCapabilities.value.defaultFlow || 'basic'
+  } catch { askCapabilities.value = { advancedAvailable: false } }
+}
+const downloadResearchReport = async msg => {
+  if (!canUseFeature('ask_report_download')) return
+  try {
+    const { data } = await getAskCapabilities()
+    if (!data?.reportDownloadAvailable || data.authorizationScope !== msg.data?.authorization_scope) {
+      ElMessage.warning('当前权限已变化，请重新查询后再下载研究报告。')
+      return
+    }
+    const url = URL.createObjectURL(new Blob([buildResearchReportHtml(msg.data, { allowAutoChart: featureAccess.value.ask_chart_auto_infer })], { type:'text/html;charset=utf-8' }))
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `DataPulse研究报告-${new Date().toISOString().slice(0,10)}.html`
+    anchor.click()
+    setTimeout(() => URL.revokeObjectURL(url),1000)
+  } catch { ElMessage.error('未能验证当前下载权限，请稍后再试。') }
+}
+const workflowFor = msg => msg.loading || (isCurrentSessionMessage(msg) && session.state.status === 'running') ? session.state.workflow : msg.data?.workflow
 const query = ref('')
 const datasetId = ref(null)
 const modelId = ref(null)
@@ -1438,7 +699,7 @@ const clearStaleSessionState = () => {
   session.clearRecoveredSessionResult()
   clearChatUiState()
 }
-const showPanel = ref(true)
+const showPanel = ref(false)
 const chatBodyRef = ref(null)
 const panelRef = ref(null)
 const sideReportRef = ref(null)
@@ -1449,6 +710,7 @@ const thinkingOpen = reactive({})
 const logOpen = reactive({})
 const timelineVersion = ref(0)
 const reportViewerVisible = ref(false)
+const reportViewerResearch = ref(null)
 const reportViewerTitle = ref('')
 const reportViewerReport = ref('')
 const reportViewerDatasets = ref([])
@@ -1562,19 +824,13 @@ const displayResult = computed(() => {
 })
 
 const timelineKey = computed(() => `${session.state.conversationSessionId || 'fresh'}-${timelineVersion.value}`)
-const detailPanelVisible = computed(() => showPanel.value && canUseFeature('debug_execution_trace'))
+const detailPanelVisible = computed(() => showPanel.value && canUseFeature('debug_execution_trace') && canUseFeature('ask_field_execution_trace'))
 const canViewCharts = computed(() => canUseFeature('chart_viewer'))
 const canViewFullscreenReport = computed(() => canUseFeature('report_fullscreen'))
 
 const statusBarText = computed(() => {
-  const m = {
-    running: session.state.logs.slice(-1)[0]?.title || '任务执行中',
-    completed: '',
-    canceled: '本轮问数已取消',
-    error: '当前任务执行异常',
-    waiting_confirmation: '等待确认统计口径'
-  }
-  return m[session.state.status] || ''
+  if(session.state.status==='idle')return ''
+  return taskOutcome(session.state.result,{status:session.state.status,busy:isRunning.value,workflow:session.state.workflow}).label
 })
 
 const activeReportResult = computed(() => {
@@ -1583,11 +839,24 @@ const activeReportResult = computed(() => {
   }
   return detailReportResult.value || session.state.result || null
 })
+const inspectorFocusPhase=ref(-1)
+const inspectionBusy=computed(()=>isRunning.value && !isViewingReadonly.value)
+const inspectionResult=computed(()=>inspectionBusy.value?null:activeReportResult.value)
+const inspectionWorkflow=computed(()=>inspectionBusy.value?session.state.workflow:inspectionResult.value?.workflow || {})
+const openActivityInspector=async(msg,phase=0)=>{
+  if(!canUseFeature('debug_execution_trace') || !canUseFeature('ask_field_execution_trace'))return
+  detailReportResult.value=msg?.loading?null:msg?.data || null
+  inspectorFocusPhase.value=-1
+  showPanel.value=true
+  await nextTick()
+  inspectorFocusPhase.value=phase
+  resizeRenderedCharts()
+}
 const latestSessionError = computed(() => {
   const msg = activeRequestAiMessage.value || currentSessionAiMessage.value
   return String(msg?.data?.error || session.state.result?.error || '').trim()
 })
-const showAskFlowBadge = ref(true)
+const showAskFlowBadge = ref(false)
 
 const activeAskFlowMeta = computed(() => {
   if (!showAskFlowBadge.value) return null
@@ -1765,6 +1034,7 @@ const sanitizeDatasetSelection = () => {
 
 const datasetResults = computed(() => latestDatasets.value)
 const hasSideReport = computed(() => {
+  if (activeReportResult.value?.research) return false
   if (latestSessionError.value) return false
   return resultPreviews.value.length > 0 || !!latestReport.value
 })
@@ -1845,6 +1115,7 @@ const buildResultConfidenceMeta = (route = {}, datasets = []) => {
 }
 
 const sideConfidenceBadges = computed(() => {
+  if (activeReportResult.value?.workflow) return []
   const advanced = activeReportResult.value?.diagnostics?.advanced || {}
   const evidenceVote = advanced?.evidence_vote || {}
   const templatePolicy = advanced?.template_policy || {}
@@ -4118,15 +3389,23 @@ const openReportViewer = (report = latestReport.value, title = sideReportHeading
     title = sideReportHeading.value
     datasetsForReport = latestDatasets.value
   }
-  if (!report) {
+  if (!report && !datasetsForReport?.length) {
     ElMessage.warning('当前还没有可查看的完整报告')
     return
   }
+  reportViewerResearch.value = null
   reportViewerReport.value = report
   reportViewerTitle.value = normalizeReportTitle(title)
   reportViewerDatasets.value = Array.isArray(datasetsForReport) ? datasetsForReport : []
   reportDialogFullscreen.value = false
   reportViewerVisible.value = true
+}
+const openMessageReport = result => {
+  if(!canUseFeature('ask_report_details') || !result)return
+  const datasets=result.research?(result.research.evidence || []).flatMap(e=>e.dataset_results || []):result.dataset_results || []
+  const report=String(result.report || result.analysis || datasets.map(ds=>ds.analysis || '').join('\n\n'))
+  openReportViewer(report,result.question || '数据分析报告',datasets)
+  reportViewerResearch.value = result.research ? result : null
 }
 const openFullScreenReport = () => {
   openReportViewer(latestReport.value, sideReportHeading.value, latestDatasets.value)
@@ -4326,11 +3605,11 @@ const shouldShowThinkingCard = (msg) => {
 }
 
 const shouldShowConfirmationCard = (msg) => Boolean(
-  !isViewingReadonly.value && msg?.data?.requires_confirmation && !confirmationSubmitting[msg.id] && !msg?.loading
+  !isViewingReadonly.value && msg?.data?.confirmation_type !== 'research_plan' && msg?.data?.requires_confirmation && !confirmationSubmitting[msg.id] && !msg?.loading
 )
 
 const shouldShowConfirmationSubmitted = (msg) => Boolean(
-  !isViewingReadonly.value && msg?.data?.requires_confirmation && confirmationSubmitting[msg.id]
+  !isViewingReadonly.value && msg?.data?.confirmation_type !== 'research_plan' && msg?.data?.requires_confirmation && confirmationSubmitting[msg.id]
 )
 
 const isMessageExecutionComplete = (msg) => {
@@ -4600,14 +3879,13 @@ const rerunQuestion = async (msg) => {
   thinkingOpen[aid] = true
 
   query.value = ''
-  showPanel.value = true
   clearExecutionPanelState()
   scheduleChatScroll(24, 'smooth')
   startTimer()
 
   try {
     const datasetInput = getDatasetInputForQuestion(text)
-    const res = await session.startAsk(text, datasetInput, getModelInputForQuestion())
+    const res = await session.startAsk(text, datasetInput, getModelInputForQuestion(), {})
     clearPendingQuickDataset()
     if (res) {
       aiMsg.loading = false
@@ -4617,7 +3895,7 @@ const rerunQuestion = async (msg) => {
         upsertHistory({ ...runningShell, status: 'pending_confirmation' })
       } else if (!res?.error) {
         saveCurrentToHistory(res, { preferId: shellId })
-        markRunningTaskCompleted(shellId)
+        markRunningTaskCompleted(shellId, taskOutcome(res || aiMsg.data).status)
       } else {
         markRunningTaskFailed(shellId)
       }
@@ -4653,6 +3931,7 @@ const rerunQuestion = async (msg) => {
     scheduleChatScroll(36, 'smooth')
   } finally {
     stopTimer()
+    finishQuestionQueue(aiMsg.data)
   }
 }
 
@@ -4685,11 +3964,61 @@ const resendOriginalQuestion = (msg) => {
   handleSend({ skipTypoCheck: true })
 }
 
+const questionQueue=ref([])
+const queuePaused=ref(false)
+const queueDraftFlow=ref('')
+const queueReason=ref('')
+const sendInFlight=ref(false)
+let queueGeneration=0
+const pauseQuestionQueue=reason=>{queuePaused.value=true;queueReason.value=reason}
+const clearQuestionQueue=()=>{questionQueue.value=[];queuePaused.value=false;queueReason.value=''}
+const removeQueuedQuestion=id=>{questionQueue.value=questionQueue.value.filter(item=>item.id!==id)}
+const editQueuedQuestion=id=>{
+  const item=questionQueue.value.find(item=>item.id===id)
+  if(!item || isViewingReadonly.value)return
+  if(query.value.trim()){ElMessage.info('先发送或整理当前草稿，再编辑队列问题');return}
+  query.value=item.question;datasetId.value=item.datasetId;modelId.value=item.modelId;queueDraftFlow.value=item.flow
+  isDatasetManuallySelected.value=Boolean(item.datasetId)
+  removeQueuedQuestion(id);focusComposer()
+}
+const drainQuestionQueue=()=>{
+  if(sendInFlight.value || isRunning.value || isViewingReadonly.value || queuePaused.value || !questionQueue.value.length)return
+  if(!canUseFeature('ask_send_question')){pauseQuestionQueue('发送权限已变更，请确认后继续');return}
+  if(session.state.status==='waiting_confirmation'){pauseQuestionQueue(queuePauseReason('waiting'));return}
+  const upcoming=questionQueue.value[0]
+  if(upcoming.datasetId && (!canUseFeature('ask_dataset_select') || !datasets.value.some(d=>Number(d.id)===Number(upcoming.datasetId)))){pauseQuestionQueue('排队问题的数据集或选择权限已变更，请检查后继续');return}
+  if(upcoming.modelId && (!canUseFeature('ask_model_select') || !aiModels.value.some(m=>Number(m.id)===Number(upcoming.modelId)))){pauseQuestionQueue('排队问题的模型或选择权限已变更，请检查后继续');return}
+  const [item,...rest]=questionQueue.value
+  questionQueue.value=rest
+  void handleSend({_queueItem:item})
+}
+const resumeQuestionQueue=()=>{
+  if(session.state.status==='waiting_confirmation'){ElMessage.info('请先确认当前问题或研究计划');return}
+  queuePaused.value=false;queueReason.value='';drainQuestionQueue()
+}
+const finishQuestionQueue=result=>{
+  const reason=queuePauseReason(taskOutcome(result).status)
+  if(reason){if(questionQueue.value.length)pauseQuestionQueue(reason);return}
+  if(queueReason.value===queuePauseReason('waiting')){queuePaused.value=false;queueReason.value=''}
+  window.setTimeout(drainQuestionQueue,0)
+}
 const handleSend = async (sendOptions) => {
   const opts = (sendOptions && typeof sendOptions === 'object' && !Array.isArray(sendOptions)) ? sendOptions : undefined
   if (!canUseFeature('ask_send_question')) return
-  const text = query.value.trim()
-  if (!text || isRunning.value) return
+  const queued=opts?._queueItem
+  const text = String(queued?.question || query.value).trim()
+  if (!text || isViewingReadonly.value) return
+  const submitted=queued || queuedQuestion(text,{datasetId:opts?.datasetId || getDatasetInputForQuestion(text),datasetName:datasets.value.find(d=>Number(d.id)===Number(opts?.datasetId || getDatasetInputForQuestion(text)))?.dataset_name,modelId:getModelInputForQuestion(),flow:queueDraftFlow.value || requestedFlow.value})
+  if(!queued && (isRunning.value || sendInFlight.value || questionQueue.value.length || session.state.status==='waiting_confirmation')){
+    try{questionQueue.value=appendQuestion(questionQueue.value,submitted)}catch(error){ElMessage.info(error.message);return}
+    query.value='';queueDraftFlow.value='';clearPendingQuickDataset()
+    if(session.state.status==='waiting_confirmation')pauseQuestionQueue(queuePauseReason('waiting'))
+    drainQuestionQueue();focusComposer();return
+  }
+  const dispatchToken=++queueGeneration
+  sendInFlight.value=true
+  requestedFlow.value=submitted.flow
+  if(!queued){query.value='';queueDraftFlow.value='';queuePaused.value=false;queueReason.value=''}
   const createShellId = () => {
     if (typeof window !== 'undefined' && window.crypto?.randomUUID) {
       return `history-report-${window.crypto.randomUUID()}`
@@ -4702,8 +4031,8 @@ const handleSend = async (sendOptions) => {
     id: shellId,
     title: String(text).slice(0, 24),
     question: text,
-    datasetId: datasetId.value || null,
-    datasetName: datasets.value.find(d => d.id === datasetId.value)?.name || '',
+    datasetId: submitted.datasetId,
+    datasetName: submitted.datasetName,
     updatedAt: new Date().toISOString(),
     status: 'running',
     reportSnapshot: null,
@@ -4721,7 +4050,6 @@ const handleSend = async (sendOptions) => {
   activeRequestAiMessageId.value = aid
   thinkingOpen[aid] = true
 
-  showPanel.value = true
   clearExecutionPanelState()
   scheduleChatScroll(24, 'smooth')
   startTimer()
@@ -4729,11 +4057,7 @@ const handleSend = async (sendOptions) => {
   try {
     // 解析条确认链路可显式锚定数据集（opts.datasetId）：用户已明确指定口径，
     // 跳过 datasetInput 的自动释放启发式
-    const pinnedDatasetId = opts && Number.isFinite(Number(opts.datasetId)) && Number(opts.datasetId) > 0
-      ? Number(opts.datasetId)
-      : null
-    const datasetInput = pinnedDatasetId || getDatasetInputForQuestion(text)
-    const res = await session.startAsk(text, datasetInput, getModelInputForQuestion(), opts)
+    const res = await session.startAsk(text, submitted.datasetId, submitted.modelId, { ...opts, _queueItem:undefined, askFlow:undefined })
     clearPendingQuickDataset()
     if (res) {
       aiMsg.loading = false
@@ -4743,7 +4067,7 @@ const handleSend = async (sendOptions) => {
         upsertHistory({ ...runningShell, status: 'pending_confirmation' })
       } else if (!res?.error) {
         saveCurrentToHistory(res, { preferId: shellId })
-        markRunningTaskCompleted(shellId)
+        markRunningTaskCompleted(shellId, taskOutcome(res || aiMsg.data).status)
       } else {
         markRunningTaskFailed(shellId)
       }
@@ -4753,9 +4077,8 @@ const handleSend = async (sendOptions) => {
       markRunningTaskFailed(shellId)
     } else {
       aiMsg.loading = false
-      markRunningTaskCompleted(shellId)
+      markRunningTaskCompleted(shellId, taskOutcome(res || aiMsg.data).status)
     }
-    query.value = ''
     thinkingOpen[aid] = false
     if (res && !res?.requires_confirmation && !res?.error) scheduleChatReportTop(48, 'smooth')
     else scheduleChatScroll(48, 'smooth')
@@ -4776,16 +4099,17 @@ const handleSend = async (sendOptions) => {
     }
     aiMsg.loading = false
     aiMsg.data = { error: err.response?.data?.error || err.message || '系统繁忙' }
-    query.value = text
+    if(!query.value.trim() && !queued)query.value = text
     scheduleChatScroll(36, 'smooth')
     markRunningTaskFailed(shellId)
   } finally {
-    stopTimer()
+    if(dispatchToken===queueGeneration){stopTimer();sendInFlight.value=false;finishQuestionQueue(aiMsg.data)}
   }
 }
 
 const handleStop = () => {
   if (!canUseFeature('ask_stop_run')) return
+  if(questionQueue.value.length)pauseQuestionQueue(queuePauseReason('canceled'))
   session.stopAsk()
   const msg = latestAiMessage.value
   if (msg?.role === 'ai' && msg.loading) {
@@ -4793,6 +4117,8 @@ const handleStop = () => {
     msg.data = {
       ...(msg.data || {}),
       aborted: true,
+      requires_confirmation: false,
+      workflow: { ...session.state.workflow, status: "canceled" },
       question: session.state.question || query.value.trim(),
     }
     thinkingOpen[msg.id] = false
@@ -4811,6 +4137,8 @@ const handleStop = () => {
 }
 
 const resetForNewChat = () => {
+  queueGeneration++;sendInFlight.value=false
+  questionQueue.value=[];queuePaused.value=false;queueReason.value='';queueDraftFlow.value=''
   // 修 1（reset 保存 guard）：只有完整、正确的结果才保存，避免把 requires_confirmation 中间态
   // （行业部 Overview 层级）当成正式历史保存；也避免旧会话残留的脏 result 被保存。
   const cur = session.state.result || null
@@ -4830,7 +4158,7 @@ const resetForNewChat = () => {
   setActiveHistory('')
   clearChatUiState()
   session.resetSession()
-  showPanel.value = true
+  showPanel.value = false
   nextTick(() => {
     scheduleChatScroll(20, 'auto')
     schedulePanelScroll(20, 'auto', true)
@@ -4846,7 +4174,7 @@ const handleNewChat = async () => {
 
   try {
     await ElMessageBox.confirm(
-      '开始新会话后，当前执行记录会被清空，并自动归档到历史对话中。',
+      questionQueue.value.length ? '开始新会话后，将清空待问队列与未发送草稿；当前记录归档到历史对话。' : '开始新会话后，当前执行记录会被清空，并自动归档到历史对话中。',
       '开始新会话',
       {
         type: 'info',
@@ -4862,8 +4190,9 @@ const handleNewChat = async () => {
   }
 }
 
+const historyPanelRef = ref(null)
 const focusSidebarHistory = () => {
-  window.dispatchEvent(new CustomEvent('datapulse-history-focus'))
+  historyPanelRef.value?.open()
 }
 
 const handleSelectHistorySession = async (item) => {
@@ -4872,6 +4201,7 @@ const handleSelectHistorySession = async (item) => {
     return
   }
   if (!item || item.id === activeHistoryId.value) return
+  if(questionQueue.value.length)pauseQuestionQueue('正在查看历史会话，返回后可继续队列')
   await restoreHistory(item)
 }
 
@@ -5026,6 +4356,11 @@ const downloadLatestReport = (report = latestReport.value, title = sideReportHea
 
   frame.onload = triggerPrint
   window.setTimeout(triggerPrint, 40)
+}
+const draftAnswerFollowUp = (item) => {
+  if (isRunning.value || isViewingReadonly.value || !canUseFeature('ask_send_question') || !canUseFeature('ask_quick_ask')) return
+  // The same controlled dataset router rechecks scope when the user submits.
+  quickAsk(item)
 }
 const quickAsk = (item) => {
   if (!canUseFeature('ask_quick_ask')) return
@@ -5195,7 +4530,7 @@ const doConfirm = async (opt, msg) => {
     }
     if (!res?.requires_confirmation && !res?.error) {
       saveCurrentToHistory(res, { preferId: runningSessionId.value })
-      markRunningTaskCompleted(runningSessionId.value)
+      markRunningTaskCompleted(runningSessionId.value,taskOutcome(res).status)
     } else if (res?.requires_confirmation) {
       markRunningTaskPending(runningSessionId.value)
       const currentShell = historySessions.value.find(h => h.id === runningSessionId.value)
@@ -5232,7 +4567,7 @@ const doConfirm = async (opt, msg) => {
     ElMessage.error(error?.response?.data?.error || error?.message || '提交失败')
     scheduleChatScroll(36, 'smooth')
   }
-  finally { stopTimer() }
+  finally { if (msg?.id) confirmationSubmitting[msg.id] = false; stopTimer(); finishQuestionQueue(msg?.data) }
 }
 
 const scrollChat = (behavior = 'smooth') => nextTick(() => {
@@ -5245,8 +4580,11 @@ const scrollChatToReportTop = (behavior = 'auto') => nextTick(() => {
   const container = chatBodyRef.value
   if (!container) return
   const latestId = latestAiMessage.value?.id
+  const researchDesks = container.querySelectorAll('.research-desk.is-research')
+  const researchDesk = researchDesks[researchDesks.length - 1]
+  const researchTarget = researchDesk?.querySelector('.research-report') || researchDesk
   const allResultChains = Array.from(container.querySelectorAll('.ax-result-chain'))
-  const target = (latestId && resultChainRefs.get(latestId))
+  const target = researchTarget || (latestId && resultChainRefs.get(latestId))
     || allResultChains[allResultChains.length - 1]
   if (!target) {
     scrollChat(behavior)
@@ -5300,7 +4638,8 @@ const scheduleChatScroll = (delay = 40, behavior = 'smooth') => {
   if (isViewingReadonly.value) return
   if (chatScrollTimer) clearTimeout(chatScrollTimer)
   chatScrollTimer = window.setTimeout(() => {
-    scrollChat(behavior)
+    if (latestAiMessage.value?.data?.research_plan) scrollChatToReportTop(behavior)
+    else scrollChat(behavior)
   }, delay)
 }
 
@@ -5821,14 +5160,14 @@ const renderDialogChart = () => {
 watch(() => session.state.logs.length, (len) => {
   if (len > 0) {
     logOpen[len - 1] = true
-    scheduleChatScroll(26, 'smooth')
+    if (!session.state.workflow.run_id) scheduleChatScroll(26, 'smooth')
     schedulePanelScroll(60, 'auto', shouldFollowPanelBottom())
   }
 }, { flush: 'post' })
 
 watch(() => session.state.logs.map(log => log.pulseText || '').join('|'), (signature) => {
   if (!signature) return
-  scheduleChatScroll(26, 'smooth')
+  if (!session.state.workflow.run_id) scheduleChatScroll(26, 'smooth')
   schedulePanelScroll(60, 'auto', shouldFollowPanelBottom())
 }, { flush: 'post' })
 
@@ -5842,7 +5181,7 @@ watch(() => session.state.status, (s) => {
     })
   }
   if (s === 'waiting_confirmation') {
-    scheduleChatScroll(26, 'smooth')
+    if (!session.state.workflow.run_id) scheduleChatScroll(26, 'smooth')
     schedulePanelScroll(60, 'auto', true)
   }
 })
@@ -5938,6 +5277,7 @@ const sanitizeModelSelection = () => {
 onMounted(async () => {
   window.addEventListener('datapulse-create-fresh-chat', handleExternalFreshChat)
   loadFeatureFlags()
+  refreshAskCapabilities()
   loadHistory()
 
   // 从 sessionStorage 还原输入状态
@@ -5970,6 +5310,7 @@ onMounted(async () => {
 
 // keep-alive 重新激活时刷新引用数据（数据集、模型可能在其他页面被修改）
 onActivated(async () => {
+  refreshAskCapabilities()
   try {
     const res = await getBookshelfDatasets()
     datasets.value = res.datasets || []
@@ -5986,12 +5327,14 @@ onActivated(async () => {
   clearStaleSessionState()
 })
 
+watch(datasetId, refreshAskCapabilities)
 // 将关键输入状态持久化到 sessionStorage，页面跳转后还原
 watch([query, datasetId, modelId, isDatasetManuallySelected], ([q, d, m, manual]) => {
   setSessionCache({ query: q, datasetId: manual ? d : null, modelId: m })
 }, { flush: 'post' })
 
 onDeactivated(() => {
+  if(questionQueue.value.length)pauseQuestionQueue('已离开问数页，返回后可继续队列')
   // keep-alive 停用时的轻量清理（不销毁组件状态）
   if (chatScrollTimer) clearTimeout(chatScrollTimer)
   if (panelScrollTimer) clearTimeout(panelScrollTimer)
@@ -6112,8 +5455,8 @@ onUnmounted(() => {
 .ax-composer-track {
   flex: 0 0 auto;
   /* 贴底通栏：突破 960px 居中轨道，dock 背景/分隔线全宽，内容内部限宽 */
-  width: 100% !important;
-  max-width: none !important;
+  width: calc(100% - 80px);
+  max-width: 1120px;
   padding: 0;
 }
 
@@ -6137,15 +5480,15 @@ onUnmounted(() => {
 }
 
 .ax-readonly-banner.banner-running {
-  background: linear-gradient(90deg, rgba(13, 148, 136, 0.06) 0%, rgba(13, 148, 136, 0.02) 100%);
-  border-left: 4px solid #0D9488;
+  background: linear-gradient(90deg, rgba(29, 78, 216, 0.06) 0%, rgba(29, 78, 216, 0.02) 100%);
+  border-left: 4px solid #1d4ed8;
   color: #C41E24;
-  box-shadow: 0 3px 10px rgba(13, 148, 136, 0.08);
+  box-shadow: 0 3px 10px rgba(29, 78, 216, 0.08);
 }
 
 .ax-readonly-banner.banner-running:hover {
-  background: linear-gradient(90deg, rgba(13, 148, 136, 0.1) 0%, rgba(13, 148, 136, 0.04) 100%);
-  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.14);
+  background: linear-gradient(90deg, rgba(29, 78, 216, 0.1) 0%, rgba(29, 78, 216, 0.04) 100%);
+  box-shadow: 0 4px 14px rgba(29, 78, 216, 0.14);
 }
 
 .ax-readonly-banner.banner-completed {
@@ -6305,7 +5648,7 @@ onUnmounted(() => {
   justify-content: center;
   flex-shrink: 0;
   border: 0;
-  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.18);
+  box-shadow: 0 4px 12px rgba(29, 78, 216, 0.18);
   padding: 0;
 }
 
@@ -6437,8 +5780,8 @@ onUnmounted(() => {
   max-width: 980px;
   padding: 14px;
   border-radius: 6px;
-  border: 1px solid rgba(13, 148, 136, 0.1);
-  background: linear-gradient(180deg, #F0FDFA 0%, #ffffff 100%);
+  border: 1px solid rgba(29, 78, 216, 0.1);
+  background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.035);
 }
 
@@ -6457,7 +5800,7 @@ onUnmounted(() => {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: #0D9488;
+  color: #1d4ed8;
 }
 
 .ax-inline-visuals-title {
@@ -6627,9 +5970,9 @@ onUnmounted(() => {
   width: 100%;
   padding: 8px 12px;
   margin-bottom: 8px;
-  border: 1px solid rgba(13, 148, 136, 0.18);
+  border: 1px solid rgba(29, 78, 216, 0.18);
   border-radius: 4px;
-  background: rgba(13, 148, 136, 0.04);
+  background: rgba(29, 78, 216, 0.04);
   font-size: 13px;
   line-height: 1.5;
 }
@@ -6638,8 +5981,8 @@ onUnmounted(() => {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: rgba(13, 148, 136, 0.12);
-  color: #0D9488;
+  background: rgba(29, 78, 216, 0.12);
+  color: #1d4ed8;
   font-size: 12px;
   font-weight: 600;
   display: inline-flex;
@@ -6661,9 +6004,9 @@ onUnmounted(() => {
   margin-left: auto;
 }
 .ax-clarify-chip {
-  border: 1px solid rgba(13, 148, 136, 0.35);
+  border: 1px solid rgba(29, 78, 216, 0.35);
   background: #fff;
-  color: #0D9488;
+  color: #1d4ed8;
   border-radius: 999px;
   padding: 3px 12px;
   font-size: 12px;
@@ -6671,7 +6014,7 @@ onUnmounted(() => {
   transition: background 0.15s ease, color 0.15s ease;
 }
 .ax-clarify-chip:hover:not(:disabled) {
-  background: #0D9488;
+  background: #1d4ed8;
   color: #fff;
 }
 .ax-clarify-chip:disabled {
@@ -6736,9 +6079,9 @@ onUnmounted(() => {
   width: 100%;
   padding: 14px 16px;
   margin-bottom: 8px;
-  border: 1px solid rgba(13, 148, 136, 0.3);
+  border: 1px solid rgba(29, 78, 216, 0.3);
   border-radius: 5px;
-  background: rgba(13, 148, 136, 0.05);
+  background: rgba(29, 78, 216, 0.05);
 }
 .ax-early-clarify-head {
   display: flex;
@@ -6778,7 +6121,7 @@ onUnmounted(() => {
   text-underline-offset: 3px;
 }
 .ax-early-clarify-continue:hover:not(:disabled) {
-  color: #0D9488;
+  color: #1d4ed8;
 }
 .ax-early-clarify-continue:disabled {
   opacity: 0.5;
@@ -6902,7 +6245,7 @@ onUnmounted(() => {
   flex: 0 0 auto;
   padding: 1px 5px;
   border-radius: 4px;
-  background: #0D9488;
+  background: #1d4ed8;
   color: #fff;
   font-size: 10px;
   font-weight: 600;
@@ -6980,7 +6323,7 @@ onUnmounted(() => {
   padding: 0 14px;
   border-radius: 4px;
   border: none;
-  background: #0D9488;
+  background: #1d4ed8;
   color: #fff;
   font-size: 12px;
   font-weight: 600;
@@ -7016,14 +6359,14 @@ onUnmounted(() => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #0D9488;
-  box-shadow: 0 0 0 5px rgba(13, 148, 136, 0.08);
+  background: #1d4ed8;
+  box-shadow: 0 0 0 5px rgba(29, 78, 216, 0.08);
 }
 
 .ax-confirm-submitted-title {
   font-size: 13px;
   font-weight: 700;
-  color: #0D9488;
+  color: #1d4ed8;
 }
 
 .ax-confirm-submitted-desc {
@@ -7044,8 +6387,8 @@ onUnmounted(() => {
 }
 
 .ax-error-card {
-  background: #F0FDFA;
-  border: 1px solid #F0FDFA;
+  background: #eff6ff;
+  border: 1px solid #eff6ff;
   color: var(--error);
 }
 
@@ -7058,13 +6401,13 @@ onUnmounted(() => {
   background:
     linear-gradient(90deg, rgba(0, 0, 0, 0.035) 1px, transparent 1px),
     linear-gradient(180deg, rgba(0, 0, 0, 0.035) 1px, transparent 1px),
-    radial-gradient(circle at 12% 18%, rgba(13, 148, 136, 0.16), transparent 30%),
-    linear-gradient(135deg, #F2F5F4 0%, #F0FDFA 54%, #F0FDFA 100%);
+    radial-gradient(circle at 12% 18%, rgba(29, 78, 216, 0.16), transparent 30%),
+    linear-gradient(135deg, #F2F5F4 0%, #eff6ff 54%, #eff6ff 100%);
   background-size: 18px 18px, 18px 18px, auto, auto;
-  border: 1px solid rgba(13, 148, 136, 0.22);
+  border: 1px solid rgba(29, 78, 216, 0.22);
   color: #111827;
   box-shadow:
-    0 12px 28px rgba(13, 148, 136, 0.08),
+    0 12px 28px rgba(29, 78, 216, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.84);
 }
 
@@ -7073,7 +6416,7 @@ onUnmounted(() => {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  border-left: 3px solid #0D9488;
+  border-left: 3px solid #1d4ed8;
   pointer-events: none;
 }
 
@@ -7084,8 +6427,8 @@ onUnmounted(() => {
   top: 13px;
   width: 58px;
   height: 16px;
-  border-top: 1px solid rgba(13, 148, 136, 0.2);
-  border-right: 1px solid rgba(13, 148, 136, 0.42);
+  border-top: 1px solid rgba(29, 78, 216, 0.2);
+  border-right: 1px solid rgba(29, 78, 216, 0.42);
   transform: skewX(-24deg);
   pointer-events: none;
 }
@@ -7101,10 +6444,10 @@ onUnmounted(() => {
   border-radius: 50%;
   background:
     radial-gradient(circle, rgba(255, 255, 255, 0.96) 0 30%, transparent 31%),
-    conic-gradient(from 210deg, rgba(13, 148, 136, 0.18), rgba(13, 148, 136, 0.85), rgba(13, 148, 136, 0.18));
+    conic-gradient(from 210deg, rgba(29, 78, 216, 0.18), rgba(29, 78, 216, 0.85), rgba(29, 78, 216, 0.18));
   box-shadow:
-    0 0 0 4px rgba(13, 148, 136, 0.06),
-    0 0 18px rgba(13, 148, 136, 0.28);
+    0 0 0 4px rgba(29, 78, 216, 0.06),
+    0 0 18px rgba(29, 78, 216, 0.28);
   flex: 0 0 auto;
 }
 
@@ -7112,7 +6455,7 @@ onUnmounted(() => {
 .ax-cancel-icon::after {
   content: '';
   position: absolute;
-  background: #0D9488;
+  background: #1d4ed8;
   border-radius: 999px;
 }
 
@@ -7132,7 +6475,7 @@ onUnmounted(() => {
   position: absolute;
   inset: 7px;
   border-radius: 50%;
-  border: 1px solid rgba(13, 148, 136, 0.28);
+  border: 1px solid rgba(29, 78, 216, 0.28);
 }
 
 .ax-cancel-copy {
@@ -7143,7 +6486,7 @@ onUnmounted(() => {
 
 .ax-cancel-kicker {
   margin-bottom: 3px;
-  color: #0D9488;
+  color: #1d4ed8;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -7176,7 +6519,7 @@ onUnmounted(() => {
 }
 
 .ax-link-btn.danger {
-  color: #0D9488;
+  color: #1d4ed8;
 }
 
 /* ===== 右侧面板 ===== */
@@ -7241,7 +6584,7 @@ onUnmounted(() => {
   font-weight: 800;
   letter-spacing: 0;
   text-transform: none;
-  color: #0D9488;
+  color: #1d4ed8;
 }
 .ax-panel-title-row {
   display: flex;
@@ -7279,8 +6622,8 @@ onUnmounted(() => {
   color: #B45309;
 }
 .ax-panel-state.error {
-  background: rgba(13, 148, 136, 0.1);
-  color: #0D9488;
+  background: rgba(29, 78, 216, 0.1);
+  color: #1d4ed8;
 }
 .ax-panel-state.waiting_confirmation {
   background: rgba(245, 158, 11, 0.12);
@@ -7310,7 +6653,7 @@ onUnmounted(() => {
 
 .ax-panel-close:hover {
   color: #1A1A1A;
-  border-color: rgba(13, 148, 136, 0.14);
+  border-color: rgba(29, 78, 216, 0.14);
   background: rgba(255, 255, 255, 1);
 }
 .ax-panel-content {
@@ -7425,7 +6768,7 @@ onUnmounted(() => {
 }
 
 .ax-kpi-card.is-tone-danger .ax-kpi-value {
-  color: #0D9488;
+  color: #1d4ed8;
 }
 
 .ax-kpi-value {
@@ -7905,8 +7248,8 @@ onUnmounted(() => {
 
 .ax-business-risk-pill.danger,
 .ax-office-rate.danger {
-  color: #0D9488;
-  background: #F0FDFA;
+  color: #1d4ed8;
+  background: #eff6ff;
 }
 
 .ax-business-risk-pill.neutral,
@@ -8068,9 +7411,9 @@ onUnmounted(() => {
 .ax-office-card-head:hover .ax-office-drill-toggle,
 .ax-rep-drill-head:hover .ax-office-drill-toggle,
 .ax-office-drill-toggle.is-open {
-  border-color: var(--office-accent-border, rgba(13, 148, 136, 0.18));
+  border-color: var(--office-accent-border, rgba(29, 78, 216, 0.18));
   background: #ffffff;
-  color: var(--office-accent, #0D9488);
+  color: var(--office-accent, #1d4ed8);
   opacity: 1;
 }
 
@@ -8181,8 +7524,8 @@ onUnmounted(() => {
   bottom: 4px;
   width: 3px;
   border-radius: 999px;
-  background: var(--office-accent-soft, rgba(13, 148, 136, 0.12));
-  border: 1px solid var(--office-accent-border, rgba(13, 148, 136, 0.16));
+  background: var(--office-accent-soft, rgba(29, 78, 216, 0.12));
+  border: 1px solid var(--office-accent-border, rgba(29, 78, 216, 0.16));
 }
 
 .ax-drill-path {
@@ -8201,7 +7544,7 @@ onUnmounted(() => {
 .ax-drill-path i {
   width: 18px;
   height: 1px;
-  background: var(--office-accent, #0D9488);
+  background: var(--office-accent, #1d4ed8);
   position: relative;
 }
 
@@ -8212,13 +7555,13 @@ onUnmounted(() => {
   top: -3px;
   width: 6px;
   height: 6px;
-  border-top: 1px solid var(--office-accent, #0D9488);
-  border-right: 1px solid var(--office-accent, #0D9488);
+  border-top: 1px solid var(--office-accent, #1d4ed8);
+  border-right: 1px solid var(--office-accent, #1d4ed8);
   transform: rotate(45deg);
 }
 
 .ax-drill-path strong {
-  color: var(--office-accent, #0D9488);
+  color: var(--office-accent, #1d4ed8);
 }
 
 .ax-drill-insight-grid {
@@ -8257,8 +7600,8 @@ onUnmounted(() => {
 }
 
 .ax-drill-insight-card.is-risk {
-  border-color: rgba(13, 148, 136, 0.14);
-  background: #F0FDFA;
+  border-color: rgba(29, 78, 216, 0.14);
+  background: #eff6ff;
 }
 
 .ax-chart-copy-drill {
@@ -8312,7 +7655,7 @@ onUnmounted(() => {
 .ax-office-empty-drill {
   margin-top: 8px;
   padding: 14px;
-  border: 1px dashed rgba(13, 148, 136, 0.28);
+  border: 1px dashed rgba(29, 78, 216, 0.28);
   border-radius: 5px;
   background: linear-gradient(180deg, #F2F5F4 0%, #ffffff 100%);
   color: #6B7280;
@@ -8406,8 +7749,8 @@ onUnmounted(() => {
 
 .ax-detail-rate.danger,
 .ax-detail-tag.danger {
-  color: #0D9488;
-  background: #F0FDFA;
+  color: #1d4ed8;
+  background: #eff6ff;
 }
 
 .ax-office-bars {
@@ -8469,7 +7812,7 @@ onUnmounted(() => {
 }
 
 .ax-office-bar-track .is-rate.danger {
-  background: #0D9488;
+  background: #1d4ed8;
 }
 
 .ax-office-bar-track .is-gap {
@@ -9347,7 +8690,7 @@ button.ax-compare-row:hover {
   width: auto;
   max-width: min(420px, calc(100vw - 32px));
   padding: 9px 13px;
-  border: 1px solid rgba(13, 148, 136, 0.12);
+  border: 1px solid rgba(29, 78, 216, 0.12);
   border-radius: 4px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 249, 250, 0.98));
@@ -9481,3 +8824,27 @@ button.ax-compare-row:hover {
   }
 }
 </style>
+
+<style scoped>
+.ax-page { background:#f2f5f4; --ax-content-width:1000px; }
+.ax-workspace, .ax-chat-panel, .ax-chat-body { background:#f2f5f4; }
+.ax-header-track :deep(.ax-header) { background:transparent; min-height:64px; border-color:#dfe7e2; }
+.path-selector { display:flex;align-items:center;justify-content:space-between;gap:18px;padding:16px 0 8px;flex-wrap:wrap; }
+.path-tabs { display:flex;gap:4px;padding:4px;background:#e9eeeb;border-radius:9px; }
+.path-tabs button { display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:9px 16px;border:0;background:transparent;border-radius:6px;color:#75857c;font:inherit;cursor:pointer; }
+.path-tabs button[aria-pressed="true"] { background:white;color:#195f4d;box-shadow:0 2px 6px #263d2e0a; }
+.path-tabs button:disabled { cursor:not-allowed;opacity:.5; }
+.path-tabs small { font-size:11px; }.path-tabs span { font-size:13px;font-weight:500; }
+.path-scope,.path-policy-note { color:#7c8d82;font-size:11px; }.path-policy-note { margin-top:4px;margin-bottom:0; }
+.ax-ai-meta { margin-bottom:16px; }.ax-ai-cards { gap:18px;padding-left:0;max-width:none; }.ax-ai-wrap { margin:10px 0 20px; }
+.ax-ai-name { font-size:12px;color:#73867a; }.ax-ai-avatar { width:28px;height:28px; }
+.ax-msg-list { gap:30px; }.ax-result-chain { background:#fff;border:1px solid #e2e9e5;border-radius:10px;padding:24px;box-shadow:0 4px 20px #203b2a04; }
+.ax-inline-visual-card { box-shadow:none; }.ax-composer-track { padding-top:12px;background:#f2f5f4; }
+@media(max-width:1080px){.ax-workspace{flex-direction:column}.ax-chat-panel{min-height:0;flex:1}.ax-chat-body{min-height:0}.ax-detail-panel-container{max-height:42vh}.ax-content-track{width:calc(100% - 32px)}}
+@media(max-width:700px){.path-tabs{width:100%}.path-tabs button{flex:1;padding:8px}.path-scope{font-size:11px}.ax-result-chain{padding:16px}.ax-page{--ax-content-gutter:16px}}
+@media(prefers-reduced-motion:reduce){.ax-page :deep(*){animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<style scoped src="../styles/analysisStudio.css"></style>
+
+<style scoped>.html-report-reader{display:block;width:100%;height:72dvh;min-height:400px;border:0;border-radius:10px;background:#f3f6fa}</style>

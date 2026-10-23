@@ -14,6 +14,7 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from ask_projection import project_ask_result
 from ask_flow import ask_flow_controller
 from ask_flow.contracts import AskRequest, ConfirmRequest
 import dataset_report_config as drc
@@ -42,6 +43,14 @@ from datapulse_report_history_store import (
 ask_chat_bp = Blueprint("ask_chat", __name__)
 
 
+@ask_chat_bp.after_request
+def project_response_fields(response):
+    if response.is_json:
+        value = response.get_json(silent=True)
+        response.set_data(json.dumps(_json_safe(project_ask_result(value,get_current_user())),ensure_ascii=False))
+    return response
+
+
 def _require_feature(user: dict, key: str):
     if feature_available(key, user or {}):
         return None
@@ -65,7 +74,7 @@ def get_report_history():
     except Exception:
         # 权限系统异常时，降级为不返回任何数据集结果（保留元信息）
         allowed_ids = []
-    history = filter_history_dataset_results(history, allowed_ids)
+    history = filter_history_dataset_results(history, allowed_ids, current_user=user or {})
     return jsonify({"history": history})
 
 
@@ -209,6 +218,8 @@ def _json_safe(value):
 
 
 def _sse_frame(event_name: str, payload: dict) -> str:
+    if event_name in ("result", "workflow"):
+        payload = project_ask_result(payload,get_current_user())
     return f"event: {event_name}\ndata: {json.dumps(_json_safe(payload), ensure_ascii=False)}\n\n"
 
 
@@ -612,6 +623,7 @@ def ask_chat():
             conversation_history=conversation_history if isinstance(conversation_history, list) else None,
             current_user=user,
             requested_flow=str(payload.get("ask_flow") or payload.get("flow") or ""),
+            execution_id=str(payload.get("execution_id") or ""),
         ))
         _append_controller_debug(
             "ask_chat.service.ask.done",
@@ -648,7 +660,7 @@ def ask_chat():
         # 结构化解析条（响应层只读聚合，fail-open；内部已判开关/可见性/出条铁律）
         from disambiguation.parse_spans import build_parse_bar
         _parse_bar = build_parse_bar(question=question, result=result, user=user)
-        if _parse_bar:
+        if _parse_bar and not result.get("research") and not result.get("research_plan"):
             result["parse_bar"] = _parse_bar
 
         if result.get("error"):
@@ -803,6 +815,7 @@ def ask_chat_stream():
                     conversation_history=conversation_history if isinstance(conversation_history, list) else None,
                     current_user=user,
                     requested_flow=str(payload.get("ask_flow") or payload.get("flow") or ""),
+            execution_id=str(payload.get("execution_id") or ""),
                 ))
                 result["total_duration"] = round(time.time() - started, 2)
                 # Attach report_config if dataset was identified
@@ -842,7 +855,7 @@ def ask_chat_stream():
                 # 结构化解析条（响应层只读聚合，fail-open；内部已判开关/可见性/出条铁律）
                 from disambiguation.parse_spans import build_parse_bar
                 _parse_bar = build_parse_bar(question=question, result=result, user=user)
-                if _parse_bar:
+                if _parse_bar and not result.get("research") and not result.get("research_plan"):
                     result["parse_bar"] = _parse_bar
                 event_queue.put({"type": "result", "result": result})
             except Exception as exc:
@@ -924,6 +937,9 @@ def ask_chat_stream():
                 continue
 
             item_type = str(item.get("type") or "")
+            if item_type == "workflow":
+                yield _sse_frame("workflow", item)
+                continue
             if item_type == "trace":
                 yield _sse_frame("trace", item)
                 continue
@@ -1217,8 +1233,10 @@ def confirm_by_boss():
             selected_dataset_ids=selected_dataset_ids,
             allowed_dataset_ids=allowed_dataset_ids,
             option_id=option_id,
+            plan_branch_ids=payload.get("plan_branch_ids"),
             current_user=user,
             requested_flow=str(payload.get("ask_flow") or payload.get("flow") or ""),
+            execution_id=str(payload.get("execution_id") or ""),
         ))
         result["total_duration"] = round(time.time() - started, 2)
         # 确认执行后补 parse_bar：让历史消息保留"最终确认的理解"解析条（单值节点，2026-08-31 定稿）。
@@ -1228,7 +1246,7 @@ def confirm_by_boss():
                 from disambiguation.parse_spans import build_parse_bar
                 _pb_question = str(result.get("question") or selected_option or "").strip()
                 _parse_bar = build_parse_bar(question=_pb_question, result=result, user=user)
-                if _parse_bar:
+                if _parse_bar and not result.get("research") and not result.get("research_plan"):
                     result["parse_bar"] = _parse_bar
             except Exception:
                 pass  # fail-open：parse_bar 生成失败不影响确认结果
@@ -1349,9 +1367,11 @@ def confirm_by_boss_stream():
                     selected_dataset_ids=selected_dataset_ids,
                     allowed_dataset_ids=allowed_dataset_ids,
                     option_id=option_id,
+            plan_branch_ids=payload.get("plan_branch_ids"),
                     live_callback=emit,
                     current_user=user,
                     requested_flow=str(payload.get("ask_flow") or payload.get("flow") or ""),
+            execution_id=str(payload.get("execution_id") or ""),
                 ))
                 result["total_duration"] = round(time.time() - started, 2)
                 # 确认执行后补 parse_bar（stream 版，与同步版对齐，2026-08-31）：让历史保留"最终确认的理解"解析条。
@@ -1361,7 +1381,7 @@ def confirm_by_boss_stream():
                         from disambiguation.parse_spans import build_parse_bar
                         _pb_question = str(result.get("question") or selected_option or "").strip()
                         _parse_bar = build_parse_bar(question=_pb_question, result=result, user=user)
-                        if _parse_bar:
+                        if _parse_bar and not result.get("research") and not result.get("research_plan"):
                             result["parse_bar"] = _parse_bar
                     except Exception:
                         pass  # fail-open：parse_bar 生成失败不影响确认结果
@@ -1416,6 +1436,9 @@ def confirm_by_boss_stream():
                 continue
 
             item_type = str(item.get("type") or "")
+            if item_type == "workflow":
+                yield _sse_frame("workflow", item)
+                continue
             if item_type == "trace":
                 yield _sse_frame("trace", item)
                 continue
@@ -1432,3 +1455,59 @@ def confirm_by_boss_stream():
     response.headers["Cache-Control"] = "no-cache"
     response.headers["X-Accel-Buffering"] = "no"
     return response
+
+
+@ask_chat_bp.route("/api/ask-chat/capabilities", methods=["GET"])
+def ask_capabilities():
+    user = get_current_user()
+    denied = _require_feature(user, "ask_send_question")
+    if denied:
+        return denied
+    config = ask_flow_controller.load_config()
+    allowed = _allowed_dataset_ids(user)
+    dataset = request.args.get("dataset_id")
+    selected = [int(dataset)] if dataset and dataset.isdigit() and int(dataset) in allowed else []
+    decision = ask_flow_controller.decide(user=user, dataset_ids=selected)
+    from datapulse_advanced.config_store import load_config
+    research_config = load_config()
+    from ask_runtime import scope_key
+    return jsonify({"success":True,"data":{
+        "defaultFlow": decision.flow,
+        "advancedAvailable": bool(config.get("advancedEnabled")) and ask_flow_controller._role_allowed(user, config) and bool(research_config.get("enabled")),
+        "authorizationScope":scope_key(user,allowed),
+        "reportDownloadAvailable":feature_available("ask_report_download",user),
+        "reason": decision.reason, "attachMetadata": bool(config.get("attachMetadata")),
+        "limits":{k:config[k] for k in ("maxParallel","maxRetries","queryTimeoutSeconds","maxResultRows")},
+        "scopeLabel":"当前账号授权组织 · 两条路径均强制校验"}})
+
+
+@ask_chat_bp.route("/api/ask-chat/runs/<run_id>", methods=["GET"])
+def get_ask_run(run_id):
+    user = get_current_user()
+    denied = _require_feature(user, "ask_send_question")
+    if denied:
+        return denied
+    from ask_runtime import get_run
+    try:
+        run = get_run(run_id,user,_allowed_dataset_ids(user))
+        return jsonify({"success":True,"data":{"run_id":run.id,"status":run.status,"events":run.events}})
+    except PermissionError as exc:
+        return jsonify({"error":str(exc)}),403
+    except LookupError as exc:
+        return jsonify({"error":str(exc)}),404
+
+
+@ask_chat_bp.route("/api/ask-chat/runs/<run_id>/cancel", methods=["POST"])
+def cancel_ask_run(run_id):
+    user = get_current_user()
+    denied = _require_feature(user, "ask_stop_run")
+    if denied:
+        return denied
+    from ask_runtime import request_cancel
+    try:
+        status = request_cancel(run_id,user,_allowed_dataset_ids(user))
+        return jsonify({"success":True,"data":{"status":status}})
+    except PermissionError as exc:
+        return jsonify({"error":str(exc)}),403
+    except LookupError as exc:
+        return jsonify({"error":str(exc)}),404

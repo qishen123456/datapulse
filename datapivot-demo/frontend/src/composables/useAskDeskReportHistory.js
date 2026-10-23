@@ -1,3 +1,4 @@
+import {taskOutcome} from '../state/askWorkflow'
 import { nextTick, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { setReadonlySnapshot } from '@/state/askDeskTaskView'
@@ -166,7 +167,7 @@ export const useDataPulseReportHistory = ({
       datasetId: reportSnapshot.datasetId,
       datasetName: reportSnapshot.datasetName,
       updatedAt: reportSnapshot.updatedAt,
-      status: 'completed',
+      status: taskOutcome(reportSnapshot.result).status,
       reportSnapshot,
     }
     return upsertHistory(payload)

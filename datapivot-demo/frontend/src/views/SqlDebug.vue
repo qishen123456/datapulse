@@ -575,14 +575,14 @@ onUnmounted(() => {
 }
 
 .mode-btn:hover {
-  background: rgba(13, 148, 136, 0.08);
-  color: #0d9488;
+  background: rgba(29, 78, 216, 0.08);
+  color: #1d4ed8;
 }
 
 .mode-btn.active {
-  background: #0d9488;
+  background: #1d4ed8;
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.25);
+  box-shadow: 0 2px 8px rgba(29, 78, 216, 0.25);
 }
 
 /* 分隔线 */
@@ -605,7 +605,7 @@ onUnmounted(() => {
 }
 
 .topbar-label .el-icon {
-  color: #0d9488;
+  color: #1d4ed8;
   font-size: 14px;
 }
 
@@ -622,11 +622,11 @@ onUnmounted(() => {
 }
 
 :deep(.studio-dataset-select .el-input__wrapper:hover) {
-  box-shadow: 0 0 0 1px #0d9488 inset !important;
+  box-shadow: 0 0 0 1px #1d4ed8 inset !important;
 }
 
 :deep(.studio-dataset-select .el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 1.5px #0d9488 inset, 0 0 0 3px rgba(13, 148, 136, 0.12) !important;
+  box-shadow: 0 0 0 1.5px #1d4ed8 inset, 0 0 0 3px rgba(29, 78, 216, 0.12) !important;
 }
 
 /* 行限输入 */
@@ -655,15 +655,15 @@ onUnmounted(() => {
 }
 
 .topbar-icon-btn:hover {
-  border-color: #0d9488;
-  color: #0d9488;
-  background: rgba(13, 148, 136, 0.05);
+  border-color: #1d4ed8;
+  color: #1d4ed8;
+  background: rgba(29, 78, 216, 0.05);
 }
 
 .topbar-icon-btn.active {
-  background: rgba(13, 148, 136, 0.1);
-  border-color: #0d9488;
-  color: #0d9488;
+  background: rgba(29, 78, 216, 0.1);
+  border-color: #1d4ed8;
+  color: #1d4ed8;
 }
 
 /* 执行按钮 */
@@ -675,13 +675,13 @@ onUnmounted(() => {
   height: 34px;
   border: none;
   border-radius: 8px;
-  background: linear-gradient(135deg, #0d9488, #0f766e);
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
   color: #ffffff;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
+  box-shadow: 0 2px 8px rgba(29, 78, 216, 0.3);
   white-space: nowrap;
 }
 
@@ -690,8 +690,8 @@ onUnmounted(() => {
 }
 
 .studio-run-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #0f766e, #115e59);
-  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.4);
+  background: linear-gradient(135deg, #1e40af, #1e3a8a);
+  box-shadow: 0 4px 14px rgba(29, 78, 216, 0.4);
   transform: translateY(-1px);
 }
 
@@ -745,7 +745,7 @@ onUnmounted(() => {
 
 .statusbar-mode.sql {
   color: #5eead4;
-  background: rgba(13, 148, 136, 0.15);
+  background: rgba(29, 78, 216, 0.15);
 }
 
 .statusbar-mode.ask {
@@ -782,12 +782,12 @@ onUnmounted(() => {
   border-radius: 0 !important;
   box-shadow: none !important;
   padding: 18px 20px !important;
-  caret-color: #0d9488;
+  caret-color: #1d4ed8;
   resize: none !important;
 }
 
 :deep(.studio-editor .el-textarea__inner::placeholder) {
-  color: rgba(100, 116, 139, 0.5) !important;
+  color: #94a3b8 !important;
   font-style: italic;
 }
 
@@ -808,7 +808,7 @@ onUnmounted(() => {
 }
 
 :deep(.studio-editor--ask .el-textarea__inner::placeholder) {
-  color: rgba(100, 116, 139, 0.55) !important;
+  color: #94a3b8 !important;
   font-style: normal;
 }
 
@@ -859,8 +859,8 @@ onUnmounted(() => {
 }
 
 .sql-pane-copy:hover {
-  background: rgba(13, 148, 136, 0.2);
-  border-color: #0d9488;
+  background: rgba(29, 78, 216, 0.2);
+  border-color: #1d4ed8;
   color: #5eead4;
 }
 
@@ -918,8 +918,8 @@ onUnmounted(() => {
 }
 
 .result-dot.is-ok {
-  background: #0d9488;
-  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+  background: #1d4ed8;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15);
 }
 
 .result-dot.is-err {
@@ -934,13 +934,13 @@ onUnmounted(() => {
 }
 
 .result-count {
-  color: #0d9488;
+  color: #1d4ed8;
   font-size: 12px;
   font-weight: 500;
-  background: rgba(13, 148, 136, 0.08);
+  background: rgba(29, 78, 216, 0.08);
   padding: 2px 10px;
   border-radius: 20px;
-  border: 1px solid rgba(13, 148, 136, 0.2);
+  border: 1px solid rgba(29, 78, 216, 0.2);
 }
 
 .result-waiting {
@@ -973,9 +973,9 @@ onUnmounted(() => {
 }
 
 .result-btn:hover {
-  border-color: #0d9488;
-  color: #0d9488;
-  background: rgba(13, 148, 136, 0.04);
+  border-color: #1d4ed8;
+  color: #1d4ed8;
+  background: rgba(29, 78, 216, 0.04);
 }
 
 /* 错误提示 */

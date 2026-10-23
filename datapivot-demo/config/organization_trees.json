@@ -10,9 +10,1040 @@
       "sort_order": 100,
       "created_at": "2026-05-18 09:52:55",
       "updated_at": "2026-06-30 13:03:36"
+    },
+    {
+      "id": "gas_jc_tree",
+      "name": "江城燃气组织树",
+      "code": "GAS_JC",
+      "description": "模拟数据唯一组织来源，43节点",
+      "enabled": true,
+      "sort_order": 100,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19"
     }
   ],
   "nodes": [
+    {
+      "id": "JC-GROUP",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "",
+      "name": "江城燃气集团",
+      "code": "JC-GROUP",
+      "description": "",
+      "enabled": true,
+      "sort_order": 0,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP"
+      ],
+      "path_names": [
+        "江城燃气集团"
+      ],
+      "level": 1
+    },
+    {
+      "id": "BINJIANG",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "JC-GROUP",
+      "name": "滨江分公司",
+      "code": "BINJIANG",
+      "description": "",
+      "enabled": true,
+      "sort_order": 1,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "BINJIANG"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "滨江分公司"
+      ],
+      "level": 2
+    },
+    {
+      "id": "SHAHU",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "JC-GROUP",
+      "name": "沙湖分公司",
+      "code": "SHAHU",
+      "description": "",
+      "enabled": true,
+      "sort_order": 8,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "SHAHU"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "沙湖分公司"
+      ],
+      "level": 2
+    },
+    {
+      "id": "JINGKAI",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "JC-GROUP",
+      "name": "经开分公司",
+      "code": "JINGKAI",
+      "description": "",
+      "enabled": true,
+      "sort_order": 15,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "JINGKAI"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "经开分公司"
+      ],
+      "level": 2
+    },
+    {
+      "id": "LINGANG",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "JC-GROUP",
+      "name": "临港分公司",
+      "code": "LINGANG",
+      "description": "",
+      "enabled": true,
+      "sort_order": 22,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "LINGANG"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "临港分公司"
+      ],
+      "level": 2
+    },
+    {
+      "id": "GAOXIN",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "JC-GROUP",
+      "name": "高新分公司",
+      "code": "GAOXIN",
+      "description": "",
+      "enabled": true,
+      "sort_order": 29,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "GAOXIN"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "高新分公司"
+      ],
+      "level": 2
+    },
+    {
+      "id": "GYSP",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "JC-GROUP",
+      "name": "高压输配分公司",
+      "code": "GYSP",
+      "description": "",
+      "enabled": true,
+      "sort_order": 36,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "GYSP"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "高压输配分公司"
+      ],
+      "level": 2
+    },
+    {
+      "id": "BINJIANG-S1",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "BINJIANG",
+      "name": "滨江第1服务中心",
+      "code": "BINJIANG-S1",
+      "description": "",
+      "enabled": true,
+      "sort_order": 2,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "BINJIANG",
+        "BINJIANG-S1"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "滨江分公司",
+        "滨江第1服务中心"
+      ],
+      "level": 3
+    },
+    {
+      "id": "BINJIANG-S2",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "BINJIANG",
+      "name": "滨江第2服务中心",
+      "code": "BINJIANG-S2",
+      "description": "",
+      "enabled": true,
+      "sort_order": 5,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "BINJIANG",
+        "BINJIANG-S2"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "滨江分公司",
+        "滨江第2服务中心"
+      ],
+      "level": 3
+    },
+    {
+      "id": "SHAHU-S1",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "SHAHU",
+      "name": "沙湖第1服务中心",
+      "code": "SHAHU-S1",
+      "description": "",
+      "enabled": true,
+      "sort_order": 9,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "SHAHU",
+        "SHAHU-S1"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "沙湖分公司",
+        "沙湖第1服务中心"
+      ],
+      "level": 3
+    },
+    {
+      "id": "SHAHU-S2",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "SHAHU",
+      "name": "沙湖第2服务中心",
+      "code": "SHAHU-S2",
+      "description": "",
+      "enabled": true,
+      "sort_order": 12,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "SHAHU",
+        "SHAHU-S2"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "沙湖分公司",
+        "沙湖第2服务中心"
+      ],
+      "level": 3
+    },
+    {
+      "id": "JINGKAI-S1",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "JINGKAI",
+      "name": "经开第1服务中心",
+      "code": "JINGKAI-S1",
+      "description": "",
+      "enabled": true,
+      "sort_order": 16,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "JINGKAI",
+        "JINGKAI-S1"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "经开分公司",
+        "经开第1服务中心"
+      ],
+      "level": 3
+    },
+    {
+      "id": "JINGKAI-S2",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "JINGKAI",
+      "name": "经开第2服务中心",
+      "code": "JINGKAI-S2",
+      "description": "",
+      "enabled": true,
+      "sort_order": 19,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "JINGKAI",
+        "JINGKAI-S2"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "经开分公司",
+        "经开第2服务中心"
+      ],
+      "level": 3
+    },
+    {
+      "id": "LINGANG-S1",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "LINGANG",
+      "name": "临港第1服务中心",
+      "code": "LINGANG-S1",
+      "description": "",
+      "enabled": true,
+      "sort_order": 23,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "LINGANG",
+        "LINGANG-S1"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "临港分公司",
+        "临港第1服务中心"
+      ],
+      "level": 3
+    },
+    {
+      "id": "LINGANG-S2",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "LINGANG",
+      "name": "临港第2服务中心",
+      "code": "LINGANG-S2",
+      "description": "",
+      "enabled": true,
+      "sort_order": 26,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "LINGANG",
+        "LINGANG-S2"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "临港分公司",
+        "临港第2服务中心"
+      ],
+      "level": 3
+    },
+    {
+      "id": "GAOXIN-S1",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "GAOXIN",
+      "name": "高新第1服务中心",
+      "code": "GAOXIN-S1",
+      "description": "",
+      "enabled": true,
+      "sort_order": 30,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "GAOXIN",
+        "GAOXIN-S1"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "高新分公司",
+        "高新第1服务中心"
+      ],
+      "level": 3
+    },
+    {
+      "id": "GAOXIN-S2",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "GAOXIN",
+      "name": "高新第2服务中心",
+      "code": "GAOXIN-S2",
+      "description": "",
+      "enabled": true,
+      "sort_order": 33,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "GAOXIN",
+        "GAOXIN-S2"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "高新分公司",
+        "高新第2服务中心"
+      ],
+      "level": 3
+    },
+    {
+      "id": "GYSP-S1",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "GYSP",
+      "name": "高压输配第1服务中心",
+      "code": "GYSP-S1",
+      "description": "",
+      "enabled": true,
+      "sort_order": 37,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "GYSP",
+        "GYSP-S1"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "高压输配分公司",
+        "高压输配第1服务中心"
+      ],
+      "level": 3
+    },
+    {
+      "id": "GYSP-S2",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "GYSP",
+      "name": "高压输配第2服务中心",
+      "code": "GYSP-S2",
+      "description": "",
+      "enabled": true,
+      "sort_order": 40,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "GYSP",
+        "GYSP-S2"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "高压输配分公司",
+        "高压输配第2服务中心"
+      ],
+      "level": 3
+    },
+    {
+      "id": "BINJIANG-S1-W1",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "BINJIANG-S1",
+      "name": "滨江1中心第1网格",
+      "code": "BINJIANG-S1-W1",
+      "description": "",
+      "enabled": true,
+      "sort_order": 3,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "BINJIANG",
+        "BINJIANG-S1",
+        "BINJIANG-S1-W1"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "滨江分公司",
+        "滨江第1服务中心",
+        "滨江1中心第1网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "BINJIANG-S1-W2",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "BINJIANG-S1",
+      "name": "滨江1中心第2网格",
+      "code": "BINJIANG-S1-W2",
+      "description": "",
+      "enabled": true,
+      "sort_order": 4,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "BINJIANG",
+        "BINJIANG-S1",
+        "BINJIANG-S1-W2"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "滨江分公司",
+        "滨江第1服务中心",
+        "滨江1中心第2网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "BINJIANG-S2-W1",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "BINJIANG-S2",
+      "name": "滨江2中心第1网格",
+      "code": "BINJIANG-S2-W1",
+      "description": "",
+      "enabled": true,
+      "sort_order": 6,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "BINJIANG",
+        "BINJIANG-S2",
+        "BINJIANG-S2-W1"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "滨江分公司",
+        "滨江第2服务中心",
+        "滨江2中心第1网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "BINJIANG-S2-W2",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "BINJIANG-S2",
+      "name": "滨江2中心第2网格",
+      "code": "BINJIANG-S2-W2",
+      "description": "",
+      "enabled": true,
+      "sort_order": 7,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "BINJIANG",
+        "BINJIANG-S2",
+        "BINJIANG-S2-W2"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "滨江分公司",
+        "滨江第2服务中心",
+        "滨江2中心第2网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "SHAHU-S1-W1",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "SHAHU-S1",
+      "name": "沙湖1中心第1网格",
+      "code": "SHAHU-S1-W1",
+      "description": "",
+      "enabled": true,
+      "sort_order": 10,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "SHAHU",
+        "SHAHU-S1",
+        "SHAHU-S1-W1"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "沙湖分公司",
+        "沙湖第1服务中心",
+        "沙湖1中心第1网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "SHAHU-S1-W2",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "SHAHU-S1",
+      "name": "沙湖1中心第2网格",
+      "code": "SHAHU-S1-W2",
+      "description": "",
+      "enabled": true,
+      "sort_order": 11,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "SHAHU",
+        "SHAHU-S1",
+        "SHAHU-S1-W2"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "沙湖分公司",
+        "沙湖第1服务中心",
+        "沙湖1中心第2网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "SHAHU-S2-W1",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "SHAHU-S2",
+      "name": "沙湖2中心第1网格",
+      "code": "SHAHU-S2-W1",
+      "description": "",
+      "enabled": true,
+      "sort_order": 13,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "SHAHU",
+        "SHAHU-S2",
+        "SHAHU-S2-W1"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "沙湖分公司",
+        "沙湖第2服务中心",
+        "沙湖2中心第1网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "SHAHU-S2-W2",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "SHAHU-S2",
+      "name": "沙湖2中心第2网格",
+      "code": "SHAHU-S2-W2",
+      "description": "",
+      "enabled": true,
+      "sort_order": 14,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "SHAHU",
+        "SHAHU-S2",
+        "SHAHU-S2-W2"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "沙湖分公司",
+        "沙湖第2服务中心",
+        "沙湖2中心第2网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "JINGKAI-S1-W1",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "JINGKAI-S1",
+      "name": "经开1中心第1网格",
+      "code": "JINGKAI-S1-W1",
+      "description": "",
+      "enabled": true,
+      "sort_order": 17,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "JINGKAI",
+        "JINGKAI-S1",
+        "JINGKAI-S1-W1"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "经开分公司",
+        "经开第1服务中心",
+        "经开1中心第1网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "JINGKAI-S1-W2",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "JINGKAI-S1",
+      "name": "经开1中心第2网格",
+      "code": "JINGKAI-S1-W2",
+      "description": "",
+      "enabled": true,
+      "sort_order": 18,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "JINGKAI",
+        "JINGKAI-S1",
+        "JINGKAI-S1-W2"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "经开分公司",
+        "经开第1服务中心",
+        "经开1中心第2网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "JINGKAI-S2-W1",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "JINGKAI-S2",
+      "name": "经开2中心第1网格",
+      "code": "JINGKAI-S2-W1",
+      "description": "",
+      "enabled": true,
+      "sort_order": 20,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "JINGKAI",
+        "JINGKAI-S2",
+        "JINGKAI-S2-W1"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "经开分公司",
+        "经开第2服务中心",
+        "经开2中心第1网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "JINGKAI-S2-W2",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "JINGKAI-S2",
+      "name": "经开2中心第2网格",
+      "code": "JINGKAI-S2-W2",
+      "description": "",
+      "enabled": true,
+      "sort_order": 21,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "JINGKAI",
+        "JINGKAI-S2",
+        "JINGKAI-S2-W2"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "经开分公司",
+        "经开第2服务中心",
+        "经开2中心第2网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "LINGANG-S1-W1",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "LINGANG-S1",
+      "name": "临港1中心第1网格",
+      "code": "LINGANG-S1-W1",
+      "description": "",
+      "enabled": true,
+      "sort_order": 24,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "LINGANG",
+        "LINGANG-S1",
+        "LINGANG-S1-W1"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "临港分公司",
+        "临港第1服务中心",
+        "临港1中心第1网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "LINGANG-S1-W2",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "LINGANG-S1",
+      "name": "临港1中心第2网格",
+      "code": "LINGANG-S1-W2",
+      "description": "",
+      "enabled": true,
+      "sort_order": 25,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "LINGANG",
+        "LINGANG-S1",
+        "LINGANG-S1-W2"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "临港分公司",
+        "临港第1服务中心",
+        "临港1中心第2网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "LINGANG-S2-W1",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "LINGANG-S2",
+      "name": "临港2中心第1网格",
+      "code": "LINGANG-S2-W1",
+      "description": "",
+      "enabled": true,
+      "sort_order": 27,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "LINGANG",
+        "LINGANG-S2",
+        "LINGANG-S2-W1"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "临港分公司",
+        "临港第2服务中心",
+        "临港2中心第1网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "LINGANG-S2-W2",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "LINGANG-S2",
+      "name": "临港2中心第2网格",
+      "code": "LINGANG-S2-W2",
+      "description": "",
+      "enabled": true,
+      "sort_order": 28,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "LINGANG",
+        "LINGANG-S2",
+        "LINGANG-S2-W2"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "临港分公司",
+        "临港第2服务中心",
+        "临港2中心第2网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "GAOXIN-S1-W1",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "GAOXIN-S1",
+      "name": "高新1中心第1网格",
+      "code": "GAOXIN-S1-W1",
+      "description": "",
+      "enabled": true,
+      "sort_order": 31,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "GAOXIN",
+        "GAOXIN-S1",
+        "GAOXIN-S1-W1"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "高新分公司",
+        "高新第1服务中心",
+        "高新1中心第1网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "GAOXIN-S1-W2",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "GAOXIN-S1",
+      "name": "高新1中心第2网格",
+      "code": "GAOXIN-S1-W2",
+      "description": "",
+      "enabled": true,
+      "sort_order": 32,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "GAOXIN",
+        "GAOXIN-S1",
+        "GAOXIN-S1-W2"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "高新分公司",
+        "高新第1服务中心",
+        "高新1中心第2网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "GAOXIN-S2-W1",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "GAOXIN-S2",
+      "name": "高新2中心第1网格",
+      "code": "GAOXIN-S2-W1",
+      "description": "",
+      "enabled": true,
+      "sort_order": 34,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "GAOXIN",
+        "GAOXIN-S2",
+        "GAOXIN-S2-W1"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "高新分公司",
+        "高新第2服务中心",
+        "高新2中心第1网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "GAOXIN-S2-W2",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "GAOXIN-S2",
+      "name": "高新2中心第2网格",
+      "code": "GAOXIN-S2-W2",
+      "description": "",
+      "enabled": true,
+      "sort_order": 35,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "GAOXIN",
+        "GAOXIN-S2",
+        "GAOXIN-S2-W2"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "高新分公司",
+        "高新第2服务中心",
+        "高新2中心第2网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "GYSP-S1-W1",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "GYSP-S1",
+      "name": "高压输配1中心第1网格",
+      "code": "GYSP-S1-W1",
+      "description": "",
+      "enabled": true,
+      "sort_order": 38,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "GYSP",
+        "GYSP-S1",
+        "GYSP-S1-W1"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "高压输配分公司",
+        "高压输配第1服务中心",
+        "高压输配1中心第1网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "GYSP-S1-W2",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "GYSP-S1",
+      "name": "高压输配1中心第2网格",
+      "code": "GYSP-S1-W2",
+      "description": "",
+      "enabled": true,
+      "sort_order": 39,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "GYSP",
+        "GYSP-S1",
+        "GYSP-S1-W2"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "高压输配分公司",
+        "高压输配第1服务中心",
+        "高压输配1中心第2网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "GYSP-S2-W1",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "GYSP-S2",
+      "name": "高压输配2中心第1网格",
+      "code": "GYSP-S2-W1",
+      "description": "",
+      "enabled": true,
+      "sort_order": 41,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "GYSP",
+        "GYSP-S2",
+        "GYSP-S2-W1"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "高压输配分公司",
+        "高压输配第2服务中心",
+        "高压输配2中心第1网格"
+      ],
+      "level": 4
+    },
+    {
+      "id": "GYSP-S2-W2",
+      "tree_type_id": "gas_jc_tree",
+      "parent_id": "GYSP-S2",
+      "name": "高压输配2中心第2网格",
+      "code": "GYSP-S2-W2",
+      "description": "",
+      "enabled": true,
+      "sort_order": 42,
+      "created_at": "2026-10-22 00:05:19",
+      "updated_at": "2026-10-22 00:05:19",
+      "path_ids": [
+        "JC-GROUP",
+        "GYSP",
+        "GYSP-S2",
+        "GYSP-S2-W2"
+      ],
+      "path_names": [
+        "江城燃气集团",
+        "高压输配分公司",
+        "高压输配第2服务中心",
+        "高压输配2中心第2网格"
+      ],
+      "level": 4
+    },
     {
       "id": "node_ea963f252380",
       "tree_type_id": "tree_3991b9e4de6d",
@@ -554,6 +1585,6 @@
       "level": 2
     }
   ],
-  "updated_at": "2026-07-10 17:05:00",
-  "updated_by": "admin"
+  "updated_at": "2026-10-22 00:05:19",
+  "updated_by": "gas-demo-local-installer"
 }

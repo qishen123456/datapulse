@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "organization_nodes": 43,
+  "datasets": [
+    "GAS_SAFE",
+    "GAS_AR",
+    "GAS_BIZ"
+  ],
+  "golden_queries_via_http": 18,
+  "unbound_account": "denied",
+  "organization_binding": "BINJIANG scope membership passed",
+  "limitations": [
+    "普通账号聚合前行权限尚需独立验收，不据此开放业务账号",
+    "本次未调用真实LLM，未连接飞书"
+  ]
+}

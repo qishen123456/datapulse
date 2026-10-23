@@ -150,7 +150,7 @@ onMounted(() => {
   padding: 0;
   background: transparent;
   border: 0;
-  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.18);
+  box-shadow: 0 4px 12px rgba(29, 78, 216, 0.18);
 }
 
 .ax-welcome-avatar::before {
@@ -195,7 +195,7 @@ onMounted(() => {
   padding: 0;
   border-radius: 0;
   background: transparent;
-  color: #0D9488;
+  color: #1d4ed8;
   font-size: 14px;
   font-weight: 800;
   letter-spacing: 0;
@@ -216,7 +216,7 @@ onMounted(() => {
 .ax-welcome-text.is-typing::after {
   content: '|';
   margin-left: 5px;
-  color: rgba(13, 148, 136, 0.72);
+  color: rgba(29, 78, 216, 0.72);
   animation: ax-welcome-cursor-blink 1s step-end infinite;
 }
 
@@ -271,9 +271,9 @@ onMounted(() => {
 }
 
 .ax-quick-refresh:hover:not(:disabled) {
-  border-color: #0D9488;
-  background: #F0FDFA;
-  color: #0F766E;
+  border-color: #1d4ed8;
+  background: #eff6ff;
+  color: #1e40af;
   box-shadow: none;
 }
 
@@ -340,7 +340,7 @@ onMounted(() => {
 
 .ax-quick-btn:hover {
   background: #F6FAF9;
-  border-color: #0D9488;
+  border-color: #1d4ed8;
   color: #1A1A1A;
 }
 
@@ -356,9 +356,9 @@ onMounted(() => {
   max-width: 200px;
   padding: 3px 8px;
   border-radius: 3px;
-  border: 1px solid rgba(13, 148, 136, 0.32);
-  background: #F0FDFA;
-  color: #0F766E;
+  border: 1px solid rgba(29, 78, 216, 0.32);
+  background: #eff6ff;
+  color: #1e40af;
   font-size: 11px;
   font-weight: 700;
   line-height: 1.3;

@@ -16,7 +16,7 @@ def get_report_config(dataset_id):
         return denied
     cfg = drc.get_config(dataset_id)
     if cfg is None:
-        return jsonify({"config": None, "is_default": True, "default_config": drc.get_default_config()})
+        return jsonify({"config": None, "is_default": True, "default_config": drc.get_generic_config()})
     return jsonify({"config": cfg, "is_default": False})
 
 
@@ -49,4 +49,4 @@ def get_default_config():
     _, denied = require_feature("report_config", "当前账号没有查看报告模板配置权限")
     if denied:
         return denied
-    return jsonify({"config": drc.get_default_config()})
+    return jsonify({"config": drc.get_default_config() if request.args.get('profile') == 'hierarchy' else drc.get_generic_config()})

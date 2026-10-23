@@ -159,6 +159,7 @@ class DataSourceRouter:
                 dbname=db_config.get("database_name", ""),
                 user=db_config.get("username", ""),
                 password=self._decode_password(db_config.get("password_b64", "")),
+                connect_timeout=8,
             )
         if db_type == "mysql":
             import pymysql
@@ -170,6 +171,9 @@ class DataSourceRouter:
                 user=db_config.get("username", ""),
                 password=self._decode_password(db_config.get("password_b64", "")),
                 charset="utf8mb4",
+                connect_timeout=8,
+                read_timeout=int(db_config.get("read_timeout", 30)),
+                write_timeout=10,
             )
         if db_type == "sqlite":
             import sqlite3
@@ -186,7 +190,7 @@ class DataSourceRouter:
                 f"UID={db_config.get('username', '')};"
                 f"PWD={self._decode_password(db_config.get('password_b64', ''))}"
             )
-            return pyodbc.connect(conn_str)
+            return pyodbc.connect(conn_str, readonly=True, timeout=8)
         raise ValueError(f"unsupported database type: {db_type}")
 
     def execute_sql_for_source(self, source_id: int, sql: str) -> pd.DataFrame:
@@ -199,6 +203,73 @@ class DataSourceRouter:
             return pd.read_sql_query(sql, conn)
         finally:
             conn.close()
+
+    def execute_guarded_sql(self, source_id: int, sql: str, *, on_preflight=None) -> pd.DataFrame:
+        from ask_runtime import current_run, database_operation, checkpoint
+        from ask_stability import validate_sql, validate_explain
+        validate_sql(sql)
+        checkpoint()
+        source = self.data_sources.get(source_id)
+        if not source:
+            raise ValueError("数据源不存在")
+        run = current_run()
+        limits = run.config if run else {}
+        timeout = min(120,max(3,int(limits.get('queryTimeoutSeconds',30))))
+        row_limit = min(20000,max(100,int(limits.get('maxResultRows',10000))))
+        config = source['config']
+        dialect = str(config.get('type') or '').lower()
+        conn = self._connect_raw_database({**config, 'read_timeout':timeout})
+        if dialect == 'sqlserver':
+            conn.timeout = timeout  # pyodbc applies query timeout when creating cursors.
+        try:
+            with database_operation(conn):
+                cur = conn.cursor()
+                try:
+                    query = sql.strip().rstrip(';')
+                    if dialect == 'postgresql':
+                        cur.execute('SET TRANSACTION READ ONLY')
+                        cur.execute('SET LOCAL statement_timeout = %s', (timeout * 1000,))
+                        cur.execute('EXPLAIN (FORMAT JSON) ' + query)
+                        validate_explain(cur.fetchone()[0],row_limit * 100)
+                    elif dialect == 'sqlite':
+                        import time
+                        deadline = time.monotonic() + timeout
+                        conn.execute('PRAGMA query_only = ON')
+                        conn.set_progress_handler(lambda: int(time.monotonic() > deadline or bool(run and run.cancelled.is_set())),1000)
+                        cur.execute('EXPLAIN QUERY PLAN ' + query)
+                        cur.fetchall()
+                    elif dialect == 'mysql':
+                        cur.execute('SET SESSION MAX_EXECUTION_TIME = %s', (timeout * 1000,))
+                        cur.execute('START TRANSACTION READ ONLY')
+                        cur.execute('EXPLAIN ' + query)
+                        cur.fetchall()
+                    elif dialect == 'sqlserver':
+                        # SHOWPLAN is compilation only; never ANALYZE or execute a probe.
+                        cur.execute('SET SHOWPLAN_XML ON')
+                        try:
+                            cur.execute(query)
+                            cur.fetchall()
+                        finally:
+                            cur.execute('SET SHOWPLAN_XML OFF')
+                    else:
+                        raise ValueError('当前方言尚未支持受控预检，请检查数据源类型。')
+                    checkpoint()
+                    if on_preflight:
+                        on_preflight()
+                    cur.execute(query)
+                    columns = [item[0] for item in (cur.description or [])]
+                    rows = cur.fetchmany(row_limit + 1)
+                    if len(rows) > row_limit:
+                        raise ValueError(f'查询超过 {row_limit} 行上限，请收窄范围或聚合。')
+                    checkpoint()
+                    return pd.DataFrame.from_records(rows,columns=columns)
+                finally:
+                    cur.close()
+        finally:
+            try:
+                conn.rollback()
+            finally:
+                conn.close()
 
     def get_vanna_for_source(self, source_id: int) -> Tuple[object, str]:
         if source_id not in self.data_sources:

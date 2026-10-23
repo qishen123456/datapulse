@@ -5,6 +5,7 @@ import time
 import traceback
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
+from ask_runtime import checkpoint, current_run
 from llm_stream_parser import extract_stream_delta, stream_delta_value_to_text
 
 
@@ -50,8 +51,12 @@ class LLMClient:
         # 请求带 extra_body.reasoning_split，思考内容分流到 reasoning_details 字段，
         # 不再混入 content 正文（修 Agent4 报告夹带 "Wait, ..." 自审话术，2026-08-27）。
         # 未配置的模型 extra_body=None，请求体与之前完全一致，零影响。
-        self._llm_extra_body = {"reasoning_split": True} if config.get("reasoning_split") else None
+        extra = {"reasoning_split": True} if config.get("reasoning_split") else {}
+        if isinstance(config.get("enable_thinking"), bool):
+            extra["enable_thinking"] = config["enable_thinking"]
+        self._llm_extra_body = extra or None
         self._llm_client = self._openai_factory(
+            max_retries=0,
             api_key=config.get("api_key", ""),
             base_url=config.get("base_url", "https://api.openai.com/v1"),
         )
@@ -163,7 +168,11 @@ class LLMClient:
                 return content
             except Exception as exc:
                 last_error = exc
+                checkpoint()
                 retryable = index < len(candidate_configs) and self._should_retry(exc)
+                run = current_run()
+                if retryable and run:
+                    retryable = run.claim_retry()
                 self._append_trace(
                     trace,
                     stage or "llm.call",

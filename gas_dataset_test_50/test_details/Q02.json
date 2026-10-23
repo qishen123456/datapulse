@@ -1,0 +1,24 @@
+{
+  "case": {
+    "id": "Q02",
+    "ds": "GAS_BIZ",
+    "type": "客户结构占比",
+    "q": "2026年9月各客户类型的销气量及占比是多少？",
+    "check_type": "user_type_sales"
+  },
+  "report": {
+    "id": "Q02",
+    "dataset": "GAS_BIZ",
+    "type": "客户结构占比",
+    "question": "2026年9月各客户类型的销气量及占比是多少？",
+    "duration_seconds": 180.01,
+    "error": "HTTPConnectionPool(host='127.0.0.1', port=5002): Read timed out. (read timeout=180)",
+    "status": "FAIL",
+    "sql": "",
+    "row_count": 0,
+    "analysis_summary": "",
+    "gt_reference": "[['居民', '68922252', '0.45871658965821965316'], ['工业', '47839960', '0.31840200608340020402'], ['商业', '31893304', '0.21226798630742442219'], ['公益机构', '1594668', '0.01061341795095572063']]",
+    "judgement_details": "请求错误: HTTPConnectionPool(host='127.0.0.1', port=5002): Read timed out. (read timeout=180)"
+  },
+  "ai_result": null
+}

@@ -1,0 +1,39 @@
+{
+  "question": "只看沙湖分公司，保持刚才的月份和期末应收余额指标。",
+  "requires_confirmation": false,
+  "conversation_session_id": "gas-qa-347e82a6604a4678a3b7875ac2f0003f",
+  "rows": [
+    {
+      "期末应收_元": 113361975.4
+    }
+  ],
+  "columns": [
+    "期末应收_元"
+  ],
+  "analysis": "## 江城燃气·应收回款与稽核\n\n2026年9月末，沙湖分公司的期末应收余额为 113,361,975.4 元。",
+  "dataset_results": [
+    {
+      "dataset_id": 65,
+      "dataset_name": "江城燃气·应收回款与稽核",
+      "sql": "SELECT SUM(closing_yuan) AS 期末应收_元 FROM v_gas_ar WHERE month='2026-09' AND branch_name='沙湖分公司'",
+      "columns": [
+        "期末应收_元"
+      ],
+      "rows": [
+        {
+          "期末应收_元": 113361975.4
+        }
+      ],
+      "analysis": "2026年9月末，沙湖分公司的期末应收余额为 113,361,975.4 元。",
+      "analysis_status": "model_generated",
+      "row_count": 1
+    }
+  ],
+  "ask_flow": {
+    "flow": "basic",
+    "reason": "basic_selected",
+    "requested_flow": "basic",
+    "controller": "AskFlowController",
+    "duration_seconds": 20.778
+  }
+}

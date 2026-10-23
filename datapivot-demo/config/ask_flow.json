@@ -1,6 +1,6 @@
 {
   "defaultFlow": "basic",
-  "advancedEnabled": false,
+  "advancedEnabled": true,
   "advancedRoles": [
     "super_admin"
   ],

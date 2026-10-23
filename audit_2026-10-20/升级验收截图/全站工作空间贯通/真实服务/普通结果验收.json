@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "basicUiMs": 95769,
+  "reportProfile": "generic",
+  "analysisStatus": "model_generated",
+  "modelStages": [
+    "agent2.sql_generate",
+    "agent4.analysis"
+  ],
+  "errors": []
+}

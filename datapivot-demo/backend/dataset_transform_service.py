@@ -82,7 +82,6 @@ class DatasetTransformService:
         select_body = transform_sql
         if target_type == "view":
             return [
-                f"DROP VIEW IF EXISTS {target_escaped} CASCADE;",
                 f"CREATE OR REPLACE VIEW {target_escaped} AS\n{select_body}",
             ]
         if target_type == "table":

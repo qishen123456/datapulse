@@ -1,11 +1,11 @@
 <template>
-  <div class="migration-page">
+  <div class="module-layout-v4 migration-page">
     <section class="hero-card">
       <div>
         <p class="eyebrow">RELEASE GUARD</p>
         <h1>迁移发布与配置保护</h1>
         <p class="hero-copy">
-          管理数据源、数据集、字段字典、Agent 提示词、模型配置、报告模板、员工权限和系统日志等运行态资源。
+          管理数据源、数据集、字段字典、专家提示词、模型配置、报告模板、员工权限和系统日志等运行态资源。
           发布代码前后可以在这里导出、预检、备份和导入，避免生产环境配置被误覆盖。
         </p>
       </div>
@@ -13,62 +13,6 @@
         <el-button :loading="loading" @click="loadSummary">刷新状态</el-button>
         <el-button v-if="runtimeExportEnabled" type="primary" :loading="exporting" @click="handleExport">导出运行态包</el-button>
       </div>
-    </section>
-
-    <section class="metric-grid" :class="{ 'is-loading': loading && !summary }">
-      <article class="metric-card">
-        <span>配置文件</span>
-        <strong>{{ metricValue(summaryStats.configCount) }}</strong>
-        <small>包含员工、组织树、数据集权限和问数历史；不含登录 token 与 local 私有配置</small>
-      </article>
-      <article class="metric-card">
-        <span>启用数据集</span>
-        <strong>{{ metricValue(datasetCount) }}</strong>
-        <small>{{ summary ? (inactiveDatasetCount ? `另有 ${inactiveDatasetCount} 个停用数据集随迁移包保留` : '来自 bs_datasets 当前启用项') : '正在读取运行态数据' }}</small>
-      </article>
-      <article class="metric-card">
-        <span>运行态记录</span>
-        <strong>{{ metricValue(summaryStats.runtimeRows) }}</strong>
-        <small>字段字典、Golden SQL、提示词等</small>
-      </article>
-      <article class="metric-card">
-        <span>权限资源</span>
-        <strong>{{ metricValue(permissionStats.enabledEmployees) }}</strong>
-        <small>{{ permissionResourceText }}</small>
-      </article>
-      <article class="metric-card">
-        <span>系统日志</span>
-        <strong>{{ metricValue(summaryStats.systemLogRows) }}</strong>
-        <small>{{ logFileSummaryText }}</small>
-      </article>
-      <article class="metric-card">
-        <span>最近备份</span>
-        <strong>{{ metricValue(backups.length) }}</strong>
-        <small>导入前会自动生成回滚包</small>
-      </article>
-    </section>
-
-    <section class="permission-grid" :class="{ 'is-loading': loading && !summary }">
-      <article class="permission-card">
-        <span>员工账号</span>
-        <strong>{{ summary ? `${permissionStats.enabledEmployees} / ${permissionStats.employees}` : '-- / --' }}</strong>
-        <small>{{ permissionStats.adminEmployees }} 个管理员或业务管理员</small>
-      </article>
-      <article class="permission-card">
-        <span>组织树</span>
-        <strong>{{ summary ? `${permissionStats.enabledOrganizationNodes} / ${permissionStats.organizationNodes}` : '-- / --' }}</strong>
-        <small>{{ permissionStats.organizationTreeTypes }} 个组织树类型</small>
-      </article>
-      <article class="permission-card">
-        <span>数据集权限</span>
-        <strong>{{ metricValue(permissionStats.dataPermissionRules) }}</strong>
-        <small>{{ permissionStats.orgTreeDataPermissionRules }} 条按组织树控制</small>
-      </article>
-      <article class="permission-card">
-        <span>功能权限 RBAC</span>
-        <strong>{{ metricValue(permissionStats.rbacRoles) }}</strong>
-        <small>{{ permissionStats.rbacGroups }} 个权限组/分组</small>
-      </article>
     </section>
 
     <section class="workbench">
@@ -83,9 +27,9 @@
           </div>
         </template>
 
-        <div class="upload-zone" :class="{ ready: !!selectedFileName }">
+        <div class="upload-zone" :class="{ ready: !!selectedFileName, 'is-dragging': dragging }" @dragover.prevent="dragging = runtimeFileSelectEnabled" @dragleave.prevent="dragging = false" @drop.prevent="handleDrop">
           <div>
-            <strong>{{ selectedFileName || '选择 datapulse_runtime_*.json' }}</strong>
+            <strong>{{ selectedFileName || '拖入运行态包，或选择 JSON 文件' }}</strong>
             <p>支持从 Windows 测试环境导出的运行态包，也支持命令行脚本导出的包。</p>
           </div>
           <label v-if="runtimeFileSelectEnabled" class="file-picker">
@@ -136,7 +80,7 @@
           </div>
         </template>
 
-        <el-empty v-if="!previewResult" description="上传运行态包后，点击“预检导入”查看影响范围。" />
+        <GovernanceEmpty v-if="!previewResult" description="上传运行态包后，点击“预检导入”查看影响范围。" />
         <div v-else class="preview-body">
           <div class="preview-summary">
             <el-tag>{{ previewResult.mode === 'replace' ? '替换模式' : '合并模式' }}</el-tag>
@@ -217,10 +161,70 @@
         <el-table-column prop="path" label="服务器路径" min-width="320" />
       </el-table>
     </el-card>
+    <details class="release-resource-drawer"><summary>查看当前环境资源与权限清单</summary>
+    <section class="metric-grid" :class="{ 'is-loading': loading && !summary }">
+      <article class="metric-card">
+        <span>配置文件</span>
+        <strong>{{ metricValue(summaryStats.configCount) }}</strong>
+        <small>包含员工、组织树、数据集权限和问数历史；不含登录 token 与 local 私有配置</small>
+      </article>
+      <article class="metric-card">
+        <span>启用数据集</span>
+        <strong>{{ metricValue(datasetCount) }}</strong>
+        <small>{{ summary ? (inactiveDatasetCount ? `另有 ${inactiveDatasetCount} 个停用数据集随迁移包保留` : '来自 bs_datasets 当前启用项') : '正在读取运行态数据' }}</small>
+      </article>
+      <article class="metric-card">
+        <span>运行态记录</span>
+        <strong>{{ metricValue(summaryStats.runtimeRows) }}</strong>
+        <small>字段字典、Golden SQL、提示词等</small>
+      </article>
+      <article class="metric-card">
+        <span>权限资源</span>
+        <strong>{{ metricValue(permissionStats.enabledEmployees) }}</strong>
+        <small>{{ permissionResourceText }}</small>
+      </article>
+      <article class="metric-card">
+        <span>系统日志</span>
+        <strong>{{ metricValue(summaryStats.systemLogRows) }}</strong>
+        <small>{{ logFileSummaryText }}</small>
+      </article>
+      <article class="metric-card">
+        <span>最近备份</span>
+        <strong>{{ metricValue(backups.length) }}</strong>
+        <small>导入前会自动生成回滚包</small>
+      </article>
+    </section>
+
+    <section class="permission-grid" :class="{ 'is-loading': loading && !summary }">
+      <article class="permission-card">
+        <span>员工账号</span>
+        <strong>{{ summary ? `${permissionStats.enabledEmployees} / ${permissionStats.employees}` : '-- / --' }}</strong>
+        <small>{{ permissionStats.adminEmployees }} 个管理员或业务管理员</small>
+      </article>
+      <article class="permission-card">
+        <span>组织树</span>
+        <strong>{{ summary ? `${permissionStats.enabledOrganizationNodes} / ${permissionStats.organizationNodes}` : '-- / --' }}</strong>
+        <small>{{ permissionStats.organizationTreeTypes }} 个组织树类型</small>
+      </article>
+      <article class="permission-card">
+        <span>数据集权限</span>
+        <strong>{{ metricValue(permissionStats.dataPermissionRules) }}</strong>
+        <small>{{ permissionStats.orgTreeDataPermissionRules }} 条按组织树控制</small>
+      </article>
+      <article class="permission-card">
+        <span>功能权限 RBAC</span>
+        <strong>{{ metricValue(permissionStats.rbacRoles) }}</strong>
+        <small>{{ permissionStats.rbacGroups }} 个权限组/分组</small>
+      </article>
+    </section>
+
+    </details>
   </div>
 </template>
 
 <script setup>
+import "../styles/module-interiors.css"
+import GovernanceEmpty from "../components/GovernanceEmpty.vue"
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -348,10 +352,19 @@ const handleExport = async () => {
   }
 }
 
+const dragging = ref(false)
+const handleDrop = (event) => {
+  dragging.value = false
+  if (!runtimeFileSelectEnabled.value) return
+  handleFileChange({target:{files:event.dataTransfer.files}})
+}
 const handleFileChange = (event) => {
   const file = event.target.files?.[0]
   if (!file) return
+  if (!runtimeFileSelectEnabled.value) return
+  if (!/\.json$/i.test(file.name)) { ElMessage.error("请选择 JSON 运行态包"); return }
   selectedFileName.value = file.name
+  bundle.value = null
   previewResult.value = null
   const reader = new FileReader()
   reader.onload = () => {
@@ -452,7 +465,7 @@ const tableLabel = (table) => ({
   bs_dataset_synonyms: '数据集同义词',
   bs_common_questions: '常见问题',
   bs_golden_sql_samples: 'Golden SQL',
-  bs_agent_prompt_fragments: 'Agent 提示词',
+  bs_agent_prompt_fragments: '专家提示词',
   bs_data_dictionary_items: '字段字典',
   bs_schema_definitions: 'Schema 定义',
   bs_lld_documents: 'LLD 文档',
@@ -497,13 +510,13 @@ onMounted(() => {
   gap: 24px;
   padding: 28px;
   background:
-    radial-gradient(circle at right top, rgba(13, 148, 136, 0.16), transparent 32%),
+    radial-gradient(circle at right top, rgba(29, 78, 216, 0.16), transparent 32%),
     linear-gradient(135deg, #ffffff 0%, #F2F5F4 100%);
 }
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #0D9488;
+  color: #1d4ed8;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -578,7 +591,7 @@ onMounted(() => {
 .permission-card strong {
   display: block;
   margin: 10px 0 4px;
-  color: #0D9488;
+  color: #1d4ed8;
   font-size: 30px;
   line-height: 1.15;
   font-variant-numeric: tabular-nums;
@@ -593,7 +606,7 @@ onMounted(() => {
 
 .permission-card {
   padding: 14px 16px;
-  border: 1px solid #F0FDFA;
+  border: 1px solid #eff6ff;
   border-radius: 6px;
   background: #F2F5F4;
 }
@@ -629,7 +642,7 @@ onMounted(() => {
   justify-content: space-between;
   gap: 18px;
   padding: 20px;
-  border: 1px dashed #F0FDFA;
+  border: 1px dashed #eff6ff;
   border-radius: 6px;
   background: #F2F5F4;
 }
@@ -648,7 +661,7 @@ onMounted(() => {
   height: 36px;
   border-radius: 999px;
   color: #fff;
-  background: #0D9488;
+  background: #1d4ed8;
   cursor: pointer;
 }
 

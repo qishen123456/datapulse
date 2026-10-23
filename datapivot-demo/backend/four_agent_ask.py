@@ -17,6 +17,8 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 if CURRENT_DIR not in sys.path:
     sys.path.insert(0, CURRENT_DIR)
 
+from ask_runtime import checkpoint, current_run, AskCancelled
+from ask_stability import result_assertions, schema_link
 from agent_registry import get_agent
 import ask_engine_utils
 from bookshelf_repository import BookshelfConfigurationError, BookshelfRepository
@@ -203,6 +205,7 @@ class FourAgentAskService:
         return ask_engine_utils._build_route_thought(route, question, catalog)
 
     def _append_trace(self, trace: Optional[Dict[str, Any]], stage: str, status: str = "info", **payload: Any) -> None:
+        checkpoint()
         return self._trace_component()._append_trace(trace, stage, status, **payload)
 
     def _append_llm_delta(
@@ -634,6 +637,24 @@ class FourAgentAskService:
         columns = result.get("columns") or []
         rows = result.get("rows") or []
         review_summary = str((review or {}).get("review_summary") or "").strip()
+
+        context["analysis_status"] = "model_unavailable" if error_message else "deterministic"
+        if self._safe_dict(context.get("report_config")).get("profile") == "generic":
+            lines = ["## 查询事实", f"本次从“{dataset_name}”返回 {row_count} 行、{len(columns)} 个字段。"]
+            if rows:
+                first = rows[0]
+                facts = []
+                for column in columns[:4]:
+                    value = first.get(column)
+                    shown = "缺失" if value is None else f"{value:,.4f}".rstrip("0").rstrip(".") if isinstance(value, (int,float)) else str(value)
+                    facts.append(f"{column}：{shown}")
+                lines.append("首行记录：" + "；".join(facts) + "。")
+            else:
+                lines.append("当前条件未匹配记录；不能据此认定业务指标为零。")
+            if error_message:
+                lines.extend(["", "模型解读暂不可用。以上为查询数据的确定性摘要，不包含自动归因。"])
+            lines.extend(["", "口径与单位以字段定义为准；完整结果见数据视图。"])
+            return "\n\n".join(lines)
 
         layered = self._build_layered_management_report(
             question,
@@ -1349,6 +1370,15 @@ class FourAgentAskService:
             lines.extend(["", f"> 说明：高级模型分析失败，已使用规则分层报告兜底。原因：{error_message}"])
         return "\n".join(lines)
 
+    @staticmethod
+    def _can_diagnose_empty_results(results):
+        # A failed query is not evidence of an empty database scope.
+        return bool(results) and all(
+            item.get("query_status") == "completed"
+            and not int(item.get("row_count") or 0)
+            for item in results
+        )
+
     def _build_graceful_dataset_result(
         self,
         question: str,
@@ -1372,7 +1402,12 @@ class FourAgentAskService:
             result=safe_result,
             error_message="",
         )
+        if getattr(self, "_require_ai", False):
+            context["analysis_status"] = "model_unavailable"
+            analysis_text = "AI 问数未完成：未能生成或通过校验的可执行查询。请调整问题或检查模型服务后重试；当前未生成业务答案。"
         return {
+            "analysis_status": context.get("analysis_status", "deterministic"),
+            "query_status": "failed",
             "dataset_id": dataset.get("id"),
             "dataset_code": dataset.get("dataset_code"),
             "dataset_name": dataset.get("dataset_name"),
@@ -1525,6 +1560,8 @@ class FourAgentAskService:
         }
 
     def _select_sql_strategy(self, question: str, route: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+        if current_run() and current_run().flow == 'advanced':
+            return {'mode':'generate', 'reason':'research_branch_requires_own_query'}
         samples = context.get("golden_sql_samples") or []
         sql_samples = [item for item in samples if str(item.get("sql_text") or "").strip()]
         top_sample = sql_samples[0] if sql_samples else {}
@@ -1646,7 +1683,7 @@ class FourAgentAskService:
         # Filter/comparison/aggregate questions should not be hijacked by ranking-style Golden SQL samples.
         # Prefer deterministic rule SQL; if unavailable, fall back to fresh generation.
         if rule_based_sql is None:
-            rule_based_sql = self._build_rule_based_sql(question, route, context)
+            rule_based_sql = '' if current_run() and current_run().flow == 'advanced' else self._build_rule_based_sql(question, route, context)
         # 在规则 SQL 构建之后再读取 intent：数量词修复可能已把它就地改成 aggregate
         filter_intent = str(query_intent.get("intent") or "") == "filter"
         comparison_intent = str(query_intent.get("intent") or "") == "comparison"
@@ -2553,6 +2590,7 @@ class FourAgentAskService:
         stage: str = "",
         agent_name: str = "",
     ) -> str:
+        checkpoint()
         return self._llm_component()._chat(
             system_prompt, user_prompt, max_tokens, trace, stage, agent_name
         )
@@ -2566,6 +2604,7 @@ class FourAgentAskService:
         stage: str = "",
         agent_name: str = "",
     ) -> Dict[str, Any]:
+        checkpoint()
         return self._llm_component()._chat_json(
             system_prompt, user_prompt, fallback, trace, stage, agent_name
         )
@@ -2574,7 +2613,15 @@ class FourAgentAskService:
         agent = get_agent(agent_no)
         prompt = (agent or {}).get("system_prompt") or fallback
         knowledge = "\n".join(f"- {item}" for item in (agent or {}).get("knowledge_base", []))
-        return f"{prompt}\n\n补充知识：\n{knowledge}".strip()
+        from datapulse_advanced.config_store import load_config
+        from skill_bindings import instructions_for
+        from ask_runtime import current_run
+        if not hasattr(self, '_skill_config'):
+            self._skill_config = load_config()
+        run = current_run()
+        flow = run.flow if run else getattr(self, '_skill_flow', 'basic')
+        instructions = instructions_for(self._skill_config, agent_no, flow)
+        return f"{prompt}\n\n补充知识：\n{knowledge}\n\n技能执行指令：\n{instructions}".strip()
 
     def _build_report_config_prompt(self, context: Dict[str, Any]) -> str:
         config = self._safe_dict(context.get("report_config")) or report_config_store.get_default_config()
@@ -4962,8 +5009,15 @@ ranking_params 说明：
                 f"当前用户授权组织名称：{', '.join(row_security.get('allowed_names') or []) or '无'}；"
                 f"授权组织编码：{', '.join(row_security.get('allowed_codes') or []) or '无'}。"
             )
+        if row_security.get("principal_scope") == "super_admin_full_scope":
+            row_security_lines = ["当前身份为超级管理员，允许全域汇总，无需附加某个组织的过滤条件。授权编码为空表示全域，不表示无权限。业务问题明确指定的组织条件仍必须保留。"]
         dictionary_lines = []
-        for item in context.get("data_dictionary", [])[:150]:
+        from datapulse_advanced.config_store import load_config
+        from skill_bindings import field_limit
+        if not hasattr(self, '_skill_config'):
+            self._skill_config = load_config()
+        prompt_fields = schema_link(context, context.get("original_question") or "", limit=field_limit(self._skill_config))
+        for item in prompt_fields:
             dictionary_lines.append(
                 f"{item['table_name']}.{item['column_name']} => semantic={item['semantic_name']}, "
                 f"jsonb_key={item.get('jsonb_key')}, extraction={item.get('extraction_rule', '')}"
@@ -7717,7 +7771,7 @@ LIMIT 10000
         dataset_code = str(dataset.get("dataset_code") or "")
         dataset_name = str(dataset.get("dataset_name") or "")
         defer_rule_fallback = dataset_code == "panshi_deal_flow_2026_phase1" or dataset_name == "磐石成交流水（阶段一升级版）"
-        rule_based_sql = self._build_rule_based_sql(question, route, context)
+        rule_based_sql = '' if current_run() and current_run().flow == 'advanced' else self._build_rule_based_sql(question, route, context)
         normalized_question = str(question or "").replace("\n", " ").strip()
         force_grouped_ranking = (
             defer_rule_fallback
@@ -7734,6 +7788,7 @@ LIMIT 10000
         )
         if (
             rule_based_sql
+            and not getattr(self, "_require_ai", False)
             and not seed_sql
             and (not defer_rule_fallback or force_grouped_ranking or force_resolved_scope_rule or force_descendant_scope_rule)
         ):
@@ -7806,7 +7861,8 @@ Agent1 路由结果：
 请输出 JSON：
 {{
   "sql": "最终 PostgreSQL SQL",
-  "notes": "生成说明"
+  "notes": "生成说明",
+  "public_summary": "面向业务用户的查询方案摘要：用1至2句话说明本次指标、维度、时间比较和聚合口径，只描述准备怎样查询，不声称已经取得结果；不包含SQL正文、提示词或内部推理过程。"
 }}
 """
         if seed_block:
@@ -7826,7 +7882,7 @@ Agent1 路由结果：
         if "..." in sql_text:
             sql_text = ""
             result["notes"] = "agent2 generated incomplete sql"
-        if not sql_text:
+        if not sql_text and (current_run() is None or current_run().claim_retry()):
             retry_prompt = f"""
 你刚刚返回了空 SQL。请再次尝试，优先依据当前上下文里的字段、表结构、Join 关系和 Golden SQL 样本，生成一条可以直接执行的只读 PostgreSQL SQL。
 
@@ -7870,7 +7926,7 @@ Agent1 路由结果：
             if retry_sql:
                 retry_result["sql"] = retry_sql
                 return retry_result
-            if seed_sql and self._is_read_only_sql(seed_sql):
+            if not getattr(self, "_require_ai", False) and seed_sql and self._is_read_only_sql(seed_sql):
                 self._append_trace(
                     trace,
                     "agent2.sql_generate.seed_fallback",
@@ -7880,7 +7936,7 @@ Agent1 路由结果：
                     sql=self._truncate_text(seed_sql, 12000),
                 )
                 return {"sql": seed_sql, "notes": "golden sample seed fallback", "sample_id": seed_sample_id, "source": "sample_direct"}
-            if rule_based_sql and defer_rule_fallback:
+            if not getattr(self, "_require_ai", False) and rule_based_sql and defer_rule_fallback:
                 self._append_trace(
                     trace,
                     "agent2.sql_generate.rule_fallback",
@@ -8504,7 +8560,7 @@ Agent1 路由结果：
 执行失败的 SQL：
 {failed_sql}
 
-数据库返回的真实错误：
+执行错误或审核反馈（以反馈标明的阶段为准，不假定已经执行SQL）：
 {error_message}
 
 数据集专属提示（Agent2）：
@@ -8743,8 +8799,15 @@ Agent1 路由结果：
 待复核 SQL：
 {sql_text}
 
+服务端提供的实际授权上下文：
+{json.dumps(context.get("row_security") or {}, ensure_ascii=False)}
+权限条件由服务端在审核后、执行前处理，不能仅因待审SQL没有系统权限条件就断言越权。超级管理员允许全域汇总；仍须审核用户明确指定的业务组织范围。
+
 LLD：
 {self._get_lld_content(context)}
+
+真实字段字典与表结构（审核字段合法性时以此为准，不猜测字段名）：
+{self._build_context_blob(context)}
 
 数据集专属提示（Agent3）：
 {dataset_prompt}
@@ -8778,7 +8841,7 @@ LLD：
             stage="agent3.sql_review",
             agent_name="Agent3",
         )
-        if str(result.get("review_summary") or "").strip() == "review fallback: agent3 unavailable":
+        if str(result.get("review_summary") or "").strip() == "review fallback: agent3 unavailable" and (current_run() is None or current_run().claim_retry()):
             retry_prompt = f"""
 你刚刚未能完成 SQL 复核。请再次严格复核下面这条 SQL 是否满足统计口径、时间范围、组织边界、字段语义和只读安全要求。
 
@@ -8794,8 +8857,15 @@ Agent1 路由结果：
 待复核 SQL：
 {sql_text}
 
+服务端提供的实际授权上下文：
+{json.dumps(context.get("row_security") or {}, ensure_ascii=False)}
+权限条件由服务端在审核后、执行前处理，不能仅因待审SQL没有系统权限条件就断言越权。超级管理员允许全域汇总；仍须审核用户明确指定的业务组织范围。
+
 LLD：
 {self._get_lld_content(context)}
+
+真实字段字典与表结构（审核字段合法性时以此为准，不猜测字段名）：
+{self._build_context_blob(context)}
 
 数据集专属提示（Agent3）：
 {dataset_prompt}
@@ -8811,40 +8881,45 @@ LLD：
             if str(retry_result.get("review_summary") or "").strip() != "review fallback: agent3 unavailable":
                 result = retry_result
             else:
-                # fail-open（2026-09-06）：Agent3 两次复核均不可用时【放行】SQL（宁可漏不可错拦）。
-                # 旧的 fail-closed（approved=False）导致 LLM 抖动时 SQL 明明正确也被拒 → 0 行
-                # （用户实测"云芯部件/增值查询 0 行"根因：Agent3 超时 62s 两次失败，SQL 全字段正确仍被拒）。
-                # Agent3 是复核保险层，它挂了不应阻断主流程；放行并打风险标记。
                 result = {
-                    "approved": True,
-                    "final_sql": sql_text,
-                    "review_summary": "agent3 unavailable, executed without review (fail-open)",
-                    "risks": ["Agent3 复核不可用（模型超时/失败），SQL 未经复核直接执行。"],
-                    "fixes": [],
+                    "approved": False,
+                    "final_sql": "",
+                    "review_summary": "AI SQL复核不可用，已阻断执行。",
+                    "risks": ["SQL未完成AI复核，不能执行。"],
+                    "fixes": ["检查模型服务后重新发起问数。"],
                 }
         result["approved"] = False if str(result.get("approved")).lower() in ("false", "0", "none", "") else bool(result.get("approved"))
         result["risks"] = result.get("risks") if isinstance(result.get("risks"), list) else [str(result.get("risks") or "").strip()] if result.get("risks") else []
         result["fixes"] = result.get("fixes") if isinstance(result.get("fixes"), list) else [str(result.get("fixes") or "").strip()] if result.get("fixes") else []
         if result.get("approved") is not False and not result.get("final_sql"):
             result["final_sql"] = sql_text
-        # fail-open（2026-09-06 进一步放宽）：Agent3 拒绝时【一律放行原 SQL】+ 警告。
-        # 覆盖范围：①两次复核均不可用（unavailable）②拒绝但 final_sql 空（矛盾）③拒绝且 final_sql 有值（Agent3 修正版不可信/LLM 抖动会改坏原 SQL）。
-        # 用户"宁可漏不可错拦"原则：Agent3 误判或抖动不能阻断主流程；原 SQL 是 Agent2 正常生成的，多数场景正确。
-        # 已有的最终 SQL 字段校验（_dataset_field_validation）仍兜底安全。
-        if not result.get("approved"):
-            result = {
-                "approved": True,
-                "final_sql": sql_text,
-                "review_summary": "agent3 not approved, executed original SQL (fail-open)",
-                "risks": (result.get("risks") or []) + ["Agent3 未通过复核，已放行原 SQL（疑为 LLM 误判/抖动）。"],
-                "fixes": result.get("fixes") or [],
-            }
+        # Rejection remains rejection; deterministic checks cannot turn an
+        # unavailable/rejected model audit into a claimed AI approval.
         final_sql = str(result.get("final_sql") or "").strip()
         if final_sql:
             validation = self._dataset_field_validation(final_sql, context)
             if not validation.get("ok"):
                 return self._build_field_validation_block_review(validation, final_sql, trace, "normal")
         return result
+
+    def _review_sql_with_correction(self, question, route, sql_text, context, agent2_prompt, agent3_prompt, trace=None, review_policy="normal"):
+        review = self._agent3_review(question, route, sql_text, context, agent3_prompt, trace=trace, review_policy=review_policy)
+        run = current_run()
+        while review.get("approved") is False and run and run.claim_retry():
+            self._append_trace(trace,"agent2.sql_repair.review_rejection","request",
+                business_summary="SQL审核未通过，正在依据审核反馈修复；修复后必须重新审核，不能直接执行。")
+            feedback = json.dumps({k:review.get(k) for k in ("review_summary","risks","fixes")},ensure_ascii=False)
+            repaired = self._repair_sql_after_execution_error(question,route,context,sql_text,
+                "SQL尚未执行，以下为审核未通过反馈："+feedback,agent2_prompt,trace=trace)
+            candidate = str(repaired.get("sql") or "").strip()
+            if not candidate or not self._is_read_only_sql(candidate):
+                break
+            sql_text = candidate
+            review = self._agent3_review(question,route,sql_text,context,agent3_prompt,trace=trace,review_policy="normal")
+        self._append_trace(trace,'agent3.evidence','response' if review.get('approved') is not False else 'warning',
+            approved=review.get('approved'),business_summary='查询审核已通过，接下来注入组织范围并预检执行计划。' if review.get('approved') is not False else '查询尚未通过审核，未进入数据执行。',
+            activity={'kind':'review','heading':'查询审核通过' if review.get('approved') is not False else '查询审核未通过','approved':review.get('approved')})
+        return sql_text, review
 
     def _execute_sql(
         self,
@@ -8855,7 +8930,10 @@ LLD：
     ) -> Dict[str, Any]:
         started = time.time()
         try:
-            dataframe = datasource_router.execute_sql_for_source(source_id, final_sql)
+            checkpoint()
+            self._append_trace(trace,'stability.explain','request')
+            dataframe = datasource_router.execute_guarded_sql(source_id, final_sql, on_preflight=lambda: self._append_trace(trace,'stability.explain','response',business_summary='执行计划预检通过。'))
+            checkpoint()
         except Exception as exc:
             self._append_trace(
                 trace,
@@ -8868,6 +8946,7 @@ LLD：
             )
             raise RuntimeError(f"执行SQL失败: {exc}")
         if dataframe is None or dataframe.empty:
+            self._append_trace(trace,'stability.assert','warning',business_summary='查询为空，保留当前授权范围，进入空结果诊断。',row_count=0)
             self._append_trace(
                 trace,
                 "datasource.execute_sql",
@@ -8896,8 +8975,12 @@ LLD：
                     value = float(value)
                 elif value != value:
                     value = None
+                if isinstance(value, float) and math.isnan(value):
+                    value = None
                 item[column] = value
             rows.append(item)
+        checks = result_assertions(rows, (current_run().config if current_run() else {}).get('maxResultRows',10000))
+        self._append_trace(trace,'stability.assert','warning' if checks['warnings'] else 'response',business_summary='；'.join(checks['warnings']) if checks['warnings'] else '结果规模与空值核验通过。',row_count=len(rows))
         self._append_trace(
             trace,
             "datasource.execute_sql",
@@ -8920,9 +9003,9 @@ LLD：
         result: Dict[str, Any],
         trace: Optional[Dict[str, Any]] = None,
     ) -> str:
-        # 0 行结果统一走确定性"未找到"提示，避免 LLM 生成不稳定文案
-        # （N5：查无此节点时不得静默返回总览，须明确提示未找到）。
-        if not (result.get("rows") or []):
+        # Ordinary questions require AI interpretation even for zero rows.
+        # Preserve legacy deterministic empty handling for other callers.
+        if not getattr(self, "_require_ai", False) and not (result.get("rows") or []):
             return self._build_fallback_analysis(question, context, review, result)
         # bug 2026-08-26：商用数据集 Agent4 曾被硬编码 bypass（2026-05-01 c190fc5，当时 prompt 体系未就绪），
         # 导致用户永远看到规则化兜底文本、无下级洞察。现移除 bypass 恢复 LLM 分析；
@@ -8958,6 +9041,17 @@ LLD：
    f) **排序列**：明细对比默认按合计列降序；排名类按用户指定方向。
    g) 表格内容用 markdown pipe 语法，前端会渲染为 HTML 表格。
 """.strip()
+        if self._safe_dict(context.get("report_config")).get("profile") == "generic":
+            global_report_standard = """
+本轮为通用数据分析，以下要求优先于历史业绩报告模板与数据集背景中的示例问题：
+1. 第一段直接回答本轮问题并给出关键数值、单位和时间；不要先输出报告标题，不套用战区、达成率、目标缺口或固定四段式模板。
+2. 只使用本次实际查询结果及其字段含义，不把背景中的其他问题当成本轮目标。单值查询简洁回答，不强行凑亮点、问题和建议。
+3. 组织权限以服务端提供的实际授权上下文为准。super_admin_full_scope 表示当前用户有全域权限，不得因SQL无组织WHERE而宣称越权、缺少授权或要求改成单组织。普通用户权限由服务端处理，不能仅凭SQL片段推断权限失效。
+4. 空结果明确说明没有匹配记录，不能说业务数值为零或擅自换时间。
+5. 严格区分事实、差异、假设和已验证原因。单月横截面不能证明因果或“系统性管理偏差”，不能据描述性排序声称存在正/负相关，除非有专门统计检验。
+6. 无法从本次结果验证的原因、趋势、风险阈值与预测，明确为待验证，不编造。所得税缺失时不能把税前利润称为净利润。
+7. 可以用简短Markdown段落或列表；完整数据由画布展示，不必复述全表。金额保留原始单位含义，气量不可误当金额。
+""".strip()
         system_prompt = f"{system_prompt}\n\n{global_report_standard}"
         prompt_groups = self._safe_dict(context.get("agent_prompts"))
         dataset_prompt = "\n\n".join(
@@ -8972,8 +9066,11 @@ LLD：
 LLD 背景：
 {self._get_lld_content(context)}
 
-Agent3 复核结果：
+Agent3 复核结果（审核发生在最终权限处理之前，不能作为权限执行失败的证据）：
 {json.dumps(review, ensure_ascii=False)}
+
+服务端实际授权上下文（不是模型推测）：
+{json.dumps(context.get("row_security") or {}, ensure_ascii=False)}
 
 结果预览（前30行）：
 {json.dumps(result.get('rows', [])[:30], ensure_ascii=False)}
@@ -9004,6 +9101,11 @@ Agent3 复核结果：
             # 兜底：剥离 <think> 思考块后若正文为空（token 被思考耗尽），改用规则化 fallback 报告，
             # 避免把"只有思考没有结论"的文本透传给前端导致重点发现/建议动作显示异常。
             body = re.sub(r"<think>[\s\S]*?</think>", "", str(content or "")).strip()
+            if not body:
+                self._append_trace(trace, "agent4.analysis.empty_body", "warning",
+                    analysis_preview="AI 未返回有效解读，结果不能标记为 AI 已完成。")
+                return self._build_fallback_analysis(question, context, review, result, "empty_body_after_think")
+            context["analysis_status"] = "model_generated"
             # 自动明细对比表（2026-09-06 用户反馈"按战区分两列展示"）：Agent4 LLM 即使强约束也不稳定输出表格，
             # 后端按 report_spec + rows 强制组装 markdown table 追加到 analysis（fail-open for table）。
             # 去重（2026-09-06）：LLM 已自己输出表格时不重复注入（否则合计行出现 2 次，用户实测反馈）。
@@ -9013,15 +9115,7 @@ Agent3 复核结果：
             if table_md and not self._analysis_has_table(body):
                 body = (body + "\n\n" + table_md).strip()
                 content = body
-            if not body:
-                self._append_trace(
-                    trace,
-                    "agent4.analysis.empty_body",
-                    "warning",
-                    analysis_preview="Agent4 返回内容剥离思考块后为空，改用规则化兜底报告。",
-                )
-                return self._build_fallback_analysis(question, context, review, result, "empty_body_after_think")
-            return content
+            return body
         except Exception as exc:
             self._append_trace(
                 trace,
@@ -9072,11 +9166,17 @@ Agent3 复核结果：
         for dataset_id in dataset_ids:
             context = self.repository.get_dataset_context(int(dataset_id), route.get("refined_query", question))
             context["original_question"] = question
+            run = current_run()
+            if run and run.config.get('skillPolicy',{}).get('golden_sql') is False:
+                context['golden_sql_samples'] = []
+                route = {k:v for k,v in route.items() if not k.startswith('matched_sample_')}
             dataset_meta = self._safe_dict(context.get("dataset"))
             permission_rule = (load_data_permissions().get("rules") or {}).get(str(int(dataset_id))) or {}
             user_scope = user_org_scope_for_rule(current_user or {}, permission_rule) if permission_rule.get("mode") == "org_tree" else {}
             context["row_security"] = {
                 "mode": permission_rule.get("mode") or "public",
+                "principal_scope": "super_admin_full_scope" if (current_user or {}).get("role") == "super_admin" else "restricted_by_policy",
+                "enforcement_stage": "after_review_before_execution",
                 "tree_type_id": permission_rule.get("tree_type_id") or "",
                 "tree_type_ids": permission_rule.get("tree_type_ids") or ([permission_rule.get("tree_type_id")] if permission_rule.get("tree_type_id") else []),
                 "organization_field": self._safe_dict(permission_rule.get("scope")).get("organization_field") or "组织编码",
@@ -9120,9 +9220,17 @@ Agent3 复核结果：
                 )
                 self._flush_trace(trace, result)
                 return result
+            from analysis_activity import asset_activity
+            self._append_trace(trace,'stability.context','response',dataset_id=dataset_id,
+                business_summary='已读取本次查询所需的字段、关联与样例依据。',activity=asset_activity(context,question))
+            if not current_run() or current_run().flow == 'basic':
+                self._append_trace(trace,'agent1.scope_confirmed','response',dataset_id=dataset_id,
+                    business_summary='已确定本次查询的数据范围，继续准备指标与字段口径。')
+            self._append_trace(trace,'pipeline.agent2_prepare','request',dataset_id=dataset_id,
+                business_summary='正在整理查询粒度、字段与业务口径，随后生成并审核查询。')
             saved_report_config = report_config_store.get_config(int(dataset_id))
             report_config_source = "dataset_config" if saved_report_config else "default"
-            report_config = dict(saved_report_config or report_config_store.get_default_config())
+            report_config = dict(saved_report_config or report_config_store.get_generic_config())
             context["route"] = route
             context["report_config"] = report_config
             route_entities = self._route_entity_resolution(route) or {}
@@ -9350,6 +9458,13 @@ Agent3 复核结果：
             agent3_prompt = "\n\n".join(item["prompt_content"] for item in prompts.get(3, []))
 
             sql_strategy = self._select_sql_strategy(route.get("refined_query", question), route, context)
+            if getattr(self, "_require_ai", False) and sql_strategy.get("mode") in {"sample_direct", "rule_based"}:
+                # Preserve candidate selection safeguards, but only use its SQL as
+                # a reference: Agent2 must review the actual question and schema.
+                sql_strategy = {**sql_strategy, "mode": "sample_template", "reason": "ai_generation_required"}
+                self._append_trace(trace, "agent2.sql_generate.reference", "request",
+                    dataset_id=dataset_id, dataset_name=dataset_meta.get("dataset_name"),
+                    business_summary="已检索参考 SQL，交由 AI 核对问题、字段与统计口径；不会直接执行样例。")
             agent3_review_policy = "normal"
             if sql_strategy.get("mode") == "sample_direct" and sql_strategy.get("sql"):
                 step_started = time.time()
@@ -9410,6 +9525,7 @@ Agent3 复核结果：
                     dataset_name=dataset_meta.get("dataset_name"),
                     sql=self._truncate_text(sql_text, 12000),
                     notes=agent2_result.get("notes", ""),
+                    public_summary=agent2_result.get("public_summary", ""),
                     sql_strategy=sql_strategy,
                 )
                 if not sql_text:
@@ -9459,14 +9575,9 @@ Agent3 复核结果：
                 )
 
             step_started = time.time()
-            review = self._agent3_review(
-                question,
-                route,
-                sql_text,
-                context,
-                agent3_prompt,
-                trace=trace,
-                review_policy=agent3_review_policy,
+            sql_text, review = self._review_sql_with_correction(
+                question,route,sql_text,context,agent2_prompt,agent3_prompt,
+                trace=trace,review_policy=agent3_review_policy,
             )
             final_sql = review.get("final_sql", sql_text)
             coerced_final_sql = self._coerce_city_company_level_sql(question, context, final_sql)
@@ -9536,7 +9647,13 @@ Agent3 复核结果：
                     trace=trace,
                     dataset_name=dataset_meta.get("dataset_name", ""),
                 )
+            except AskCancelled:
+                raise
             except Exception as exec_error:
+                checkpoint()
+                run = current_run()
+                if run and not run.claim_retry():
+                    raise RuntimeError('本任务修复次数已达控制台上限，请调整问题后重试。') from exec_error
                 self._append_trace(
                     trace,
                     "pipeline.execute_sql",
@@ -9561,6 +9678,8 @@ Agent3 复核结果：
                 if repaired_sql:
                     try:
                         repair_review = self._agent3_review(question, route, repaired_sql, context, agent3_prompt, trace=trace)
+                        if repair_review.get("approved") is False:
+                            raise ValueError('修复SQL未通过复核，禁止执行。')
                         repaired_final_sql = (repair_review.get("final_sql") or repaired_sql).strip()
                         repaired_final_sql = self._coerce_city_company_level_sql(question, context, repaired_final_sql)
                         if not self._is_read_only_sql(repaired_final_sql):
@@ -9659,6 +9778,7 @@ Agent3 复核结果：
                 trace,
                 "pipeline.agent4_result",
                 "info",
+                analysis_status=context.get("analysis_status", "model_generated"),
                 dataset_id=dataset_id,
                 dataset_name=dataset_meta.get("dataset_name"),
                 analysis_preview=self._truncate_text(analysis_text, 4000),
@@ -9668,7 +9788,7 @@ Agent3 复核结果：
                 {
                     "title": "Agent4 业务解读",
                     "duration": round((time.time() - step_started) * 1000, 2),
-                    "status": "success",
+                    "status": "warning" if context.get("analysis_status") == "model_unavailable" else "success",
                 }
             )
 
@@ -9680,6 +9800,8 @@ Agent3 复核结果：
                     "source_id": context["dataset"]["source_id"],
                     "report_config": report_config,
                     "report_config_source": report_config_source,
+                    "analysis_status": context.get("analysis_status", "model_generated"),
+                    "query_status": "completed",
                     "resolved_entities": context.get("resolved_entities"),
                     "query_intent": context.get("query_intent") or {},
                     "agent3_review": review,
@@ -9707,7 +9829,7 @@ Agent3 复核结果：
         # 2026-09-03：诊断/卡片必须用用户原始问题（route.raw_question），不能用追问改写后的
         # effective_question——条件类追问会被 resolve_followup 拼成"指令+上轮SQL+新问题"的
         # prompt blob，对它做拼音召回会把 SQL 里的节点名当碎片，卡片文案也漏出 prompt。
-        if dataset_results and not any(int(d.get("row_count") or 0) > 0 for d in dataset_results):
+        if self._can_diagnose_empty_results(dataset_results):
             try:
                 from disambiguation import zero_row_diagnosis as _zrd
 
@@ -9739,7 +9861,8 @@ Agent3 复核结果：
                         return _zrd_result
                     if _diag and _diag.get("honest_analysis"):
                         for _d in dataset_results:
-                            _d["analysis"] = _diag["honest_analysis"]
+                            if _d.get("analysis_status") != "model_generated":
+                                _d["analysis"] = _diag["honest_analysis"]
                         self._append_trace(
                             trace, "zero_row.diagnosis", "info",
                             branch=_diag.get("branch"), subject=_diag.get("subject"),
@@ -9804,6 +9927,7 @@ Agent3 复核结果：
         trace = self._new_trace(question, "ask", live_callback=live_callback)
         memory_history = conversation_history or self.short_term_memory.get(conversation_session_id)
         raw_question = question
+        preserve_followup_scope = bool(memory_history and ShortTermMemoryStore.references_previous(question))
         effective_question = self.short_term_memory.resolve_followup(question, memory_history) or question
         org_subject_resolution = None
         if self._looks_like_org_subject_question(question):
@@ -9837,7 +9961,8 @@ Agent3 复核结果：
                         domain_scope_dataset_id=domain_scope_id,
                     )
                 else:
-                    effective_question = rewritten_question
+                    if not preserve_followup_scope:
+                        effective_question = rewritten_question
                     self._append_trace(
                         trace,
                         "agent1.org_subject_resolved",
@@ -9866,7 +9991,7 @@ Agent3 复核结果：
                 effective_question = question
                 explicit_dataset_followup_reset = True
         explicit_followup_org_target = self._extract_followup_org_target(question)
-        if explicit_followup_org_target and effective_question != question:
+        if explicit_followup_org_target and effective_question != question and not preserve_followup_scope:
             # 追问里已经明确给出了新的组织对象时，不要再把上一轮对象正文一并下传。
             # 否则 SQL 生成阶段容易继续沿用上一轮对象，只把本轮对象当作补充说明。
             effective_question = (

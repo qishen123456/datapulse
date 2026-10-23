@@ -126,6 +126,8 @@ def merge_with_default_config(config: dict | None) -> dict:
     needs SQL projection contracts and analysis dimensions, so older configs should
     inherit those defaults without forcing users to recreate them.
     """
+    if isinstance(config, dict) and config.get("profile") == "generic":
+        return {**get_generic_config(), **config}
     default = get_default_config()
     if not isinstance(config, dict):
         return default
@@ -155,6 +157,17 @@ def merge_with_default_config(config: dict | None) -> dict:
                 merged_policies[policy_key] = policy_value
         merged["intentPolicies"] = merged_policies
     return merged
+
+
+def get_generic_config() -> dict:
+    """Unconfigured datasets have no implicit sales-target/attainment contract."""
+    return {
+        "profile": "generic", "reportTitle": "数据分析简报", "metrics": [],
+        "levels": [], "signalRules": [], "intentPolicies": {}, "sections": [],
+        "nameColumn": "", "parentColumn": "", "trackColumn": "", "levelColumn": "",
+        "sqlOutputContract": {}, "sourceFields": {},
+        "agentReportGuidance": "只解释实际返回的字段与数值，单位依字段和业务字典。不得补造任务、达成率、风险灯、组织层级或因果关系。结论须可回到查询数据。没有对比基准不能声称增长或异常。",
+    }
 
 
 def get_default_config() -> dict:

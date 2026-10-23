@@ -296,15 +296,15 @@ const confirmAsk = () => {
 }
 
 .ax-parse-token-dataset {
-  background: #ECFEFF;
+  background: #f0f4ef;
   color: #1D4ED8;
   border: 1px solid #BFDBFE;
 }
 
 .ax-parse-token-node {
-  background: #F0FDFA;
-  color: #0F766E;
-  border: 1px solid #99F6E4;
+  background: #f0f4ef;
+  color: #294e3e;
+  border: 1px solid #cfddd1;
 }
 
 .ax-parse-token-inherited {
@@ -390,13 +390,13 @@ const confirmAsk = () => {
   background: transparent;
   border-radius: 7px;
   font-size: 13px;
-  color: #334155;
+  color: #39463f;
   cursor: pointer;
 }
 
 .ax-parse-picker-item:hover {
   background: #F1F5F9;
-  color: #0F766E;
+  color: #294e3e;
 }
 
 .ax-parse-picker-current {
@@ -450,14 +450,14 @@ const confirmAsk = () => {
   padding: 4px 12px;
   border: none;
   border-radius: 7px;
-  background: #0F766E;
+  background: #294e3e;
   color: #FFFFFF;
   font-size: 12px;
   cursor: pointer;
 }
 
 .ax-parse-confirm-btn:hover {
-  background: #115E59;
+  background: #1e3a8a;
 }
 
 .ax-parse-undo {
@@ -471,7 +471,7 @@ const confirmAsk = () => {
 }
 
 .ax-parse-undo:hover {
-  color: #334155;
+  color: #39463f;
   border-color: #CBD5E1;
 }
 </style>

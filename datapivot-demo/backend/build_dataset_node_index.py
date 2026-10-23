@@ -18,6 +18,9 @@ SUPPORTED_DATASET_CODES = (
     "panshi_deal_flow_2026_phase1",
     "feishu_tbl_beta",
     "feishu_tblyongfukaidan",
+    "GAS_BIZ",
+    "GAS_AR",
+    "GAS_SAFE",
 )
 SOURCE_TABLE_TO_DATASET_CODES = {
     "feishu_tbl_alpha": ["yunshu_ops_overview_v1"],
@@ -25,6 +28,17 @@ SOURCE_TABLE_TO_DATASET_CODES = {
     "feishu_tbl_beta": ["feishu_tbl_beta"],
     "feishu_tblyongfukaidan": ["feishu_tblyongfukaidan"],
 }
+SOURCE_TABLE_TO_DATASET_CODES.update({
+    "raw_gas_org": ["GAS_BIZ", "GAS_AR", "GAS_SAFE"],
+    "raw_gas_sales_monthly": ["GAS_BIZ", "GAS_AR"],
+    "raw_gas_supply_monthly": ["GAS_BIZ"],
+    "raw_gas_profit_monthly": ["GAS_BIZ"],
+    "raw_gas_growth_monthly": ["GAS_BIZ"],
+    "raw_gas_ar_monthly": ["GAS_AR"],
+    "raw_gas_safety_monthly": ["GAS_SAFE"],
+    "raw_gas_network_assets": ["GAS_SAFE"],
+    "raw_gas_hazard_orders": ["GAS_SAFE"],
+})
 
 LEVEL_SUFFIXES = [
     "城市战区",
@@ -321,6 +335,8 @@ def _build_dataset_nodes(
             continue
         seen_keys.add(node_key)
         aliases = _build_aliases(node_name)
+        if dataset_code in {"GAS_BIZ", "GAS_AR", "GAS_SAFE"} and node_name.endswith("分公司"):
+            aliases.append(node_name.removesuffix("分公司"))
         for extra in EXTRA_NODE_ALIASES.get((dataset_code, node_name), []):
             if extra not in aliases:
                 aliases.append(extra)
@@ -479,6 +495,12 @@ def _build_sql_for_dataset(
     dataset_code: str,
     context: Dict[str, Any],
 ) -> str:
+    if dataset_code in {"GAS_BIZ", "GAS_AR", "GAS_SAFE"}:
+        return """SELECT CASE n.org_level WHEN 1 THEN '集团' WHEN 2 THEN '分公司'
+            WHEN 3 THEN '服务中心' ELSE '网格' END AS node_level,
+            n.org_name AS node_name,p.org_name AS parent_name,'江城燃气' AS track
+            FROM v_gas_org n LEFT JOIN v_gas_org p ON n.parent_id=p.org_id
+            ORDER BY n.org_level,n.org_id"""
     if dataset_code == "yunshu_ops_overview_v1":
         return _consumer_nodes_sql()
     if dataset_code == "panshi_deal_flow_2026_phase1":

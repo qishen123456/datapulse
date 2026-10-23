@@ -11,7 +11,7 @@ AGENTS_FILE = os.path.join(DATA_DIR, "agent_registry.json")
 DEFAULT_AGENTS = [
     {
         "agent_no": 1,
-        "name": "Agent1 路由中枢",
+        "name": "主理人 · 路由与研究规划",
         "role_summary": "识别业务语义、匹配数据集、发现歧义口径并决定是否需要确认。",
         "system_prompt": (
             "你是全域路由中枢。你的职责不是直接回答业务问题，而是基于用户问题、数据集标签、同义词、常见问题、"
@@ -27,7 +27,7 @@ DEFAULT_AGENTS = [
     },
     {
         "agent_no": 2,
-        "name": "Agent2 SQL 架构师",
+        "name": "查询专家",
         "role_summary": "结合数据字典、DDL、LLD、表关系和高质量样本生成可执行 SQL。",
         "system_prompt": (
             "你是 SQL 架构师。你必须严格依据当前数据集的 LLD、数据字典、Schema、表关系和 Golden SQL 样本生成只读 SQL。"
@@ -42,7 +42,7 @@ DEFAULT_AGENTS = [
     },
     {
         "agent_no": 3,
-        "name": "Agent3 合规审计员",
+        "name": "核验专家",
         "role_summary": "复核 SQL 是否满足统计口径、LLD 约束和只读安全要求。",
         "system_prompt": (
             "你是 SQL 审计员。你不重新理解业务问题，而是复核 SQL 是否满足当前数据集的统计口径、"
@@ -58,7 +58,7 @@ DEFAULT_AGENTS = [
     },
     {
         "agent_no": 4,
-        "name": "Agent4 业务分析官",
+        "name": "分析与报告专家",
         "role_summary": "把审计通过后的结果转成老板视角的结论、风险和建议。",
         "system_prompt": (
             "你是高管业务分析官。你要从老板视角总结关键结论、异常点、原因判断和管理建议，"
@@ -90,7 +90,11 @@ def load_agents() -> List[Dict[str, Any]]:
     _ensure_file()
     with open(AGENTS_FILE, "r", encoding="utf-8") as file:
         data = json.load(file)
-    return data if isinstance(data, list) else deepcopy(DEFAULT_AGENTS)
+    agents = data if isinstance(data, list) else deepcopy(DEFAULT_AGENTS)
+    legacy_names = {'Agent1 路由中枢': '主理人 · 路由与研究规划', 'Agent2 SQL 架构师': '查询专家', 'Agent3 合规审计员': '核验专家', 'Agent4 业务分析官': '分析与报告专家'}
+    for item in agents:
+        item['name'] = legacy_names.get(item.get('name'), item.get('name'))
+    return agents
 
 
 def save_agents(agents: List[Dict[str, Any]]) -> None:

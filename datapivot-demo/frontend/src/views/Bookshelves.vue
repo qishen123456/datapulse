@@ -179,10 +179,10 @@
                   <el-table-column label="Agent" width="120">
                     <template #default="{ row }">
                       <el-select v-model="row.agent_no">
-                        <el-option :value="1" label="Agent1 路由" />
-                        <el-option :value="2" label="Agent2 SQL" />
-                        <el-option :value="3" label="Agent3 审计" />
-                        <el-option :value="4" label="Agent4 分析" />
+                        <el-option :value="1" label="主理人路由" />
+                        <el-option :value="2" label="查询专家 SQL" />
+                        <el-option :value="3" label="核验专家" />
+                        <el-option :value="4" label="分析与报告专家" />
                       </el-select>
                     </template>
                   </el-table-column>
@@ -370,8 +370,8 @@ onMounted(async () => {
   transform: translateY(-1px);
 }
 .dataset-item.active {
-  border-color: var(--color-primary, #0D9488);
-  background: var(--color-primary-light, #F0FDFA);
+  border-color: var(--color-primary, #1d4ed8);
+  background: var(--color-primary-light, #eff6ff);
 }
 .dataset-name {
   font-weight: 600;

@@ -1,11 +1,9 @@
 <template>
-  <div class="fs-page">
+  <div class="module-layout-v4 fs-page">
     <section class="fs-hero">
-      <div class="fs-hero-orb"></div>
       <div class="fs-hero-copy">
-        <div class="fs-kicker">FEISHU DATA PIPELINE</div>
-        <h2>飞书同步工作台</h2>
-        <p>把多维表格沉淀为可问数的数据资产，统一管理同步任务、运行状态、目标表和操作日志。</p>
+        <h2>飞书同步</h2>
+        <p>将多维表格同步到数据库，管理任务调度与运行记录。</p>
       </div>
       <div class="fs-hero-actions">
         <button class="fs-btn fs-btn-ghost" @click="loadData">
@@ -19,9 +17,8 @@
       </div>
     </section>
 
-    <section class="fs-stat-grid">
+    <section class="fs-stat-grid" aria-label="同步任务概览">
       <article v-for="card in statCards" :key="card.label" class="fs-stat-card" :class="card.tone">
-        <span class="fs-stat-icon">{{ card.icon }}</span>
         <div class="fs-stat-copy">
           <span class="fs-stat-label">{{ card.label }}</span>
           <strong>{{ card.value }}</strong>
@@ -31,22 +28,12 @@
     </section>
 
     <section class="fs-ops-board" v-loading="loading || loadingAllLogs">
-      <div class="fs-board-head">
-        <div>
-          <div class="fs-board-kicker">OPERATIONS VIEW</div>
-          <h3>飞书同步运营视图</h3>
-          <p>集中管理同步任务、预计执行时间和全局运行日志，异常任务不用再逐个点卡片排查。</p>
-        </div>
-        <div class="fs-board-tags">
-          <span>{{ nextRunSummary }}</span>
-          <span>{{ filteredAllLogs.length }} 条日志</span>
-        </div>
-      </div>
+      <div class="fs-board-head"><span class="fs-board-status"><i></i>{{ nextRunSummary }}</span><span>{{ filteredAllLogs.length }} 条运行日志</span></div>
 
       <el-tabs v-model="opsActiveTab" class="fs-ops-tabs">
         <el-tab-pane name="schedule">
           <template #label>
-            <span class="fs-tab-label">全局调度视图</span>
+            <span class="fs-tab-label">任务调度</span>
           </template>
           <section class="fs-ops-panel fs-schedule-panel">
             <div class="fs-panel-title">
@@ -97,7 +84,7 @@
                   <span :class="['fs-next-run', row.nextRunTone]">{{ row.nextRunText }}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" width="156" fixed="right">
+              <el-table-column label="操作" width="156">
                 <template #default="{ row }">
                   <div class="fs-row-actions">
                     <el-button v-if="isFeatureEnabled('feishu_sync_start')" link type="primary" size="small" @click="startSync(row)" :disabled="!row.is_active || row.last_sync_status === 'running'">同步</el-button>
@@ -111,7 +98,7 @@
 
         <el-tab-pane name="logs">
           <template #label>
-            <span class="fs-tab-label">统一运行日志</span>
+            <span class="fs-tab-label">运行日志</span>
           </template>
           <section class="fs-ops-panel fs-log-panel">
             <div class="fs-panel-title">
@@ -213,7 +200,7 @@
 
         <el-tab-pane name="tasks">
           <template #label>
-            <span class="fs-tab-label">同步任务编排</span>
+            <span class="fs-tab-label">任务配置</span>
           </template>
           <section class="fs-ops-panel fs-task-panel" v-loading="loading">
             <div class="fs-board-head">
@@ -529,6 +516,7 @@
 </template>
 
 <script setup>
+import "../styles/module-interiors.css"
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Delete, Document, Edit, Plus, RefreshRight, VideoPause, VideoPlay } from '@element-plus/icons-vue'
@@ -1165,7 +1153,7 @@ onUnmounted(() => {
   padding: 28px;
   color: #111827;
   background:
-    radial-gradient(circle at 8% 0%, rgba(13, 148, 136, 0.10), transparent 30%),
+    radial-gradient(circle at 8% 0%, rgba(29, 78, 216, 0.10), transparent 30%),
     radial-gradient(circle at 90% 16%, rgba(8, 145, 178, 0.08), transparent 28%),
     linear-gradient(180deg, #EDF2F1 0%, #F2F5F4 100%);
 }
@@ -1193,7 +1181,7 @@ onUnmounted(() => {
   width: 210px;
   height: 210px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(13, 148, 136, 0.28), transparent 62%);
+  background: radial-gradient(circle, rgba(29, 78, 216, 0.28), transparent 62%);
   filter: blur(2px);
 }
 
@@ -1207,7 +1195,7 @@ onUnmounted(() => {
   font-size: 12px;
   font-weight: 900;
   letter-spacing: 0.14em;
-  color: #0D9488;
+  color: #1d4ed8;
 }
 
 .fs-hero h2 {
@@ -1259,7 +1247,7 @@ onUnmounted(() => {
 
 .fs-btn-primary {
   color: #fff;
-  background: linear-gradient(135deg, #1A1A1A 0%, #0D9488 100%);
+  background: linear-gradient(135deg, #1A1A1A 0%, #1d4ed8 100%);
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24);
 }
 
@@ -1298,8 +1286,8 @@ onUnmounted(() => {
   justify-content: center;
   font-size: 18px;
   font-weight: 900;
-  color: #0D9488;
-  background: linear-gradient(180deg, #F0FDFA 0%, #F0FDFA 100%);
+  color: #1d4ed8;
+  background: linear-gradient(180deg, #eff6ff 0%, #eff6ff 100%);
 }
 
 .fs-stat-card.running .fs-stat-icon {
@@ -1308,8 +1296,8 @@ onUnmounted(() => {
 }
 
 .fs-stat-card.failed .fs-stat-icon {
-  color: #0D9488;
-  background: linear-gradient(180deg, #F0FDFA 0%, #F0FDFA 100%);
+  color: #1d4ed8;
+  background: linear-gradient(180deg, #eff6ff 0%, #eff6ff 100%);
 }
 
 .fs-stat-card.quiet .fs-stat-icon {
@@ -1368,8 +1356,8 @@ onUnmounted(() => {
   padding: 0 12px;
   border-radius: 999px;
   background: #F2F5F4;
-  border: 1px solid rgba(13, 148, 136, 0.12);
-  color: #0D9488;
+  border: 1px solid rgba(29, 78, 216, 0.12);
+  color: #1d4ed8;
   font-size: 12px;
   font-weight: 800;
   display: inline-flex;
@@ -1406,7 +1394,7 @@ onUnmounted(() => {
 }
 
 .fs-ops-tabs :deep(.el-tabs__item.is-active) {
-  color: #0D9488;
+  color: #1d4ed8;
 }
 
 .fs-tab-label {
@@ -1509,7 +1497,7 @@ onUnmounted(() => {
 }
 
 .fs-next-run.is-waiting {
-  color: #0D9488;
+  color: #1d4ed8;
   font-weight: 800;
 }
 
@@ -1545,9 +1533,9 @@ onUnmounted(() => {
   background: #9CA3AF;
 }
 
-.fs-task-card.is-success::before { background: linear-gradient(90deg, #0D9488, #10B981); }
+.fs-task-card.is-success::before { background: linear-gradient(90deg, #1d4ed8, #10B981); }
 .fs-task-card.is-running::before { background: linear-gradient(90deg, #f59e0b, #9CA3AF); }
-.fs-task-card.is-failed::before { background: linear-gradient(90deg, #0D9488, #F87171); }
+.fs-task-card.is-failed::before { background: linear-gradient(90deg, #1d4ed8, #F87171); }
 
 .fs-task-top {
   display: flex;
@@ -1584,7 +1572,7 @@ onUnmounted(() => {
 }
 
 .is-failed .fs-task-status-dot {
-  background: #0D9488;
+  background: #1d4ed8;
   box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.12);
 }
 
@@ -1626,8 +1614,8 @@ onUnmounted(() => {
 }
 
 .fs-status-pill.is-failed {
-  color: #0D9488;
-  background: #F0FDFA;
+  color: #1d4ed8;
+  background: #eff6ff;
 }
 
 .fs-task-meta {
@@ -1673,7 +1661,7 @@ onUnmounted(() => {
 .fs-task-route i {
   height: 1px;
   flex: 1;
-  background: linear-gradient(90deg, rgba(13, 148, 136, 0.18), rgba(0, 0, 0, 0.38), rgba(13, 148, 136, 0.18));
+  background: linear-gradient(90deg, rgba(29, 78, 216, 0.18), rgba(0, 0, 0, 0.38), rgba(29, 78, 216, 0.18));
 }
 
 .fs-task-actions {
@@ -1698,13 +1686,13 @@ onUnmounted(() => {
 }
 
 .fs-action-primary {
-  color: #0D9488;
-  background: #F0FDFA;
+  color: #1d4ed8;
+  background: #eff6ff;
 }
 
 .fs-action-danger {
-  color: #0D9488;
-  background: #F0FDFA;
+  color: #1d4ed8;
+  background: #eff6ff;
 }
 
 .fs-url-assist,
@@ -1712,9 +1700,9 @@ onUnmounted(() => {
   margin-bottom: 18px;
   padding: 16px;
   border-radius: 6px;
-  border: 1px solid rgba(13, 148, 136, 0.12);
+  border: 1px solid rgba(29, 78, 216, 0.12);
   background:
-    radial-gradient(circle at 96% 0%, rgba(13, 148, 136, 0.12), transparent 34%),
+    radial-gradient(circle at 96% 0%, rgba(29, 78, 216, 0.12), transparent 34%),
     #F2F5F4;
 }
 
@@ -1758,7 +1746,7 @@ onUnmounted(() => {
 }
 
 .fs-schema-panel.is-ready {
-  border-color: rgba(13, 148, 136, 0.24);
+  border-color: rgba(29, 78, 216, 0.24);
 }
 
 .fs-schema-summary {
@@ -1799,7 +1787,7 @@ onUnmounted(() => {
   margin-top: 12px;
   padding: 12px 14px;
   border-radius: 6px;
-  border: 1px solid rgba(13, 148, 136, 0.14);
+  border: 1px solid rgba(29, 78, 216, 0.14);
   background: rgba(236, 254, 255, 0.82);
   display: flex;
   align-items: center;
@@ -1837,7 +1825,7 @@ onUnmounted(() => {
 }
 
 .fs-field-box.removed {
-  border-color: rgba(13, 148, 136, 0.16);
+  border-color: rgba(29, 78, 216, 0.16);
 }
 
 .fs-field-box-title {
@@ -1987,4 +1975,18 @@ onUnmounted(() => {
 .fs-log-actions .el-radio-group {
   margin-right: 8px;
 }
+
+/* Operations workspace: compact status, one task surface, persistent navigation. */
+.fs-page{padding:0;background:transparent;color:#18222f}
+.fs-hero{min-height:0;overflow:visible;padding:0;margin:0 0 24px;border:0;border-radius:0;background:none;box-shadow:none;gap:20px}
+.fs-hero h2{margin:0;font-size:24px;font-weight:600;letter-spacing:-.6px}.fs-hero p{margin-top:8px;font-size:13px;color:#778292}.fs-hero-actions{gap:8px}
+.fs-btn,.fs-action-btn{font-weight:500;transition:background .15s,border-color .15s}.fs-btn{height:34px;padding:0 13px;border-radius:7px;font-size:12px}.fs-btn:hover,.fs-action-btn:hover{transform:none}.fs-btn-primary{background:#365f91;box-shadow:none}.fs-btn-primary:hover{background:#294d77}.fs-btn-ghost{color:#526278;background:#fff;border:1px solid #dde3eb;box-shadow:none}
+.fs-stat-grid{display:flex;flex-wrap:wrap;gap:0;margin:0 0 24px;border-top:1px solid #e3e7ed;border-bottom:1px solid #e3e7ed;padding:18px 0;background:none}
+.fs-stat-card{flex:1;min-width:150px;min-height:0;padding:0 24px;border:0;border-right:1px solid #e3e7ed;border-radius:0;background:transparent;box-shadow:none}.fs-stat-card:first-child{padding-left:0}.fs-stat-card:last-child{border:0}.fs-stat-copy{display:grid;grid-template-columns:auto 1fr;gap:7px 14px;align-items:center}.fs-stat-label{font-size:12px;font-weight:400;color:#6f7c8e}.fs-stat-copy strong{font-size:20px;font-weight:600;letter-spacing:-.4px;color:#33465f}.fs-stat-copy small{grid-column:1/-1;font-size:10px;color:#8a95a4}
+.fs-ops-board{padding:0 22px 22px;margin:0;border:1px solid #e1e5eb;border-radius:12px;background:#fff;box-shadow:none;min-height:400px}.fs-board-head{margin:0;padding:16px 0 12px;align-items:center;font-size:11px;color:#8a95a4;gap:12px}.fs-board-status{display:flex;align-items:center;gap:7px;color:#6b7c90}.fs-board-status i{width:5px;height:5px;border-radius:50%;background:#8799af}
+.fs-ops-tabs{margin:0}.fs-ops-tabs :deep(.el-tabs__header){margin:0 0 20px}.fs-ops-tabs :deep(.el-tabs__item){font-weight:500;font-size:13px;height:44px;color:#758294}.fs-ops-tabs :deep(.el-tabs__item.is-active){color:#365f91}
+.fs-ops-panel{padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}.fs-panel-title{margin-bottom:18px;gap:18px}.fs-panel-title strong{font-size:13px;font-weight:500;color:#33465f}.fs-panel-title span{font-size:11px;color:#8490a1}.fs-schedule-actions,.fs-log-actions{gap:8px}.fs-compact-table{border-radius:0}.fs-compact-table :deep(th.el-table__cell){font-size:11px;font-weight:500;color:#7d8898}.fs-compact-table :deep(td.el-table__cell){height:62px}.fs-compact-table :deep(.cell>strong){font-weight:500}.fs-compact-table :deep(.cell>small){font-size:11px;color:#8993a1}
+.fs-task-card{border:1px solid #e2e7ed;border-radius:10px;background:#fff;box-shadow:none}.fs-task-card:hover{transform:none;box-shadow:none;border-color:#bccbda}.fs-task-grid{gap:16px}.fs-task-meta{background:#f8fafc}.fs-task-icon{background:#eef3f8;color:#5c7899;box-shadow:none}.fs-action-btn{box-shadow:none}.fs-section-title h3{font-size:16px;font-weight:600}.fs-empty{background:transparent;border:0;box-shadow:none}
+@media(max-width:760px){.fs-page{padding:0}.fs-hero{gap:16px}.fs-hero-actions{justify-content:flex-start}.fs-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 0}.fs-stat-card{min-width:0;padding:0 16px}.fs-stat-card:nth-child(odd){padding-left:0}.fs-stat-card:nth-child(even){border:0}.fs-stat-copy{gap:7px 10px}.fs-stat-copy strong{font-size:18px}.fs-ops-board{padding:0 16px 18px}.fs-board-head{flex-direction:row;align-items:center}.fs-panel-title{align-items:stretch}.fs-schedule-actions .el-input,.fs-schedule-actions .el-select{width:100%}.fs-ops-tabs :deep(.el-tabs__item){padding:0 14px}.fs-hero h2{font-size:22px}}
+
 </style>

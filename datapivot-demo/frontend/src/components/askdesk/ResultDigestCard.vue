@@ -13,14 +13,14 @@
     </div>
 
     <div class="ax-core-section">
-      <div class="ax-section-label">一、核心结论</div>
+      <div class="ax-section-label">核心结论</div>
       <div class="ax-core-body">
         <p class="ax-boss-answer-conclusion">{{ coreConclusionText }}</p>
       </div>
     </div>
 
     <div v-if="primaryKpiCards.length" class="ax-report-mini-section">
-      <div class="ax-section-label">二、关键指标</div>
+      <div class="ax-section-label">关键指标</div>
       <div class="ax-kpi-grid" :class="kpiGridClass" :style="kpiGridStyle">
         <article v-for="card in primaryKpiCards" :key="card.key" class="ax-kpi-card" :class="[`is-${card.tone}`, card.isLeader ? 'is-compare-leader' : '']">
           <div v-if="card.rankText || card.parentText" class="ax-kpi-card-top">
@@ -102,7 +102,7 @@
     </div>
 
     <div v-if="insightCards.length" class="ax-report-mini-section">
-      <div class="ax-section-label">三、结构看板</div>
+      <div class="ax-section-label">结构与覆盖</div>
       <div class="ax-insight-grid">
         <article v-for="item in insightCards" :key="item.label" class="ax-insight-card" :class="`is-${item.tone}`">
           <span>{{ item.label }}</span>
@@ -2862,7 +2862,7 @@ const actionItems = computed(() => {
   width: 100%;
   padding: 15px 17px 16px;
   border-radius: 6px;
-  border: 1px solid rgba(13, 148, 136, 0.12);
+  border: 1px solid rgba(29, 78, 216, 0.12);
   background: linear-gradient(180deg, #ffffff 0%, #FFFFFF 100%);
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.055);
 }
@@ -2894,7 +2894,7 @@ const actionItems = computed(() => {
 
 .ax-boss-answer-kicker,
 .ax-section-label {
-  color: #0D9488;
+  color: #1d4ed8;
   font-size: 12px;
   line-height: 1.35;
   font-weight: 800;
@@ -2905,10 +2905,10 @@ const actionItems = computed(() => {
   align-items: center;
   height: 22px;
   padding: 0 8px;
-  border: 1px solid rgba(13, 148, 136, 0.16);
+  border: 1px solid rgba(29, 78, 216, 0.16);
   border-radius: 4px;
   background: #F2F5F4;
-  color: #0D9488;
+  color: #1d4ed8;
   font-size: 11px;
   font-weight: 800;
   line-height: 1;
@@ -2995,8 +2995,8 @@ const actionItems = computed(() => {
 }
 
 .ax-kpi-rank-badge.is-leader {
-  background: linear-gradient(90deg, rgba(13, 148, 136, 0.10) 0%, rgba(13, 148, 136, 0.05) 100%);
-  color: #0F766E;
+  background: linear-gradient(90deg, rgba(29, 78, 216, 0.10) 0%, rgba(29, 78, 216, 0.05) 100%);
+  color: #1e40af;
 }
 
 .ax-kpi-parent {
@@ -3062,7 +3062,7 @@ const actionItems = computed(() => {
 }
 
 .ax-kpi-card.is-danger .ax-kpi-value {
-  color: #0D9488;
+  color: #1d4ed8;
 }
 
 .ax-insight-grid {
@@ -3151,13 +3151,13 @@ const actionItems = computed(() => {
 }
 
 .ax-section-summary .is-risk {
-  color: #0F766E;
+  color: #1e40af;
   font-weight: 800;
 }
 
 .ax-drill-section {
   padding: 11px 12px 12px;
-  border: 1px solid rgba(13, 148, 136, 0.12);
+  border: 1px solid rgba(29, 78, 216, 0.12);
   border-radius: 6px;
   background: #FFFFFF;
 }
@@ -3219,9 +3219,9 @@ const actionItems = computed(() => {
   gap: 10px;
   align-items: center;
   padding: 10px 12px;
-  border-top: 1px solid rgba(13, 148, 136, 0.08);
-  border-left: 3px solid #0D9488;
-  background: linear-gradient(90deg, rgba(13, 148, 136, 0.08), rgba(13, 148, 136, 0.02));
+  border-top: 1px solid rgba(29, 78, 216, 0.08);
+  border-left: 3px solid #1d4ed8;
+  background: linear-gradient(90deg, rgba(29, 78, 216, 0.08), rgba(29, 78, 216, 0.02));
 }
 
 .ax-drill-table.is-person-ranking .ax-drill-group-row {
@@ -3300,7 +3300,7 @@ const actionItems = computed(() => {
 
 .ax-drill-group-row.is-group-3 {
   border-left-color: #10B981;
-  background: linear-gradient(90deg, rgba(13, 148, 136, 0.1), rgba(13, 148, 136, 0.025));
+  background: linear-gradient(90deg, rgba(29, 78, 216, 0.1), rgba(29, 78, 216, 0.025));
 }
 
 .ax-drill-group-row.is-group-3 .ax-drill-group-node strong,
@@ -3348,7 +3348,7 @@ const actionItems = computed(() => {
 }
 
 .ax-drill-group-node strong {
-  color: #0D9488;
+  color: #1d4ed8;
   font-size: 13px;
   font-weight: 800;
   overflow: hidden;
@@ -3392,7 +3392,7 @@ const actionItems = computed(() => {
 
 .ax-drill-group-title-only > span {
   min-width: 0;
-  color: #0D9488;
+  color: #1d4ed8;
   font-size: 13px;
   font-weight: 800;
   overflow: hidden;
@@ -3501,7 +3501,7 @@ const actionItems = computed(() => {
   height: 100%;
   min-width: 6px;
   border-radius: inherit;
-  background: linear-gradient(90deg, #0F766E 0%, #0891B2 50%, #0E7490 100%);
+  background: linear-gradient(90deg, #1e40af 0%, #2563eb 50%, #1e40af 100%);
   box-shadow: 0 3px 10px rgba(180, 83, 9, 0.12);
 }
 
@@ -3526,12 +3526,12 @@ const actionItems = computed(() => {
 }
 
 .ax-drill-rate.is-danger .ax-drill-bar i {
-  background: linear-gradient(90deg, #0F766E 0%, #0891B2 60%, #0E7490 100%);
+  background: linear-gradient(90deg, #1e40af 0%, #2563eb 60%, #1e40af 100%);
 }
 
 .ax-drill-rate.is-danger .ax-drill-rate-head strong,
 .ax-drill-rate.is-danger .ax-drill-rate-head span {
-  color: #0F766E;
+  color: #1e40af;
 }
 
 .ax-drill-rate.is-neutral .ax-drill-bar i {
@@ -3556,13 +3556,13 @@ const actionItems = computed(() => {
 }
 
 .ax-drill-rate.is-rank-bottom .ax-drill-bar i {
-  background: linear-gradient(90deg, #0F766E 0%, #0891B2 60%, #0E7490 100%);
+  background: linear-gradient(90deg, #1e40af 0%, #2563eb 60%, #1e40af 100%);
   box-shadow: 0 3px 10px rgba(180, 83, 9, 0.14);
 }
 
 .ax-drill-rate.is-rank-bottom .ax-drill-rate-head strong,
 .ax-drill-rate.is-rank-bottom .ax-drill-rate-head span {
-  color: #0F766E;
+  color: #1e40af;
 }
 
 .ax-drill-rate.is-rank-neutral .ax-drill-bar i {
@@ -3589,7 +3589,7 @@ const actionItems = computed(() => {
   min-width: 0;
   padding: 11px 12px;
   border-radius: 5px;
-  border: 1px solid rgba(13, 148, 136, 0.1);
+  border: 1px solid rgba(29, 78, 216, 0.1);
   background: #ffffff;
 }
 
@@ -3636,7 +3636,7 @@ const actionItems = computed(() => {
 }
 
 .ax-comparison-card.is-leader {
-  border-color: rgba(13, 148, 136, 0.22);
+  border-color: rgba(29, 78, 216, 0.22);
   background: #F2F5F4;
 }
 
@@ -3660,7 +3660,7 @@ const actionItems = computed(() => {
 
 .ax-comparison-card-head strong {
   flex-shrink: 0;
-  color: #0D9488;
+  color: #1d4ed8;
   font-size: 15px;
   line-height: 1.25;
 }
@@ -3695,12 +3695,12 @@ const actionItems = computed(() => {
   padding: 8px 10px;
   border-radius: 4px;
   background: linear-gradient(180deg, #ffffff 0%, #F2F5F4 100%);
-  border: 1px solid rgba(13, 148, 136, 0.12);
+  border: 1px solid rgba(29, 78, 216, 0.12);
 }
 
 .ax-comparison-lane-row.is-leader {
-  border-color: rgba(13, 148, 136, 0.24);
-  box-shadow: 0 6px 18px rgba(13, 148, 136, 0.08);
+  border-color: rgba(29, 78, 216, 0.24);
+  box-shadow: 0 6px 18px rgba(29, 78, 216, 0.08);
 }
 
 .ax-comparison-lane-head {
@@ -3714,7 +3714,7 @@ const actionItems = computed(() => {
 }
 
 .ax-comparison-lane-head strong {
-  color: #0D9488;
+  color: #1d4ed8;
   font-size: 16px;
   line-height: 1.2;
 }
@@ -3724,7 +3724,7 @@ const actionItems = computed(() => {
   height: 8px;
   margin-top: 8px;
   border-radius: 4px;
-  background: rgba(13, 148, 136, 0.08);
+  background: rgba(29, 78, 216, 0.08);
   overflow: hidden;
 }
 
@@ -3732,7 +3732,7 @@ const actionItems = computed(() => {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #0D9488 0%, #0D9488 100%);
+  background: linear-gradient(90deg, #1d4ed8 0%, #1d4ed8 100%);
 }
 
 .ax-comparison-lane-meta {
@@ -3799,11 +3799,11 @@ const actionItems = computed(() => {
 
 .ax-comparison-chart-row.is-leader .ax-comparison-chart-label,
 .ax-comparison-chart-row.is-leader .ax-comparison-chart-value {
-  color: #0F766E;
+  color: #1e40af;
 }
 
 .ax-comparison-chart-row.is-leader .ax-comparison-chart-track i {
-  background: linear-gradient(90deg, #0F766E 0%, #0891B2 55%, #0E7490 100%);
+  background: linear-gradient(90deg, #1e40af 0%, #2563eb 55%, #1e40af 100%);
   box-shadow: 0 4px 14px rgba(180, 83, 9, 0.18);
 }
 
@@ -3855,7 +3855,7 @@ const actionItems = computed(() => {
   height: 100%;
   min-width: 10px;
   border-radius: inherit;
-  background: linear-gradient(90deg, #0F766E 0%, #0891B2 50%, #0E7490 100%);
+  background: linear-gradient(90deg, #1e40af 0%, #2563eb 50%, #1e40af 100%);
   box-shadow: 0 3px 10px rgba(180, 83, 9, 0.12);
 }
 
@@ -3890,7 +3890,7 @@ const actionItems = computed(() => {
 
 .ax-kpi-card.is-compare-leader .ax-kpi-label,
 .ax-kpi-card.is-compare-leader .ax-kpi-value {
-  color: #0F766E;
+  color: #1e40af;
 }
 
 .ax-comparison-gap-list span {
@@ -3898,7 +3898,7 @@ const actionItems = computed(() => {
   border-radius: 7px;
   background: rgba(248, 246, 243, 0.9);
   border: 1px solid rgba(15, 118, 110, 0.08);
-  color: #0F766E;
+  color: #1e40af;
   font-size: 11px;
   font-weight: 700;
 }
@@ -3915,9 +3915,9 @@ const actionItems = computed(() => {
   height: 28px;
   padding: 0 11px;
   border-radius: 4px;
-  border: 1px solid rgba(13, 148, 136, 0.18);
+  border: 1px solid rgba(29, 78, 216, 0.18);
   background: #F2F5F4;
-  color: #0D9488;
+  color: #1d4ed8;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
@@ -3977,13 +3977,13 @@ const actionItems = computed(() => {
 }
 
 .ax-report-debug-strip .is-danger {
-  border-color: rgba(13, 148, 136, 0.22);
-  background: #F0FDFA;
-  color: #0D9488;
+  border-color: rgba(29, 78, 216, 0.22);
+  background: #eff6ff;
+  color: #1d4ed8;
 }
 
 .ax-report-debug-strip .is-info {
-  border-color: rgba(13, 148, 136, 0.18);
+  border-color: rgba(29, 78, 216, 0.18);
   background: #F2F5F4;
   color: #6B7280;
 }
@@ -4078,4 +4078,9 @@ const actionItems = computed(() => {
     gap: 2px;
   }
 }
+</style>
+
+<style scoped>
+.ax-boss-answer{color:#294032}.ax-boss-answer-title{font-weight:500!important;font-size:20px!important;line-height:1.6!important;letter-spacing:-.4px}.ax-boss-answer-conclusion{font-size:16px!important;font-weight:400!important;line-height:1.9!important;color:#344f3f!important}.ax-section-label{font-size:11px!important;font-weight:500!important;letter-spacing:1px;color:#84938a!important;margin-bottom:12px!important}.ax-kpi-card{background:#f7f9f7!important;border-color:#e8ede8!important;box-shadow:none!important;border-radius:7px!important}.ax-kpi-value{font-size:30px!important;font-weight:500!important;letter-spacing:-.8px;color:#264937!important}.ax-kpi-label{font-size:12px!important;color:#738378!important}.ax-report-mini-section,.ax-core-section{border-color:#e7ede7!important}.ax-boss-answer-link{color:#1d4ed8!important;font-weight:400!important}
+@media(max-width:600px){.ax-kpi-value{font-size:25px!important}.ax-boss-answer-title{font-size:18px!important}}
 </style>

@@ -41,9 +41,9 @@ export const markRunningTaskPending = (id) => {
   }
 }
 
-export const markRunningTaskCompleted = (id) => {
+export const markRunningTaskCompleted = (id, outcome = 'completed') => {
   if (runningSessionId.value === id) {
-    runningTaskStatus.value = 'completed'
+    runningTaskStatus.value = outcome==='failed' || outcome==='canceled' ? 'failed' : outcome==='partial' ? 'partial' : 'completed'
     completedTaskId.value = id
     pendingTaskId.value = null
   }

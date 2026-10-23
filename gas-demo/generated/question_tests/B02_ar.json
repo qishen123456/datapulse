@@ -1,0 +1,39 @@
+{
+  "question": "2026年9月末应收余额是多少",
+  "requires_confirmation": false,
+  "conversation_session_id": "gas-qa-347e82a6604a4678a3b7875ac2f0003f",
+  "rows": [
+    {
+      "期末应收_元": 356614211.92
+    }
+  ],
+  "columns": [
+    "期末应收_元"
+  ],
+  "analysis": "## 江城燃气·应收回款与稽核\n\n2026年9月末，全域应收余额为 **356,614,211.92 元**。",
+  "dataset_results": [
+    {
+      "dataset_id": 65,
+      "dataset_name": "江城燃气·应收回款与稽核",
+      "sql": "SELECT SUM(closing_yuan) AS 期末应收_元 FROM v_gas_ar WHERE month='2026-09'",
+      "columns": [
+        "期末应收_元"
+      ],
+      "rows": [
+        {
+          "期末应收_元": 356614211.92
+        }
+      ],
+      "analysis": "2026年9月末，全域应收余额为 **356,614,211.92 元**。",
+      "analysis_status": "model_generated",
+      "row_count": 1
+    }
+  ],
+  "ask_flow": {
+    "flow": "basic",
+    "reason": "basic_selected",
+    "requested_flow": "basic",
+    "controller": "AskFlowController",
+    "duration_seconds": 80.369
+  }
+}

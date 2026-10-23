@@ -1469,4 +1469,5 @@ class AdvancedAskService:
         self.fallback_service.write_controller_probe(payload)
 
 
-advanced_ask_service = AdvancedAskService()
+# Compatibility export: all runtime imports resolve to the independent research engine.
+from . import advanced_ask_service

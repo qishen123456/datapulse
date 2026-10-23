@@ -225,7 +225,7 @@ watch(displaySql, () => {
   height: 31px;
   border-radius: 4px;
   border: 1px solid rgba(26, 26, 26, 0.16);
-  background: #F0FDFA;
+  background: #eff6ff;
   color: #1A1A1A;
   font-size: 9px;
   font-weight: 800;
@@ -299,8 +299,8 @@ watch(displaySql, () => {
 
 .ax-copy-btn:hover {
   border-color: rgba(26, 26, 26, 0.36);
-  color: #0F766E;
-  background: #F0FDFA;
+  color: #1e40af;
+  background: #eff6ff;
   transform: translateY(-1px);
 }
 

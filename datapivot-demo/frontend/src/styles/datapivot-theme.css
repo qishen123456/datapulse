@@ -7,20 +7,20 @@
   --font-sans: 'HarmonyOS Sans SC', 'MiSans', 'Source Han Sans SC', 'Noto Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Segoe UI', 'PingFang SC', sans-serif;
   --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', Consolas, monospace;
 
-  /* ── 品牌色：翡翠青体系（Teal #0D9488 → Cyan #0891B2）── */
-  --brand-primary: #0D9488;
-  --brand-primary-hover: #0F766E;
-  --brand-primary-active: #115E59;
-  --brand-primary-soft: #F0FDFA;
-  --brand-primary-soft-2: #ECFEFF;
-  --brand-primary-focus: rgba(13, 148, 136, 0.16);
-  --brand-primary-focus-strong: rgba(13, 148, 136, 0.26);
+  /* ── 品牌色：翡翠青体系（Teal #1d4ed8 → Cyan #2563eb）── */
+  --brand-primary: #1d4ed8;
+  --brand-primary-hover: #1e40af;
+  --brand-primary-active: #1e3a8a;
+  --brand-primary-soft: #eff6ff;
+  --brand-primary-soft-2: #eff6ff;
+  --brand-primary-focus: rgba(29, 78, 216, 0.16);
+  --brand-primary-focus-strong: rgba(29, 78, 216, 0.26);
 
   /* 品牌渐变（克制使用，仅深色块/登录页等显式引用处） */
-  --brand-gradient: linear-gradient(135deg, #0D9488 0%, #0891B2 100%);
-  --brand-gradient-hover: linear-gradient(135deg, #0F766E 0%, #0E7490 100%);
-  --brand-gradient-soft: linear-gradient(135deg, #F0FDFA 0%, #ECFEFF 100%);
-  --brand-accent: #0891B2;
+  --brand-gradient: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+  --brand-gradient-hover: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
+  --brand-gradient-soft: linear-gradient(135deg, #eff6ff 0%, #eff6ff 100%);
+  --brand-accent: #2563eb;
 
   /* 深墨岩：承载顶栏与深色面板（青调近黑） */
   --brand-black: rgba(13, 25, 24, 0.98);
@@ -30,12 +30,12 @@
   --brand-overlay: rgba(255, 255, 255, 0.72);
 
   /* 主行动色：翡翠青实色 */
-  --brand-action: #0D9488;
-  --brand-action-hover: #0F766E;
-  --brand-action-active: #115E59;
-  --brand-action-soft: #F0FDFA;
-  --brand-action-focus: rgba(13, 148, 136, 0.14);
-  --brand-action-focus-strong: rgba(13, 148, 136, 0.24);
+  --brand-action: #1d4ed8;
+  --brand-action-hover: #1e40af;
+  --brand-action-active: #1e3a8a;
+  --brand-action-soft: #eff6ff;
+  --brand-action-focus: rgba(29, 78, 216, 0.14);
+  --brand-action-focus-strong: rgba(29, 78, 216, 0.24);
 
   /* ── 中性色阶 ── */
   --brand-gray-50: #F8FAFC;
@@ -86,8 +86,8 @@
   --shadow-md: 0 1px 3px rgba(13, 25, 24, 0.06), 0 6px 16px rgba(13, 25, 24, 0.07);
   --shadow-lg: 0 2px 6px rgba(13, 25, 24, 0.06), 0 12px 28px rgba(13, 25, 24, 0.09);
   --shadow-xl: 0 4px 10px rgba(13, 25, 24, 0.07), 0 20px 44px rgba(13, 25, 24, 0.12);
-  --shadow-focus: 0 0 0 3px rgba(13, 148, 136, 0.16);
-  --shadow-hover: 0 3px 10px rgba(13, 148, 136, 0.12);
+  --shadow-focus: 0 0 0 3px rgba(29, 78, 216, 0.16);
+  --shadow-hover: 0 3px 10px rgba(29, 78, 216, 0.12);
 
   /* ── 圆角（锐角线框风：整体收小，与大圆角版本明显区分）── */
   --radius-xs: 4px;
@@ -116,15 +116,15 @@
 
   /* ── 兼容旧引用 ── */
   --radius-card-mid: 6px;
-  --color-primary: #0D9488;
-  --color-primary-hover: #0F766E;
-  --color-primary-active: #115E59;
-  --color-primary-light: #F0FDFA;
-  --color-primary-light-hover: #CCFBF1;
-  --color-primary-bg: #F0FDFA;
-  --color-accent: #0891B2;
-  --color-accent-hover: #0E7490;
-  --color-accent-light: #ECFEFF;
+  --color-primary: #1d4ed8;
+  --color-primary-hover: #1e40af;
+  --color-primary-active: #1e3a8a;
+  --color-primary-light: #eff6ff;
+  --color-primary-light-hover: #dbeafe;
+  --color-primary-bg: #eff6ff;
+  --color-accent: #2563eb;
+  --color-accent-hover: #1e40af;
+  --color-accent-light: #eff6ff;
   --color-action-ink: #0C1A19;
   --gray-50: #F8FAFC;
   --gray-100: #F1F5F9;
@@ -140,13 +140,13 @@
 
 /* ===== Element Plus CSS Variables 映射 ===== */
 :root {
-  --el-color-primary: #0D9488;
+  --el-color-primary: #1d4ed8;
   --el-color-primary-light-3: #2DD4BF;
   --el-color-primary-light-5: #5EEAD4;
-  --el-color-primary-light-7: #99F6E4;
-  --el-color-primary-light-8: #CCFBF1;
-  --el-color-primary-light-9: #F0FDFA;
-  --el-color-primary-dark-2: #0F766E;
+  --el-color-primary-light-7: #bfdbfe;
+  --el-color-primary-light-8: #dbeafe;
+  --el-color-primary-light-9: #eff6ff;
+  --el-color-primary-dark-2: #1e40af;
 
   --el-color-success: #10B981;
   --el-color-success-light-3: #34d399;
@@ -367,7 +367,7 @@ html, body, #app, .el-popper, .el-overlay {
 }
 
 .el-button--primary.is-plain {
-  border-color: rgba(13, 148, 136, 0.32) !important;
+  border-color: rgba(29, 78, 216, 0.32) !important;
   background: var(--brand-action-soft) !important;
   color: var(--brand-action) !important;
   box-shadow: var(--shadow-xs);
@@ -375,7 +375,7 @@ html, body, #app, .el-popper, .el-overlay {
 
 .el-button--primary.is-plain:hover {
   border-color: var(--brand-action) !important;
-  background: #CCFBF1 !important;
+  background: #dbeafe !important;
   color: var(--brand-action-hover) !important;
 }
 
@@ -1165,7 +1165,7 @@ select:focus-visible,
 }
 
 .el-menu--popup .el-menu-item:hover {
-  background: rgba(13, 148, 136, 0.18) !important;
+  background: rgba(29, 78, 216, 0.18) !important;
   color: #5eead4 !important;
   transform: translateX(3px) !important;
 }
@@ -1176,7 +1176,7 @@ select:focus-visible,
 }
 
 .el-menu--popup .el-menu-item.is-active {
-  background: rgba(13, 148, 136, 0.28) !important;
+  background: rgba(29, 78, 216, 0.28) !important;
   color: #ffffff !important;
   font-weight: 600 !important;
 }

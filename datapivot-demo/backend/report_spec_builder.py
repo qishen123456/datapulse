@@ -757,6 +757,13 @@ def build_report_spec(
     resolved_entities: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     config = report_config or {}
+    if config.get("profile") == "generic":
+        return {
+            "version": "3.0", "profile": "generic", "reportTitle": config.get("reportTitle", "数据分析简报"),
+            "question": question, "analysisMode": "generic", "layoutTemplate": "answer_canvas",
+            "charts": [], "columns": columns, "rowCount": len(rows),
+            "source": {"dataset_id": dataset.get("id"), "dataset_name": dataset.get("dataset_name")},
+        }
     query_intent = config.get("queryIntent") if isinstance(config.get("queryIntent"), dict) else {}
     rows = rows if isinstance(rows, list) else []
     available_columns = [str(item) for item in (columns or []) if str(item or "").strip()]

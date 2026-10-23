@@ -327,6 +327,7 @@ def clear_history(user: Dict[str, Any] | None) -> None:
 def filter_history_dataset_results(
     history_items: List[Dict[str, Any]],
     allowed_dataset_ids: List[int] | set[int] | None,
+    current_user: Dict[str, Any] | None = None,
 ) -> List[Dict[str, Any]]:
     """按数据集权限裁剪历史快照的 dataset_results。
 
@@ -354,6 +355,14 @@ def filter_history_dataset_results(
         if not isinstance(result, dict):
             safe_items.append(item)
             continue
+        if current_user is not None and (result.get('workflow') or result.get('research')):
+            from ask_runtime import scope_key
+            if result.get('authorization_scope') != scope_key(current_user,allowed_dataset_ids):
+                snapshot['result'] = {'error':'组织授权已变化，历史证据已隐藏，请重新查询。','question':result.get('question',''),'dataset_results':[]}
+                snapshot['logs'] = []
+                item['logs'] = []
+                safe_items.append(item)
+                continue
         dataset_results = result.get("dataset_results")
         if not isinstance(dataset_results, list) or not dataset_results:
             safe_items.append(item)
@@ -368,6 +377,11 @@ def filter_history_dataset_results(
             safe_items.append(item)
             continue
 
+        for key in ('research','research_plan','workflow','diagnostics','report_spec','report_config','report_configs','analysis','sql','rows','columns','confidence','route'):
+            result.pop(key,None)
+        result['row_count'] = 0
+        snapshot['logs'] = []
+        item['logs'] = []
         result["dataset_results"] = filtered
         if not filtered:
             result["error"] = result.get("error") or "权限不足，历史报告数据已按当前账号权限隔离。"

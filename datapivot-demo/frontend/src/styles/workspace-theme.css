@@ -1,0 +1,179 @@
+/* Shared workspace design system. Chart series keep their own semantic palettes. */
+:root {
+  --studio-bg:#f7f7f5; --studio-surface:#fff; --studio-ink:#24292e;
+  --studio-muted:#66716b; --studio-accent:#386553; --studio-line:#e3e6e1;
+  --studio-soft:#edf3ef; --studio-action:#29333b;
+  --font-sans:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
+  --brand-primary:#29333b; --brand-primary-hover:#1c252b; --brand-primary-active:#121b21;
+  --brand-primary-soft:#edf3ef; --brand-primary-soft-2:#f6f8f5;
+  --brand-primary-focus:#38655316; --brand-primary-focus-strong:#3865532b;
+  --brand-gradient:linear-gradient(#29333b,#29333b); --brand-gradient-hover:linear-gradient(#1c252b,#1c252b);
+  --brand-gradient-soft:linear-gradient(#f6f8f5,#f6f8f5);
+  --brand-action:#29333b; --brand-action-hover:#1c252b; --brand-action-active:#121b21;
+  --brand-action-soft:#edf3ef; --brand-accent:#386553;
+  --color-primary:#386553; --color-primary-hover:#2d5645; --color-primary-active:#244736;
+  --color-primary-light:#edf3ef; --color-primary-bg:#edf3ef; --color-primary-light-hover:#e4ece6;
+  --bg-page:#f7f7f5; --bg-soft:#f3f5f1; --bg-hover:#edf1eb;
+  --border:#dce1da; --border-light:#eceee9; --border-hover:#9aa99d;
+  --text-title:#24292e; --text-body:#48534d; --text-secondary:#5d6962;
+  --text-muted:#66716b; --text-placeholder:#78827b;
+  --radius-xs:5px; --radius-sm:7px; --radius-md:8px; --radius-card:12px; --radius-lg:12px; --radius-xl:14px;
+  --shadow-xs:0 1px 2px #24292e03; --shadow-sm:0 1px 3px #24292e05;
+  --shadow-md:0 4px 16px #24292e08; --shadow-lg:0 10px 32px #24292e12; --shadow-xl:0 16px 48px #24292e1c;
+  --el-color-primary:#386553; --el-color-primary-dark-2:#2d5645;
+  --el-color-primary-light-3:#6e8d7e; --el-color-primary-light-5:#9cb1a5;
+  --el-color-primary-light-7:#c6d6ca; --el-color-primary-light-8:#dde7df; --el-color-primary-light-9:#edf3ef;
+  --el-color-success:#386553; --el-color-success-light-9:#edf5ef;
+  --el-color-warning:#946823; --el-color-warning-light-9:#fbf5e8;
+  --el-color-danger:#ae4848; --el-color-danger-light-9:#fcf1ef;
+  --el-text-color-primary:#24292e; --el-text-color-regular:#48534d;
+  --el-text-color-secondary:#66716b; --el-text-color-placeholder:#78827b;
+  --el-border-color:#dce1da; --el-border-color-light:#e7ebe4; --el-border-color-lighter:#eceee9;
+  --el-fill-color-light:#f3f5f1; --el-font-size-base:13px;
+}
+body{font-family:var(--font-sans);background:var(--studio-bg);color:var(--text-body);font-size:13px}
+
+/* Every configuration workspace has one title, one action row and one content rhythm. */
+.workspace-shell .page-wrap :is(.admin-page-head,.console-hero,.org-hero,.permission-page>.page-head,.migration-page>.hero-card,.dataset-page-heading,.cs-page-heading,.expert-page-head,.advanced-hero,.fs-hero,.report-settings-heading){background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:0 0 24px!important;margin:0!important;min-height:0;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.workspace-shell .page-wrap :is(.admin-page-head,.console-hero,.org-hero,.permission-page>.page-head,.migration-page>.hero-card,.advanced-hero,.fs-hero)::before,
+.workspace-shell .page-wrap :is(.admin-page-head,.console-hero,.org-hero,.permission-page>.page-head,.migration-page>.hero-card,.advanced-hero,.fs-hero)::after{display:none!important}
+.workspace-shell .page-wrap :is(.admin-page-head,.console-hero,.org-hero,.permission-page>.page-head,.migration-page>.hero-card,.dataset-page-heading,.cs-page-heading,.expert-page-head,.advanced-hero,.fs-hero,.report-settings-heading) :is(h1,h2){font-size:25px;line-height:1.4;letter-spacing:-.7px;font-weight:650;margin:4px 0 8px;color:var(--studio-ink)}
+.workspace-shell .page-wrap :is(.admin-page-head,.console-hero,.org-hero,.permission-page>.page-head,.migration-page>.hero-card,.dataset-page-heading,.cs-page-heading,.expert-page-head,.advanced-hero,.fs-hero,.report-settings-heading) p{font-size:13px;line-height:1.75;color:var(--studio-muted);max-width:780px;margin:0}
+.workspace-shell .page-wrap :is(.admin-kicker,.hero-kicker,.eyebrow,.kicker,.dataset-eyebrow,.page-overline,.editor-overline,.report-settings-heading>div>span){font-size:12px!important;color:var(--studio-muted)!important;letter-spacing:.04em!important;font-weight:500!important;line-height:1.6}
+.workspace-shell .page-wrap :is(.hero-actions,.head-actions,.expert-head-actions,.header-actions,.fs-hero-actions){display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:0}
+.workspace-shell .page-wrap :is(.hero-actions,.head-actions,.expert-head-actions,.header-actions)>.el-button+.el-button{margin-left:0}
+.workspace-shell .page-wrap :is(.el-card,.glass-card){background:var(--studio-surface)!important;border:1px solid var(--studio-line)!important;box-shadow:none!important;backdrop-filter:none!important;border-radius:12px!important}
+.workspace-shell .el-card__header{padding:16px 20px;border-bottom:1px solid var(--border-light)}
+.workspace-shell .el-card__body{padding:20px}
+.workspace-shell :is(.panel-title,.card-header){font-size:14px;color:var(--studio-ink);font-weight:600}
+
+/* Forms and controls: graphite primary action, pine selection, readable disabled states. */
+.el-button:not(.is-link):not(.is-text){border-radius:7px!important;font-size:13px!important;font-weight:500!important;min-height:34px;box-shadow:0 1px 2px #24292e04!important;transition:background .15s,border-color .15s!important}
+.el-button--primary:not(.is-link):not(.is-text){background:var(--brand-primary)!important;border-color:var(--brand-primary)!important;color:#fff!important;box-shadow:0 1px 2px #24292e0a!important}
+.el-button--primary:not(.is-disabled):hover{background:var(--brand-primary-hover)!important;border-color:var(--brand-primary-hover)!important}
+.el-button.is-link,.el-button.is-text{font-weight:500!important;font-size:13px!important;min-height:28px;border-radius:5px!important;box-shadow:none!important}
+.el-button.is-link:not(.el-button--danger):not(.el-button--warning){color:var(--studio-accent)}
+.el-button.is-disabled{opacity:1!important;cursor:not-allowed!important}
+.el-button.is-disabled:not(.is-link):not(.is-text){background:#eff1ed!important;border-color:#e1e5de!important;color:#7c857d!important;box-shadow:none!important}
+.el-button.is-disabled.is-link,.el-button.is-disabled.is-text{color:#899189!important}
+.el-input__wrapper,.el-select__wrapper{border-radius:7px!important;font-size:13px!important;box-shadow:0 0 0 1px var(--border) inset!important;background:#fff!important;min-height:34px}
+.el-input__wrapper:hover,.el-select__wrapper:hover{box-shadow:0 0 0 1px var(--border-hover) inset!important}
+.el-input__wrapper.is-focus,.el-select__wrapper.is-focused{box-shadow:0 0 0 1px var(--studio-accent) inset,0 0 0 3px var(--brand-primary-focus)!important}
+.el-textarea__inner{font-size:13px!important;line-height:1.8!important;border-radius:7px!important;box-shadow:0 0 0 1px var(--border) inset!important;padding:12px 14px!important;background:#fff!important;color:var(--text-body)}
+.el-input.is-disabled .el-input__wrapper,.el-select__wrapper.is-disabled,.el-textarea.is-disabled .el-textarea__inner{background:#f2f4ef!important;color:#737e74!important}
+.el-form-item__label{color:var(--text-secondary)!important;font-size:13px!important;font-weight:400!important}
+.el-table{--el-table-header-bg-color:#f6f7f4;--el-table-header-text-color:#5d6962;--el-table-text-color:#48534d;--el-table-border-color:#eceee9;--el-table-row-hover-bg-color:#f5f8f3;font-size:13px!important}
+.el-table th.el-table__cell{background:#f6f7f4!important;color:#5d6962!important;font-size:12px!important;font-weight:550!important;border-bottom:1px solid var(--studio-line)!important;height:39px}
+.el-table td.el-table__cell{border-bottom:1px solid var(--border-light)!important;padding:11px 0!important}
+.el-table--border .el-table__cell{border-right:0!important}
+.el-table__body tr.el-table__row--striped td.el-table__cell{background:#fff!important}
+.el-table__body tr:hover>td.el-table__cell{background:#f5f8f3!important}
+.el-tag{border-radius:5px!important;font-size:12px!important;font-weight:500;border-color:transparent!important;padding:0 7px}
+.el-tabs__item{font-size:13px!important;font-weight:500!important;color:var(--studio-muted);height:42px}
+.el-tabs__item.is-active{color:var(--studio-accent)!important}
+.el-tabs__active-bar{height:2px!important;background:var(--studio-accent)!important}
+.el-tabs__nav-wrap:after{height:1px!important;background:var(--studio-line)!important}
+.el-switch{--el-switch-on-color:#386553;--el-switch-off-color:#cbd3c9}
+.el-radio-button__original-radio:checked+.el-radio-button__inner{background:var(--studio-accent)!important;border-color:var(--studio-accent)!important;box-shadow:-1px 0 0 var(--studio-accent)!important}
+.el-dialog,.el-drawer{border:1px solid var(--studio-line)!important;box-shadow:0 16px 64px #24292e1c!important;border-radius:12px!important}
+.el-dialog__title{font-size:17px!important;font-weight:600;color:var(--studio-ink)}.el-dialog__body{color:var(--text-body)}
+.el-menu--popup{background:#fff!important;border:1px solid var(--studio-line)!important;box-shadow:var(--shadow-lg)!important;backdrop-filter:none!important}
+.el-menu--popup .el-menu-item,.el-menu--popup .el-menu-item .el-icon{color:var(--text-body)!important}
+.el-menu--popup .el-menu-item:hover,.el-menu--popup .el-menu-item.is-active{background:var(--studio-soft)!important;color:var(--studio-accent)!important;transform:none!important}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--studio-accent);outline-offset:3px}
+
+/* Shared asset/editor surfaces and selection states; no color treatment on result charts. */
+.workspace-shell .page-wrap :is(.dataset-workspace,.db-workbench,.agent-workbench,.advanced-workbench,.cs-main,.fs-ops-board,.rc-layout){border-color:var(--studio-line);border-radius:12px;background:#fff;box-shadow:0 2px 5px #24292e03}
+.workspace-shell .page-wrap :is(.dataset-catalog,.agent-rail,.rc-sidebar,.db-detail){background:#fafbf8;border-color:var(--studio-line)}
+.workspace-shell .page-wrap :is(.dataset-tile,.agent-card,.rc-ds-item){box-shadow:none;border-radius:8px}
+.workspace-shell .page-wrap :is(.dataset-tile.active,.agent-card.active,.rc-ds-item.is-active){background:var(--studio-soft);border-color:#d4e1d6;color:var(--studio-accent);box-shadow:none}
+.workspace-shell .page-wrap :is(.dataset-tile:hover,.agent-card:hover,.rc-ds-item:hover){background:#f0f4ed}
+.workspace-shell .page-wrap :is(.dataset-tile-title,.agent-card-copy strong,.dataset-identity h2,.agent-editor-head h2,.cs-provider-title,.db-detail h3,.skill-identity strong,.fs-panel-title strong){color:var(--studio-ink)}
+.workspace-shell .page-wrap :is(.dataset-asset-icon,.dataset-tile.active .dataset-asset-icon,.active .agent-card-no,.rc-ds-icon,.collaboration-map summary,.capability-related .el-button){color:var(--studio-accent)}
+.workspace-shell .page-wrap :is(.active .agent-card-no,.skill-scope-filter button[aria-pressed=true]){background:var(--studio-soft);border-color:#d4e1d6;color:var(--studio-accent)}
+.workspace-shell .page-wrap :is(.role-selected-dot,.status-dot,.quality-track i){background:var(--studio-accent)}
+.workspace-shell .page-wrap :is(.knowledge-category-nav button,.editor-section-tabs button,.cs-detail-tabs button){color:var(--studio-muted);font-size:13px}
+.workspace-shell .page-wrap :is(.knowledge-category-nav button[aria-pressed=true],.editor-section-tabs button[aria-pressed=true],.cs-detail-tabs button[aria-pressed=true]){color:var(--studio-accent);border-bottom-color:var(--studio-accent)}
+.workspace-shell .page-wrap .knowledge-section-nav button{font-size:12px;color:var(--studio-muted)}
+.workspace-shell .page-wrap .knowledge-section-nav button[aria-current=page]{color:var(--studio-accent);background:var(--studio-soft);border-color:#d4e1d6}
+.workspace-shell .page-wrap :is(.dataset-status-filter,.skill-scope-filter){background:#eef1eb}
+.workspace-shell .page-wrap :is(.dataset-status-filter button,.skill-scope-filter button){font-size:12px;color:var(--studio-muted)}
+.workspace-shell .page-wrap .dataset-status-filter button[aria-pressed=true]{color:var(--studio-accent);background:#fff}
+.workspace-shell .page-wrap :is(.dataset-identity,.agent-editor-head,.cs-hero){border-color:var(--studio-line)}
+.workspace-shell .page-wrap :is(.dataset-tile-meta,.dataset-tile-sub,.catalog-footnote,.dataset-identity-meta,.properties-summary,.property-switch-note,.quality-summary-copy,.quality-detail-label,.knowledge-section-intro p,.knowledge-section-intro>span,.agent-card-copy small,.role-execution-note p,.section-heading p,.editor-footnote,.text-count,.cs-ch-meta,.cs-provider-kicker,.cs-provider-url-sub,.cs-stat-card span,.cs-section-desc,.cs-models-desc,.cs-model-id,.fs-stat-copy small,.fs-board-head,.fs-panel-title span,.db-inventory-toolbar span,.db-table-caption,.skill-identity p,.skill-runtime,.skill-list-caption,.summary-list span){font-size:12px;color:var(--studio-muted);line-height:1.7}
+.workspace-shell .page-wrap :is(.dataset-tile-sub,.catalog-footnote,.editor-footnote,.cs-model-id,.skill-runtime small,.skill-identity code){color:var(--studio-muted)}
+.workspace-shell .page-wrap :is(.quality-check,.quality-check small,.quality-score small,.quality-summary-copy strong span,.dataset-status-filter button>span,.knowledge-section-nav button span,.knowledge-category-nav button span,.catalog-heading>span,.asset-state,.agent-card-no,.rail-note-label,.collaboration-map ol,.collaboration-map>div>span,.editor-section-tabs span,.cs-sidebar-count,.cs-stat-card span,.cs-detail-tabs button span,.cs-models-count,.skill-identity small,.skill-identity code,.skill-runtime small,.flow-map-label){font-size:12px}
+.workspace-shell .page-wrap :is(.knowledge-category-nav button span,.editor-section-tabs span,.cs-sidebar-count,.cs-detail-tabs button span,.cs-models-count){background:#eef1eb;color:var(--studio-muted)}
+.workspace-shell .page-wrap .agent-card-copy strong{font-size:13px}
+.workspace-shell .page-wrap .prompt-input textarea{background:#fcfdfb!important;color:var(--text-body)}
+.workspace-shell .page-wrap .advanced-tabs .el-tabs__header.is-left{background:#fafbf8;border-color:var(--studio-line)}
+.workspace-shell .page-wrap .advanced-tabs .el-tabs__item.is-active{background:var(--studio-soft);color:var(--studio-accent)}
+.workspace-shell .page-wrap :is(.plain-panel p,.plain-panel li,.switch-list small,.capability-flow-map p,.summary-list,.skill-binding-summary,.skill-editor-hint){color:var(--text-secondary);font-size:13px}
+.workspace-shell .page-wrap :is(.capability-flow-map strong,.capability-status-strip strong,.switch-list strong,.summary-list strong){color:var(--studio-ink)}
+.workspace-shell .page-wrap :is(.skill-emblem,.skill-emblem.fixed,.skill-identity small,.json-preview){color:var(--text-secondary);background:#f4f6f1;border-color:var(--studio-line)}
+.workspace-shell .page-wrap .skill-identity:hover strong{color:var(--studio-accent)}
+.workspace-shell .page-wrap .cs-ch-item{border-color:var(--studio-line);background:#fff}
+.workspace-shell .page-wrap .cs-ch-item.is-active{background:var(--studio-soft);border-color:#a4bba9;box-shadow:inset 0 -2px 0 var(--studio-accent)}
+.workspace-shell .page-wrap :is(.cs-ch-icon,.cs-provider-icon){background:var(--studio-action);box-shadow:none}
+.workspace-shell .page-wrap .cs-provider-icon:hover{background:var(--studio-accent)}
+.workspace-shell .page-wrap .cs-ch-name{font-size:13px;color:var(--studio-ink)}
+.workspace-shell .page-wrap :is(.cs-config-card,.cs-model-row:hover,.fs-task-meta,.rc-card){background:#fafbf8;border-color:var(--studio-line);box-shadow:none}
+.workspace-shell .page-wrap :is(.cs-model-emoji,.fs-task-icon){background:var(--studio-soft);color:var(--studio-accent)}
+.workspace-shell .page-wrap .cs-model-emoji svg{stroke:var(--studio-accent)}
+.workspace-shell .page-wrap .fs-btn-primary{background:var(--brand-primary);box-shadow:none;color:#fff}
+.workspace-shell .page-wrap .fs-btn-primary:hover{background:var(--brand-primary-hover)}
+.workspace-shell .page-wrap .fs-btn-ghost{color:var(--text-body);border-color:var(--border)}
+.workspace-shell .page-wrap :is(.fs-btn,.fs-action-btn){font-size:13px;border-radius:7px}
+.workspace-shell .page-wrap :is(.fs-stat-grid,.fs-stat-card,.fs-task-card){border-color:var(--studio-line)}
+.workspace-shell .page-wrap .fs-stat-copy strong{color:var(--studio-ink)}
+.workspace-shell .page-wrap .fs-ops-tabs .el-tabs__item.is-active{color:var(--studio-accent)}
+
+/* Governance, reports and SQL console retain their own task layouts. */
+.workspace-shell .org-page .stat-grid,.workspace-shell .migration-page .metric-grid{gap:0;border:1px solid var(--studio-line);background:#fff;border-radius:10px;overflow:hidden;margin:0 0 20px}
+.workspace-shell .org-page .stat-item,.workspace-shell .migration-page .metric-card{border:0!important;border-right:1px solid var(--border-light)!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;padding:16px 22px!important;min-height:0!important}
+.workspace-shell .org-page .stat-item:last-child,.workspace-shell .migration-page .metric-card:last-child{border-right:0!important}
+.workspace-shell .org-page .stat-item strong,.workspace-shell .migration-page .metric-card strong{font-size:24px;font-weight:550;color:var(--studio-ink)}
+.workspace-shell .org-page :is(.type-panel,.node-panel,.detail-panel),.workspace-shell .permission-page :is(.toolbar,.user-table-card){border:1px solid var(--studio-line);border-radius:10px;background:#fff;box-shadow:none}
+.workspace-shell .org-page .type-item{border-radius:7px;box-shadow:none;background:#fff;border:1px solid var(--studio-line)}
+.workspace-shell .org-page .type-item.active{background:var(--studio-soft);border-color:#c2d4c5;color:var(--studio-accent)}
+.workspace-shell .rc-layout{overflow:hidden}.workspace-shell .rc-sidebar{border-right:1px solid var(--studio-line)}.workspace-shell .rc-main{background:#fff}.workspace-shell .rc-card{border-radius:8px}
+.workspace-shell .page-wrap .console-page{background:transparent;padding:0;max-width:none}
+.workspace-shell .page-wrap .console-page>*{max-width:none}
+.workspace-shell .page-wrap .console-tabs{display:flex;flex-wrap:wrap;padding:4px;gap:4px;border:1px solid var(--studio-line);box-shadow:none;background:#fff;border-radius:9px;margin-top:0}
+.workspace-shell .page-wrap .console-tabs button{height:36px;padding:0 16px;border-radius:6px;font-size:13px;font-weight:500;color:var(--studio-muted);background:transparent;box-shadow:none}
+.workspace-shell .page-wrap .console-tabs button.active{background:var(--studio-soft);color:var(--studio-accent);box-shadow:none}
+.workspace-shell .page-wrap .console-page :is(.summary-strip>div,.ask-flow-overview,.ask-flow-card,.module-card,.permission-card,.dashboard-toolbar,.dashboard-panel,.console-section,.data-permission-toolbar,.data-permission-panel){background:#fff;box-shadow:none;border:1px solid var(--studio-line);border-radius:10px}
+.workspace-shell .page-wrap .console-page .summary-strip{gap:0;border:1px solid var(--studio-line);border-radius:10px;overflow:hidden}
+.workspace-shell .page-wrap .console-page .summary-strip>div{border:0;border-right:1px solid var(--border-light);border-radius:0;padding:16px 20px}
+.workspace-shell .page-wrap .console-page .dashboard-toolbar{padding:14px 18px;gap:16px}.workspace-shell .page-wrap .console-page .dashboard-toolbar>div:first-child{display:none}
+.workspace-shell .page-wrap .console-page .dashboard-grid{gap:0;border:1px solid var(--studio-line);border-radius:10px;background:#fff;overflow:hidden}
+.workspace-shell .page-wrap .console-page .dashboard-card{border:0;border-right:1px solid var(--border-light);background:#fff;border-radius:0;box-shadow:none;padding:18px 22px}
+.workspace-shell .page-wrap .console-page .dashboard-card:last-child{border-right:0}
+.workspace-shell .page-wrap .console-page .dashboard-card strong{font-size:27px;font-weight:550;line-height:1.5;color:var(--studio-ink)}
+.workspace-shell .page-wrap .console-page .dashboard-card small{font-size:12px;line-height:1.7;color:var(--studio-muted)}
+.workspace-shell .page-wrap .console-page .dashboard-card:hover{background:#f5f8f3}
+.workspace-shell .page-wrap .console-page .dashboard-rank-panels{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.workspace-shell .page-wrap .console-page .dashboard-rank-panel{min-height:0}
+.workspace-shell .page-wrap .console-page .dashboard-panel{padding:18px 20px}
+.workspace-shell .page-wrap .console-page .dashboard-panel h2{font-size:15px;font-weight:600;color:var(--studio-ink)}
+.workspace-shell .page-wrap .console-page .card-kicker{font-size:12px;color:var(--studio-muted);letter-spacing:.04em}
+.workspace-shell .page-wrap .console-page .rank-metric{font-weight:500}
+.workspace-shell .page-wrap .studio-page{border:1px solid var(--studio-line);border-radius:12px;overflow:hidden;background:#fff}
+.workspace-shell .page-wrap .studio-page .studio-topbar{background:#fff;border-bottom:1px solid var(--studio-line);padding:12px 16px}
+.workspace-shell .page-wrap .studio-page .mode-switcher{background:#eef1eb;border:1px solid var(--studio-line)}
+.workspace-shell .page-wrap .studio-page .mode-btn{font-size:13px;color:var(--studio-muted)}
+.workspace-shell .page-wrap .studio-page .mode-btn.active{background:#fff;color:var(--studio-accent);box-shadow:0 1px 3px #24292e0a}
+.workspace-shell .page-wrap .studio-page .studio-run-btn{background:var(--studio-action);box-shadow:none;border-radius:7px}
+.workspace-shell .page-wrap .studio-page .studio-editor-zone,.workspace-shell .page-wrap .studio-page .studio-editor{background:#242b2e;color:#d9e2da}
+.workspace-shell .page-wrap .studio-page .editor-statusbar{background:#2a3335;border-bottom:1px solid #ffffff0a}
+.workspace-shell .page-wrap .studio-page .result-header{background:#f8faf6;border-bottom:1px solid var(--studio-line)}
+@media(max-width:900px){
+  .workspace-shell .page-wrap :is(.admin-page-head,.console-hero,.org-hero,.permission-page>.page-head,.migration-page>.hero-card,.dataset-page-heading,.cs-page-heading,.expert-page-head,.advanced-hero,.fs-hero,.report-settings-heading){flex-wrap:wrap;gap:14px;align-items:flex-start}
+  .workspace-shell .page-wrap :is(.admin-page-head,.console-hero,.org-hero,.permission-page>.page-head,.migration-page>.hero-card,.dataset-page-heading,.cs-page-heading,.expert-page-head,.advanced-hero,.fs-hero,.report-settings-heading) :is(h1,h2){font-size:22px}
+}
+@media(max-width:700px){
+  .workspace-shell .page-wrap .console-page .dashboard-rank-panels{grid-template-columns:1fr}
+  .workspace-shell .page-wrap .console-page .dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .workspace-shell .page-wrap .console-page .dashboard-toolbar{flex-wrap:wrap}
+  .workspace-shell .page-wrap .console-tabs button{padding:0 11px}
+}

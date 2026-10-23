@@ -723,6 +723,9 @@ class FeishuSyncService:
     
     def sync_data_to_postgres(self, config: Dict, records: List[Dict]) -> bool:
         """同步数据到PostgreSQL"""
+        # None means retrieval failed; [] means a successfully retrieved empty snapshot.
+        if records is None:
+            return False
         conn = self.get_postgres_connection(config)
         if not conn:
             return False
@@ -759,6 +762,12 @@ class FeishuSyncService:
                 records_to_sync = records
                 print(f"全量同步：{len(records)}条记录")
             
+            # Empty full snapshots must also remove stale rows. Keep truncate and
+            # inserts in one transaction so a malformed record cannot erase good data.
+            if config.get('sync_mode') == 'full':
+                cursor.execute(sql.SQL("TRUNCATE TABLE {table}").format(table=sql.Identifier(table_name)))
+                write_log(config['id'], 'INFO', f'全量快照替换: {table_name}，源记录{len(records_to_sync)}条')
+
             # 批量插入/更新数据
             if records_to_sync:
                 sync_time = datetime.now()
@@ -766,12 +775,6 @@ class FeishuSyncService:
                     records_to_sync,
                     config.get("_field_items") or [],
                 )
-
-                # 全量模式下先清空目标表，确保与飞书当前视图完全一致。
-                if config.get('sync_mode') == 'full':
-                    print(f"全量同步：清空表 {table_name}")
-                    cursor.execute(sql.SQL("TRUNCATE TABLE {table}").format(table=sql.Identifier(table_name)))
-                    write_log(config['id'], 'INFO', f'全量同步：已清空表 {table_name}')
 
                 for record in normalized_records:
                     record_id = record.get('record_id', '')
@@ -787,8 +790,10 @@ class FeishuSyncService:
                     """).format(table=sql.Identifier(table_name))
                     cursor.execute(upsert_sql, (record_id, Json(record.get('fields', {})), sync_time, sync_time, sync_time))
                 
-                conn.commit()
                 print(f"成功同步{len(normalized_records)}条记录到{table_name}")
+
+            conn.commit()
+            cursor.close()
 
             # 触发关联的数据集转换任务（失败不影响同步任务状态）
             try:
@@ -827,6 +832,7 @@ class FeishuSyncService:
             return True
             
         except Exception as e:
+            conn.rollback()
             print(f"同步数据到PostgreSQL失败: {e}")
             return False
         finally:

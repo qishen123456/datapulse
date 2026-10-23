@@ -29,14 +29,14 @@
       </div>
     </section>
 
-    <section class="console-tabs">
+    <nav class="console-tabs" aria-label="控制台功能">
       <button type="button" :class="{ active: activeConsoleTab === 'dashboard' }" @click="switchConsoleTab('dashboard')">管理看板</button>
       <button type="button" :class="{ active: activeConsoleTab === 'permissions' }" @click="switchConsoleTab('permissions')">功能权限控制</button>
       <button type="button" :class="{ active: activeConsoleTab === 'ask-flow' }" @click="switchConsoleTab('ask-flow')">问数流程控制</button>
       <button type="button" :class="{ active: activeConsoleTab === 'fields' }" @click="switchConsoleTab('fields')">字段显示权限</button>
       <button type="button" :class="{ active: activeConsoleTab === 'data' }" @click="switchConsoleTab('data')">数据集权限控制</button>
       <button type="button" :class="{ active: activeConsoleTab === 'logs' }" @click="switchConsoleTab('logs')">日志管理</button>
-    </section>
+    </nav>
 
     <section class="console-command-layout" :class="{ 'is-data-tab': activeConsoleTab === 'data' }">
       <main class="console-command-main">
@@ -173,11 +173,11 @@
         <section class="ask-flow-overview">
           <div class="ask-flow-overview-copy">
             <span class="card-kicker">问数流程控制</span>
-            <h2>{{ isAdvancedFlowSelected ? '当前默认使用进阶流程' : '当前默认使用基础流程' }}</h2>
-            <p>这里控制用户提问时默认进入哪套问数流程。基础流程保持现状，进阶流程用于后续 Skill、规划和工具能力灰度。</p>
+            <h2>{{ isAdvancedFlowSelected ? '当前默认使用高阶研究' : '当前默认使用普通问数' }}</h2>
+            <p>这里控制用户提问时默认进入哪套问数流程。普通问数与高阶研究独立执行，两条路径都强制校验组织树权限。高阶研究先确认计划，再并行取证。</p>
           </div>
           <div class="ask-flow-overview-status">
-            <strong>{{ askFlowDecision.flow === 'advanced' ? '进阶流程' : '基础流程' }}</strong>
+            <strong>{{ askFlowDecision.flow === 'advanced' ? '高阶研究' : '普通问数' }}</strong>
             <span>{{ askFlowReasonText }}</span>
             <el-tag :type="isAdvancedFlowSelected ? 'success' : 'info'" effect="light">
               {{ isAdvancedFlowSelected ? '当前选择进阶' : '当前选择基础' }}
@@ -201,8 +201,8 @@
               @click="selectAskFlow('basic')"
             >
               <span class="flow-choice-tag">稳定</span>
-              <strong>基础流程</strong>
-              <small>沿用当前四 Agent 链式问数，适合日常经营问数。</small>
+              <strong>普通问数</strong>
+              <small>指标检索、明细过滤与日常对比；保留生成、审核、预检、执行与结果校验。</small>
               <i>{{ askFlowConfig.defaultFlow === 'basic' ? '当前使用' : '点击切换' }}</i>
             </button>
 
@@ -213,8 +213,8 @@
               @click="selectAskFlow('advanced')"
             >
               <span class="flow-choice-tag">升级</span>
-              <strong>进阶流程</strong>
-              <small>独立新流程入口。当前先镜像基础流程，后续逐步加入 Skill 和规划能力。</small>
+              <strong>高阶研究</strong>
+              <small>研究计划 → 用户确认 → 专家并行取证 → 证据汇合与研究报告。</small>
               <i>{{ askFlowConfig.defaultFlow === 'advanced' ? '当前使用' : '点击切换' }}</i>
             </button>
           </div>
@@ -224,33 +224,39 @@
           <div class="ask-flow-card-head">
             <div>
               <span class="card-kicker">保护策略</span>
-              <h3>进阶流程控制</h3>
+              <h3>双路径问数控制</h3>
             </div>
             <el-button text type="primary" @click="askFlowAdvancedOpen = !askFlowAdvancedOpen">
               {{ askFlowAdvancedOpen ? '收起' : '展开设置' }}
             </el-button>
           </div>
           <div v-if="askFlowAdvancedOpen" class="flow-settings-grid">
+            <div class="role-route-policy"><h4>按角色分配问数路径</h4><p>用户界面不显示路径切换。角色分配优先于数据集策略和默认路径；高阶仍需总开关、角色开放名单与功能权限同时准入。</p><label v-for="item in [{key:'user',label:'普通用户'},{key:'business_admin',label:'业务管理员'},{key:'admin',label:'管理员'},{key:'super_admin',label:'超级管理员'}]" :key="item.key"><span>{{ item.label }}</span><el-select v-model="askFlowConfig.rolePolicies[item.key]" clearable placeholder="沿用数据集 / 默认策略"><el-option label="普通问数" value="basic"/><el-option label="高阶研究" value="advanced"/></el-select></label></div>
+            <label class="flow-setting-item"><span>开放高阶研究入口</span><small>独立于默认路径；同时检查功能权限、角色灰度与能力中心开关。</small><el-switch v-model="askFlowConfig.advancedEnabled" /></label>
+            <label class="flow-setting-item"><span>高阶并发上限</span><small>每任务最多同时执行的研究分支。</small><el-input-number v-model="askFlowConfig.maxParallel" :min="1" :max="4" /></label>
+            <label class="flow-setting-item"><span>全任务修复预算</span><small>两条路径都受此限制，所有分支共享，最多2次。</small><el-input-number v-model="askFlowConfig.maxRetries" :min="0" :max="2" /></label>
+            <label class="flow-setting-item"><span>单次查询超时（秒）</span><small>下发到数据库驱动或语句超时。</small><el-input-number v-model="askFlowConfig.queryTimeoutSeconds" :min="3" :max="120" /></label>
+            <label class="flow-setting-item"><span>结果行数上限</span><small>超限阻止返回，提示收窄或聚合。</small><el-input-number v-model="askFlowConfig.maxResultRows" :min="100" :max="20000" :step="100" /></label>
             <label class="flow-setting-item">
-              <span>异常自动回退</span>
-              <small>进阶流程异常时自动切回基础流程。</small>
-              <el-switch v-model="askFlowConfig.fallbackToBasicOnError" />
+              <span>独立路径保护</span>
+              <small>高阶失败保留已有证据与缺口，不静默改为普通查询。</small>
+              <el-tag type="success">始终启用</el-tag>
             </label>
             <label class="flow-setting-item">
               <span>问数界面显示流程标识</span>
-              <small>问数完成后显示“基础流程 / 进阶流程”。</small>
+              <small>问数完成后显示“普通问数 / 高阶研究”。</small>
               <el-switch v-model="askFlowConfig.attachMetadata" />
             </label>
             <div class="flow-setting-item is-wide">
-              <span>允许使用进阶流程的角色</span>
-              <small>这里是进阶流程灰度名单；账号必须同时拥有功能权限控制里的“使用进阶问数流程”。</small>
+              <span>允许使用高阶研究的角色</span>
+              <small>这里是高阶研究灰度名单；账号必须同时拥有功能权限控制里的“使用高阶研究流程”。</small>
               <el-checkbox-group v-model="askFlowConfig.advancedRoles" class="flow-role-checks">
                 <el-checkbox v-for="role in roles" :key="role.value" :label="role.value">{{ role.label }}</el-checkbox>
               </el-checkbox-group>
             </div>
           </div>
           <div v-else class="flow-collapsed-summary">
-            <span>回退保护：{{ askFlowConfig.fallbackToBasicOnError ? '开启' : '关闭' }}</span>
+            <span>独立路径：禁止静默跨档</span>
             <span>流程标识：{{ askFlowConfig.attachMetadata ? '显示' : '隐藏' }}</span>
             <span>角色：{{ askFlowRoleSummary }}</span>
           </div>
@@ -267,12 +273,12 @@
             </el-button>
           </div>
           <div v-if="askFlowDatasetOpen" class="flow-dataset-policy">
-            <p>只在需要让某个数据集先试用进阶流程时配置。留空则全部跟随上面的默认流程。</p>
+            <p>只在需要让某个数据集先试用高阶研究时配置。留空则全部跟随上面的默认流程。</p>
             <div v-for="(row, index) in askFlowDatasetPolicyRows" :key="row.key" class="flow-dataset-row">
               <el-input v-model="row.datasetId" placeholder="数据集 ID，例如 12" />
               <el-select v-model="row.flow" placeholder="流程">
-                <el-option label="基础流程" value="basic" />
-                <el-option label="进阶流程" value="advanced" />
+                <el-option label="普通问数" value="basic" />
+                <el-option label="高阶研究" value="advanced" />
               </el-select>
               <el-button plain type="danger" @click="removeAskFlowDatasetPolicy(index)">删除</el-button>
             </div>
@@ -696,7 +702,7 @@
                 <p v-if="item.stream">{{ item.stream }}</p>
               </el-timeline-item>
             </el-timeline>
-            <el-empty v-else description="暂无思考过程记录" :image-size="60" />
+            <GovernanceEmpty v-else description="暂无思考过程记录" :image-size="60" />
           </section>
           <section class="detail-section">
             <h3>原始详情</h3>
@@ -848,7 +854,7 @@
             </template>
           </el-table-column>
         </el-table>
-        <el-empty v-if="!filteredScopedEmployees.length" description="暂无命中员工" :image-size="72" />
+        <GovernanceEmpty v-if="!filteredScopedEmployees.length" description="暂无命中员工" :image-size="72" />
         <p class="scoped-employee-note">超级管理员拥有系统全量访问，不计入组织树命中名单。</p>
       </div>
     </el-dialog>
@@ -856,6 +862,7 @@
 </template>
 
 <script setup>
+import GovernanceEmpty from "../components/GovernanceEmpty.vue"
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
@@ -907,7 +914,12 @@ const askFlowConfig = ref({
   advancedEnabled: false,
   advancedRoles: ['super_admin'],
   datasetPolicies: {},
-  fallbackToBasicOnError: true,
+  rolePolicies: {},
+  fallbackToBasicOnError: false,
+  maxParallel: 3,
+  maxRetries: 2,
+  queryTimeoutSeconds: 30,
+  maxResultRows: 10000,
   attachMetadata: false,
 })
 const dataPermissionLoading = ref(false)
@@ -977,7 +989,7 @@ const activeHero = computed(() => {
   if (activeConsoleTab.value === 'ask-flow') {
     return {
       kicker: '问数流程控制',
-      description: '配置基础流程和进阶流程的入口、灰度角色和回退策略，确保升级版问数可控发布。'
+      description: '配置普通问数和高阶研究的入口、灰度角色和回退策略，确保升级版问数可控发布。'
     }
   }
   return {
@@ -989,11 +1001,11 @@ const activeHero = computed(() => {
 const askFlowReasonText = computed(() => {
   const reason = askFlowDecision.value?.reason || ''
   const map = {
-    basic_selected: '当前选择基础流程。',
-    advanced_disabled: '进阶流程总开关关闭，已回落基础流程。',
-    advanced_role_denied: '当前角色不在进阶流程灰度范围内。',
-    advanced_selected: '当前会进入进阶流程。',
-    advanced_error_fallback: '进阶流程异常时已回退基础流程。'
+    basic_selected: '当前选择普通问数。',
+    advanced_disabled: '高阶研究未开放，请选择普通问数或联系管理员。',
+    advanced_role_denied: '当前角色不在高阶研究灰度范围内。',
+    advanced_selected: '当前会进入高阶研究。',
+    advanced_error_fallback: '旧版回退记录；当前高阶任务失败时明确提示，不自动切换路径。'
   }
   return map[reason] || reason || '尚未加载流程判断。'
 })
@@ -1008,6 +1020,7 @@ const askFlowRoleSummary = computed(() => {
 
 const selectAskFlow = (flow) => {
   askFlowConfig.value.defaultFlow = flow === 'advanced' ? 'advanced' : 'basic'
+  if (flow === 'advanced') askFlowConfig.value.advancedEnabled = true
 }
 
 const featureList = computed(() =>
@@ -1095,7 +1108,7 @@ const permissionSectionRules = [
   { key: 'dataset-dict', label: '数据字典', description: '字段字典维护和 DDL 提取字段。', match: /^dataset_dict_/ },
   { key: 'dataset-schema', label: 'DDL + 表关联', description: 'DDL、表结构、表关联和来源表导入。', match: /^dataset_(schema|relation|source_table)/ },
   { key: 'dataset-golden', label: 'Golden SQL', description: '训练实例和 Golden SQL 样例维护。', match: /^dataset_golden_/ },
-  { key: 'dataset-prompt', label: 'Agent 提示片段', description: 'Agent 提示词片段维护。', match: /^dataset_prompt_(create|update|delete)$/ },
+  { key: 'dataset-prompt', label: '专家提示片段', description: '专家提示词片段维护。', match: /^dataset_prompt_(create|update|delete)$/ },
   { key: 'dataset-sql', label: 'SQL 调试台', description: '智能问数页 SQL 调试执行、复制和导出。', match: /^dataset_sql_preview_/ },
   { key: 'dataset-extcfg', label: '飞书/外部配置', description: '数据集外部配置维护。', match: /^dataset_extcfg_/ },
   { key: 'employee-account', label: '账号维护', description: '新增、编辑、启停、批量修改和删除账号。', match: /^employee_(create|update|status_update|bulk_update|delete)$/ },
@@ -1286,7 +1299,12 @@ const applyAskFlowConfig = (config = {}, decision = {}) => {
     advancedEnabled: Boolean(config.advancedEnabled),
     advancedRoles: Array.isArray(config.advancedRoles) && config.advancedRoles.length ? [...config.advancedRoles] : ['super_admin'],
     datasetPolicies: policies,
-    fallbackToBasicOnError: config.fallbackToBasicOnError !== false,
+    rolePolicies: { ...(config.rolePolicies || {}) },
+    fallbackToBasicOnError: false,
+    maxParallel: config.maxParallel ?? 3,
+    maxRetries: config.maxRetries ?? 2,
+    queryTimeoutSeconds: config.queryTimeoutSeconds ?? 30,
+    maxResultRows: config.maxResultRows ?? 10000,
     attachMetadata: config.attachMetadata !== false,
   }
   askFlowDecision.value = decision || {}
@@ -1321,10 +1339,15 @@ const buildAskFlowPayload = () => {
   const hasAdvancedPolicy = Object.values(datasetPolicies).includes('advanced')
   return {
     defaultFlow: flow,
-    advancedEnabled: flow === 'advanced' || hasAdvancedPolicy,
+    advancedEnabled: Boolean(askFlowConfig.value.advancedEnabled),
     advancedRoles: askFlowConfig.value.advancedRoles?.length ? askFlowConfig.value.advancedRoles : ['super_admin'],
     datasetPolicies,
-    fallbackToBasicOnError: askFlowConfig.value.fallbackToBasicOnError !== false,
+    rolePolicies: { ...askFlowConfig.value.rolePolicies },
+    fallbackToBasicOnError: false,
+    maxParallel: askFlowConfig.value.maxParallel,
+    maxRetries: askFlowConfig.value.maxRetries,
+    queryTimeoutSeconds: askFlowConfig.value.queryTimeoutSeconds,
+    maxResultRows: askFlowConfig.value.maxResultRows,
     attachMetadata: askFlowConfig.value.attachMetadata !== false,
   }
 }
@@ -1356,7 +1379,7 @@ const handleAskFlowSave = async () => {
 }
 
 const handleAskFlowReset = async () => {
-  await ElMessageBox.confirm('将恢复问数流程控制器默认配置：默认基础流程、关闭进阶流程。确认继续吗？', '恢复默认', {
+  await ElMessageBox.confirm('将恢复问数流程控制器默认配置：默认普通问数、关闭高阶研究。确认继续吗？', '恢复默认', {
     type: 'warning',
     confirmButtonText: '恢复默认',
     cancelButtonText: '取消'
@@ -2169,7 +2192,7 @@ const whatHappened = (row) => (
 const actionSuggestion = (row) => {
   const details = eventDetails(row)
   if (details.suggested_action) return details.suggested_action
-  if (row?.category === 'low_confidence') return '建议把这条问题补进回归题集或 Golden SQL，并检查字段字典、同义词和 Agent2 SQL 生成提示词。'
+  if (row?.category === 'low_confidence') return '建议把这条问题补进回归题集或 Golden SQL，并检查字段字典、同义词和 查询专家 SQL 生成提示词。'
   if (row?.category === 'error') return '建议先看详细错误和请求路径，再到对应 controller 搜索接口路径定位代码。'
   if (row?.category === 'auth') return '建议核对登录账号、角色和权限矩阵配置。'
   return '无需处理；这是正常访问记录。'
@@ -2251,8 +2274,8 @@ onMounted(() => {
   padding: 24px 28px 36px;
   color: #111827;
   background:
-    radial-gradient(circle at 8% 6%, rgba(13, 148, 136, 0.12), transparent 28%),
-    linear-gradient(135deg, #F2F5F4 0%, #F2F5F4 54%, #F0FDFA 100%);
+    radial-gradient(circle at 8% 6%, rgba(29, 78, 216, 0.12), transparent 28%),
+    linear-gradient(135deg, #F2F5F4 0%, #F2F5F4 54%, #eff6ff 100%);
 }
 
 .ask-flow-panel { display: flex; flex-direction: column; gap: 16px; }
@@ -2263,7 +2286,7 @@ onMounted(() => {
   justify-content: space-between;
   gap: 20px;
   padding: 22px;
-  border: 1px solid #F0FDFA;
+  border: 1px solid #eff6ff;
   border-radius: 4px;
   background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(236, 254, 255, 0.9));
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.07);
@@ -2306,7 +2329,7 @@ onMounted(() => {
   width: 30px;
   height: 30px;
   border-radius: 999px;
-  background: #0D9488;
+  background: #1d4ed8;
   color: #fff;
   font-weight: 800;
 }
@@ -2333,25 +2356,25 @@ onMounted(() => {
 }
 
 .flow-choice-card:hover {
-  border-color: #F0FDFA;
+  border-color: #eff6ff;
   background: #ffffff;
 }
 
 .flow-choice-card.active {
-  border-color: #0D9488;
-  background: #F0FDFA;
+  border-color: #1d4ed8;
+  background: #eff6ff;
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.10);
 }
 
 .flow-choice-card strong { font-size: 22px; color: #111827; }
 .flow-choice-card small { color: #6B7280; line-height: 1.65; }
-.flow-choice-card i { margin-top: auto; font-style: normal; color: #0D9488; font-weight: 700; }
+.flow-choice-card i { margin-top: auto; font-style: normal; color: #1d4ed8; font-weight: 700; }
 
 .flow-choice-tag {
   padding: 3px 8px;
   border-radius: 999px;
-  background: #F0FDFA;
-  color: #0D9488;
+  background: #eff6ff;
+  color: #1d4ed8;
   font-size: 12px;
   font-weight: 700;
 }
@@ -2484,7 +2507,7 @@ onMounted(() => {
 .card-kicker {
   display: inline-flex;
   margin-bottom: 5px;
-  color: #0D9488;
+  color: #1d4ed8;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -2524,7 +2547,7 @@ onMounted(() => {
   bottom: 28px;
   z-index: 30;
   padding: 8px;
-  border: 1px solid rgba(13, 148, 136, 0.18);
+  border: 1px solid rgba(29, 78, 216, 0.18);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.16);
@@ -2608,7 +2631,7 @@ onMounted(() => {
 }
 
 .dashboard-card.is-danger strong {
-  color: #0D9488;
+  color: #1d4ed8;
 }
 
 .dashboard-card.is-warning strong {
@@ -2620,7 +2643,7 @@ onMounted(() => {
 }
 
 .dashboard-card.is-primary strong {
-  color: #0D9488;
+  color: #1d4ed8;
 }
 
 .dashboard-panels {
@@ -2690,7 +2713,7 @@ onMounted(() => {
 }
 
 .rank-metric.is-primary {
-  color: #0D9488;
+  color: #1d4ed8;
 }
 
 .rank-metric.is-success {
@@ -2698,7 +2721,7 @@ onMounted(() => {
 }
 
 .rank-metric.is-danger {
-  color: #0D9488;
+  color: #1d4ed8;
 }
 
 .rank-metric.is-warning {
@@ -2715,7 +2738,7 @@ onMounted(() => {
 
 .summary-strip strong {
   display: block;
-  color: #0D9488;
+  color: #1d4ed8;
   font-size: 21px;
   line-height: 1.1;
 }
@@ -2752,7 +2775,7 @@ onMounted(() => {
 
 .console-tabs button.active {
   color: #ffffff;
-  background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.22);
 }
 
@@ -2850,8 +2873,8 @@ onMounted(() => {
   margin-left: 8px;
   padding: 2px 7px;
   border-radius: 999px;
-  color: #0D9488;
-  background: #F0FDFA;
+  color: #1d4ed8;
+  background: #eff6ff;
   font-size: 11px;
 }
 
@@ -2888,8 +2911,8 @@ onMounted(() => {
 }
 
 .role-head.checked small {
-  color: #0D9488;
-  background: #F0FDFA;
+  color: #1d4ed8;
+  background: #eff6ff;
 }
 
 .role-head input,
@@ -2910,9 +2933,9 @@ onMounted(() => {
 
 .role-head.checked .check-box,
 .permission-check.checked .check-box {
-  border-color: #0D9488;
-  background: #0D9488;
-  box-shadow: inset 0 0 0 3px #0D9488;
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+  box-shadow: inset 0 0 0 3px #1d4ed8;
 }
 
 .role-head.checked .check-box::after,
@@ -3040,8 +3063,8 @@ onMounted(() => {
   flex-shrink: 0;
   padding: 3px 8px;
   border-radius: 999px;
-  background: #F0FDFA;
-  color: #0D9488;
+  background: #eff6ff;
+  color: #1d4ed8;
   font-size: 12px;
   font-style: normal;
   font-weight: 800;
@@ -3053,8 +3076,8 @@ onMounted(() => {
   margin: 0 8px 3px 0;
   padding: 2px 7px;
   border-radius: 999px;
-  background: #F0FDFA;
-  color: #0D9488;
+  background: #eff6ff;
+  color: #1d4ed8;
   font-size: 11px;
   font-weight: 800;
   vertical-align: middle;
@@ -3095,8 +3118,8 @@ onMounted(() => {
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
-  color: #0D9488;
-  background: #F0FDFA;
+  color: #1d4ed8;
+  background: #eff6ff;
   font-size: 11px;
   font-weight: 800;
 }
@@ -3121,7 +3144,7 @@ onMounted(() => {
 }
 
 .data-summary-strip strong {
-  color: #0D9488;
+  color: #1d4ed8;
 }
 
 .data-permission-card {
@@ -3254,8 +3277,8 @@ onMounted(() => {
 }
 
 .detail-highlight {
-  border-color: #F0FDFA;
-  background: #F0FDFA;
+  border-color: #eff6ff;
+  background: #eff6ff;
 }
 
 .detail-section h3 {
@@ -3298,7 +3321,7 @@ onMounted(() => {
   border-radius: 6px;
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 249, 250, 0.96)),
-    radial-gradient(circle at 0 0, rgba(13, 148, 136, 0.1), transparent 34%);
+    radial-gradient(circle at 0 0, rgba(29, 78, 216, 0.1), transparent 34%);
 }
 
 .console-hero h1 {
@@ -3343,7 +3366,7 @@ onMounted(() => {
   top: 0;
   z-index: 2;
   margin-bottom: 2px;
-  background: #F0FDFA;
+  background: #eff6ff;
 }
 
 .feature-col {
@@ -3375,8 +3398,8 @@ onMounted(() => {
 }
 
 .role-head.checked {
-  border-color: rgba(13, 148, 136, 0.24);
-  background: #F0FDFA;
+  border-color: rgba(29, 78, 216, 0.24);
+  background: #eff6ff;
 }
 
 .role-head small {
@@ -3425,7 +3448,7 @@ onMounted(() => {
 }
 
 .scope-summary strong {
-  color: #0D9488;
+  color: #1d4ed8;
   font-size: 18px;
 }
 
@@ -3571,4 +3594,8 @@ onMounted(() => {
     grid-template-columns: 1fr 1fr;
   }
 }
+</style>
+
+<style scoped>
+.role-route-policy{grid-column:1/-1;padding:18px 20px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px}.role-route-policy h4{font-size:14px;font-weight:500;margin:0 0 8px}.role-route-policy p{font-size:12px;color:#64748b;line-height:1.8}.role-route-policy>label{display:flex;align-items:center;gap:20px;justify-content:space-between;padding:10px 0}.role-route-policy .el-select{width:min(270px,65%)}.role-route-policy>label>span{font-size:12px;color:#435976}
 </style>

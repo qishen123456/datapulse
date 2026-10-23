@@ -175,7 +175,7 @@ const segments = computed(() => {
 
 .ax-user-bubble {
   padding: 12px 18px;
-  background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%);
+  background: linear-gradient(135deg, #386553 0%, #294e3e 100%);
   color: #ffffff;
   border: none;
   border-radius: 8px 8px 6px 8px;
@@ -234,8 +234,8 @@ const segments = computed(() => {
 }
 
 .ax-user-action:hover:not(:disabled) {
-  color: #0F766E;
-  border-color: rgba(13, 148, 136, 0.22);
+  color: #294e3e;
+  border-color: rgba(29, 78, 216, 0.22);
   background: #ffffff;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(15, 118, 110, 0.12);

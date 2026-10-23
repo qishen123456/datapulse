@@ -316,7 +316,12 @@ export const sendAskChatStream = (question, signal, selectedDatasetIds, onEvent,
     session_id: sessionId || undefined,
     conversation_history: conversationHistory || undefined,
     skip_typo_check: options?.skipTypoCheck || undefined,
+    ask_flow: options?.askFlow || undefined,
+    execution_id: options?.executionId || undefined,
   }, signal, onEvent)
+
+export const getAskCapabilities = (datasetId) => api.get('/ask-chat/capabilities', { params: { dataset_id: datasetId || undefined }, silent: true })
+export const cancelAskRun = (runId) => api.post(`/ask-chat/runs/${encodeURIComponent(runId)}/cancel`, {}, { silent: true })
 
 export const getDataPulseReportHistory = (limit = 50) => api.get('/ask-chat/report-history', { params: { limit }, timeout: 5000, silent: true })
 export const saveDataPulseReportHistory = (item) => api.post('/ask-chat/report-history', { item }, { silent: true })

@@ -1,0 +1,169 @@
+[
+  {
+    "code": "GAS_BIZ",
+    "name": "江城燃气·经营与供销差",
+    "domain": "燃气经营",
+    "tables": [
+      "v_gas_sales",
+      "v_gas_supply_sources",
+      "v_gas_supply_balance",
+      "v_gas_profit",
+      "v_gas_growth",
+      "v_gas_org"
+    ],
+    "synonyms": [
+      "燃气经营",
+      "销气",
+      "供销差",
+      "燃气利润",
+      "燃气新增用户"
+    ],
+    "questions": [
+      [
+        "2026年9月各分公司销气量排名",
+        "SELECT branch_name,SUM(volume_m3) AS 销气量_方 FROM v_gas_sales WHERE month='2026-09' GROUP BY branch_name ORDER BY 销气量_方 DESC"
+      ],
+      [
+        "2026年9月各分公司供销差率",
+        "SELECT branch_name,(SUM(inlet_m3)-SUM(sales_m3))/NULLIF(SUM(inlet_m3),0) AS 供销差率 FROM v_gas_supply_balance WHERE month='2026-09' GROUP BY branch_name ORDER BY 供销差率 DESC"
+      ],
+      [
+        "2026年前三季度模拟税前利润是多少",
+        "SELECT SUM(pretax_profit_yuan) AS 税前利润_元 FROM v_gas_profit WHERE month BETWEEN '2026-01' AND '2026-09'"
+      ],
+      [
+        "2026年9月居民和工商业销气收入各多少",
+        "SELECT user_type,SUM(revenue_yuan) AS 销气收入_元 FROM v_gas_sales WHERE month='2026-09' GROUP BY user_type"
+      ],
+      [
+        "2026年9月哪个分公司估抄率最高",
+        "SELECT branch_name,SUM(estimated_meter_m3)::numeric/NULLIF(SUM(volume_m3),0) AS 估抄率 FROM v_gas_sales WHERE month='2026-09' GROUP BY branch_name ORDER BY 估抄率 DESC"
+      ],
+      [
+        "2026年9月各分公司新增通气多少户",
+        "SELECT branch_name,SUM(connected_users) AS 新增通气户数 FROM v_gas_growth WHERE month='2026-09' GROUP BY branch_name"
+      ]
+    ],
+    "deep": [
+      "2026年三季度利润相较去年同期为何变化？拆解量价、采购、损耗和费用贡献",
+      "居民每方提价0.1元，在销量不变假设下2026年前三季度可增收多少？"
+    ],
+    "schema_definition": {
+      "v_gas_sales": "CREATE OR REPLACE VIEW v_gas_sales AS\nSELECT\n  (fields->>'business_key')::text AS \"business_key\",\n  (fields->>'month')::text AS \"month\",\n  (fields->>'org_id')::text AS \"org_id\",\n  (fields->>'org_name')::text AS \"org_name\",\n  (fields->>'org_path')::text AS \"org_path\",\n  (fields->>'branch_id')::text AS \"branch_id\",\n  (fields->>'branch_name')::text AS \"branch_name\",\n  (fields->>'center_id')::text AS \"center_id\",\n  (fields->>'data_version')::text AS \"data_version\",\n  (fields->>'user_type')::text AS \"user_type\",\n  (NULLIF(fields->>'volume_m3', ''))::numeric::bigint AS \"volume_m3\",\n  (NULLIF(fields->>'price_yuan_m3', ''))::numeric AS \"price_yuan_m3\",\n  (NULLIF(fields->>'theoretical_revenue_yuan', ''))::numeric AS \"theoretical_revenue_yuan\",\n  (NULLIF(fields->>'revenue_yuan', ''))::numeric AS \"revenue_yuan\",\n  (NULLIF(fields->>'audit_difference_yuan', ''))::numeric AS \"audit_difference_yuan\",\n  (NULLIF(fields->>'actual_meter_m3', ''))::numeric::bigint AS \"actual_meter_m3\",\n  (NULLIF(fields->>'estimated_meter_m3', ''))::numeric::bigint AS \"estimated_meter_m3\",\n  (fields->>'tax_basis')::text AS \"tax_basis\",\n  (fields->>'exception_code')::text AS \"exception_code\",\n  fields->>'org_id' AS \"组织编码\",\n  fields->>'org_path' AS \"组织编码路径\"\nFROM raw_gas_sales_monthly;",
+      "v_gas_supply_sources": "CREATE OR REPLACE VIEW v_gas_supply_sources AS\nSELECT\n  (fields->>'business_key')::text AS \"business_key\",\n  (fields->>'month')::text AS \"month\",\n  (fields->>'org_id')::text AS \"org_id\",\n  (fields->>'org_name')::text AS \"org_name\",\n  (fields->>'org_path')::text AS \"org_path\",\n  (fields->>'branch_id')::text AS \"branch_id\",\n  (fields->>'branch_name')::text AS \"branch_name\",\n  (fields->>'center_id')::text AS \"center_id\",\n  (fields->>'data_version')::text AS \"data_version\",\n  (fields->>'source')::text AS \"source\",\n  (NULLIF(fields->>'inlet_m3', ''))::numeric::bigint AS \"inlet_m3\",\n  (NULLIF(fields->>'purchase_price_yuan_m3', ''))::numeric AS \"purchase_price_yuan_m3\",\n  (NULLIF(fields->>'purchase_cost_yuan', ''))::numeric AS \"purchase_cost_yuan\",\n  (NULLIF(fields->>'loss_threshold', ''))::numeric AS \"loss_threshold\",\n  (fields->>'measurement_basis')::text AS \"measurement_basis\",\n  (fields->>'allocation_basis')::text AS \"allocation_basis\",\n  fields->>'org_id' AS \"组织编码\",\n  fields->>'org_path' AS \"组织编码路径\"\nFROM raw_gas_supply_monthly;",
+      "v_gas_supply_balance": "CREATE OR REPLACE VIEW v_gas_supply_balance AS\nWITH s AS (\n SELECT month,center_id,branch_id,branch_name,SUM(volume_m3) AS sales_m3,\n SUM(revenue_yuan) AS sales_revenue_yuan,SUM(estimated_meter_m3) AS estimated_m3\n FROM v_gas_sales GROUP BY month,center_id,branch_id,branch_name\n), p AS (\n SELECT month,org_id,org_name,org_path,SUM(inlet_m3) AS inlet_m3,\n SUM(purchase_cost_yuan) AS purchase_cost_yuan,MAX(loss_threshold) AS loss_threshold\n FROM v_gas_supply_sources GROUP BY month,org_id,org_name,org_path\n)\nSELECT p.*,s.branch_id,s.branch_name,s.sales_m3,s.sales_revenue_yuan,s.estimated_m3,\n p.inlet_m3-s.sales_m3 AS loss_m3,\n (p.inlet_m3-s.sales_m3)/NULLIF(p.inlet_m3,0) AS loss_rate,\n p.org_id AS \"组织编码\",p.org_path AS \"组织编码路径\"\nFROM p JOIN s ON p.month=s.month AND p.org_id=s.center_id;",
+      "v_gas_profit": "CREATE OR REPLACE VIEW v_gas_profit AS\nSELECT f.*,COALESCE(b.sales_m3,0) AS sales_m3,\n COALESCE(b.sales_revenue_yuan,0) AS sales_revenue_yuan,\n COALESCE(b.purchase_cost_yuan,0) AS purchase_cost_yuan,\n COALESCE(b.sales_revenue_yuan,0)+f.installation_revenue_yuan+f.value_added_revenue_yuan AS total_revenue_yuan,\n COALESCE(b.sales_revenue_yuan,0)+f.installation_revenue_yuan+f.value_added_revenue_yuan\n -COALESCE(b.purchase_cost_yuan,0)-f.installation_cost_yuan-f.value_added_cost_yuan\n -f.distribution_cost_yuan-f.admin_expense_yuan-f.finance_expense_yuan-f.impairment_yuan AS pretax_profit_yuan\nFROM v_gas_profit_inputs f LEFT JOIN v_gas_supply_balance b ON f.month=b.month AND f.org_id=b.org_id;",
+      "v_gas_growth": "CREATE OR REPLACE VIEW v_gas_growth AS\nSELECT\n  (fields->>'business_key')::text AS \"business_key\",\n  (fields->>'month')::text AS \"month\",\n  (fields->>'org_id')::text AS \"org_id\",\n  (fields->>'org_name')::text AS \"org_name\",\n  (fields->>'org_path')::text AS \"org_path\",\n  (fields->>'branch_id')::text AS \"branch_id\",\n  (fields->>'branch_name')::text AS \"branch_name\",\n  (fields->>'center_id')::text AS \"center_id\",\n  (fields->>'data_version')::text AS \"data_version\",\n  (fields->>'user_type')::text AS \"user_type\",\n  (NULLIF(fields->>'opening_users', ''))::numeric::bigint AS \"opening_users\",\n  (NULLIF(fields->>'applied_users', ''))::numeric::bigint AS \"applied_users\",\n  (NULLIF(fields->>'connected_users', ''))::numeric::bigint AS \"connected_users\",\n  (NULLIF(fields->>'churn_users', ''))::numeric::bigint AS \"churn_users\",\n  (NULLIF(fields->>'ending_users', ''))::numeric::bigint AS \"ending_users\",\n  (NULLIF(fields->>'bottle_conversion_users', ''))::numeric::bigint AS \"bottle_conversion_users\",\n  (NULLIF(fields->>'potential_users', ''))::numeric::bigint AS \"potential_users\",\n  fields->>'org_id' AS \"组织编码\",\n  fields->>'org_path' AS \"组织编码路径\"\nFROM raw_gas_growth_monthly;",
+      "v_gas_org": "CREATE OR REPLACE VIEW v_gas_org AS\nSELECT\n  (fields->>'business_key')::text AS \"business_key\",\n  (fields->>'org_id')::text AS \"org_id\",\n  (fields->>'org_name')::text AS \"org_name\",\n  (fields->>'parent_id')::text AS \"parent_id\",\n  (NULLIF(fields->>'org_level', ''))::numeric::bigint AS \"org_level\",\n  (fields->>'org_path')::text AS \"org_path\",\n  (fields->>'org_name_path')::text AS \"org_name_path\",\n  (NULLIF(fields->>'sales_enabled', ''))::numeric::bigint AS \"sales_enabled\",\n  (fields->>'data_version')::text AS \"data_version\",\n  fields->>'org_id' AS \"组织编码\",\n  fields->>'org_path' AS \"组织编码路径\"\nFROM raw_gas_org;"
+    }
+  },
+  {
+    "code": "GAS_AR",
+    "name": "江城燃气·应收回款与稽核",
+    "domain": "燃气财务",
+    "tables": [
+      "v_gas_ar",
+      "v_gas_ar_summary",
+      "v_gas_sales",
+      "v_gas_org"
+    ],
+    "synonyms": [
+      "燃气欠费",
+      "燃气应收",
+      "账龄",
+      "回款",
+      "量价稽核"
+    ],
+    "questions": [
+      [
+        "2026年9月末应收余额是多少",
+        "SELECT SUM(closing_yuan) AS 期末应收_元 FROM v_gas_ar WHERE month='2026-09'"
+      ],
+      [
+        "2026年9月欠费最多的十个模拟工商客户",
+        "SELECT customer_name,closing_yuan FROM v_gas_ar WHERE month='2026-09' AND object_kind='模拟客户' ORDER BY closing_yuan DESC LIMIT 10"
+      ],
+      [
+        "2026年9月超过180天的应收有多少",
+        "SELECT SUM(aging_181_365_yuan+aging_365_plus_yuan) AS 长账龄应收_元 FROM v_gas_ar WHERE month='2026-09'"
+      ],
+      [
+        "2026年9月各分公司气费回收率",
+        "SELECT branch_name,SUM(collected_yuan)/NULLIF(SUM(billed_yuan),0) AS 回收率 FROM v_gas_ar WHERE month='2026-09' GROUP BY branch_name"
+      ],
+      [
+        "2026年9月重点催收的客户有哪些",
+        "SELECT customer_name,closing_yuan,collection_status FROM v_gas_ar WHERE month='2026-09' AND collection_status='重点催收'"
+      ],
+      [
+        "哪些月份账单收入与量价收入存在差异",
+        "SELECT month,branch_name,SUM(audit_difference_yuan) AS 稽核差异_元 FROM v_gas_sales GROUP BY month,branch_name HAVING SUM(audit_difference_yuan)<>0"
+      ]
+    ],
+    "deep": [
+      "沙湖应收恶化是哪些客户和账龄推动的？给出证据和催收建议",
+      "按1%、3%、10%、30%、70%的演示账龄计提比例复核最新月计提是否充分"
+    ],
+    "schema_definition": {
+      "v_gas_ar": "CREATE OR REPLACE VIEW v_gas_ar AS\nSELECT\n  (fields->>'business_key')::text AS \"business_key\",\n  (fields->>'month')::text AS \"month\",\n  (fields->>'org_id')::text AS \"org_id\",\n  (fields->>'org_name')::text AS \"org_name\",\n  (fields->>'org_path')::text AS \"org_path\",\n  (fields->>'branch_id')::text AS \"branch_id\",\n  (fields->>'branch_name')::text AS \"branch_name\",\n  (fields->>'center_id')::text AS \"center_id\",\n  (fields->>'data_version')::text AS \"data_version\",\n  (fields->>'customer_id')::text AS \"customer_id\",\n  (fields->>'customer_name')::text AS \"customer_name\",\n  (fields->>'object_kind')::text AS \"object_kind\",\n  (fields->>'user_type')::text AS \"user_type\",\n  (NULLIF(fields->>'opening_yuan', ''))::numeric AS \"opening_yuan\",\n  (NULLIF(fields->>'billed_yuan', ''))::numeric AS \"billed_yuan\",\n  (NULLIF(fields->>'collected_yuan', ''))::numeric AS \"collected_yuan\",\n  (NULLIF(fields->>'adjustment_yuan', ''))::numeric::bigint AS \"adjustment_yuan\",\n  (NULLIF(fields->>'closing_yuan', ''))::numeric AS \"closing_yuan\",\n  (NULLIF(fields->>'aging_0_30_yuan', ''))::numeric AS \"aging_0_30_yuan\",\n  (NULLIF(fields->>'aging_31_90_yuan', ''))::numeric AS \"aging_31_90_yuan\",\n  (NULLIF(fields->>'aging_91_180_yuan', ''))::numeric AS \"aging_91_180_yuan\",\n  (NULLIF(fields->>'aging_181_365_yuan', ''))::numeric AS \"aging_181_365_yuan\",\n  (NULLIF(fields->>'aging_365_plus_yuan', ''))::numeric AS \"aging_365_plus_yuan\",\n  (NULLIF(fields->>'provision_yuan', ''))::numeric AS \"provision_yuan\",\n  (fields->>'collection_status')::text AS \"collection_status\",\n  (fields->>'aging_basis')::text AS \"aging_basis\",\n  fields->>'org_id' AS \"组织编码\",\n  fields->>'org_path' AS \"组织编码路径\"\nFROM raw_gas_ar_monthly;",
+      "v_gas_ar_summary": "CREATE OR REPLACE VIEW v_gas_ar_summary AS\nSELECT month,org_id,org_name,org_path,branch_id,branch_name,user_type,\n SUM(opening_yuan) AS opening_yuan,SUM(billed_yuan) AS billed_yuan,SUM(collected_yuan) AS collected_yuan,\n SUM(closing_yuan) AS closing_yuan,SUM(provision_yuan) AS provision_yuan,\n SUM(aging_181_365_yuan+aging_365_plus_yuan) AS aging_over_180_yuan,\n org_id AS \"组织编码\",org_path AS \"组织编码路径\"\nFROM v_gas_ar GROUP BY month,org_id,org_name,org_path,branch_id,branch_name,user_type;",
+      "v_gas_sales": "CREATE OR REPLACE VIEW v_gas_sales AS\nSELECT\n  (fields->>'business_key')::text AS \"business_key\",\n  (fields->>'month')::text AS \"month\",\n  (fields->>'org_id')::text AS \"org_id\",\n  (fields->>'org_name')::text AS \"org_name\",\n  (fields->>'org_path')::text AS \"org_path\",\n  (fields->>'branch_id')::text AS \"branch_id\",\n  (fields->>'branch_name')::text AS \"branch_name\",\n  (fields->>'center_id')::text AS \"center_id\",\n  (fields->>'data_version')::text AS \"data_version\",\n  (fields->>'user_type')::text AS \"user_type\",\n  (NULLIF(fields->>'volume_m3', ''))::numeric::bigint AS \"volume_m3\",\n  (NULLIF(fields->>'price_yuan_m3', ''))::numeric AS \"price_yuan_m3\",\n  (NULLIF(fields->>'theoretical_revenue_yuan', ''))::numeric AS \"theoretical_revenue_yuan\",\n  (NULLIF(fields->>'revenue_yuan', ''))::numeric AS \"revenue_yuan\",\n  (NULLIF(fields->>'audit_difference_yuan', ''))::numeric AS \"audit_difference_yuan\",\n  (NULLIF(fields->>'actual_meter_m3', ''))::numeric::bigint AS \"actual_meter_m3\",\n  (NULLIF(fields->>'estimated_meter_m3', ''))::numeric::bigint AS \"estimated_meter_m3\",\n  (fields->>'tax_basis')::text AS \"tax_basis\",\n  (fields->>'exception_code')::text AS \"exception_code\",\n  fields->>'org_id' AS \"组织编码\",\n  fields->>'org_path' AS \"组织编码路径\"\nFROM raw_gas_sales_monthly;",
+      "v_gas_org": "CREATE OR REPLACE VIEW v_gas_org AS\nSELECT\n  (fields->>'business_key')::text AS \"business_key\",\n  (fields->>'org_id')::text AS \"org_id\",\n  (fields->>'org_name')::text AS \"org_name\",\n  (fields->>'parent_id')::text AS \"parent_id\",\n  (NULLIF(fields->>'org_level', ''))::numeric::bigint AS \"org_level\",\n  (fields->>'org_path')::text AS \"org_path\",\n  (fields->>'org_name_path')::text AS \"org_name_path\",\n  (NULLIF(fields->>'sales_enabled', ''))::numeric::bigint AS \"sales_enabled\",\n  (fields->>'data_version')::text AS \"data_version\",\n  fields->>'org_id' AS \"组织编码\",\n  fields->>'org_path' AS \"组织编码路径\"\nFROM raw_gas_org;"
+    }
+  },
+  {
+    "code": "GAS_SAFE",
+    "name": "江城燃气·安全与管网治理",
+    "domain": "燃气安全",
+    "tables": [
+      "v_gas_safety",
+      "v_gas_hazards",
+      "v_gas_network",
+      "v_gas_org"
+    ],
+    "synonyms": [
+      "燃气安全",
+      "隐患",
+      "安检",
+      "管网",
+      "GIS",
+      "抢修"
+    ],
+    "questions": [
+      [
+        "2026年9月各分公司安检覆盖率",
+        "SELECT branch_name,SUM(inspected)::numeric/NULLIF(SUM(due_inspect),0) AS 安检覆盖率 FROM v_gas_safety WHERE month='2026-09' GROUP BY branch_name"
+      ],
+      [
+        "截至2026年9月底有哪些超期未闭环隐患",
+        "SELECT hazard_id,org_name,hazard_type,due_date FROM v_gas_hazards WHERE found_date<='2026-09-30' AND due_date<'2026-09-30' AND (completed_date IS NULL OR completed_date>'2026-09-30')"
+      ],
+      [
+        "2026年9月各分公司抢修及时率",
+        "SELECT branch_name,SUM(emergency_on_time)::numeric/NULLIF(SUM(emergency_total),0) AS 抢修及时率 FROM v_gas_safety WHERE month='2026-09' GROUP BY branch_name"
+      ],
+      [
+        "2026年9月到访不遇还有多少户",
+        "SELECT SUM(not_at_home) AS 到访不遇户数 FROM v_gas_safety WHERE month='2026-09'"
+      ],
+      [
+        "截至2026年9月GIS入库里程占比多少",
+        "SELECT SUM(CASE WHEN gis_loaded_date<='2026-09-30' THEN length_km ELSE 0 END)/NULLIF(SUM(length_km),0) AS GIS入库率 FROM v_gas_network WHERE laid_date<='2026-09-30'"
+      ],
+      [
+        "沙湖分公司有多少公里超过20年的老旧管网",
+        "SELECT SUM(length_km) AS 老旧管网_公里 FROM v_gas_network WHERE branch_id='SHAHU' AND laid_date<='2006-09-30'"
+      ]
+    ],
+    "deep": [
+      "沙湖哪些网格应优先治理？并行检查隐患、管龄、安检覆盖和抢修",
+      "未闭环重大隐患如何安排整改优先级？依据工单截止日和资产信息解释"
+    ],
+    "schema_definition": {
+      "v_gas_safety": "CREATE OR REPLACE VIEW v_gas_safety AS\nSELECT\n  (fields->>'business_key')::text AS \"business_key\",\n  (fields->>'month')::text AS \"month\",\n  (fields->>'org_id')::text AS \"org_id\",\n  (fields->>'org_name')::text AS \"org_name\",\n  (fields->>'org_path')::text AS \"org_path\",\n  (fields->>'branch_id')::text AS \"branch_id\",\n  (fields->>'branch_name')::text AS \"branch_name\",\n  (fields->>'center_id')::text AS \"center_id\",\n  (fields->>'data_version')::text AS \"data_version\",\n  (NULLIF(fields->>'due_inspect', ''))::numeric::bigint AS \"due_inspect\",\n  (NULLIF(fields->>'inspected', ''))::numeric::bigint AS \"inspected\",\n  (NULLIF(fields->>'not_at_home', ''))::numeric::bigint AS \"not_at_home\",\n  (NULLIF(fields->>'three_piece_installed', ''))::numeric::bigint AS \"three_piece_installed\",\n  (NULLIF(fields->>'emergency_total', ''))::numeric::bigint AS \"emergency_total\",\n  (NULLIF(fields->>'emergency_on_time', ''))::numeric::bigint AS \"emergency_on_time\",\n  (NULLIF(fields->>'leak_count', ''))::numeric::bigint AS \"leak_count\",\n  fields->>'org_id' AS \"组织编码\",\n  fields->>'org_path' AS \"组织编码路径\"\nFROM raw_gas_safety_monthly;",
+      "v_gas_hazards": "CREATE OR REPLACE VIEW v_gas_hazards AS\nSELECT\n  (fields->>'business_key')::text AS \"business_key\",\n  (fields->>'hazard_id')::text AS \"hazard_id\",\n  (fields->>'org_id')::text AS \"org_id\",\n  (fields->>'org_name')::text AS \"org_name\",\n  (fields->>'org_path')::text AS \"org_path\",\n  (fields->>'branch_id')::text AS \"branch_id\",\n  (fields->>'branch_name')::text AS \"branch_name\",\n  (fields->>'center_id')::text AS \"center_id\",\n  (fields->>'data_version')::text AS \"data_version\",\n  (fields->>'network_id')::text AS \"network_id\",\n  (CASE WHEN fields->>'found_date' ~ '^[0-9]{13}$' THEN (to_timestamp((fields->>'found_date')::numeric/1000) AT TIME ZONE 'Asia/Shanghai')::date ELSE NULLIF(fields->>'found_date', '')::date END)::date AS \"found_date\",\n  (CASE WHEN fields->>'due_date' ~ '^[0-9]{13}$' THEN (to_timestamp((fields->>'due_date')::numeric/1000) AT TIME ZONE 'Asia/Shanghai')::date ELSE NULLIF(fields->>'due_date', '')::date END)::date AS \"due_date\",\n  (CASE WHEN fields->>'completed_date' ~ '^[0-9]{13}$' THEN (to_timestamp((fields->>'completed_date')::numeric/1000) AT TIME ZONE 'Asia/Shanghai')::date ELSE NULLIF(fields->>'completed_date', '')::date END)::date AS \"completed_date\",\n  (fields->>'severity')::text AS \"severity\",\n  (fields->>'hazard_type')::text AS \"hazard_type\",\n  (fields->>'status')::text AS \"status\",\n  (CASE WHEN fields->>'as_of_date' ~ '^[0-9]{13}$' THEN (to_timestamp((fields->>'as_of_date')::numeric/1000) AT TIME ZONE 'Asia/Shanghai')::date ELSE NULLIF(fields->>'as_of_date', '')::date END)::date AS \"as_of_date\",\n  fields->>'org_id' AS \"组织编码\",\n  fields->>'org_path' AS \"组织编码路径\"\nFROM raw_gas_hazard_orders;",
+      "v_gas_network": "CREATE OR REPLACE VIEW v_gas_network AS\nSELECT\n  (fields->>'business_key')::text AS \"business_key\",\n  (fields->>'network_id')::text AS \"network_id\",\n  (fields->>'org_id')::text AS \"org_id\",\n  (fields->>'org_name')::text AS \"org_name\",\n  (fields->>'org_path')::text AS \"org_path\",\n  (fields->>'branch_id')::text AS \"branch_id\",\n  (fields->>'branch_name')::text AS \"branch_name\",\n  (fields->>'center_id')::text AS \"center_id\",\n  (fields->>'data_version')::text AS \"data_version\",\n  (fields->>'pressure_level')::text AS \"pressure_level\",\n  (NULLIF(fields->>'length_km', ''))::numeric AS \"length_km\",\n  (fields->>'material')::text AS \"material\",\n  (CASE WHEN fields->>'laid_date' ~ '^[0-9]{13}$' THEN (to_timestamp((fields->>'laid_date')::numeric/1000) AT TIME ZONE 'Asia/Shanghai')::date ELSE NULLIF(fields->>'laid_date', '')::date END)::date AS \"laid_date\",\n  (CASE WHEN fields->>'gis_loaded_date' ~ '^[0-9]{13}$' THEN (to_timestamp((fields->>'gis_loaded_date')::numeric/1000) AT TIME ZONE 'Asia/Shanghai')::date ELSE NULLIF(fields->>'gis_loaded_date', '')::date END)::date AS \"gis_loaded_date\",\n  fields->>'org_id' AS \"组织编码\",\n  fields->>'org_path' AS \"组织编码路径\"\nFROM raw_gas_network_assets;",
+      "v_gas_org": "CREATE OR REPLACE VIEW v_gas_org AS\nSELECT\n  (fields->>'business_key')::text AS \"business_key\",\n  (fields->>'org_id')::text AS \"org_id\",\n  (fields->>'org_name')::text AS \"org_name\",\n  (fields->>'parent_id')::text AS \"parent_id\",\n  (NULLIF(fields->>'org_level', ''))::numeric::bigint AS \"org_level\",\n  (fields->>'org_path')::text AS \"org_path\",\n  (fields->>'org_name_path')::text AS \"org_name_path\",\n  (NULLIF(fields->>'sales_enabled', ''))::numeric::bigint AS \"sales_enabled\",\n  (fields->>'data_version')::text AS \"data_version\",\n  fields->>'org_id' AS \"组织编码\",\n  fields->>'org_path' AS \"组织编码路径\"\nFROM raw_gas_org;"
+    }
+  }
+]

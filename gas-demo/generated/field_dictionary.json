@@ -1,0 +1,1218 @@
+[
+  {
+    "csv": "gas_org.csv",
+    "view": "v_gas_org",
+    "field": "business_key",
+    "type": "text",
+    "chinese": "业务唯一键",
+    "required": true
+  },
+  {
+    "csv": "gas_org.csv",
+    "view": "v_gas_org",
+    "field": "org_id",
+    "type": "text",
+    "chinese": "组织编码",
+    "required": true
+  },
+  {
+    "csv": "gas_org.csv",
+    "view": "v_gas_org",
+    "field": "org_name",
+    "type": "text",
+    "chinese": "组织名称",
+    "required": false
+  },
+  {
+    "csv": "gas_org.csv",
+    "view": "v_gas_org",
+    "field": "parent_id",
+    "type": "text",
+    "chinese": "上级组织编码",
+    "required": false
+  },
+  {
+    "csv": "gas_org.csv",
+    "view": "v_gas_org",
+    "field": "org_level",
+    "type": "bigint",
+    "chinese": "组织层级",
+    "required": false
+  },
+  {
+    "csv": "gas_org.csv",
+    "view": "v_gas_org",
+    "field": "org_path",
+    "type": "text",
+    "chinese": "组织编码路径",
+    "required": true
+  },
+  {
+    "csv": "gas_org.csv",
+    "view": "v_gas_org",
+    "field": "org_name_path",
+    "type": "text",
+    "chinese": "组织名称路径",
+    "required": false
+  },
+  {
+    "csv": "gas_org.csv",
+    "view": "v_gas_org",
+    "field": "sales_enabled",
+    "type": "bigint",
+    "chinese": "是否有销售职责",
+    "required": false
+  },
+  {
+    "csv": "gas_org.csv",
+    "view": "v_gas_org",
+    "field": "data_version",
+    "type": "text",
+    "chinese": "模拟版本",
+    "required": false
+  },
+  {
+    "csv": "gas_sales_monthly.csv",
+    "view": "v_gas_sales",
+    "field": "business_key",
+    "type": "text",
+    "chinese": "业务唯一键",
+    "required": true
+  },
+  {
+    "csv": "gas_sales_monthly.csv",
+    "view": "v_gas_sales",
+    "field": "month",
+    "type": "text",
+    "chinese": "月份",
+    "required": false
+  },
+  {
+    "csv": "gas_sales_monthly.csv",
+    "view": "v_gas_sales",
+    "field": "org_id",
+    "type": "text",
+    "chinese": "组织编码",
+    "required": true
+  },
+  {
+    "csv": "gas_sales_monthly.csv",
+    "view": "v_gas_sales",
+    "field": "org_name",
+    "type": "text",
+    "chinese": "组织名称",
+    "required": false
+  },
+  {
+    "csv": "gas_sales_monthly.csv",
+    "view": "v_gas_sales",
+    "field": "org_path",
+    "type": "text",
+    "chinese": "组织编码路径",
+    "required": true
+  },
+  {
+    "csv": "gas_sales_monthly.csv",
+    "view": "v_gas_sales",
+    "field": "branch_id",
+    "type": "text",
+    "chinese": "分公司编码",
+    "required": false
+  },
+  {
+    "csv": "gas_sales_monthly.csv",
+    "view": "v_gas_sales",
+    "field": "branch_name",
+    "type": "text",
+    "chinese": "分公司名称",
+    "required": false
+  },
+  {
+    "csv": "gas_sales_monthly.csv",
+    "view": "v_gas_sales",
+    "field": "center_id",
+    "type": "text",
+    "chinese": "服务中心编码",
+    "required": false
+  },
+  {
+    "csv": "gas_sales_monthly.csv",
+    "view": "v_gas_sales",
+    "field": "data_version",
+    "type": "text",
+    "chinese": "模拟版本",
+    "required": false
+  },
+  {
+    "csv": "gas_sales_monthly.csv",
+    "view": "v_gas_sales",
+    "field": "user_type",
+    "type": "text",
+    "chinese": "客户类型",
+    "required": false
+  },
+  {
+    "csv": "gas_sales_monthly.csv",
+    "view": "v_gas_sales",
+    "field": "volume_m3",
+    "type": "bigint",
+    "chinese": "销气量_方",
+    "required": false
+  },
+  {
+    "csv": "gas_sales_monthly.csv",
+    "view": "v_gas_sales",
+    "field": "price_yuan_m3",
+    "type": "numeric",
+    "chinese": "销售均价_元每方",
+    "required": false
+  },
+  {
+    "csv": "gas_sales_monthly.csv",
+    "view": "v_gas_sales",
+    "field": "theoretical_revenue_yuan",
+    "type": "numeric",
+    "chinese": "理论量价收入_元",
+    "required": false
+  },
+  {
+    "csv": "gas_sales_monthly.csv",
+    "view": "v_gas_sales",
+    "field": "revenue_yuan",
+    "type": "numeric",
+    "chinese": "账单销气收入_元",
+    "required": false
+  },
+  {
+    "csv": "gas_sales_monthly.csv",
+    "view": "v_gas_sales",
+    "field": "audit_difference_yuan",
+    "type": "numeric",
+    "chinese": "量价稽核差异_元",
+    "required": false
+  },
+  {
+    "csv": "gas_sales_monthly.csv",
+    "view": "v_gas_sales",
+    "field": "actual_meter_m3",
+    "type": "bigint",
+    "chinese": "实抄量_方",
+    "required": false
+  },
+  {
+    "csv": "gas_sales_monthly.csv",
+    "view": "v_gas_sales",
+    "field": "estimated_meter_m3",
+    "type": "bigint",
+    "chinese": "估抄量_方",
+    "required": false
+  },
+  {
+    "csv": "gas_sales_monthly.csv",
+    "view": "v_gas_sales",
+    "field": "tax_basis",
+    "type": "text",
+    "chinese": "税口径",
+    "required": false
+  },
+  {
+    "csv": "gas_sales_monthly.csv",
+    "view": "v_gas_sales",
+    "field": "exception_code",
+    "type": "text",
+    "chinese": "预置异常编号",
+    "required": false
+  },
+  {
+    "csv": "gas_supply_monthly.csv",
+    "view": "v_gas_supply_sources",
+    "field": "business_key",
+    "type": "text",
+    "chinese": "业务唯一键",
+    "required": true
+  },
+  {
+    "csv": "gas_supply_monthly.csv",
+    "view": "v_gas_supply_sources",
+    "field": "month",
+    "type": "text",
+    "chinese": "月份",
+    "required": false
+  },
+  {
+    "csv": "gas_supply_monthly.csv",
+    "view": "v_gas_supply_sources",
+    "field": "org_id",
+    "type": "text",
+    "chinese": "组织编码",
+    "required": true
+  },
+  {
+    "csv": "gas_supply_monthly.csv",
+    "view": "v_gas_supply_sources",
+    "field": "org_name",
+    "type": "text",
+    "chinese": "组织名称",
+    "required": false
+  },
+  {
+    "csv": "gas_supply_monthly.csv",
+    "view": "v_gas_supply_sources",
+    "field": "org_path",
+    "type": "text",
+    "chinese": "组织编码路径",
+    "required": true
+  },
+  {
+    "csv": "gas_supply_monthly.csv",
+    "view": "v_gas_supply_sources",
+    "field": "branch_id",
+    "type": "text",
+    "chinese": "分公司编码",
+    "required": false
+  },
+  {
+    "csv": "gas_supply_monthly.csv",
+    "view": "v_gas_supply_sources",
+    "field": "branch_name",
+    "type": "text",
+    "chinese": "分公司名称",
+    "required": false
+  },
+  {
+    "csv": "gas_supply_monthly.csv",
+    "view": "v_gas_supply_sources",
+    "field": "center_id",
+    "type": "text",
+    "chinese": "服务中心编码",
+    "required": false
+  },
+  {
+    "csv": "gas_supply_monthly.csv",
+    "view": "v_gas_supply_sources",
+    "field": "data_version",
+    "type": "text",
+    "chinese": "模拟版本",
+    "required": false
+  },
+  {
+    "csv": "gas_supply_monthly.csv",
+    "view": "v_gas_supply_sources",
+    "field": "source",
+    "type": "text",
+    "chinese": "气源",
+    "required": false
+  },
+  {
+    "csv": "gas_supply_monthly.csv",
+    "view": "v_gas_supply_sources",
+    "field": "inlet_m3",
+    "type": "bigint",
+    "chinese": "边界入口气量_方",
+    "required": false
+  },
+  {
+    "csv": "gas_supply_monthly.csv",
+    "view": "v_gas_supply_sources",
+    "field": "purchase_price_yuan_m3",
+    "type": "numeric",
+    "chinese": "采购均价_元每方",
+    "required": false
+  },
+  {
+    "csv": "gas_supply_monthly.csv",
+    "view": "v_gas_supply_sources",
+    "field": "purchase_cost_yuan",
+    "type": "numeric",
+    "chinese": "采购成本_元",
+    "required": false
+  },
+  {
+    "csv": "gas_supply_monthly.csv",
+    "view": "v_gas_supply_sources",
+    "field": "loss_threshold",
+    "type": "numeric",
+    "chinese": "演示供销差阈值_小数",
+    "required": false
+  },
+  {
+    "csv": "gas_supply_monthly.csv",
+    "view": "v_gas_supply_sources",
+    "field": "measurement_basis",
+    "type": "text",
+    "chinese": "计量依据",
+    "required": false
+  },
+  {
+    "csv": "gas_supply_monthly.csv",
+    "view": "v_gas_supply_sources",
+    "field": "allocation_basis",
+    "type": "text",
+    "chinese": "成本分摊依据",
+    "required": false
+  },
+  {
+    "csv": "gas_profit_monthly.csv",
+    "view": "v_gas_profit_inputs",
+    "field": "business_key",
+    "type": "text",
+    "chinese": "业务唯一键",
+    "required": true
+  },
+  {
+    "csv": "gas_profit_monthly.csv",
+    "view": "v_gas_profit_inputs",
+    "field": "month",
+    "type": "text",
+    "chinese": "月份",
+    "required": false
+  },
+  {
+    "csv": "gas_profit_monthly.csv",
+    "view": "v_gas_profit_inputs",
+    "field": "org_id",
+    "type": "text",
+    "chinese": "组织编码",
+    "required": true
+  },
+  {
+    "csv": "gas_profit_monthly.csv",
+    "view": "v_gas_profit_inputs",
+    "field": "org_name",
+    "type": "text",
+    "chinese": "组织名称",
+    "required": false
+  },
+  {
+    "csv": "gas_profit_monthly.csv",
+    "view": "v_gas_profit_inputs",
+    "field": "org_path",
+    "type": "text",
+    "chinese": "组织编码路径",
+    "required": true
+  },
+  {
+    "csv": "gas_profit_monthly.csv",
+    "view": "v_gas_profit_inputs",
+    "field": "branch_id",
+    "type": "text",
+    "chinese": "分公司编码",
+    "required": false
+  },
+  {
+    "csv": "gas_profit_monthly.csv",
+    "view": "v_gas_profit_inputs",
+    "field": "branch_name",
+    "type": "text",
+    "chinese": "分公司名称",
+    "required": false
+  },
+  {
+    "csv": "gas_profit_monthly.csv",
+    "view": "v_gas_profit_inputs",
+    "field": "center_id",
+    "type": "text",
+    "chinese": "服务中心编码",
+    "required": false
+  },
+  {
+    "csv": "gas_profit_monthly.csv",
+    "view": "v_gas_profit_inputs",
+    "field": "data_version",
+    "type": "text",
+    "chinese": "模拟版本",
+    "required": false
+  },
+  {
+    "csv": "gas_profit_monthly.csv",
+    "view": "v_gas_profit_inputs",
+    "field": "installation_revenue_yuan",
+    "type": "numeric",
+    "chinese": "安装工程收入_元",
+    "required": false
+  },
+  {
+    "csv": "gas_profit_monthly.csv",
+    "view": "v_gas_profit_inputs",
+    "field": "installation_cost_yuan",
+    "type": "numeric",
+    "chinese": "安装工程直接成本_元",
+    "required": false
+  },
+  {
+    "csv": "gas_profit_monthly.csv",
+    "view": "v_gas_profit_inputs",
+    "field": "value_added_revenue_yuan",
+    "type": "numeric",
+    "chinese": "增值收入_元",
+    "required": false
+  },
+  {
+    "csv": "gas_profit_monthly.csv",
+    "view": "v_gas_profit_inputs",
+    "field": "value_added_cost_yuan",
+    "type": "numeric",
+    "chinese": "增值直接成本_元",
+    "required": false
+  },
+  {
+    "csv": "gas_profit_monthly.csv",
+    "view": "v_gas_profit_inputs",
+    "field": "distribution_cost_yuan",
+    "type": "numeric",
+    "chinese": "配气成本_元",
+    "required": false
+  },
+  {
+    "csv": "gas_profit_monthly.csv",
+    "view": "v_gas_profit_inputs",
+    "field": "admin_expense_yuan",
+    "type": "numeric",
+    "chinese": "管理费用_元",
+    "required": false
+  },
+  {
+    "csv": "gas_profit_monthly.csv",
+    "view": "v_gas_profit_inputs",
+    "field": "finance_expense_yuan",
+    "type": "numeric",
+    "chinese": "财务费用_元",
+    "required": false
+  },
+  {
+    "csv": "gas_profit_monthly.csv",
+    "view": "v_gas_profit_inputs",
+    "field": "impairment_yuan",
+    "type": "numeric",
+    "chinese": "当期减值费用_元",
+    "required": false
+  },
+  {
+    "csv": "gas_profit_monthly.csv",
+    "view": "v_gas_profit_inputs",
+    "field": "pretax_profit_target_yuan",
+    "type": "numeric",
+    "chinese": "模拟税前利润目标_元",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "business_key",
+    "type": "text",
+    "chinese": "业务唯一键",
+    "required": true
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "month",
+    "type": "text",
+    "chinese": "月份",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "org_id",
+    "type": "text",
+    "chinese": "组织编码",
+    "required": true
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "org_name",
+    "type": "text",
+    "chinese": "组织名称",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "org_path",
+    "type": "text",
+    "chinese": "组织编码路径",
+    "required": true
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "branch_id",
+    "type": "text",
+    "chinese": "分公司编码",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "branch_name",
+    "type": "text",
+    "chinese": "分公司名称",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "center_id",
+    "type": "text",
+    "chinese": "服务中心编码",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "data_version",
+    "type": "text",
+    "chinese": "模拟版本",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "customer_id",
+    "type": "text",
+    "chinese": "模拟客户编码",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "customer_name",
+    "type": "text",
+    "chinese": "模拟客户名称",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "object_kind",
+    "type": "text",
+    "chinese": "客户对象类型",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "user_type",
+    "type": "text",
+    "chinese": "客户类型",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "opening_yuan",
+    "type": "numeric",
+    "chinese": "期初应收_元",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "billed_yuan",
+    "type": "numeric",
+    "chinese": "本期应收_元",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "collected_yuan",
+    "type": "numeric",
+    "chinese": "本期回款_元",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "adjustment_yuan",
+    "type": "bigint",
+    "chinese": "应收调整_元",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "closing_yuan",
+    "type": "numeric",
+    "chinese": "期末应收_元",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "aging_0_30_yuan",
+    "type": "numeric",
+    "chinese": "账龄0至30天_元",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "aging_31_90_yuan",
+    "type": "numeric",
+    "chinese": "账龄31至90天_元",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "aging_91_180_yuan",
+    "type": "numeric",
+    "chinese": "账龄91至180天_元",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "aging_181_365_yuan",
+    "type": "numeric",
+    "chinese": "账龄181至365天_元",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "aging_365_plus_yuan",
+    "type": "numeric",
+    "chinese": "账龄超过365天_元",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "provision_yuan",
+    "type": "numeric",
+    "chinese": "期末计提余额_元",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "collection_status",
+    "type": "text",
+    "chinese": "催收状态",
+    "required": false
+  },
+  {
+    "csv": "gas_ar_monthly.csv",
+    "view": "v_gas_ar",
+    "field": "aging_basis",
+    "type": "text",
+    "chinese": "账龄生成口径",
+    "required": false
+  },
+  {
+    "csv": "gas_growth_monthly.csv",
+    "view": "v_gas_growth",
+    "field": "business_key",
+    "type": "text",
+    "chinese": "业务唯一键",
+    "required": true
+  },
+  {
+    "csv": "gas_growth_monthly.csv",
+    "view": "v_gas_growth",
+    "field": "month",
+    "type": "text",
+    "chinese": "月份",
+    "required": false
+  },
+  {
+    "csv": "gas_growth_monthly.csv",
+    "view": "v_gas_growth",
+    "field": "org_id",
+    "type": "text",
+    "chinese": "组织编码",
+    "required": true
+  },
+  {
+    "csv": "gas_growth_monthly.csv",
+    "view": "v_gas_growth",
+    "field": "org_name",
+    "type": "text",
+    "chinese": "组织名称",
+    "required": false
+  },
+  {
+    "csv": "gas_growth_monthly.csv",
+    "view": "v_gas_growth",
+    "field": "org_path",
+    "type": "text",
+    "chinese": "组织编码路径",
+    "required": true
+  },
+  {
+    "csv": "gas_growth_monthly.csv",
+    "view": "v_gas_growth",
+    "field": "branch_id",
+    "type": "text",
+    "chinese": "分公司编码",
+    "required": false
+  },
+  {
+    "csv": "gas_growth_monthly.csv",
+    "view": "v_gas_growth",
+    "field": "branch_name",
+    "type": "text",
+    "chinese": "分公司名称",
+    "required": false
+  },
+  {
+    "csv": "gas_growth_monthly.csv",
+    "view": "v_gas_growth",
+    "field": "center_id",
+    "type": "text",
+    "chinese": "服务中心编码",
+    "required": false
+  },
+  {
+    "csv": "gas_growth_monthly.csv",
+    "view": "v_gas_growth",
+    "field": "data_version",
+    "type": "text",
+    "chinese": "模拟版本",
+    "required": false
+  },
+  {
+    "csv": "gas_growth_monthly.csv",
+    "view": "v_gas_growth",
+    "field": "user_type",
+    "type": "text",
+    "chinese": "客户类型",
+    "required": false
+  },
+  {
+    "csv": "gas_growth_monthly.csv",
+    "view": "v_gas_growth",
+    "field": "opening_users",
+    "type": "bigint",
+    "chinese": "期初户数",
+    "required": false
+  },
+  {
+    "csv": "gas_growth_monthly.csv",
+    "view": "v_gas_growth",
+    "field": "applied_users",
+    "type": "bigint",
+    "chinese": "报装户数",
+    "required": false
+  },
+  {
+    "csv": "gas_growth_monthly.csv",
+    "view": "v_gas_growth",
+    "field": "connected_users",
+    "type": "bigint",
+    "chinese": "新增通气户数",
+    "required": false
+  },
+  {
+    "csv": "gas_growth_monthly.csv",
+    "view": "v_gas_growth",
+    "field": "churn_users",
+    "type": "bigint",
+    "chinese": "销户数",
+    "required": false
+  },
+  {
+    "csv": "gas_growth_monthly.csv",
+    "view": "v_gas_growth",
+    "field": "ending_users",
+    "type": "bigint",
+    "chinese": "期末户数",
+    "required": false
+  },
+  {
+    "csv": "gas_growth_monthly.csv",
+    "view": "v_gas_growth",
+    "field": "bottle_conversion_users",
+    "type": "bigint",
+    "chinese": "瓶改管户数",
+    "required": false
+  },
+  {
+    "csv": "gas_growth_monthly.csv",
+    "view": "v_gas_growth",
+    "field": "potential_users",
+    "type": "bigint",
+    "chinese": "潜在可接入户数",
+    "required": false
+  },
+  {
+    "csv": "gas_safety_monthly.csv",
+    "view": "v_gas_safety",
+    "field": "business_key",
+    "type": "text",
+    "chinese": "业务唯一键",
+    "required": true
+  },
+  {
+    "csv": "gas_safety_monthly.csv",
+    "view": "v_gas_safety",
+    "field": "month",
+    "type": "text",
+    "chinese": "月份",
+    "required": false
+  },
+  {
+    "csv": "gas_safety_monthly.csv",
+    "view": "v_gas_safety",
+    "field": "org_id",
+    "type": "text",
+    "chinese": "组织编码",
+    "required": true
+  },
+  {
+    "csv": "gas_safety_monthly.csv",
+    "view": "v_gas_safety",
+    "field": "org_name",
+    "type": "text",
+    "chinese": "组织名称",
+    "required": false
+  },
+  {
+    "csv": "gas_safety_monthly.csv",
+    "view": "v_gas_safety",
+    "field": "org_path",
+    "type": "text",
+    "chinese": "组织编码路径",
+    "required": true
+  },
+  {
+    "csv": "gas_safety_monthly.csv",
+    "view": "v_gas_safety",
+    "field": "branch_id",
+    "type": "text",
+    "chinese": "分公司编码",
+    "required": false
+  },
+  {
+    "csv": "gas_safety_monthly.csv",
+    "view": "v_gas_safety",
+    "field": "branch_name",
+    "type": "text",
+    "chinese": "分公司名称",
+    "required": false
+  },
+  {
+    "csv": "gas_safety_monthly.csv",
+    "view": "v_gas_safety",
+    "field": "center_id",
+    "type": "text",
+    "chinese": "服务中心编码",
+    "required": false
+  },
+  {
+    "csv": "gas_safety_monthly.csv",
+    "view": "v_gas_safety",
+    "field": "data_version",
+    "type": "text",
+    "chinese": "模拟版本",
+    "required": false
+  },
+  {
+    "csv": "gas_safety_monthly.csv",
+    "view": "v_gas_safety",
+    "field": "due_inspect",
+    "type": "bigint",
+    "chinese": "当月应检户数",
+    "required": false
+  },
+  {
+    "csv": "gas_safety_monthly.csv",
+    "view": "v_gas_safety",
+    "field": "inspected",
+    "type": "bigint",
+    "chinese": "当月已检户数",
+    "required": false
+  },
+  {
+    "csv": "gas_safety_monthly.csv",
+    "view": "v_gas_safety",
+    "field": "not_at_home",
+    "type": "bigint",
+    "chinese": "到访不遇户数",
+    "required": false
+  },
+  {
+    "csv": "gas_safety_monthly.csv",
+    "view": "v_gas_safety",
+    "field": "three_piece_installed",
+    "type": "bigint",
+    "chinese": "当月三件套安装户数",
+    "required": false
+  },
+  {
+    "csv": "gas_safety_monthly.csv",
+    "view": "v_gas_safety",
+    "field": "emergency_total",
+    "type": "bigint",
+    "chinese": "抢修次数",
+    "required": false
+  },
+  {
+    "csv": "gas_safety_monthly.csv",
+    "view": "v_gas_safety",
+    "field": "emergency_on_time",
+    "type": "bigint",
+    "chinese": "及时到场次数",
+    "required": false
+  },
+  {
+    "csv": "gas_safety_monthly.csv",
+    "view": "v_gas_safety",
+    "field": "leak_count",
+    "type": "bigint",
+    "chinese": "泄漏次数",
+    "required": false
+  },
+  {
+    "csv": "gas_network_assets.csv",
+    "view": "v_gas_network",
+    "field": "business_key",
+    "type": "text",
+    "chinese": "业务唯一键",
+    "required": true
+  },
+  {
+    "csv": "gas_network_assets.csv",
+    "view": "v_gas_network",
+    "field": "network_id",
+    "type": "text",
+    "chinese": "管段编号",
+    "required": false
+  },
+  {
+    "csv": "gas_network_assets.csv",
+    "view": "v_gas_network",
+    "field": "org_id",
+    "type": "text",
+    "chinese": "组织编码",
+    "required": true
+  },
+  {
+    "csv": "gas_network_assets.csv",
+    "view": "v_gas_network",
+    "field": "org_name",
+    "type": "text",
+    "chinese": "组织名称",
+    "required": false
+  },
+  {
+    "csv": "gas_network_assets.csv",
+    "view": "v_gas_network",
+    "field": "org_path",
+    "type": "text",
+    "chinese": "组织编码路径",
+    "required": true
+  },
+  {
+    "csv": "gas_network_assets.csv",
+    "view": "v_gas_network",
+    "field": "branch_id",
+    "type": "text",
+    "chinese": "分公司编码",
+    "required": false
+  },
+  {
+    "csv": "gas_network_assets.csv",
+    "view": "v_gas_network",
+    "field": "branch_name",
+    "type": "text",
+    "chinese": "分公司名称",
+    "required": false
+  },
+  {
+    "csv": "gas_network_assets.csv",
+    "view": "v_gas_network",
+    "field": "center_id",
+    "type": "text",
+    "chinese": "服务中心编码",
+    "required": false
+  },
+  {
+    "csv": "gas_network_assets.csv",
+    "view": "v_gas_network",
+    "field": "data_version",
+    "type": "text",
+    "chinese": "模拟版本",
+    "required": false
+  },
+  {
+    "csv": "gas_network_assets.csv",
+    "view": "v_gas_network",
+    "field": "pressure_level",
+    "type": "text",
+    "chinese": "压力等级",
+    "required": false
+  },
+  {
+    "csv": "gas_network_assets.csv",
+    "view": "v_gas_network",
+    "field": "length_km",
+    "type": "numeric",
+    "chinese": "管段里程_公里",
+    "required": false
+  },
+  {
+    "csv": "gas_network_assets.csv",
+    "view": "v_gas_network",
+    "field": "material",
+    "type": "text",
+    "chinese": "管材",
+    "required": false
+  },
+  {
+    "csv": "gas_network_assets.csv",
+    "view": "v_gas_network",
+    "field": "laid_date",
+    "type": "date",
+    "chinese": "敷设日期",
+    "required": false
+  },
+  {
+    "csv": "gas_network_assets.csv",
+    "view": "v_gas_network",
+    "field": "gis_loaded_date",
+    "type": "date",
+    "chinese": "GIS入库日期",
+    "required": false
+  },
+  {
+    "csv": "gas_hazard_orders.csv",
+    "view": "v_gas_hazards",
+    "field": "business_key",
+    "type": "text",
+    "chinese": "业务唯一键",
+    "required": true
+  },
+  {
+    "csv": "gas_hazard_orders.csv",
+    "view": "v_gas_hazards",
+    "field": "hazard_id",
+    "type": "text",
+    "chinese": "隐患编号",
+    "required": false
+  },
+  {
+    "csv": "gas_hazard_orders.csv",
+    "view": "v_gas_hazards",
+    "field": "org_id",
+    "type": "text",
+    "chinese": "组织编码",
+    "required": true
+  },
+  {
+    "csv": "gas_hazard_orders.csv",
+    "view": "v_gas_hazards",
+    "field": "org_name",
+    "type": "text",
+    "chinese": "组织名称",
+    "required": false
+  },
+  {
+    "csv": "gas_hazard_orders.csv",
+    "view": "v_gas_hazards",
+    "field": "org_path",
+    "type": "text",
+    "chinese": "组织编码路径",
+    "required": true
+  },
+  {
+    "csv": "gas_hazard_orders.csv",
+    "view": "v_gas_hazards",
+    "field": "branch_id",
+    "type": "text",
+    "chinese": "分公司编码",
+    "required": false
+  },
+  {
+    "csv": "gas_hazard_orders.csv",
+    "view": "v_gas_hazards",
+    "field": "branch_name",
+    "type": "text",
+    "chinese": "分公司名称",
+    "required": false
+  },
+  {
+    "csv": "gas_hazard_orders.csv",
+    "view": "v_gas_hazards",
+    "field": "center_id",
+    "type": "text",
+    "chinese": "服务中心编码",
+    "required": false
+  },
+  {
+    "csv": "gas_hazard_orders.csv",
+    "view": "v_gas_hazards",
+    "field": "data_version",
+    "type": "text",
+    "chinese": "模拟版本",
+    "required": false
+  },
+  {
+    "csv": "gas_hazard_orders.csv",
+    "view": "v_gas_hazards",
+    "field": "network_id",
+    "type": "text",
+    "chinese": "管段编号",
+    "required": false
+  },
+  {
+    "csv": "gas_hazard_orders.csv",
+    "view": "v_gas_hazards",
+    "field": "found_date",
+    "type": "date",
+    "chinese": "发现日期",
+    "required": false
+  },
+  {
+    "csv": "gas_hazard_orders.csv",
+    "view": "v_gas_hazards",
+    "field": "due_date",
+    "type": "date",
+    "chinese": "整改截止日期",
+    "required": false
+  },
+  {
+    "csv": "gas_hazard_orders.csv",
+    "view": "v_gas_hazards",
+    "field": "completed_date",
+    "type": "date",
+    "chinese": "整改完成日期",
+    "required": false
+  },
+  {
+    "csv": "gas_hazard_orders.csv",
+    "view": "v_gas_hazards",
+    "field": "severity",
+    "type": "text",
+    "chinese": "隐患级别",
+    "required": false
+  },
+  {
+    "csv": "gas_hazard_orders.csv",
+    "view": "v_gas_hazards",
+    "field": "hazard_type",
+    "type": "text",
+    "chinese": "隐患类型",
+    "required": false
+  },
+  {
+    "csv": "gas_hazard_orders.csv",
+    "view": "v_gas_hazards",
+    "field": "status",
+    "type": "text",
+    "chinese": "隐患状态",
+    "required": false
+  },
+  {
+    "csv": "gas_hazard_orders.csv",
+    "view": "v_gas_hazards",
+    "field": "as_of_date",
+    "type": "date",
+    "chinese": "快照截止日期",
+    "required": false
+  }
+]

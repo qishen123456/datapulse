@@ -1,0 +1,98 @@
+{
+  "B02_ar": {
+    "status": "passed",
+    "question": "2026年9月末应收余额是多少",
+    "code": "GAS_AR",
+    "rows": 1,
+    "seconds": 80.55,
+    "model_responses": [
+      "agent2.sql_generate",
+      "agent3.sql_review",
+      "agent4.analysis"
+    ]
+  },
+  "B01_sales": {
+    "status": "passed",
+    "question": "请列出2026年9月每个分公司的总销气量，按气量从大到小排列",
+    "code": "GAS_BIZ",
+    "rows": 5,
+    "seconds": 60.69,
+    "model_responses": [
+      "agent2.sql_generate",
+      "agent3.sql_review",
+      "agent4.analysis"
+    ]
+  },
+  "B03_safety": {
+    "status": "passed",
+    "question": "2026年9月各分公司的安检覆盖率是多少？按已检户数合计除以应检户数合计，返回0到1的小数。",
+    "code": "GAS_SAFE",
+    "rows": 6,
+    "seconds": 51.04,
+    "model_responses": [
+      "agent2.sql_generate",
+      "agent3.sql_review",
+      "agent4.analysis"
+    ]
+  },
+  "B04_empty": {
+    "status": "passed",
+    "question": "2026年10月各分公司销气量是多少？严格只查2026年10月，没有数据请明确说明，不要改用9月。",
+    "code": "GAS_BIZ",
+    "rows": 0,
+    "seconds": 47.43,
+    "model_responses": [
+      "agent2.sql_generate",
+      "agent3.sql_review",
+      "agent4.analysis"
+    ]
+  },
+  "B05_followup": {
+    "status": "passed",
+    "question": "只看沙湖分公司，保持刚才的月份和期末应收余额指标。",
+    "code": "GAS_AR",
+    "rows": 1,
+    "seconds": 20.96,
+    "model_responses": [
+      "agent2.sql_generate",
+      "agent3.sql_review",
+      "agent4.analysis"
+    ]
+  },
+  "H01_plan": {
+    "status": "passed",
+    "branches": 2,
+    "seconds": 15.92,
+    "model_responses": [
+      "research.plan.generate"
+    ]
+  },
+  "H02_research": {
+    "status": "passed",
+    "branches": 2,
+    "evidence": [
+      {
+        "title": "分公司销气量核验",
+        "status": "completed"
+      },
+      {
+        "title": "分公司估抄率核验",
+        "status": "completed"
+      }
+    ],
+    "seconds": 51.83,
+    "model_responses": [
+      "agent2.sql_generate",
+      "agent2.sql_generate",
+      "agent3.sql_review",
+      "agent3.sql_review",
+      "agent4.analysis",
+      "agent4.analysis",
+      "research.report"
+    ]
+  },
+  "run_error": {
+    "status": "failed",
+    "error": "部分分支未形成可用证据"
+  }
+}

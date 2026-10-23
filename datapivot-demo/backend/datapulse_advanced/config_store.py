@@ -5,6 +5,7 @@ from copy import deepcopy
 from typing import Any, Dict, List
 
 from config_manager import read_json, write_json
+from skill_bindings import SHARED_GUARDS, SHARED_KEYS, binding_for
 
 
 ADVANCED_CAPABILITIES_FILE = "advanced_capabilities.json"
@@ -157,18 +158,20 @@ DEFAULT_SKILLS: List[Dict[str, Any]] = [
         "description": "保持现有 report_spec/dataset_results 契约，组装最终报告。",
     },
 ]
+DEFAULT_SKILLS = deepcopy(SHARED_GUARDS) + DEFAULT_SKILLS
+REQUIRED_SKILLS = SHARED_KEYS | {'dataset_route','asset_pack','route_guard','planner','sql_generate','sql_review','sql_execute','self_check','report_compose'}
 DEFAULT_SKILL_KEYS = {item["key"] for item in DEFAULT_SKILLS}
 
 
 DEFAULT_ADVANCED_CAPABILITIES: Dict[str, Any] = {
     "version": 1,
     "enabled": True,
-    "description": "进阶问数能力中心配置。最终报告契约保持不变，升级执行过程和工具链路。",
+    "description": "维护高阶研究 Skills、并行预算与报告口径；研究工作台按计划和真实证据呈现结果。",
     "execution": {
         "emitSkillTrace": True,
         "preserveFinalReportContract": True,
         "assetPreviewLimit": 3,
-        "fallbackToBasicEngine": True,
+        "fallbackToBasicEngine": False,
     },
     "skills": DEFAULT_SKILLS,
     "mcp": {
@@ -300,11 +303,21 @@ def normalize_config(payload: Any) -> Dict[str, Any]:
         execution.get("assetPreviewLimit"),
         int(result["execution"].get("assetPreviewLimit") or 3),
         1,
-        10,
+        4,
     )
-    result["execution"]["fallbackToBasicEngine"] = True
+    result["execution"]["fallbackToBasicEngine"] = False
 
     result["skills"] = _merge_skills(raw.get("skills"))
+    for skill in result['skills']:
+        if skill['key'] in REQUIRED_SKILLS:
+            skill['enabled'] = True
+        skill['runtime'] = binding_for(skill['key'], bool(skill.get('custom')))
+        if skill['key'] == 'schema_link':
+            params = skill.get('config') if isinstance(skill.get('config'), dict) else {}
+            skill['config'] = {'fieldLimit': _clean_int(params.get('fieldLimit'), 80, 8, 160)}
+        if 'prompt' in skill:
+            skill['prompt'] = str(skill.get('prompt') or '')[:6000]
+
 
     mcp = raw.get("mcp") if isinstance(raw.get("mcp"), dict) else {}
     result["mcp"]["enabled"] = _clean_bool(mcp.get("enabled"), bool(result["mcp"].get("enabled")))
@@ -376,7 +389,7 @@ def import_skills(payload: Any) -> Dict[str, Any]:
 
 
 def reset_config() -> Dict[str, Any]:
-    config = deepcopy(DEFAULT_ADVANCED_CAPABILITIES)
+    config = normalize_config(DEFAULT_ADVANCED_CAPABILITIES)
     write_json(ADVANCED_CAPABILITIES_FILE, config)
     return config
 

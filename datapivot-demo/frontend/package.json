@@ -7,7 +7,9 @@
     "dev": "vite --configLoader native",
     "build": "vite build",
     "preview": "vite preview",
-    "test:dataset-autofill": "node scripts/test-dataset-autofill-prompt-mining.mjs"
+    "test:dataset-autofill": "node scripts/test-dataset-autofill-prompt-mining.mjs",
+    "test:ask-workflow": "node --test scripts/test-ask-workflow.mjs",
+    "test:ask-workspace": "node scripts/test-ask-workspace.mjs"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",

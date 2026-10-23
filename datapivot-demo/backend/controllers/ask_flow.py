@@ -71,11 +71,19 @@ def _normalize_config(payload: Dict[str, Any]) -> Dict[str, Any]:
     config["defaultFlow"] = _normalize_flow(payload.get("defaultFlow", config.get("defaultFlow")), "basic")
     config["advancedEnabled"] = _normalize_bool(payload.get("advancedEnabled"), bool(config.get("advancedEnabled")))
     config["advancedRoles"] = _normalize_roles(payload.get("advancedRoles", config.get("advancedRoles")))
+    role_policies = payload.get('rolePolicies', config.get('rolePolicies', {}))
+    config['rolePolicies'] = {key:flow for key,flow in role_policies.items() if key in {'super_admin','admin','business_admin','user'} and flow in ('basic','advanced')} if isinstance(role_policies,dict) else {}
     config["datasetPolicies"] = _normalize_dataset_policies(payload.get("datasetPolicies", config.get("datasetPolicies")))
     config["fallbackToBasicOnError"] = _normalize_bool(
         payload.get("fallbackToBasicOnError"),
         bool(config.get("fallbackToBasicOnError")),
     )
+    config["fallbackToBasicOnError"] = False
+    for key, low, high in (("maxParallel",1,4),("maxRetries",0,2),("queryTimeoutSeconds",3,120),("maxResultRows",100,20000)):
+        try:
+            config[key] = min(high,max(low,int(payload.get(key,config[key]))))
+        except (ValueError,TypeError):
+            pass
     config["attachMetadata"] = _normalize_bool(payload.get("attachMetadata"), bool(config.get("attachMetadata")))
     return config
 

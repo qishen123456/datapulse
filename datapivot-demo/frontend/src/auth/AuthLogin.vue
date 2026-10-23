@@ -147,7 +147,7 @@ const startFeishu = async () => {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 18% 82%, rgba(13, 148, 136, 0.28) 0%, transparent 46%),
+    radial-gradient(circle at 18% 82%, rgba(29, 78, 216, 0.28) 0%, transparent 46%),
     radial-gradient(circle at 84% 16%, rgba(8, 145, 178, 0.20) 0%, transparent 42%),
     linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
@@ -186,14 +186,14 @@ const startFeishu = async () => {
   /* 脉策方形图标 logo */
   opacity: 0.95;
   display: block;
-  filter: drop-shadow(0 10px 28px rgba(13, 148, 136, 0.45));
+  filter: drop-shadow(0 10px 28px rgba(29, 78, 216, 0.45));
 }
 
 .auth-kicker {
   position: relative;
   z-index: 1;
   margin: 36px 0 16px;
-  color: rgba(13, 148, 136, 0.85);
+  color: rgba(29, 78, 216, 0.85);
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 0.18em;
@@ -318,8 +318,8 @@ const startFeishu = async () => {
 }
 
 .login-form input:focus {
-  border-color: #0D9488;
-  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.14);
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.14);
 }
 
 .password-control {
@@ -384,7 +384,7 @@ const startFeishu = async () => {
 
 .primary-login {
   margin-top: 6px;
-  background: #0F766E;
+  background: #1e40af;
   color: #fff;
   letter-spacing: 0.02em;
   box-shadow: inset 0 -2px 0 rgba(8, 17, 16, 0.22);

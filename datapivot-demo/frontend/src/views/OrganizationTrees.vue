@@ -1,5 +1,5 @@
 <template>
-  <div class="org-page">
+  <div class="module-layout-v4 org-page">
     <section class="org-hero">
       <div>
         <p class="eyebrow">权限治理</p>
@@ -40,7 +40,7 @@
             <p>编码隔离，节点互不串用</p>
           </div>
         </div>
-        <el-empty v-if="!treeTypes.length" description="暂无组织树" />
+        <GovernanceEmpty v-if="!treeTypes.length" description="暂无组织树" />
         <button
           v-for="item in treeTypes"
           :key="item.id"
@@ -78,7 +78,7 @@
                 <h3>树形层级</h3>
                 <span>{{ currentTreeNodes.length }} 个根节点</span>
               </div>
-              <el-empty v-if="!currentTreeNodes.length" description="暂无节点，先新增根节点" />
+              <GovernanceEmpty v-if="!currentTreeNodes.length" description="暂无节点，先新增根节点" />
               <el-tree
                 v-else
                 :data="currentTreeNodes"
@@ -93,7 +93,7 @@
                         <strong>{{ data.name }}</strong>
                         <em class="node-level">L{{ data.level }}</em>
                       </span>
-                      <small>{{ data.code }}</small>
+                      <small class="node-code">{{ data.code }}</small>
                     </button>
                   </div>
                 </template>
@@ -113,7 +113,7 @@
                   </div>
                   <div>
                     <dt>节点编码</dt>
-                    <dd>{{ selectedNode.code }}</dd>
+                    <dd><button class="copy-code" @click="copyNodeCode(selectedNode.code)" title="复制节点编码">{{ selectedNode.code }} <el-icon><CopyDocument /></el-icon></button></dd>
                   </div>
                   <div>
                     <dt>上级节点</dt>
@@ -130,11 +130,11 @@
                   <el-button v-if="isFeatureEnabled('organization_tree_node_delete')" type="danger" plain :icon="Delete" @click="removeNode(selectedNode)">删除节点</el-button>
                 </div>
               </template>
-              <el-empty v-else description="从左侧树中选择节点，或新增根节点" />
+              <GovernanceEmpty v-else description="从左侧树中选择节点，或新增根节点" />
             </div>
           </div>
         </template>
-        <el-empty v-else description="请先新增组织树类型" />
+        <GovernanceEmpty v-else description="请先新增组织树类型" />
       </main>
     </section>
 
@@ -281,7 +281,7 @@
               仅展示前 {{ (importPreview.changes || []).length }} 条变化，共 {{ importPreview.change_count }} 条。
             </p>
           </template>
-          <el-empty v-else description="粘贴表格后点击预检导入" />
+          <GovernanceEmpty v-else description="粘贴表格后点击预检导入" />
         </section>
       </div>
       <template #footer>
@@ -293,6 +293,13 @@
 </template>
 
 <script setup>
+import "../styles/module-interiors.css"
+const copyNodeCode = async (code) => {
+  try { await navigator.clipboard.writeText(String(code)); ElMessage.success('节点编码已复制') }
+  catch { ElMessage.error('复制失败，请手动选择节点编码') }
+}
+
+import GovernanceEmpty from "../components/GovernanceEmpty.vue"
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Delete, Edit, Plus, Refresh } from '@element-plus/icons-vue'
@@ -604,7 +611,7 @@ onMounted(async () => {
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #0D9488;
+  color: #1d4ed8;
   font-size: 13px;
   font-weight: 800;
   letter-spacing: 0;
@@ -700,8 +707,8 @@ onMounted(async () => {
 }
 
 .type-item.active {
-  border-color: #0D9488;
-  background: #F0FDFA;
+  border-color: #1d4ed8;
+  background: #eff6ff;
 }
 
 .type-item strong,
@@ -727,8 +734,8 @@ onMounted(async () => {
   height: 24px;
   padding: 0 10px;
   border-radius: 999px;
-  background: #F0FDFA;
-  color: #0D9488;
+  background: #eff6ff;
+  color: #1d4ed8;
   font-size: 12px;
   font-weight: 800;
 }
@@ -794,7 +801,7 @@ onMounted(async () => {
 
 .tree-node-row button.active {
   background: #ecfdf5;
-  box-shadow: inset 3px 0 0 #0D9488;
+  box-shadow: inset 3px 0 0 #1d4ed8;
 }
 
 .node-title-line {
@@ -826,8 +833,8 @@ onMounted(async () => {
   flex: 0 0 auto;
   padding: 1px 6px;
   border-radius: 999px;
-  background: #F0FDFA;
-  color: #0D9488;
+  background: #eff6ff;
+  color: #1d4ed8;
   font-size: 11px;
   font-style: normal;
   font-weight: 800;

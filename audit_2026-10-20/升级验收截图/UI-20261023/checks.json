@@ -1,0 +1,107 @@
+{
+  "checks": [
+    {
+      "route": "ask",
+      "overflow": false
+    },
+    {
+      "route": "datasets",
+      "overflow": false
+    },
+    {
+      "route": "databases",
+      "overflow": false
+    },
+    {
+      "route": "feishu-sync",
+      "overflow": false
+    },
+    {
+      "route": "agents",
+      "overflow": false
+    },
+    {
+      "route": "advanced-capabilities",
+      "overflow": false
+    },
+    {
+      "route": "ai-models",
+      "overflow": false
+    },
+    {
+      "route": "report-config",
+      "overflow": false
+    },
+    {
+      "route": "organization-trees",
+      "overflow": false
+    },
+    {
+      "route": "employee-permissions",
+      "overflow": false
+    },
+    {
+      "route": "admin-console",
+      "overflow": false
+    },
+    {
+      "route": "runtime-migration",
+      "overflow": false
+    },
+    {
+      "route": "sql-debug",
+      "overflow": false
+    },
+    {
+      "route": "datasets",
+      "width": 1024,
+      "overflow": false
+    },
+    {
+      "route": "databases",
+      "width": 1024,
+      "overflow": false
+    },
+    {
+      "route": "feishu-sync",
+      "width": 1024,
+      "overflow": false
+    },
+    {
+      "route": "agents",
+      "width": 1024,
+      "overflow": false
+    },
+    {
+      "route": "ai-models",
+      "width": 1024,
+      "overflow": false
+    },
+    {
+      "route": "datasets",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "databases",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "feishu-sync",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "agents",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "ai-models",
+      "width": 390,
+      "overflow": false
+    }
+  ],
+  "errors": []
+}

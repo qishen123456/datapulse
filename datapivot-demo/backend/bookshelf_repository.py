@@ -128,6 +128,18 @@ class BookshelfRepository:
             cur.execute(sql)
             return [dict(row) for row in cur.fetchall()]
 
+    def find_exact_golden_sql(self, question: str, dataset_ids: List[int]) -> List[Dict[str, Any]]:
+        """Exact, approved examples only. No fuzzy SQL reuse or parameter guessing."""
+        if not dataset_ids:
+            return []
+        with self._connect() as conn, conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("""SELECT g.dataset_id,g.id,g.sql_text,g.question
+                FROM bs_golden_sql_samples g JOIN bs_datasets d ON d.id=g.dataset_id
+                WHERE d.is_active=TRUE AND g.is_active=TRUE AND g.quality_score>=90
+                  AND g.dataset_id=ANY(%s) AND BTRIM(g.question)=%s
+                ORDER BY g.quality_score DESC,g.id LIMIT 2""", (dataset_ids,question.strip()))
+            return [dict(row) for row in cur.fetchall()]
+
     def get_dataset_context(
         self, dataset_id: int, question: str, top_k_samples: int = 5
     ) -> Dict[str, Any]:

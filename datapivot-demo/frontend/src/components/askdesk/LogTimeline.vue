@@ -597,7 +597,7 @@ onBeforeUnmount(() => {
   border: 1px solid rgba(17, 24, 39, 0.06);
   box-shadow:
     0 18px 34px rgba(15, 23, 42, 0.055),
-    inset 0 -4px 0 rgba(13, 148, 136, 0.06);
+    inset 0 -4px 0 rgba(29, 78, 216, 0.06);
   transform: perspective(260px) rotateX(18deg);
 }
 
@@ -609,9 +609,9 @@ onBeforeUnmount(() => {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  border: 6px solid rgba(13, 148, 136, 0.68);
+  border: 6px solid rgba(29, 78, 216, 0.68);
   background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 14px 24px rgba(13, 148, 136, 0.12);
+  box-shadow: 0 14px 24px rgba(29, 78, 216, 0.12);
 }
 
 .ax-empty p {
@@ -743,7 +743,7 @@ onBeforeUnmount(() => {
 }
 
 .ax-node-icon.confirm {
-  background: linear-gradient(180deg, #F0FDFA 0%, #F0FDFA 100%);
+  background: linear-gradient(180deg, #eff6ff 0%, #eff6ff 100%);
   border-color: rgba(26, 26, 26, 0.16);
 }
 
@@ -753,7 +753,7 @@ onBeforeUnmount(() => {
 }
 
 .ax-node-icon.python {
-  background: linear-gradient(180deg, #F0FDFA 0%, #F0FDFA 100%);
+  background: linear-gradient(180deg, #eff6ff 0%, #eff6ff 100%);
   border-color: rgba(107, 114, 128, 0.16);
 }
 

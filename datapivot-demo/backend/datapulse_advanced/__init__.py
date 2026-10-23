@@ -1,3 +1,5 @@
-from .service import advanced_ask_service
+from .research import ResearchAskService
+
+advanced_ask_service = ResearchAskService()
 
 __all__ = ["advanced_ask_service"]

@@ -696,6 +696,7 @@ def save_ai_model(data: dict) -> dict:
         "channel_icon": data.get('channel_icon', ''),
         "is_active": data.get('is_active', True),
         "is_default": data.get('is_default', False),
+        "enable_thinking": data.get('enable_thinking') if isinstance(data.get('enable_thinking'), bool) else None,
         "created_at": now,
         "updated_at": now
     }
@@ -731,6 +732,7 @@ def update_ai_model(model_id: int, data: dict) -> Optional[Dict]:
                 "channel_icon": data.get('channel_icon', m.get('channel_icon', '')),
                 "is_active": data.get('is_active', m['is_active']),
                 "is_default": data.get('is_default', m['is_default']),
+                "enable_thinking": data.get('enable_thinking', m.get('enable_thinking')),
                 "updated_at": now
             })
             if data.get('api_key') and data['api_key'] != '***已保存***':

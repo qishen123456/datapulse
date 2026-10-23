@@ -5,6 +5,8 @@ from typing import Any, Dict
 from flask import Blueprint, jsonify, request
 
 from auth_store import get_current_user
+from security import require_feature
+from ask_flow.controller import AskFlowController
 from datapulse_advanced.config_store import import_skills, load_config, reset_config, save_config
 from datapulse_advanced.registry import capability_summary
 
@@ -16,14 +18,18 @@ advanced_capabilities_bp = Blueprint(
 )
 
 
-def _require_admin():
+def _require_admin(feature="advanced_capabilities"):
     user = get_current_user()
     if user.get("role") not in {"super_admin", "admin"}:
-        return None, (jsonify({"success": False, "error": "只有管理员可以维护进阶问数能力"}), 403)
+        return None, (jsonify({"success": False, "error": "只有管理员可以维护技能与工具"}), 403)
+    _, denied = require_feature(feature, "当前账号未开放此技能配置操作")
+    if denied:
+        return None, denied
     return user, None
 
 
 def _response(config: Dict[str, Any], operator: str = ""):
+    flow = AskFlowController().load_config()
     return jsonify(
         {
             "success": True,
@@ -31,6 +37,7 @@ def _response(config: Dict[str, Any], operator: str = ""):
                 "config": config,
                 "summary": capability_summary(config),
                 "operator": operator,
+                "entryPolicy": {key: flow.get(key) for key in ("advancedEnabled", "defaultFlow")},
             },
         }
     )
@@ -47,7 +54,7 @@ def get_advanced_capabilities():
 
 @advanced_capabilities_bp.route("", methods=["PUT"])
 def update_advanced_capabilities():
-    user, error = _require_admin()
+    user, error = _require_admin("advanced_capability_save")
     if error:
         return error
     payload = request.get_json(silent=True) or {}
@@ -58,7 +65,7 @@ def update_advanced_capabilities():
 
 @advanced_capabilities_bp.route("/skills/import", methods=["POST"])
 def import_advanced_skills():
-    user, error = _require_admin()
+    user, error = _require_admin("advanced_skill_import")
     if error:
         return error
     payload = request.get_json(silent=True) or {}
@@ -78,7 +85,7 @@ def import_advanced_skills():
 
 @advanced_capabilities_bp.route("/reset", methods=["POST"])
 def reset_advanced_capabilities():
-    user, error = _require_admin()
+    user, error = _require_admin("advanced_capability_reset")
     if error:
         return error
     config = reset_config()

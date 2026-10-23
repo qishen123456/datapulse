@@ -1,0 +1,24 @@
+{
+  "case": {
+    "id": "Q01",
+    "ds": "GAS_BIZ",
+    "type": "基础聚合与排序",
+    "q": "2026年9月各分公司销气量排名",
+    "check_type": "series_sales"
+  },
+  "report": {
+    "id": "Q01",
+    "dataset": "GAS_BIZ",
+    "type": "基础聚合与排序",
+    "question": "2026年9月各分公司销气量排名",
+    "duration_seconds": 180.01,
+    "error": "HTTPConnectionPool(host='127.0.0.1', port=5002): Read timed out. (read timeout=180)",
+    "status": "FAIL",
+    "sql": "",
+    "row_count": 0,
+    "analysis_summary": "",
+    "gt_reference": "[['经开分公司', '36060044'], ['滨江分公司', '33055044'], ['沙湖分公司', '30050036'], ['高新分公司', '28547536'], ['临港分公司', '22537524']]",
+    "judgement_details": "请求错误: HTTPConnectionPool(host='127.0.0.1', port=5002): Read timed out. (read timeout=180)"
+  },
+  "ai_result": null
+}

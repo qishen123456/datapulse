@@ -1,0 +1,38 @@
+{
+  "gas_org.csv": {
+    "rows": 43,
+    "sha256": "889b6dcd1c55096af1e4918ad358acfa05ac76f1a38d6066308489e0b1444388"
+  },
+  "gas_sales_monthly.csv": {
+    "rows": 2640,
+    "sha256": "27c81dec6d342a3826b6cb8f03c20c43f1fbe5df4fec455bd867526d2b30e931"
+  },
+  "gas_supply_monthly.csv": {
+    "rows": 990,
+    "sha256": "b6de2a4411658eec8687bd78143c60a61b74a8b9d79a6b0b0bd5b418aee8e28e"
+  },
+  "gas_profit_monthly.csv": {
+    "rows": 396,
+    "sha256": "5595f8ef6d74202cfa4d7f8f6d9a2aa704069e151f0ae4cd98971c2bbd8e4c20"
+  },
+  "gas_ar_monthly.csv": {
+    "rows": 3960,
+    "sha256": "3ba672e8a375146b9746fdd14307d67bc8a37bf2df5020145986a727fdc04ddb"
+  },
+  "gas_growth_monthly.csv": {
+    "rows": 1320,
+    "sha256": "ffaeaa5a5f3abc197f77ac06e9e1ae486bafd4cee46088dc608025764982051f"
+  },
+  "gas_safety_monthly.csv": {
+    "rows": 792,
+    "sha256": "546bb5a173e00c04bc5745069bb268480754d9e25c6b115fcd5297b7b98cb623"
+  },
+  "gas_network_assets.csv": {
+    "rows": 12000,
+    "sha256": "05c64459c7b7503307f5a1d283d99fd0f89e97aedccaf36c1688156a69e2adff"
+  },
+  "gas_hazard_orders.csv": {
+    "rows": 120,
+    "sha256": "086f045c01a86898fdfdfae40541883da68c95df0e2fc7957b7f98e5af06ec6f"
+  }
+}

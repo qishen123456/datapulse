@@ -1,0 +1,27 @@
+{
+  "question": "2026年10月各分公司销气量是多少？严格只查2026年10月，没有数据请明确说明，不要改用9月。",
+  "requires_confirmation": false,
+  "conversation_session_id": "",
+  "rows": [],
+  "columns": [],
+  "analysis": "## 江城燃气·经营与供销差\n\n围绕「2026年10月各分公司销气量是多少？严格只查2026年10月，没有数据请明确说明，不要改用9月。」没有查到匹配数据。\n\n可以检查：对象名称是否与业务口径一致、时间范围是否过窄、或换一个数据集重试。",
+  "dataset_results": [
+    {
+      "dataset_id": 64,
+      "dataset_name": "江城燃气·经营与供销差",
+      "sql": "SELECT branch_name, SUM(volume_m3) AS 销气量_方 FROM v_gas_sales WHERE month = '2026-10' GROUP BY branch_name ORDER BY 销气量_方 DESC",
+      "columns": [],
+      "rows": [],
+      "analysis": "围绕「2026年10月各分公司销气量是多少？严格只查2026年10月，没有数据请明确说明，不要改用9月。」没有查到匹配数据。\n\n可以检查：对象名称是否与业务口径一致、时间范围是否过窄、或换一个数据集重试。",
+      "analysis_status": "model_generated",
+      "row_count": 0
+    }
+  ],
+  "ask_flow": {
+    "flow": "basic",
+    "reason": "basic_selected",
+    "requested_flow": "basic",
+    "controller": "AskFlowController",
+    "duration_seconds": 47.236
+  }
+}

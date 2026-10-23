@@ -1,0 +1,39 @@
+{
+  "status": "passed",
+  "datasets": [
+    {
+      "id": 64,
+      "code": "GAS_BIZ",
+      "fields": 110,
+      "metrics": 12,
+      "prompts": 4,
+      "standard_cases": 4,
+      "common_questions": 12,
+      "sql_samples": 12,
+      "asset_coverage_score": 100
+    },
+    {
+      "id": 65,
+      "code": "GAS_AR",
+      "fields": 75,
+      "metrics": 9,
+      "prompts": 4,
+      "standard_cases": 4,
+      "common_questions": 12,
+      "sql_samples": 12,
+      "asset_coverage_score": 100
+    },
+    {
+      "id": 66,
+      "code": "GAS_SAFE",
+      "fields": 64,
+      "metrics": 8,
+      "prompts": 4,
+      "standard_cases": 4,
+      "common_questions": 12,
+      "sql_samples": 12,
+      "asset_coverage_score": 100
+    }
+  ],
+  "note": "资产覆盖度不等于AI准确率；本次未执行36题的完整AI链路。"
+}

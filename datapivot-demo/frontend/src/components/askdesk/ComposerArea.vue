@@ -1,19 +1,21 @@
 <template>
   <div class="cmp" :class="{ 'is-running': isRunning }">
     <div class="cmp-dock">
+      <span v-if="isRunning" class="cmp-activity-ribbon" aria-hidden="true"></span>
+      <div v-if="isRunning && !disabled" class="cmp-draft-hint"><span class="cmp-draft-spark" aria-hidden="true">✦</span> 分析继续，你可以先写下一问<span>Enter 排队 · Shift + Enter 换行</span></div>
       <!-- 输入区：通栏第一行，占满全宽，无内框 -->
       <div class="cmp-input-zone">
-        <div v-if="isRunning || disabled" class="cmp-running-mask" aria-hidden="true">
+        <div v-if="disabled" class="cmp-running-mask" aria-hidden="true">
           <span class="cmp-running-line"></span>
-          <span class="cmp-running-text">{{ disabled ? '正在查看历史任务，请先返回执行中的对话' : '正在生成结果，输入区暂不可编辑' }}</span>
+          <span class="cmp-running-text">正在查看历史任务，请先返回当前对话</span>
         </div>
         <textarea
           ref="inputRef"
           v-model="modelQuery"
           class="cmp-textarea"
-          placeholder="问问业务数据，比如：磐石事业群今年哪些战区达成率偏低？"
+          :placeholder="flow==='advanced'?'描述你要深入分析的问题，例如：本季度利润变化由哪些因素推动？':'输入业务问题，例如：2026年9月各分公司销气量排名'"
           rows="1"
-          :disabled="isRunning || disabled"
+          :disabled="disabled"
           @input="autoGrow"
           @keydown="handleKeydown"
         ></textarea>
@@ -171,21 +173,22 @@
           </div>
 
           <button
-            v-if="!isRunning && allowSend"
+            v-if="allowSend"
             class="cmp-send-btn"
-            :class="{ 'is-disabled': recorderState !== 'idle' }"
-            aria-label="发送问题"
+            :class="{ 'is-disabled': recorderState !== 'idle' || !hasQuery || disabled, 'is-queue-send': queueMode }"
+            :disabled="recorderState !== 'idle' || !hasQuery || disabled"
+            :aria-label="queueMode ? '加入问数队列' : '发送问题'"
             @click="recorderState === 'idle' && $emit('send')"
           >
             <svg class="cmp-send-plane" viewBox="0 0 24 24" fill="currentColor" focusable="false">
               <path d="M9.78 18.65l.28-4.28 7.68-6.95c.33-.29-.07-.45-.51-.16l-9.5 5.98-4.15-1.3c-.9-.28-.92-.9.19-1.33L20.2 3.44c.73-.27 1.37.17 1.13 1.2l-2.8 13.23c-.2 1-.8 1.25-1.63.78l-4.25-3.13-2.05 1.98-1.02 1.15z" />
             </svg>
-            <span class="cmp-send-text">发送</span>
+            <span class="cmp-send-text">{{ queueMode ? '排队' : '发送' }}</span>
             <kbd class="cmp-send-kbd">↵</kbd>
           </button>
 
           <button
-            v-else-if="isRunning && allowStop"
+            v-if="isRunning && allowStop"
             class="cmp-stop-btn"
             aria-label="停止执行"
             @click="$emit('stop')"
@@ -209,6 +212,8 @@ const modelDatasetId = defineModel('datasetId', { default: null })
 const modelModelId = defineModel('modelId', { default: null })
 
 const props = defineProps({
+  flow:{type:String,default:'basic'},
+  queueMode:Boolean,
   datasets: {
     type: Array,
     default: () => []
@@ -303,7 +308,7 @@ const autoGrow = () => {
 const handleKeydown = (event) => {
   if (event.key !== 'Enter') return
   if (event.shiftKey) return
-  if (!props.allowSend || props.isRunning) return
+  if (event.isComposing || event.keyCode===229 || props.disabled || !props.allowSend) return
   if (recorderState.value !== 'idle') return // 录音/识别中不触发发送
   event.preventDefault()
   emit('send')
@@ -532,13 +537,13 @@ onUnmounted(() => {
 .cmp-dock {
   position: relative;
   background: #FFFFFF;
-  border-top: 2px solid #D7DEDC;
+  border-top: 2px solid #dbe3ed;
   padding: 12px 18px 10px;
   transition: border-color 0.18s ease, background 0.18s ease;
 }
 
 .cmp-dock:focus-within {
-  border-top-color: #0D9488;
+  border-top-color: #2563eb;
   background: #FFFFFF;
 }
 
@@ -570,7 +575,7 @@ onUnmounted(() => {
   font-size: 15px;
   line-height: 1.6;
   color: #0E1A19;
-  caret-color: var(--brand-primary, #0D9488);
+  caret-color: var(--brand-primary, #2563eb);
   font-family: inherit;
 }
 
@@ -603,7 +608,7 @@ onUnmounted(() => {
   width: 18px;
   height: 2px;
   border-radius: 1px;
-  background: linear-gradient(90deg, rgba(148, 163, 160, 0.2) 0%, rgba(13, 148, 136, 0.75) 50%, rgba(148, 163, 160, 0.2) 100%);
+  background: linear-gradient(90deg, rgba(148, 163, 160, 0.2) 0%, rgba(29, 78, 216, 0.75) 50%, rgba(148, 163, 160, 0.2) 100%);
   animation: cmp-line-pulse 1.4s ease-in-out infinite;
   flex: 0 0 auto;
 }
@@ -612,7 +617,7 @@ onUnmounted(() => {
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
-  background: linear-gradient(110deg, rgba(100, 116, 139, 0.8) 0%, rgba(13, 148, 136, 1) 48%, rgba(100, 116, 139, 0.8) 100%);
+  background: linear-gradient(110deg, rgba(100, 116, 139, 0.8) 0%, rgba(29, 78, 216, 1) 48%, rgba(100, 116, 139, 0.8) 100%);
   background-size: 220px 100%;
   background-repeat: no-repeat;
   -webkit-background-clip: text;
@@ -679,12 +684,12 @@ onUnmounted(() => {
 }
 
 .cmp-dataset-select.is-locked :deep(.el-select__wrapper) {
-  background: #F0FDFA;
-  box-shadow: inset 0 0 0 1px rgba(13, 148, 136, 0.35) !important;
+  background: #f0f4ef;
+  box-shadow: inset 0 0 0 1px rgba(29, 78, 216, 0.35) !important;
 }
 
 .cmp-dataset-select.is-locked :deep(.el-select__wrapper:hover) {
-  background: #CCFBF1;
+  background: #dde8de;
 }
 
 .cmp-dataset-select :deep(.el-select__selected-item),
@@ -697,7 +702,7 @@ onUnmounted(() => {
 }
 
 .cmp-dataset-select.is-locked :deep(.el-select__selected-item) {
-  color: #0F766E;
+  color: #294e3e;
 }
 
 .cmp-dataset-select :deep(.el-select__placeholder) {
@@ -723,7 +728,7 @@ onUnmounted(() => {
 }
 
 .cmp-dataset-select.is-locked .cmp-ds-icon {
-  color: #0D9488;
+  color: #2563eb;
 }
 
 .cmp-ds-icon svg {
@@ -748,12 +753,12 @@ onUnmounted(() => {
   width: 6px;
   height: 6px;
   border-radius: 1px;
-  background: #B7C4C0;
+  background: #94a3b8;
   flex: 0 0 auto;
 }
 
 .cmp-route-dot.is-locked {
-  background: #0D9488;
+  background: #2563eb;
 }
 
 /* 运行状态：直角小块（非胶囊） */
@@ -773,7 +778,7 @@ onUnmounted(() => {
   width: 6px;
   height: 6px;
   border-radius: 1px;
-  background: #0D9488;
+  background: #2563eb;
   flex: 0 0 auto;
   animation: cmp-dot-pulse 1.2s ease-in-out infinite;
 }
@@ -842,7 +847,7 @@ onUnmounted(() => {
 
 .cmp-model-select :deep(.el-select__wrapper:hover) {
   background: #EEF2F1;
-  box-shadow: inset 0 0 0 1px #D7DEDC !important;
+  box-shadow: inset 0 0 0 1px #dbe3ed !important;
 }
 
 .cmp-model-select :deep(.el-select__selected-item),
@@ -854,7 +859,7 @@ onUnmounted(() => {
 }
 
 .cmp-model-select :deep(.el-select__placeholder) {
-  color: #0F766E;
+  color: #294e3e;
 }
 
 .cmp-model-icon {
@@ -867,7 +872,7 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #0D9488;
+  color: #2563eb;
   pointer-events: none;
 }
 
@@ -895,8 +900,8 @@ onUnmounted(() => {
 
 .cmp-icon-btn:hover {
   background: #EEF2F1;
-  border-color: #D7DEDC;
-  color: #0F766E;
+  border-color: #dbe3ed;
+  color: #294e3e;
 }
 
 .cmp-icon-btn svg {
@@ -925,7 +930,7 @@ onUnmounted(() => {
 }
 
 .cmp-send-btn {
-  background: #0F766E;
+  background: #294e3e;
   box-shadow: inset 0 -2px 0 rgba(8, 17, 16, 0.22);
 }
 
@@ -991,7 +996,7 @@ onUnmounted(() => {
   padding: 0 12px;
   border-radius: 4px;
   background: #FFFFFF;
-  border: 1px solid #D7DEDC;
+  border: 1px solid #dbe3ed;
   flex: 0 0 auto;
 }
 
@@ -1006,7 +1011,7 @@ onUnmounted(() => {
 
 .cmp-recorder-icon {
   display: flex;
-  color: #0D9488;
+  color: #2563eb;
 }
 
 .cmp-recorder-pill.is-recording .cmp-recorder-icon {
@@ -1019,18 +1024,18 @@ onUnmounted(() => {
 }
 
 @keyframes cmp-recorder-pulse {
-  0%, 100% { color: #0D9488; transform: scale(1); }
+  0%, 100% { color: #2563eb; transform: scale(1); }
   50% { color: #F97316; transform: scale(1.22); }
 }
 
 @keyframes cmp-recorder-glow {
   0%, 100% {
-    border-color: #D7DEDC;
+    border-color: #dbe3ed;
     box-shadow: none;
   }
   50% {
-    border-color: #0D9488;
-    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.14);
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.14);
   }
 }
 
@@ -1046,7 +1051,7 @@ onUnmounted(() => {
 }
 
 .cmp-recorder-pill.is-clickable:hover {
-  border-color: #B7C4C0;
+  border-color: #94a3b8;
 }
 
 .cmp-recorder-hint {
@@ -1078,7 +1083,7 @@ onUnmounted(() => {
 
 .ax-model-option.is-default-model::before {
   width: 4px;
-  background: #0D9488;
+  background: #2563eb;
   opacity: 1;
 }
 
@@ -1151,15 +1156,15 @@ onUnmounted(() => {
   height: 18px;
   padding: 0 7px;
   border-radius: 3px;
-  background: rgba(13, 148, 136, 0.1);
-  color: #0F766E;
+  background: rgba(29, 78, 216, 0.1);
+  color: #294e3e;
   font-size: 10px;
   font-weight: 700;
 }
 
 :deep(.ax-ds-popper.el-popper) {
   border-radius: 6px;
-  border: 1px solid #D7DEDC;
+  border: 1px solid #dbe3ed;
   box-shadow: 0 8px 24px rgba(13, 25, 24, 0.12);
   padding: 4px;
 }
@@ -1217,7 +1222,7 @@ onUnmounted(() => {
 .ax-model-popper.el-popper {
   min-width: 280px;
   background: #FFFFFF;
-  border: 1px solid #D7DEDC;
+  border: 1px solid #dbe3ed;
   border-radius: 6px;
   box-shadow: 0 8px 24px rgba(13, 25, 24, 0.12);
   max-height: 380px;
@@ -1252,11 +1257,11 @@ onUnmounted(() => {
 .ax-model-popper .el-select-dropdown__item:hover,
 .ax-model-popper .el-select-dropdown__item.is-hovering {
   background: #F0F4F3;
-  border-color: #D7DEDC;
+  border-color: #dbe3ed;
 }
 .ax-model-popper .el-select-dropdown__item.is-selected {
-  background: #F0FDFA;
-  border-color: #99F6E4;
+  background: #f0f4ef;
+  border-color: #cbd5e1;
 }
 .ax-model-option-title {
   display: flex;
@@ -1285,7 +1290,7 @@ onUnmounted(() => {
   width: 18px;
   height: 18px;
   flex: 0 0 auto;
-  color: #0D9488;
+  color: #2563eb;
 }
 .ax-model-icon-mini svg {
   width: 14px;
@@ -1303,8 +1308,8 @@ onUnmounted(() => {
   flex: 0 0 auto;
   padding: 1px 6px;
   border-radius: 4px;
-  background: rgba(13, 148, 136, 0.1);
-  color: #0F766E;
+  background: rgba(29, 78, 216, 0.1);
+  color: #294e3e;
   font-size: 10px;
   font-weight: 600;
   line-height: 1.3;
@@ -1324,9 +1329,21 @@ onUnmounted(() => {
   line-height: 1.3;
 }
 .ax-model-check {
-  color: #0F766E;
+  color: #294e3e;
   font-size: 13px;
   font-weight: 700;
   line-height: 1;
 }
+</style>
+
+<style scoped>
+.cmp-dock{position:relative;isolation:isolate;transition:border-color .2s,box-shadow .2s;overflow:hidden}.cmp-dock:focus-within{border-color:#93b4ec!important;box-shadow:0 0 0 3px #dbeafe80,0 8px 28px #2563eb08!important}.cmp-activity-ribbon{position:absolute;inset:0 0 auto;height:2px;pointer-events:none;background:linear-gradient(90deg,transparent 5%,#93b4ec 30%,#2563eb 48%,#648bd0 58%,transparent 80%);background-size:230% 100%;animation:composer-marquee 3.2s linear infinite;opacity:.85}.cmp-draft-hint{display:flex;align-items:center;gap:7px;color:#475569;font-size:12px;margin-bottom:10px;line-height:1.6}.cmp-draft-hint>span:last-child{margin-left:auto;font-size:11px;color:#64748b}.cmp-draft-spark{color:#2563eb;font-size:13px}.cmp.is-running .cmp-dock{background:#fff}.cmp-send-btn.is-queue-send{background:#2563eb}.cmp-send-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}.cmp-stop-btn{background:#f7f7f5!important;color:#475569!important;border:1px solid #dfe4dc!important;box-shadow:none!important;border-radius:7px!important}.cmp-stop-btn:hover{background:#fef2f2!important;color:#b91c1c!important;border-color:#fecaca!important}.cmp-stop-icon{background:currentColor}.cmp-send-btn:active:not(:disabled){transform:translateY(1px)}@keyframes composer-marquee{from{background-position:160% 0}to{background-position:-60% 0}}@media(max-width:600px){.cmp-draft-hint>span:last-child{display:none}.cmp-command-right{gap:6px}.cmp-stop-btn{padding-inline:8px}.cmp-send-btn.is-queue-send{padding-inline:10px}}@media(prefers-reduced-motion:reduce){.cmp-activity-ribbon{animation:none;background-position:50% 0;opacity:.5}.cmp-dock,.cmp-send-btn{transition:none}}
+</style>
+
+<style scoped>
+@property --composer-orbit-angle{syntax:'<angle>';initial-value:0deg;inherits:false}
+.cmp-activity-ribbon{inset:0!important;width:100%;height:100%!important;padding:0!important;background:none!important;mask:none!important;-webkit-mask:none!important;animation:none!important;opacity:0;pointer-events:none}
+.cmp.is-running .cmp-dock{border:2px solid transparent!important;background:linear-gradient(#fff,#fff) padding-box,conic-gradient(from var(--composer-orbit-angle),#e2e8f0 0deg,#e2e8f0 250deg,#93b4ec 285deg,#2563eb 320deg,#648bd0 342deg,#e2e8f0 360deg) border-box!important;animation:composer-orbit 3.2s linear infinite!important}
+@keyframes composer-orbit{to{--composer-orbit-angle:360deg}}
+@media(prefers-reduced-motion:reduce){.cmp.is-running .cmp-dock{animation:none!important;background:linear-gradient(#fff,#fff) padding-box,linear-gradient(110deg,#93b4ec,#2563eb,#648bd0) border-box!important}}
 </style>

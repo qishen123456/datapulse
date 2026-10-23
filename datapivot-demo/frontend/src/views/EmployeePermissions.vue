@@ -1,5 +1,5 @@
 <template>
-  <div class="permission-page">
+  <div class="module-layout-v4 permission-page">
     <section class="page-head">
       <div>
         <p class="kicker">权限治理</p>
@@ -9,8 +9,7 @@
       <div class="head-actions">
         <el-button :icon="Refresh" :loading="loading" @click="loadAll">刷新</el-button>
         <el-button v-if="isFeatureEnabled('employee_create')" type="primary" :icon="Plus" @click="openCreateUser">新增</el-button>
-        <el-button v-if="isFeatureEnabled('employee_bulk_update')" :disabled="!selectedUserIds.length" @click="openBulkEdit">批量修改</el-button>
-        <el-button v-if="isFeatureEnabled('employee_delete')" type="danger" plain :disabled="!selectedUserIds.length" @click="bulkDeleteUsers">删除</el-button>
+
       </div>
     </section>
 
@@ -26,9 +25,11 @@
         <el-option label="正常" value="enabled" />
         <el-option label="停用" value="disabled" />
       </el-select>
+      <div v-if="selectedUserIds.length" class="account-bulk-actions"><span>已选择 {{ selectedUserIds.length }} 个账号</span>        <el-button v-if="isFeatureEnabled('employee_bulk_update')" :disabled="!selectedUserIds.length" @click="openBulkEdit">批量修改</el-button>
+        <el-button v-if="isFeatureEnabled('employee_delete')" type="danger" plain :disabled="!selectedUserIds.length" @click="bulkDeleteUsers">删除</el-button></div>
     </section>
 
-    <section class="user-table-card">
+    <section class="user-table-card"><div class="account-list-caption"><strong>账号目录</strong><span>{{ filteredUsers.length }} 个匹配账号 · 已选择 {{ selectedUserIds.length }} 项</span></div>
       <el-table
         v-loading="loading"
         :data="filteredUsers"
@@ -53,7 +54,7 @@
             <el-switch
               class="status-switch"
               :model-value="row.enabled !== false"
-              active-color="#0D9488"
+              active-color="#2563EB"
               inactive-color="#D1D5DB"
               :disabled="!isFeatureEnabled('employee_status_update')"
               @change="toggleUserEnabled(row)"
@@ -70,8 +71,8 @@
         </el-table-column>
         <el-table-column v-if="canSeeField('employee_field_actions')" label="操作" width="112">
           <template #default="{ row }">
-            <el-button v-if="isFeatureEnabled('employee_update')" link type="primary" @click="openEditUser(row)">编辑</el-button>
-            <el-button v-if="isFeatureEnabled('employee_delete')" link type="danger" @click="deleteUser(row)">删除</el-button>
+            <el-button v-if="isFeatureEnabled('employee_update')" text @click="openEditUser(row)">编辑</el-button>
+            <el-dropdown v-if="isFeatureEnabled('employee_delete')" trigger="click"><el-button text :aria-label="`更多账号操作 ${row.name || row.id}`">···</el-button><template #dropdown><el-dropdown-menu><el-dropdown-item @click="deleteUser(row)">删除账号…</el-dropdown-item></el-dropdown-menu></template></el-dropdown>
           </template>
         </el-table-column>
       </el-table>
@@ -256,6 +257,7 @@
 </template>
 
 <script setup>
+import "../styles/module-interiors.css"
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh } from '@element-plus/icons-vue'
@@ -700,7 +702,7 @@ onMounted(() => {
 
 .kicker {
   margin: 0 0 8px;
-  color: #0D9488;
+  color: #1d4ed8;
   font-size: 12px;
   font-weight: 800;
 }
@@ -922,7 +924,7 @@ onMounted(() => {
 }
 
 :deep(.status-switch.el-switch) {
-  --el-switch-on-color: #0D9488;
+  --el-switch-on-color: #1d4ed8;
   --el-switch-off-color: #D1D5DB;
   height: 24px;
 }

@@ -1,0 +1,453 @@
+[
+  {
+    "dataset": "GAS_BIZ",
+    "question": "2026年9月各分公司销气量排名",
+    "sql": "SELECT branch_name,SUM(volume_m3) AS 销气量_方 FROM v_gas_sales WHERE month='2026-09' GROUP BY branch_name ORDER BY 销气量_方 DESC",
+    "rows": [
+      {
+        "branch_name": "经开分公司",
+        "销气量_方": "41090081"
+      },
+      {
+        "branch_name": "高新分公司",
+        "销气量_方": "31382980"
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "销气量_方": "26874162"
+      },
+      {
+        "branch_name": "滨江分公司",
+        "销气量_方": "24131444"
+      },
+      {
+        "branch_name": "临港分公司",
+        "销气量_方": "20638653"
+      }
+    ]
+  },
+  {
+    "dataset": "GAS_BIZ",
+    "question": "2026年9月各分公司供销差率",
+    "sql": "SELECT branch_name,(SUM(inlet_m3)-SUM(sales_m3))/NULLIF(SUM(inlet_m3),0) AS 供销差率 FROM v_gas_supply_balance WHERE month='2026-09' GROUP BY branch_name ORDER BY 供销差率 DESC",
+    "rows": [
+      {
+        "branch_name": "沙湖分公司",
+        "供销差率": "0.05179057336474818248"
+      },
+      {
+        "branch_name": "临港分公司",
+        "供销差率": "0.02514252552932925428"
+      },
+      {
+        "branch_name": "滨江分公司",
+        "供销差率": "0.02316308876859810675"
+      },
+      {
+        "branch_name": "高新分公司",
+        "供销差率": "0.02103168907749482901"
+      },
+      {
+        "branch_name": "经开分公司",
+        "供销差率": "0.01667419575104058471"
+      }
+    ]
+  },
+  {
+    "dataset": "GAS_BIZ",
+    "question": "2026年前三季度模拟税前利润是多少",
+    "sql": "SELECT SUM(pretax_profit_yuan) AS 税前利润_元 FROM v_gas_profit WHERE month BETWEEN '2026-01' AND '2026-09'",
+    "rows": [
+      {
+        "税前利润_元": "574911908.03"
+      }
+    ]
+  },
+  {
+    "dataset": "GAS_BIZ",
+    "question": "2026年9月居民和工商业销气收入各多少",
+    "sql": "SELECT user_type,SUM(revenue_yuan) AS 销气收入_元 FROM v_gas_sales WHERE month='2026-09' GROUP BY user_type",
+    "rows": [
+      {
+        "user_type": "公益机构",
+        "销气收入_元": "4104000.84"
+      },
+      {
+        "user_type": "商业",
+        "销气收入_元": "113287941.66"
+      },
+      {
+        "user_type": "居民",
+        "销气收入_元": "147762641.70"
+      },
+      {
+        "user_type": "工业",
+        "销气收入_元": "183812129.70"
+      }
+    ]
+  },
+  {
+    "dataset": "GAS_BIZ",
+    "question": "2026年9月哪个分公司估抄率最高",
+    "sql": "SELECT branch_name,SUM(estimated_meter_m3)::numeric/NULLIF(SUM(volume_m3),0) AS 估抄率 FROM v_gas_sales WHERE month='2026-09' GROUP BY branch_name ORDER BY 估抄率 DESC",
+    "rows": [
+      {
+        "branch_name": "沙湖分公司",
+        "估抄率": "0.10869176125380207204"
+      },
+      {
+        "branch_name": "滨江分公司",
+        "估抄率": "0.01929478401706918160"
+      },
+      {
+        "branch_name": "高新分公司",
+        "估抄率": "0.01488434176741660607"
+      },
+      {
+        "branch_name": "临港分公司",
+        "估抄率": "0.01444188242323760180"
+      },
+      {
+        "branch_name": "经开分公司",
+        "估抄率": "0.01178075068773897039"
+      }
+    ]
+  },
+  {
+    "dataset": "GAS_BIZ",
+    "question": "2026年9月各分公司新增通气多少户",
+    "sql": "SELECT branch_name,SUM(connected_users) AS 新增通气户数 FROM v_gas_growth WHERE month='2026-09' GROUP BY branch_name",
+    "rows": [
+      {
+        "branch_name": "临港分公司",
+        "新增通气户数": "1520"
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "新增通气户数": "1845"
+      },
+      {
+        "branch_name": "滨江分公司",
+        "新增通气户数": "2610"
+      },
+      {
+        "branch_name": "经开分公司",
+        "新增通气户数": "2817"
+      },
+      {
+        "branch_name": "高新分公司",
+        "新增通气户数": "1685"
+      }
+    ]
+  },
+  {
+    "dataset": "GAS_AR",
+    "question": "2026年9月末应收余额是多少",
+    "sql": "SELECT SUM(closing_yuan) AS 期末应收_元 FROM v_gas_ar WHERE month='2026-09'",
+    "rows": [
+      {
+        "期末应收_元": "106157883.46"
+      }
+    ]
+  },
+  {
+    "dataset": "GAS_AR",
+    "question": "2026年9月欠费最多的十个模拟工商客户",
+    "sql": "SELECT customer_name,closing_yuan FROM v_gas_ar WHERE month='2026-09' AND object_kind='模拟客户' ORDER BY closing_yuan DESC LIMIT 10",
+    "rows": [
+      {
+        "customer_name": "沙湖1中心第1网格精密制造客户（模拟）",
+        "closing_yuan": "32862833.97"
+      },
+      {
+        "customer_name": "沙湖2中心第2网格精密制造客户（模拟）",
+        "closing_yuan": "21269399.99"
+      },
+      {
+        "customer_name": "沙湖1中心第2网格精密制造客户（模拟）",
+        "closing_yuan": "17001483.96"
+      },
+      {
+        "customer_name": "沙湖2中心第1网格精密制造客户（模拟）",
+        "closing_yuan": "13331871.8"
+      },
+      {
+        "customer_name": "经开1中心第1网格新材料生产客户（模拟）",
+        "closing_yuan": "1702698.77"
+      },
+      {
+        "customer_name": "高新1中心第2网格商贸餐饮管理客户（模拟）",
+        "closing_yuan": "846245.92"
+      },
+      {
+        "customer_name": "高新1中心第2网格酒店运营客户（模拟）",
+        "closing_yuan": "577001.81"
+      },
+      {
+        "customer_name": "经开2中心第2网格酒店运营客户（模拟）",
+        "closing_yuan": "504764.92"
+      },
+      {
+        "customer_name": "经开1中心第1网格精密制造客户（模拟）",
+        "closing_yuan": "438612.44"
+      },
+      {
+        "customer_name": "临港1中心第1网格精密制造客户（模拟）",
+        "closing_yuan": "387542.02"
+      }
+    ]
+  },
+  {
+    "dataset": "GAS_AR",
+    "question": "2026年9月超过180天的应收有多少",
+    "sql": "SELECT SUM(aging_181_365_yuan+aging_365_plus_yuan) AS 长账龄应收_元 FROM v_gas_ar WHERE month='2026-09'",
+    "rows": [
+      {
+        "长账龄应收_元": "21927280.78"
+      }
+    ]
+  },
+  {
+    "dataset": "GAS_AR",
+    "question": "2026年9月各分公司气费回收率",
+    "sql": "SELECT branch_name,SUM(collected_yuan)/NULLIF(SUM(billed_yuan),0) AS 回收率 FROM v_gas_ar WHERE month='2026-09' GROUP BY branch_name",
+    "rows": [
+      {
+        "branch_name": "临港分公司",
+        "回收率": "1.0046900473375823"
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "回收率": "0.95669682315275467159"
+      },
+      {
+        "branch_name": "滨江分公司",
+        "回收率": "1.0043231341116888"
+      },
+      {
+        "branch_name": "经开分公司",
+        "回收率": "1.00361583062146792065"
+      },
+      {
+        "branch_name": "高新分公司",
+        "回收率": "0.99519626576452897992"
+      }
+    ]
+  },
+  {
+    "dataset": "GAS_AR",
+    "question": "2026年9月重点催收的客户有哪些",
+    "sql": "SELECT customer_name,closing_yuan,collection_status FROM v_gas_ar WHERE month='2026-09' AND collection_status='重点催收'",
+    "rows": [
+      {
+        "customer_name": "沙湖1中心第1网格精密制造客户（模拟）",
+        "closing_yuan": "32862833.97",
+        "collection_status": "重点催收"
+      },
+      {
+        "customer_name": "沙湖1中心第2网格精密制造客户（模拟）",
+        "closing_yuan": "17001483.96",
+        "collection_status": "重点催收"
+      },
+      {
+        "customer_name": "沙湖2中心第1网格精密制造客户（模拟）",
+        "closing_yuan": "13331871.8",
+        "collection_status": "重点催收"
+      },
+      {
+        "customer_name": "沙湖2中心第2网格精密制造客户（模拟）",
+        "closing_yuan": "21269399.99",
+        "collection_status": "重点催收"
+      }
+    ]
+  },
+  {
+    "dataset": "GAS_AR",
+    "question": "哪些月份账单收入与量价收入存在差异",
+    "sql": "SELECT month,branch_name,SUM(audit_difference_yuan) AS 稽核差异_元 FROM v_gas_sales GROUP BY month,branch_name HAVING SUM(audit_difference_yuan)<>0",
+    "rows": [
+      {
+        "month": "2025-08",
+        "branch_name": "沙湖分公司",
+        "稽核差异_元": "80000.0"
+      }
+    ]
+  },
+  {
+    "dataset": "GAS_SAFE",
+    "question": "2026年9月各分公司安检覆盖率",
+    "sql": "SELECT branch_name,SUM(inspected)::numeric/NULLIF(SUM(due_inspect),0) AS 安检覆盖率 FROM v_gas_safety WHERE month='2026-09' GROUP BY branch_name",
+    "rows": [
+      {
+        "branch_name": "临港分公司",
+        "安检覆盖率": "0.87570799244808055381"
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "安检覆盖率": "0.92280071813285457810"
+      },
+      {
+        "branch_name": "滨江分公司",
+        "安检覆盖率": "0.90023349607302059011"
+      },
+      {
+        "branch_name": "经开分公司",
+        "安检覆盖率": "0.93634792626728110599"
+      },
+      {
+        "branch_name": "高压输配分公司",
+        "安检覆盖率": null
+      },
+      {
+        "branch_name": "高新分公司",
+        "安检覆盖率": "0.89555692687442147485"
+      }
+    ]
+  },
+  {
+    "dataset": "GAS_SAFE",
+    "question": "截至2026年9月底有哪些超期未闭环隐患",
+    "sql": "SELECT hazard_id,org_name,hazard_type,due_date FROM v_gas_hazards WHERE found_date<='2026-09-30' AND due_date<'2026-09-30' AND (completed_date IS NULL OR completed_date>'2026-09-30')",
+    "rows": [
+      {
+        "hazard_id": "HZ-0001",
+        "org_name": "滨江1中心第1网格",
+        "hazard_type": "阀门渗漏",
+        "due_date": "2025-07-13"
+      },
+      {
+        "hazard_id": "HZ-0012",
+        "org_name": "经开2中心第2网格",
+        "hazard_type": "第三方施工风险",
+        "due_date": "2024-03-17"
+      },
+      {
+        "hazard_id": "HZ-0023",
+        "org_name": "高压输配2中心第1网格",
+        "hazard_type": "防腐层破损",
+        "due_date": "2024-10-21"
+      },
+      {
+        "hazard_id": "HZ-0034",
+        "org_name": "经开1中心第2网格",
+        "hazard_type": "管线占压",
+        "due_date": "2025-10-20"
+      },
+      {
+        "hazard_id": "HZ-0045",
+        "org_name": "高压输配1中心第1网格",
+        "hazard_type": "标识缺失",
+        "due_date": "2025-09-11"
+      },
+      {
+        "hazard_id": "HZ-0056",
+        "org_name": "沙湖2中心第2网格",
+        "hazard_type": "阀门渗漏",
+        "due_date": "2024-12-31"
+      },
+      {
+        "hazard_id": "HZ-0067",
+        "org_name": "高新2中心第1网格",
+        "hazard_type": "第三方施工风险",
+        "due_date": "2026-08-08"
+      },
+      {
+        "hazard_id": "HZ-0078",
+        "org_name": "沙湖1中心第2网格",
+        "hazard_type": "防腐层破损",
+        "due_date": "2025-06-03"
+      },
+      {
+        "hazard_id": "HZ-0089",
+        "org_name": "高新1中心第1网格",
+        "hazard_type": "管线占压",
+        "due_date": "2024-04-25"
+      },
+      {
+        "hazard_id": "HZ-0100",
+        "org_name": "滨江2中心第2网格",
+        "hazard_type": "标识缺失",
+        "due_date": "2026-03-12"
+      },
+      {
+        "hazard_id": "HZ-0111",
+        "org_name": "临港2中心第1网格",
+        "hazard_type": "阀门渗漏",
+        "due_date": "2025-10-06"
+      },
+      {
+        "hazard_id": "HZ-0118",
+        "org_name": "沙湖1中心第1网格",
+        "hazard_type": "立管腐蚀",
+        "due_date": "2026-01-02"
+      },
+      {
+        "hazard_id": "HZ-0119",
+        "org_name": "沙湖2中心第2网格",
+        "hazard_type": "管线占压",
+        "due_date": "2024-10-17"
+      }
+    ]
+  },
+  {
+    "dataset": "GAS_SAFE",
+    "question": "2026年9月各分公司抢修及时率",
+    "sql": "SELECT branch_name,SUM(emergency_on_time)::numeric/NULLIF(SUM(emergency_total),0) AS 抢修及时率 FROM v_gas_safety WHERE month='2026-09' GROUP BY branch_name",
+    "rows": [
+      {
+        "branch_name": "临港分公司",
+        "抢修及时率": "0.93577981651376146789"
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "抢修及时率": "0.91346153846153846154"
+      },
+      {
+        "branch_name": "滨江分公司",
+        "抢修及时率": "0.90196078431372549020"
+      },
+      {
+        "branch_name": "经开分公司",
+        "抢修及时率": "0.87692307692307692308"
+      },
+      {
+        "branch_name": "高压输配分公司",
+        "抢修及时率": "0.89473684210526315789"
+      },
+      {
+        "branch_name": "高新分公司",
+        "抢修及时率": "0.88372093023255813953"
+      }
+    ]
+  },
+  {
+    "dataset": "GAS_SAFE",
+    "question": "2026年9月到访不遇还有多少户",
+    "sql": "SELECT SUM(not_at_home) AS 到访不遇户数 FROM v_gas_safety WHERE month='2026-09'",
+    "rows": [
+      {
+        "到访不遇户数": "2852"
+      }
+    ]
+  },
+  {
+    "dataset": "GAS_SAFE",
+    "question": "截至2026年9月GIS入库里程占比多少",
+    "sql": "SELECT SUM(CASE WHEN gis_loaded_date<='2026-09-30' THEN length_km ELSE 0 END)/NULLIF(SUM(length_km),0) AS GIS入库率 FROM v_gas_network WHERE laid_date<='2026-09-30'",
+    "rows": [
+      {
+        "gis入库率": "0.90729588235294117647"
+      }
+    ]
+  },
+  {
+    "dataset": "GAS_SAFE",
+    "question": "沙湖分公司有多少公里超过20年的老旧管网",
+    "sql": "SELECT SUM(length_km) AS 老旧管网_公里 FROM v_gas_network WHERE branch_id='SHAHU' AND laid_date<='2006-09-30'",
+    "rows": [
+      {
+        "老旧管网_公里": "1468.62"
+      }
+    ]
+  }
+]
