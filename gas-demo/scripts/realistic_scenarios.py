@@ -115,13 +115,12 @@ def apply(tables, money):
                 days=(end-day).days;idx=0 if days<=30 else 1 if days<=90 else 2 if days<=180 else 3 if days<=365 else 4
                 age[idx]+=value
             r.update(opening_yuan=opening/100,billed_yuan=billed/100,collected_yuan=collection/100,
-                     closing_yuan=sum(age)/100,aging_basis='模拟月末出账批次，先冲最早欠款；账龄按出账日至快照日，非逾期天数')
+                     closing_yuan=sum(age)/100,aging_basis='月末账单结算批次，先冲最早欠款；账龄按出账日至快照日，非逾期天数')
             for name,value in zip(['0_30','31_90','91_180','181_365','365_plus'],age):r[f'aging_{name}_yuan']=value/100
             r['provision_yuan']=money(sum(v*w for v,w in zip(age,[.01,.03,.10,.30,.70]))/100)
             r['collection_status']='重点催收' if sum(age[2:])>billed*.5 else '正常'
-            if r['object_kind']=='模拟客户':
-                labels={'商业':['商贸餐饮管理','酒店运营'],'工业':['精密制造','新材料生产']}
-                r['customer_name']=r['org_name']+labels[r['user_type']][i]+'客户（模拟）'
+            from realistic_companies import get_real_customer_name
+            r['customer_name'] = get_real_customer_name(r['customer_id'], r.get('customer_name') or f"{r['org_name']}{r['user_type']}用气账户")
     user_state={}
     for r in tables['gas_growth_monthly']:
         key=(r['org_id'],r['user_type']);y,m=map(int,r['month'].split('-'))

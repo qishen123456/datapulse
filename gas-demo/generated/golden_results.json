@@ -156,23 +156,23 @@
     "sql": "SELECT customer_name,closing_yuan FROM v_gas_ar WHERE month='2026-09' AND object_kind='模拟客户' ORDER BY closing_yuan DESC LIMIT 10",
     "rows": [
       {
-        "customer_name": "沙湖1中心第1网格精密制造客户（模拟）",
+        "customer_name": "武汉沙湖重型铸锻装备制造有限公司",
         "closing_yuan": "32862833.97"
       },
       {
-        "customer_name": "沙湖2中心第2网格精密制造客户（模拟）",
+        "customer_name": "中车特种轨道装备精密机加成型厂",
         "closing_yuan": "21269399.99"
       },
       {
-        "customer_name": "沙湖1中心第2网格精密制造客户（模拟）",
+        "customer_name": "湖北武钢沙湖冷轧精密薄板特热分厂",
         "closing_yuan": "17001483.96"
       },
       {
-        "customer_name": "沙湖2中心第1网格精密制造客户（模拟）",
+        "customer_name": "武汉特种热能工程无缝钢管制造厂",
         "closing_yuan": "13331871.8"
       },
       {
-        "customer_name": "经开1中心第1网格新材料生产客户（模拟）",
+        "customer_name": "经开1中心第1网格新材料生产客户",
         "closing_yuan": "1702698.77"
       },
       {
@@ -184,11 +184,11 @@
         "closing_yuan": "577001.81"
       },
       {
-        "customer_name": "经开2中心第2网格酒店运营客户（模拟）",
+        "customer_name": "经开2中心第2网格酒店运营客户",
         "closing_yuan": "504764.92"
       },
       {
-        "customer_name": "经开1中心第1网格精密制造客户（模拟）",
+        "customer_name": "经开1中心第1网格精密制造客户",
         "closing_yuan": "438612.44"
       },
       {
@@ -240,22 +240,22 @@
     "sql": "SELECT customer_name,closing_yuan,collection_status FROM v_gas_ar WHERE month='2026-09' AND collection_status='重点催收'",
     "rows": [
       {
-        "customer_name": "沙湖1中心第1网格精密制造客户（模拟）",
+        "customer_name": "武汉沙湖重型铸锻装备制造有限公司",
         "closing_yuan": "32862833.97",
         "collection_status": "重点催收"
       },
       {
-        "customer_name": "沙湖1中心第2网格精密制造客户（模拟）",
+        "customer_name": "湖北武钢沙湖冷轧精密薄板特热分厂",
         "closing_yuan": "17001483.96",
         "collection_status": "重点催收"
       },
       {
-        "customer_name": "沙湖2中心第1网格精密制造客户（模拟）",
+        "customer_name": "武汉特种热能工程无缝钢管制造厂",
         "closing_yuan": "13331871.8",
         "collection_status": "重点催收"
       },
       {
-        "customer_name": "沙湖2中心第2网格精密制造客户（模拟）",
+        "customer_name": "中车特种轨道装备精密机加成型厂",
         "closing_yuan": "21269399.99",
         "collection_status": "重点催收"
       }
