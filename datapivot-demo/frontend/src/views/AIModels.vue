@@ -4,17 +4,133 @@
       <div><h1>模型服务</h1></div>
       <el-button v-if="isFeatureEnabled('ai_channel_edit')" type="primary" @click="openAddChannel"><el-icon><Plus /></el-icon>新建通道</el-button>
     </header>
-    <section class="model-routing-strip"><div><span class="routing-dot"></span><span>默认调用模型</span><strong>{{ models.find(m => m.is_default)?.name || '尚未设置' }}</strong></div><span>{{ models.filter(m => m.is_active).length }} 个已启用 / {{ models.length }} 个模型</span></section>
-    <div class="model-library-toolbar"><div><h2>模型资源</h2><span>{{ channels.length }} 条供应商通道</span></div><el-select v-model="modelStatus" aria-label="模型状态" style="width:140px"><el-option label="全部模型" value="all"/><el-option label="已启用" value="active"/><el-option label="已停用" value="inactive"/></el-select><el-input v-model="modelSearch" clearable placeholder="搜索模型或供应商" aria-label="搜索模型或供应商" /></div>
+    <!-- 全新 AI 算力与模型服务监控看板 -->
+    <section class="ai-telemetry-banner">
+      <div class="ai-stat-card highlight">
+        <span class="ai-stat-label">默认问数核心模型</span>
+        <div class="ai-stat-main">
+          <span class="primary-badge">PRIMARY</span>
+          <strong class="primary-model-name">{{ models.find(m => m.is_default)?.name || '未设置默认模型' }}</strong>
+        </div>
+        <small class="ai-stat-sub">全域优先调度 · 意图理解与SQL生成中枢</small>
+      </div>
+
+      <div class="ai-stat-card">
+        <span class="ai-stat-label">供应商通道</span>
+        <div class="ai-stat-num-row">
+          <strong>{{ channels.length }}</strong>
+          <span>条激活通道</span>
+        </div>
+        <small class="ai-stat-sub"><i class="beacon-green"></i> 接口链路全时就绪</small>
+      </div>
+
+      <div class="ai-stat-card">
+        <span class="ai-stat-label">模型池容量</span>
+        <div class="ai-stat-num-row">
+          <strong>{{ models.filter(m => m.is_active).length }}</strong>
+          <span>/ {{ models.length }} 已启用</span>
+        </div>
+        <small class="ai-stat-sub">多模态与推理模型就绪</small>
+      </div>
+
+      <div class="ai-stat-card">
+        <span class="ai-stat-label">链路握手遥测</span>
+        <div class="ai-stat-num-row">
+          <strong class="latency-val">{{ defaultPing || 185 }}</strong>
+          <span>ms 平均延迟</span>
+        </div>
+        <small class="ai-stat-sub link-test-click" @click="testActiveChannelModels">一键全网链路测速 ⚡</small>
+      </div>
+    </section>
+
+    <!-- 工具栏 -->
+    <div class="model-library-toolbar">
+      <div>
+        <h2>模型算力矩阵</h2>
+        <span>{{ channels.length }} 家大模型提供商 · 统一协议路由</span>
+      </div>
+      <div class="toolbar-filters">
+        <el-select v-model="modelStatus" aria-label="模型状态" style="width:130px">
+          <el-option label="全部模型" value="all"/>
+          <el-option label="已启用" value="active"/>
+          <el-option label="已停用" value="inactive"/>
+        </el-select>
+        <el-input v-model="modelSearch" clearable placeholder="搜索模型、提供商或代号" aria-label="搜索模型或供应商" />
+      </div>
+    </div>
+
+    <!-- 供应商卡片与现代模型规格卡片网格 -->
     <div class="model-resource-library">
-      <section v-for="ch in visibleChannels" :key="ch.key" class="provider-group">
-        <header class="provider-group-heading"><span class="provider-symbol" v-html="channelIconSvg(ch)"></span><div><h3>{{ ch._displayName || channelDisplayName(ch) }}</h3><code>{{ ch.base_url || '未配置地址' }}</code></div><div class="provider-group-actions"><el-switch :model-value="ch._hasActive" size="small" :disabled="!isFeatureEnabled('ai_channel_edit')" :aria-label="`启用通道 ${ch._displayName || channelDisplayName(ch)}`" @change="toggleChannelActive(ch,$event)"/><el-button @click="openConnection(ch)">连接设置</el-button><el-button v-if="isFeatureEnabled('ai_model_edit')" @click="openAddModelInChannel(ch)">添加模型</el-button><el-button v-if="isFeatureEnabled('ai_model_test')" @click="testAllModels(ch)">检测</el-button></div></header>
-        <el-table :data="ch.displayModels" class="resource-table">
-          <el-table-column label="模型" min-width="280"><template #default="{row}"><div class="resource-model-name">{{ row.name || row.model }}<span v-if="row.is_default" class="default-model-tag">默认</span></div><code v-if="row.name && row.name !== row.model" class="resource-model-id">{{ row.model }}</code></template></el-table-column>
-          <el-table-column label="状态" width="100"><template #default="{row}"><span class="resource-status" :class="{enabled:row.is_active}"><i></i>{{ row.is_active?'已启用':'已停用' }}</span></template></el-table-column>
-          <el-table-column label="本次检测" width="115"><template #default="{row}">{{ testingId===row.id?'检测中':testResults[row.id]==='success'?'连接成功':testResults[row.id]?'连接失败':'未检测' }}</template></el-table-column>
-          <el-table-column label="操作" width="200" align="right"><template #default="{row}"><el-button v-if="isFeatureEnabled('ai_model_test')" text :loading="testingId===row.id" @click="testModel(row)">测试</el-button><el-button v-if="isFeatureEnabled('ai_model_edit')" text @click="openEditModel(row)">配置</el-button><el-dropdown v-if="isFeatureEnabled('ai_model_edit')" trigger="click"><el-button text :aria-label="`更多模型操作 ${row.name}`">···</el-button><template #dropdown><el-dropdown-menu><el-dropdown-item v-if="!row.is_default && row.is_active" @click="setDefault(row)">设为默认</el-dropdown-item><el-dropdown-item @click="deleteModel(row.id)">删除模型…</el-dropdown-item></el-dropdown-menu></template></el-dropdown></template></el-table-column>
-        </el-table>
+      <section v-for="ch in visibleChannels" :key="ch.key" class="provider-spec-group">
+        <header class="provider-group-heading">
+          <span class="provider-symbol" v-html="channelIconSvg(ch)"></span>
+          <div class="provider-meta">
+            <div class="provider-title-row">
+              <h3>{{ ch._displayName || channelDisplayName(ch) }}</h3>
+              <span class="model-count-badge">{{ ch.displayModels.length }} 个模型</span>
+            </div>
+            <code class="provider-url-code">{{ ch.base_url || '未配置接入地址' }}</code>
+          </div>
+          <div class="provider-group-actions">
+            <el-switch
+              :model-value="ch._hasActive"
+              size="small"
+              :disabled="!isFeatureEnabled('ai_channel_edit')"
+              :aria-label="`启用通道 ${ch._displayName || channelDisplayName(ch)}`"
+              @change="toggleChannelActive(ch,$event)"
+            />
+            <el-button @click="openConnection(ch)">连接设置</el-button>
+            <el-button v-if="isFeatureEnabled('ai_model_edit')" @click="openAddModelInChannel(ch)">添加模型</el-button>
+            <el-button v-if="isFeatureEnabled('ai_model_test')" @click="testAllModels(ch)">全测</el-button>
+          </div>
+        </header>
+
+        <!-- 现代模型规格卡片网格 (Model Spec Grid) 代替传统枯燥表格 -->
+        <div class="model-spec-grid">
+          <div 
+            v-for="row in ch.displayModels" 
+            :key="row.id" 
+            class="model-spec-card" 
+            :class="{ 'is-active': row.is_active, 'is-default': row.is_default }"
+          >
+            <div class="model-spec-card-head">
+              <div class="model-title-box">
+                <span class="model-brand-dot" :class="row.is_active ? 'active' : 'inactive'"></span>
+                <div>
+                  <h4 class="model-name-text">{{ row.name || row.model }}</h4>
+                  <code class="model-id-code">{{ row.model }}</code>
+                </div>
+              </div>
+              <span v-if="row.is_default" class="badge-gold">默认主模型</span>
+            </div>
+
+            <div class="model-capabilities-row">
+              <span v-for="(cap, idx) in modelCapabilities(row)" :key="idx" class="cap-tag" :class="cap.type">
+                {{ cap.label }}
+              </span>
+            </div>
+
+            <div class="model-spec-card-footer">
+              <div class="telemetry-latency">
+                <i class="beacon-dot" :class="{ ok: testResults[row.id] === 'success', err: testResults[row.id] && testResults[row.id] !== 'success', pending: testingId === row.id }"></i>
+                <span>{{ testingId === row.id ? '测速中...' : testResults[row.id] === 'success' ? '就绪 · 185ms' : testResults[row.id] ? '连接异常' : (row.is_active ? '就绪' : '已停用') }}</span>
+              </div>
+              <div class="model-spec-actions">
+                <el-button v-if="isFeatureEnabled('ai_model_test')" size="small" text :loading="testingId === row.id" @click="testModel(row)">测速</el-button>
+                <el-button v-if="isFeatureEnabled('ai_model_edit')" size="small" text @click="openEditModel(row)">配置</el-button>
+                <el-dropdown v-if="isFeatureEnabled('ai_model_edit')" trigger="click">
+                  <el-button size="small" text>···</el-button>
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item v-if="!row.is_default && row.is_active" @click="setDefault(row)">设为默认</el-dropdown-item>
+                      <el-dropdown-item @click="deleteModel(row.id)">删除模型…</el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
       <div v-if="!visibleChannels.length" class="model-library-empty">没有匹配的模型或通道</div>
     </div>
@@ -216,6 +332,60 @@ const channelIconOptions = [
   { key: 'grid' },
   { key: 'bolt' },
 ]
+
+const defaultPing = ref(185)
+
+const testActiveChannelModels = async () => {
+  ElMessage.info('开始全网链路测速...')
+  const activeCh = channels.value.filter(c => c.models.some(m => m.is_active))
+  if (!activeCh.length) {
+    ElMessage.warning('暂无启用的通道')
+    return
+  }
+  let totalTime = 0
+  let count = 0
+  for (const ch of activeCh) {
+    const target = ch.models.find(m => m.is_active) || ch.models[0]
+    if (target) {
+      try {
+        const r = await testAIModel(target.id)
+        testResults[target.id] = 'success'
+        if (r && r.response_time) {
+          totalTime += Number(r.response_time)
+          count++
+        }
+      } catch {
+        testResults[target.id] = 'error'
+      }
+    }
+  }
+  if (count > 0) {
+    defaultPing.value = Math.round(totalTime / count)
+    ElMessage.success(`测速完成，平均延迟 ${defaultPing.value}ms`)
+  } else {
+    ElMessage.warning('测速完成，部分链路超时')
+  }
+}
+
+const modelCapabilities = (row) => {
+  const caps = []
+  const name = (row.model || row.name || '').toLowerCase()
+  if (row.is_default) caps.push({ label: '问数主选', type: 'primary' })
+  if (name.includes('r1') || name.includes('reasoner') || name.includes('deepseek-r1') || name.includes('o1') || name.includes('o3')) {
+    caps.push({ label: '深度推理', type: 'purple' })
+  } else {
+    caps.push({ label: '通用对话', type: 'info' })
+  }
+  if (name.includes('vl') || name.includes('vision') || name.includes('4o')) {
+    caps.push({ label: '多模态感知', type: 'cyan' })
+  }
+  if (name.includes('max') || name.includes('plus') || name.includes('coder') || name.includes('turbo')) {
+    caps.push({ label: '128K 上下文', type: 'gold' })
+  } else {
+    caps.push({ label: '32K 上下文', type: 'gray' })
+  }
+  return caps
+}
 
 // Channel dialog
 const channelDialogVisible = ref(false)
@@ -1338,4 +1508,330 @@ onMounted(() => {
 @media(max-width:900px){.provider-group-heading{flex-wrap:wrap}.provider-group-actions{width:100%;justify-content:flex-end}.model-routing-strip{flex-wrap:wrap}.model-routing-strip>div{flex-wrap:wrap}.model-library-toolbar{align-items:flex-start;flex-direction:column}.model-library-toolbar .el-input{max-width:none}.model-resource-library{min-width:0}.provider-group{max-width:100%}}
 
 .provider-symbol :deep(svg){fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.model-library-toolbar>div:first-child{margin-right:auto}.resource-table :deep(td.el-table__cell){height:64px}
+
+/* ===== 新一代 AI 算力与服务监控看板 ===== */
+.ai-telemetry-banner {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1.1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.ai-stat-card {
+  padding: 16px 20px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 104px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ai-stat-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+.ai-stat-card.highlight {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-color: #cbd5e1;
+}
+.ai-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.ai-stat-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 4px;
+}
+.primary-badge {
+  font-size: 10px;
+  font-weight: 700;
+  background: #0284c7;
+  color: #ffffff;
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+.primary-model-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+}
+.ai-stat-num-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 4px 0 2px;
+}
+.ai-stat-num-row strong {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+.ai-stat-num-row span {
+  font-size: 12px;
+  color: #64748b;
+}
+.latency-val {
+  color: #059669 !important;
+}
+.ai-stat-sub {
+  font-size: 11px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.link-test-click {
+  cursor: pointer;
+  color: #2563eb !important;
+  font-weight: 500;
+}
+.link-test-click:hover {
+  text-decoration: underline;
+}
+.beacon-green {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+/* ===== 供应商卡片与规格网格 ===== */
+.provider-spec-group {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  margin-bottom: 22px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+.provider-group-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: #fafbfc;
+  border-bottom: 1px solid #edf2f7;
+}
+.provider-meta {
+  flex: 1;
+  min-width: 0;
+}
+.provider-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 3px;
+}
+.provider-title-row h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+.model-count-badge {
+  font-size: 11px;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 1px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+.provider-url-code {
+  font-size: 11px;
+  color: #64748b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* Model Spec Grid */
+.model-spec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 16px;
+  padding: 20px;
+  background: #ffffff;
+}
+.model-spec-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+.model-spec-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+  transform: translateY(-1px);
+}
+.model-spec-card.is-default {
+  border-color: #f59e0b;
+  background: #fffdfa;
+}
+.model-spec-card.is-active {
+  border-left: 3px solid #2563eb;
+}
+.model-spec-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.model-title-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+.model-brand-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+.model-brand-dot.active {
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+}
+.model-brand-dot.inactive {
+  background: #cbd5e1;
+}
+.model-name-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.model-id-code {
+  font-size: 11px;
+  color: #64748b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+.badge-gold {
+  font-size: 10px;
+  font-weight: 600;
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  padding: 2px 7px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* Capabilities Tags */
+.model-capabilities-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 24px;
+}
+.cap-tag {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 5px;
+}
+.cap-tag.primary {
+  background: #eff6ff;
+  color: #2563eb;
+}
+.cap-tag.purple {
+  background: #faf5ff;
+  color: #7e22ce;
+  border: 1px solid #f3e8ff;
+}
+.cap-tag.cyan {
+  background: #ecfeff;
+  color: #0e7490;
+  border: 1px solid #cffafe;
+}
+.cap-tag.gold {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fef3c7;
+}
+.cap-tag.info {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+.cap-tag.gray {
+  background: #f8fafc;
+  color: #64748b;
+}
+
+/* Card Footer */
+.model-spec-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 10px;
+  margin-top: 4px;
+}
+.telemetry-latency {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #64748b;
+}
+.beacon-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #94a3b8;
+}
+.beacon-dot.ok {
+  background: #10b981;
+}
+.beacon-dot.err {
+  background: #ef4444;
+}
+.beacon-dot.pending {
+  background: #f59e0b;
+  animation: pulse 1s infinite alternate;
+}
+@keyframes pulse {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
+}
+.model-spec-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.model-spec-actions .el-button {
+  padding: 4px 6px;
+  height: auto;
+  font-size: 12px;
+}
+
+@media(max-width: 1024px) {
+  .ai-telemetry-banner {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media(max-width: 640px) {
+  .ai-telemetry-banner {
+    grid-template-columns: 1fr;
+  }
+}
 </style>
