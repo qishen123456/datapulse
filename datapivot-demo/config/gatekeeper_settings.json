@@ -1,8 +1,8 @@
 {
   "enabled": true,
-  "visible_enabled": true,
+  "visible_enabled": false,
   "visible_roles": ["super_admin", "admin", "business_admin"],
-  "model_id": 13,
+  "model_id": 12,
   "timeout_seconds": 15,
   "max_tokens": 1024,
   "log_path": "",

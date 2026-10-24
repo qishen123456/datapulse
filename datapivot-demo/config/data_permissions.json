@@ -117,51 +117,66 @@
     },
     "64": {
       "dataset_id": 64,
-      "mode": "org_tree",
-      "tree_type_id": "gas_jc_tree",
-      "tree_type_ids": [
-        "gas_jc_tree"
-      ],
-      "organization_node_ids": [
-        "JC-GROUP"
-      ],
+      "mode": "public",
+      "tree_type_id": "",
+      "tree_type_ids": [],
+      "organization_node_ids": [],
+      "organization_codes": [],
+      "allowed_roles": [],
+      "allowed_departments": [],
+      "allowed_positions": [],
+      "allowed_employee_ids": [],
+      "allowed_union_ids": [],
       "scope": {
         "organization_field": "org_id",
-        "organization_values": []
+        "organization_values": [],
+        "company_field": "",
+        "company_values": [],
+        "row_filter_note": ""
       },
-      "note": "燃气演示组织树；未绑定组织的普通账号不开放；跨组织汇总需验证取数前过滤"
+      "note": "燃气演示全量公开访问"
     },
     "65": {
       "dataset_id": 65,
-      "mode": "org_tree",
-      "tree_type_id": "gas_jc_tree",
-      "tree_type_ids": [
-        "gas_jc_tree"
-      ],
-      "organization_node_ids": [
-        "JC-GROUP"
-      ],
+      "mode": "public",
+      "tree_type_id": "",
+      "tree_type_ids": [],
+      "organization_node_ids": [],
+      "organization_codes": [],
+      "allowed_roles": [],
+      "allowed_departments": [],
+      "allowed_positions": [],
+      "allowed_employee_ids": [],
+      "allowed_union_ids": [],
       "scope": {
         "organization_field": "org_id",
-        "organization_values": []
+        "organization_values": [],
+        "company_field": "",
+        "company_values": [],
+        "row_filter_note": ""
       },
-      "note": "燃气演示组织树；未绑定组织的普通账号不开放；跨组织汇总需验证取数前过滤"
+      "note": "燃气演示全量公开访问"
     },
     "66": {
       "dataset_id": 66,
-      "mode": "org_tree",
-      "tree_type_id": "gas_jc_tree",
-      "tree_type_ids": [
-        "gas_jc_tree"
-      ],
-      "organization_node_ids": [
-        "JC-GROUP"
-      ],
+      "mode": "public",
+      "tree_type_id": "",
+      "tree_type_ids": [],
+      "organization_node_ids": [],
+      "organization_codes": [],
+      "allowed_roles": [],
+      "allowed_departments": [],
+      "allowed_positions": [],
+      "allowed_employee_ids": [],
+      "allowed_union_ids": [],
       "scope": {
         "organization_field": "org_id",
-        "organization_values": []
+        "organization_values": [],
+        "company_field": "",
+        "company_values": [],
+        "row_filter_note": ""
       },
-      "note": "燃气演示组织树；未绑定组织的普通账号不开放；跨组织汇总需验证取数前过滤"
+      "note": "燃气演示全量公开访问"
     }
   }
 }
