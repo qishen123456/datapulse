@@ -492,7 +492,7 @@
 /* Accounts: selection actions share the list toolbar, descriptive fields keep more room. */
 .workspace-shell .page-wrap .module-layout-v4.permission-page .toolbar {
   display: grid;
-  grid-template-columns: minmax(240px, 1fr) 160px 150px;
+  grid-template-columns: minmax(240px, 1fr) 160px 150px auto;
   gap: 12px
 }
 
@@ -500,7 +500,7 @@
   border: 1px solid #e5eaf1;
   border-radius: 10px;
   overflow: hidden;
-  padding: 0 16px
+  padding: 0
 }
 
 .workspace-shell .page-wrap .module-layout-v4.permission-page .el-table td {

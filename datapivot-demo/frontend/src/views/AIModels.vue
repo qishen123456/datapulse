@@ -1,47 +1,24 @@
 <template>
-  <div class="module-layout-v4 cs-page" v-loading="loading">
+  <div class="cs-page model-workspace" v-loading="loading">
     <header class="cs-page-heading">
-      <div><h1>模型服务</h1><p>管理供应商通道、模型清单与连接设置。</p></div>
+      <div><h1>模型服务</h1></div>
       <el-button v-if="isFeatureEnabled('ai_channel_edit')" type="primary" @click="openAddChannel"><el-icon><Plus /></el-icon>新建通道</el-button>
     </header>
-    <div class="cs-layout">
-      <!-- ===== LEFT: Channel List ===== -->
-      <aside class="cs-sidebar">
-        <div class="cs-sidebar-head">
-          <div>
-            <div class="cs-sidebar-title">供应商通道</div>
-          </div>
-          <span class="cs-sidebar-count">{{ channels.length }}</span>
-        </div>
-        <div class="cs-sidebar-scroll">
-          <div
-            v-for="ch in channels" :key="ch.key"
-            class="cs-ch-item"
-            :class="{ 'is-active': selectedChannelKey === ch.key }"
-            role="button" tabindex="0" :aria-pressed="selectedChannelKey === ch.key"
-            @keydown.enter.self="selectChannel(ch.key)" @keydown.space.self.prevent="selectChannel(ch.key)"
-            @click="selectChannel(ch.key)"
-          >
-            <span class="cs-ch-icon" v-html="channelIconSvg(ch)"></span>
-            <span class="cs-ch-copy">
-              <span class="cs-ch-name">{{ ch._displayName || channelDisplayName(ch) }}</span>
-              <span class="cs-ch-meta">{{ ch.models.length }} 个模型 · {{ ch.models.filter(m => m.is_active).length }} 启用</span>
-            </span>
-            <el-switch
-              v-model="ch._hasActive"
-              size="small"
-              class="cs-ch-switch"
-              :disabled="!isFeatureEnabled('ai_channel_edit')"
-              @click.stop
-              @change="toggleChannelActive(ch, $event)"
-            />
-          </div>
-        </div>
-      </aside>
-
-      <!-- ===== RIGHT: Channel Detail ===== -->
-      <main class="cs-main" v-if="activeChannel">
-        <section class="cs-hero">
+    <section class="model-routing-strip"><div><span class="routing-dot"></span><span>默认调用模型</span><strong>{{ models.find(m => m.is_default)?.name || '尚未设置' }}</strong></div><span>{{ models.filter(m => m.is_active).length }} 个已启用 / {{ models.length }} 个模型</span></section>
+    <div class="model-library-toolbar"><div><h2>模型资源</h2><span>{{ channels.length }} 条供应商通道</span></div><el-select v-model="modelStatus" aria-label="模型状态" style="width:140px"><el-option label="全部模型" value="all"/><el-option label="已启用" value="active"/><el-option label="已停用" value="inactive"/></el-select><el-input v-model="modelSearch" clearable placeholder="搜索模型或供应商" aria-label="搜索模型或供应商" /></div>
+    <div class="model-resource-library">
+      <section v-for="ch in visibleChannels" :key="ch.key" class="provider-group">
+        <header class="provider-group-heading"><span class="provider-symbol" v-html="channelIconSvg(ch)"></span><div><h3>{{ ch._displayName || channelDisplayName(ch) }}</h3><code>{{ ch.base_url || '未配置地址' }}</code></div><div class="provider-group-actions"><el-switch :model-value="ch._hasActive" size="small" :disabled="!isFeatureEnabled('ai_channel_edit')" :aria-label="`启用通道 ${ch._displayName || channelDisplayName(ch)}`" @change="toggleChannelActive(ch,$event)"/><el-button @click="openConnection(ch)">连接设置</el-button><el-button v-if="isFeatureEnabled('ai_model_edit')" @click="openAddModelInChannel(ch)">添加模型</el-button><el-button v-if="isFeatureEnabled('ai_model_test')" @click="testAllModels(ch)">检测</el-button></div></header>
+        <el-table :data="ch.displayModels" class="resource-table">
+          <el-table-column label="模型" min-width="280"><template #default="{row}"><div class="resource-model-name">{{ row.name || row.model }}<span v-if="row.is_default" class="default-model-tag">默认</span></div><code v-if="row.name && row.name !== row.model" class="resource-model-id">{{ row.model }}</code></template></el-table-column>
+          <el-table-column label="状态" width="100"><template #default="{row}"><span class="resource-status" :class="{enabled:row.is_active}"><i></i>{{ row.is_active?'已启用':'已停用' }}</span></template></el-table-column>
+          <el-table-column label="本次检测" width="115"><template #default="{row}">{{ testingId===row.id?'检测中':testResults[row.id]==='success'?'连接成功':testResults[row.id]?'连接失败':'未检测' }}</template></el-table-column>
+          <el-table-column label="操作" width="200" align="right"><template #default="{row}"><el-button v-if="isFeatureEnabled('ai_model_test')" text :loading="testingId===row.id" @click="testModel(row)">测试</el-button><el-button v-if="isFeatureEnabled('ai_model_edit')" text @click="openEditModel(row)">配置</el-button><el-dropdown v-if="isFeatureEnabled('ai_model_edit')" trigger="click"><el-button text :aria-label="`更多模型操作 ${row.name}`">···</el-button><template #dropdown><el-dropdown-menu><el-dropdown-item v-if="!row.is_default && row.is_active" @click="setDefault(row)">设为默认</el-dropdown-item><el-dropdown-item @click="deleteModel(row.id)">删除模型…</el-dropdown-item></el-dropdown-menu></template></el-dropdown></template></el-table-column>
+        </el-table>
+      </section>
+      <div v-if="!visibleChannels.length" class="model-library-empty">没有匹配的模型或通道</div>
+    </div>
+    <el-drawer v-model="connectionOpen" title="通道连接" size="min(560px, 100vw)" class="model-connection-drawer" @closed="showApiKey=false"><div v-if="activeChannel">        <section class="cs-hero">
           <div class="cs-hero-main">
             <el-popover placement="bottom-start" trigger="click" width="260" popper-class="cs-icon-popover">
               <template #reference>
@@ -64,7 +41,6 @@
               </div>
             </el-popover>
             <div class="cs-provider-copy">
-              <div class="cs-provider-kicker">当前供应商通道</div>
               <div class="cs-provider-title-row" v-if="!editingProviderName">
                 <div class="cs-provider-title">{{ activeChannel._displayName || channelDisplayName(activeChannel) }}</div>
                 <el-button v-if="isFeatureEnabled('ai_channel_edit')" text size="small" class="cs-provider-edit-btn" @click="startEditProviderName">
@@ -85,27 +61,10 @@
               <span class="cs-provider-url-sub">{{ activeChannel.base_url || '尚未配置 API 地址' }}</span>
             </div>
           </div>
-          <div class="cs-hero-stats">
-            <div class="cs-stat-card">
-              <span>模型数</span>
-              <strong>{{ activeChannel.models.length }}</strong>
-            </div>
-            <div class="cs-stat-card">
-              <span>已启用</span>
-              <strong>{{ activeChannel.models.filter(m => m.is_active).length }}</strong>
-            </div>
-            <div class="cs-stat-card">
-              <span>默认模型</span>
-              <strong>{{ activeChannel.models.find(m => m.is_default)?.name || '未设置' }}</strong>
-            </div>
-          </div>
+
         </section>
 
-        <nav class="cs-detail-tabs" aria-label="通道配置">
-          <button type="button" :aria-pressed="channelTab === 'models'" @click="channelTab = 'models'">模型清单 <span>{{ activeChannel.models.length }}</span></button>
-          <button type="button" :aria-pressed="channelTab === 'connection'" @click="channelTab = 'connection'">连接设置</button>
-        </nav>
-        <section v-show="channelTab === 'connection'" class="cs-config-grid">
+        <section  class="cs-config-grid">
           <!-- API Key Section -->
           <div class="cs-config-card cs-config-card-key">
             <div class="cs-section-head">
@@ -148,77 +107,7 @@
           </div>
         </section>
 
-        <!-- Models Section -->
-        <section v-show="channelTab === 'models'" class="cs-model-panel">
-          <div class="cs-models-header">
-            <div>
-              <div class="cs-models-label">模型资产</div>
-              <div class="cs-models-desc">维护可调用模型、默认模型与连通性。</div>
-            </div>
-            <span class="cs-models-count">{{ activeChannel.models.length }}</span>
-            <div class="cs-models-spacer"></div>
-            <el-button v-if="isFeatureEnabled('ai_model_test')" @click="testAllModels(activeChannel)">全部检测</el-button>
-          </div>
-
-          <div class="cs-model-list">
-            <div
-              v-for="model in activeChannel.models"
-              :key="model.id"
-              class="cs-model-row"
-              :class="{ 'is-default': model.is_default, 'is-inactive': !model.is_active }"
-            >
-              <span class="cs-model-emoji" v-html="channelIconSvg(activeChannel)"></span>
-              <div class="cs-model-copy">
-                <div class="cs-model-title-line">
-                  <span class="cs-model-name">{{ model.name || model.model }}</span>
-                  <el-tag v-if="model.is_default" type="warning" size="small" round effect="plain">默认</el-tag>
-                  <el-tag v-if="!model.is_active" type="info" size="small" round effect="plain">禁用</el-tag>
-                  <span
-                    v-if="testResults[model.id]"
-                    class="cs-model-dot"
-                    :class="testResults[model.id] === 'success' ? 'is-ok' : 'is-err'"
-                  ></span>
-                </div>
-                <span class="cs-model-id">{{ model.model }}</span>
-              </div>
-              <div class="cs-model-spacer"></div>
-              <div class="cs-model-actions">
-                <el-button
-                  v-if="!model.is_default && model.is_active && isFeatureEnabled('ai_model_edit')"
-                  text size="small" @click="setDefault(model)"
-                >设默认</el-button>
-                <el-button
-                  v-if="isFeatureEnabled('ai_model_test')"
-                  text size="small"
-                  :loading="testingId === model.id"
-                  @click="testModel(model)"
-                >测试</el-button>
-                <el-button v-if="isFeatureEnabled('ai_model_edit')" text size="small" :aria-label="`配置模型 ${model.name || model.model}`" @click="openEditModel(model)">
-                  <el-icon><Setting /></el-icon>
-                </el-button>
-                <el-popconfirm v-if="isFeatureEnabled('ai_model_edit')" title="确认删除此模型？" @confirm="deleteModel(model.id)">
-                  <template #reference>
-                    <el-button text size="small" type="danger" class="cs-model-del">删除</el-button>
-                  </template>
-                </el-popconfirm>
-              </div>
-            </div>
-          </div>
-
-          <!-- Add Model Row -->
-          <div class="cs-add-model-bar">
-            <el-button v-if="isFeatureEnabled('ai_model_edit')" type="primary" plain @click="openAddModelInChannel(activeChannel)">
-              <el-icon><Plus /></el-icon> 添加模型
-            </el-button>
-          </div>
-        </section>
-      </main>
-
-      <!-- Empty State -->
-      <main class="cs-main cs-empty" v-else>
-        <div class="cs-empty-text">请选择或添加一个供应商通道</div>
-      </main>
-    </div>
+</div></el-drawer>
 
     <!-- ===== Channel Dialog ===== -->
     <el-dialog v-model="channelDialogVisible" :title="channelDialogIsNew ? '新建供应商通道' : '编辑通道'" width="480px" @close="resetChannelForm">
@@ -282,9 +171,8 @@
 </template>
 
 <script setup>
-import "../styles/module-interiors.css"
 import { ref, computed, reactive, onMounted, watch, nextTick } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Edit, Delete, ArrowDown, Setting, View, Hide } from '@element-plus/icons-vue'
 import { getAIModels, createAIModel, updateAIModel, deleteAIModel, testAIModel, setDefaultAIModel } from '../api/index.js'
 import { useFeatureFlags } from '../state/featureFlags.js'
@@ -295,6 +183,14 @@ const { isFeatureEnabled, loadFeatureFlags } = useFeatureFlags()
 const testingId = ref(null)
 const testResults = reactive({})
 const selectedChannelKey = ref(null)
+const connectionOpen = ref(false)
+const modelSearch = ref('')
+const modelStatus = ref('all')
+const visibleChannels = computed(() => {
+  const term=modelSearch.value.trim().toLowerCase()
+  return channels.value.map(ch => ({...ch, displayModels:ch.models.filter(m => (modelStatus.value==='all' || Boolean(m.is_active)===(modelStatus.value==='active')) && (!term || [m.name,m.model,ch._displayName,channelDisplayName(ch)].some(v=>String(v||'').toLowerCase().includes(term))))})).filter(ch=>ch.displayModels.length)
+})
+const openConnection = (ch) => { selectChannel(ch.key); connectionOpen.value=true }
 const channelTab = ref('models')
 const channelTesting = ref(null)
 const channelTestResult = reactive({})
@@ -496,8 +392,10 @@ const onBaseUrlChange = async () => {
   for (const m of ch.models) {
     await updateAIModel(m.id, { base_url: editableBaseUrl.value })
   }
+  const nextKey = `${ch.provider}||${editableBaseUrl.value}`
+  await loadData()
+  selectChannel(nextKey)
   ElMessage.success('API 地址已保存')
-  loadData()
 }
 
 const startEditProviderName = () => {
@@ -640,6 +538,7 @@ const testAllModels = async (ch) => {
 
 // Model CRUD
 const openAddModelInChannel = (ch) => {
+  selectChannel(ch.key)
   modelDialogIsEdit.value = false
   modelForm.value = { name: '', provider: ch.provider, model: '', base_url: ch.base_url, api_key: '', is_active: true, is_default: false }
   modelDialogVisible.value = true
@@ -681,6 +580,7 @@ const testModel = async (row) => {
 }
 
 const deleteModel = async (id) => {
+  try { await ElMessageBox.confirm('删除后无法用于后续问数，确认删除此模型？', '删除模型', {type:'warning', confirmButtonText:'删除', cancelButtonText:'取消'}) } catch { return }
   await deleteAIModel(id)
   ElMessage.success('已删除')
   loadData()
@@ -1416,4 +1316,26 @@ onMounted(() => {
 @media(max-width:1100px){.cs-hero{align-items:flex-start;flex-direction:column}.cs-hero-stats{align-self:stretch;gap:24px}.cs-stat-card:first-child{border:0;padding-left:0}}
 @media(max-width:650px){.cs-page-heading{align-items:flex-start}.cs-page-heading h1{font-size:22px}.cs-page-heading p{max-width:190px;line-height:1.7}.cs-page-heading .el-button{margin-top:4px}.cs-hero{padding:20px}.cs-hero-stats{gap:18px}.cs-stat-card{padding-left:18px}.cs-stat-card strong{font-size:12px}.cs-config-grid{grid-template-columns:1fr;padding:16px}.cs-model-panel{padding:18px 16px}.cs-detail-tabs{padding:0 20px}.cs-provider-title{font-size:19px}.cs-models-desc{max-width:170px;line-height:1.6}.cs-model-row{gap:10px}.cs-model-actions{padding-left:44px}.cs-model-emoji{flex-shrink:0}.cs-provider-copy{min-width:0}.cs-provider-name-input{width:100%}}
 
+
+/* One explicit layout contract; channel rows never participate in vertical flex growth. */
+.model-workspace.cs-page{height:auto;min-height:0;display:block}
+.model-workspace .cs-layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:28px;align-items:start;background:none;overflow:visible}
+.model-workspace .cs-sidebar{display:block;width:auto;padding:0;margin:0;background:#f8fafc;border:0;border-radius:12px;overflow:hidden}
+.model-workspace .cs-sidebar-head{padding:18px 16px;display:flex;justify-content:space-between}
+.model-workspace .cs-sidebar-scroll{display:flex;flex-direction:column;gap:4px;overflow:auto;max-height:65vh;padding:0 8px 10px;scroll-snap-type:none}
+.model-workspace .cs-ch-item{flex:0 0 auto;height:72px;min-height:72px;width:100%;padding:12px;margin:0;border:1px solid transparent;background:transparent;box-shadow:none}
+.model-workspace .cs-ch-item.is-active{background:#fff;border-color:#d5e0f0;box-shadow:0 2px 6px #0f172a08}
+.model-workspace .cs-ch-name{font-size:13px;color:#0f172a}.model-workspace .cs-ch-meta{font-size:12px;color:#475569}
+.model-workspace .cs-ch-icon,.model-workspace .cs-provider-icon{background:#eef2f7;color:#334155;box-shadow:none}
+.model-workspace .cs-main{min-width:0;min-height:0;border:0;background:#fff}
+.model-workspace .cs-hero{padding:8px 0 24px}.model-workspace .cs-provider-title{font-size:23px}.model-workspace .cs-provider-url-sub{font-size:12px;color:#475569;overflow-wrap:anywhere;white-space:normal}
+.model-workspace .cs-detail-tabs{padding:0}.model-workspace .cs-model-panel{padding:18px 0}.model-workspace .cs-models-header{margin-bottom:14px}.model-workspace .cs-model-row{padding:20px 0;min-height:80px;box-sizing:border-box}.model-workspace .cs-model-name{white-space:normal;overflow-wrap:anywhere;font-size:14px}.model-workspace .cs-model-id{font-size:12px;color:#475569;overflow-wrap:anywhere;white-space:normal}.model-workspace .cs-model-copy{min-width:0}.model-workspace .cs-model-actions{flex-shrink:0}
+.model-workspace .cs-config-grid{padding:24px 0;display:grid;grid-template-columns:1fr;gap:24px}.model-workspace .cs-config-card{padding:0 0 24px;background:none;border:0;border-bottom:1px solid #e5eaf1;border-radius:0;box-shadow:none}.model-workspace .cs-section-desc{color:#475569;font-size:12px}
+@media(max-width:900px){.model-workspace .cs-layout{grid-template-columns:1fr;gap:24px}.model-workspace .cs-sidebar-scroll{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-height:240px}.model-workspace .cs-hero{padding-top:0}}
+@media(max-width:520px){.model-workspace .cs-sidebar-scroll{grid-template-columns:1fr;max-height:235px}.model-workspace .cs-model-row{flex-wrap:wrap}.model-workspace .cs-model-actions{width:100%;padding-left:0}.model-workspace .cs-page-heading{margin-bottom:20px}}
+
+.model-workspace .model-routing-strip{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 24px;background:#f4f6fa;border-radius:12px;margin-bottom:32px;font-size:13px;color:#475569}.model-routing-strip>div{display:flex;align-items:center;gap:14px;min-width:0}.model-routing-strip strong{color:#0f172a;font-weight:600;overflow-wrap:anywhere}.routing-dot{height:8px;width:8px;flex-shrink:0;border-radius:50%;background:#2563eb}.model-library-toolbar{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:18px}.model-library-toolbar>div:first-child{display:flex;align-items:baseline;gap:14px}.model-library-toolbar h2{font-size:17px;margin:0}.model-library-toolbar span{font-size:12px;color:#64748b}.model-library-toolbar .el-input{max-width:280px}.provider-group{margin-bottom:24px;border:1px solid #e6eaf0;border-radius:12px;overflow:hidden}.provider-group-heading{display:flex;align-items:center;gap:12px;padding:18px 20px;background:#fafbfc}.provider-group-heading>div:nth-child(2){min-width:0;flex:1}.provider-group-heading h3{font-size:14px;margin:0 0 6px;color:#0f172a}.provider-group-heading code{font:11px ui-monospace,monospace;color:#64748b;overflow-wrap:anywhere}.provider-symbol{width:34px;height:34px;display:grid;place-items:center;background:#eaf0f8;border-radius:8px;color:#3b5578;flex-shrink:0}.provider-symbol :deep(svg){width:20px;height:20px}.provider-group-actions{display:flex;align-items:center;gap:8px}.provider-group-actions .el-button{margin:0}.resource-model-name{font-size:14px;color:#0f172a;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.resource-model-id{font:12px ui-monospace,monospace;color:#64748b}.default-model-tag{font-size:10px;padding:2px 7px;background:#eff6ff;color:#2563eb;border-radius:5px}.resource-status{font-size:12px;display:flex;gap:6px;align-items:center;color:#64748b}.resource-status i{width:5px;height:5px;border-radius:50%;background:#94a3b8}.resource-status.enabled{color:#047857}.resource-status.enabled i{background:#10b981}.resource-table :deep(td.el-table__cell){height:76px}.resource-table :deep(th.el-table__cell){background:#fff;font-size:11px;font-weight:500;color:#64748b}.resource-table :deep(.cell){padding-inline:20px}.model-library-empty{padding:60px;text-align:center;color:#64748b}
+@media(max-width:900px){.provider-group-heading{flex-wrap:wrap}.provider-group-actions{width:100%;justify-content:flex-end}.model-routing-strip{flex-wrap:wrap}.model-routing-strip>div{flex-wrap:wrap}.model-library-toolbar{align-items:flex-start;flex-direction:column}.model-library-toolbar .el-input{max-width:none}.model-resource-library{min-width:0}.provider-group{max-width:100%}}
+
+.provider-symbol :deep(svg){fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.model-library-toolbar>div:first-child{margin-right:auto}.resource-table :deep(td.el-table__cell){height:64px}
 </style>

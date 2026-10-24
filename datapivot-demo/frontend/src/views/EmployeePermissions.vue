@@ -1,10 +1,9 @@
 <template>
-  <div class="module-layout-v4 permission-page">
+  <div class="permission-page access-workspace">
     <section class="page-head">
       <div>
-        <p class="kicker">权限治理</p>
         <h1>账号与数据范围</h1>
-        <p>维护员工账号、角色和组织树授权；功能权限统一到系统控制台配置。</p>
+        <p>管理账号及其可访问的组织范围。</p>
       </div>
       <div class="head-actions">
         <el-button :icon="Refresh" :loading="loading" @click="loadAll">刷新</el-button>
@@ -13,7 +12,7 @@
       </div>
     </section>
 
-    <section class="toolbar">
+    <div class="access-layout"><main class="access-directory"><section class="toolbar">
       <el-input v-model.trim="phoneKeyword" clearable placeholder="按电话号码 / 姓名 / UnionID 搜索" />
       <el-select v-model="roleFilter" placeholder="角色" clearable>
         <el-option label="普通用户" value="user" />
@@ -25,23 +24,25 @@
         <el-option label="正常" value="enabled" />
         <el-option label="停用" value="disabled" />
       </el-select>
+      <span class="account-total">{{ filteredUsers.length }} 个账号</span>
       <div v-if="selectedUserIds.length" class="account-bulk-actions"><span>已选择 {{ selectedUserIds.length }} 个账号</span>        <el-button v-if="isFeatureEnabled('employee_bulk_update')" :disabled="!selectedUserIds.length" @click="openBulkEdit">批量修改</el-button>
         <el-button v-if="isFeatureEnabled('employee_delete')" type="danger" plain :disabled="!selectedUserIds.length" @click="bulkDeleteUsers">删除</el-button></div>
     </section>
 
-    <section class="user-table-card"><div class="account-list-caption"><strong>账号目录</strong><span>{{ filteredUsers.length }} 个匹配账号 · 已选择 {{ selectedUserIds.length }} 项</span></div>
+    <section class="user-table-card">
       <el-table
         v-loading="loading"
         :data="filteredUsers"
         row-key="id"
         size="small"
-        border
+        highlight-current-row
+        @row-click="row => inspectedUserId=row.id"
         @selection-change="selectedUserIds = $event.map(item => item.id)"
       >
         <el-table-column v-if="canSeeField('employee_field_actions')" type="selection" width="38" />
         <el-table-column label="id" type="index" width="48" />
         <el-table-column v-if="canSeeField('employee_field_name')" label="姓名" min-width="92">
-          <template #default="{ row }">{{ row.name || '-' }}</template>
+          <template #default="{ row }"><button class="account-name-button" @click="inspectedUserId=row.id">{{ row.name || '-' }}</button></template>
         </el-table-column>
         <el-table-column v-if="canSeeField('employee_field_phone')" label="电话" min-width="116">
           <template #default="{ row }">{{ row.account || row.username || '-' }}</template>
@@ -61,14 +62,6 @@
             />
           </template>
         </el-table-column>
-        <el-table-column v-if="canSeeField('employee_field_org')" label="组织" min-width="180" show-overflow-tooltip>
-          <template #default="{ row }">
-            <span>{{ organizationSummary(row) }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column v-if="canSeeField('employee_field_bookshelf')" label="飞书信息" min-width="160" show-overflow-tooltip>
-          <template #default="{ row }">{{ feishuSummary(row) }}</template>
-        </el-table-column>
         <el-table-column v-if="canSeeField('employee_field_actions')" label="操作" width="112">
           <template #default="{ row }">
             <el-button v-if="isFeatureEnabled('employee_update')" text @click="openEditUser(row)">编辑</el-button>
@@ -77,6 +70,8 @@
         </el-table-column>
       </el-table>
     </section>
+
+    </main><aside class="access-inspector" v-if="inspectedUser"><header><span>账号详情</span><el-button v-if="isFeatureEnabled('employee_update') && canSeeField('employee_field_actions')" @click="openEditUser(inspectedUser)">编辑授权</el-button></header><div class="identity-profile"><div class="identity-avatar">{{ canSeeField('employee_field_name') ? (inspectedUser.name || '账').slice(0,1) : '账' }}</div><h2 v-if="canSeeField('employee_field_name')">{{ inspectedUser.name || '未命名账号' }}</h2><span v-if="canSeeField('employee_field_role')">{{ roleLabel(inspectedUser.role) }}</span></div><dl class="identity-facts"><template v-if="canSeeField('employee_field_phone')"><dt>登录账号</dt><dd>{{ inspectedUser.account || inspectedUser.username || '—' }}</dd></template><template v-if="canSeeField('employee_field_status')"><dt>账号状态</dt><dd>{{ inspectedUser.enabled !== false?'正常':'停用' }}</dd></template><template v-if="canSeeField('employee_field_bookshelf')"><dt>飞书关联</dt><dd>{{ feishuSummary(inspectedUser) }}</dd></template></dl><section v-if="canSeeField('employee_field_org')" class="access-scope"><h3>组织数据范围 <span>{{ organizationDisplayNodes(inspectedUser).length }}</span></h3><div v-if="!organizationDisplayNodes(inspectedUser).length" class="scope-empty">尚未配置组织授权</div><ul v-else><li v-for="node in organizationDisplayNodes(inspectedUser)" :key="node.id"><span class="scope-node-mark"></span><div>{{ node.name }}<code v-if="canSeeField('employee_field_org_code') && node.code">{{ node.code }}</code></div></li></ul></section></aside><aside v-else class="access-inspector scope-empty">选择账号查看授权范围</aside></div>
 
     <el-dialog
       v-model="userDialog.visible"
@@ -278,6 +273,8 @@ const roleFilter = ref('')
 const statusFilter = ref('all')
 const users = ref([])
 const orgTrees = ref({ tree_types: [], nodes: [], trees: {} })
+const inspectedUserId = ref(null)
+const inspectedUser = computed(() => filteredUsers.value.find(u=>u.id===inspectedUserId.value) || filteredUsers.value[0] || null)
 const selectedUserIds = ref([])
 const bulkDialogVisible = ref(false)
 const { isFeatureEnabled, loadFeatureFlags } = useFeatureFlags()
@@ -951,6 +948,11 @@ onMounted(() => {
     flex-direction: column;
   }
 }
+
+.permission-page.module-layout-v4 .toolbar{grid-template-columns:minmax(180px,1fr) 150px 140px auto}.account-total{font-size:13px;color:#475569;align-self:center;white-space:nowrap}.permission-page.module-layout-v4 .user-table-card{padding:0}.permission-page.module-layout-v4 .toolbar{margin-bottom:12px}@media(max-width:720px){.permission-page.module-layout-v4 .toolbar{grid-template-columns:1fr}.account-total{justify-self:end}}
+
+.access-workspace .access-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:28px;align-items:start}.access-directory{min-width:0}.access-workspace .toolbar{display:flex;flex-wrap:wrap;gap:10px;padding:0;margin-bottom:18px;background:none;border:0}.access-workspace .toolbar>.el-input{flex:1 1 220px}.access-workspace .toolbar>.el-select{width:125px}.access-workspace .account-total{width:100%;font-size:12px}.access-workspace .user-table-card{border:0;border-radius:0;padding:0;overflow:hidden}.access-workspace :deep(.el-table td){height:66px}.account-name-button{border:0;background:none;font:inherit;font-weight:600;color:#0f172a;cursor:pointer;padding:8px 0;text-align:left}.access-inspector{position:sticky;top:20px;background:#f6f8fb;border:1px solid #e6eaf0;border-radius:12px;overflow:hidden}.access-inspector>header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;color:#475569}.identity-profile{padding:12px 24px 24px}.identity-avatar{width:48px;height:48px;display:grid;place-items:center;border-radius:14px;background:#e3eaf5;color:#35537a;font-size:20px;margin-bottom:14px}.identity-profile h2{margin:0 0 8px;font-size:21px;color:#0f172a}.identity-profile>span{font-size:12px;color:#475569}.identity-facts{display:grid;grid-template-columns:80px minmax(0,1fr);gap:16px 12px;padding:0 24px 24px;margin:0;font-size:12px}.identity-facts dt{color:#64748b}.identity-facts dd{margin:0;overflow-wrap:anywhere;color:#334155;font-variant-numeric:tabular-nums}.access-scope{padding:20px 24px;background:#fff;border-top:1px solid #e6eaf0}.access-scope h3{font-size:13px;display:flex;justify-content:space-between;margin:0 0 18px}.access-scope h3 span{color:#64748b;font-weight:400}.access-scope ul{list-style:none;padding:0;margin:0;max-height:340px;overflow:auto}.access-scope li{display:flex;align-items:baseline;gap:12px;padding:10px 0;font-size:12px;color:#334155}.scope-node-mark{width:6px;height:6px;flex-shrink:0;background:#a6b7cf;border-radius:2px}.access-scope code{display:block;font:10px ui-monospace,monospace;color:#64748b;margin-top:5px}.scope-empty{padding:24px;color:#64748b;font-size:13px}.access-workspace .account-bulk-actions{width:100%;display:flex;align-items:center;gap:10px;font-size:12px;padding:12px;background:#eff6ff;border-radius:8px}
+@media(max-width:1100px){.access-workspace .access-layout{grid-template-columns:1fr}.access-inspector{position:static}.access-workspace .toolbar>.el-select{flex:1}.access-directory{overflow:hidden}}
 </style>
 
 <style>
@@ -973,4 +975,6 @@ onMounted(() => {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+.permission-page.module-layout-v4 .toolbar{grid-template-columns:minmax(180px,1fr) 150px 140px auto}.account-total{font-size:13px;color:#475569;align-self:center;white-space:nowrap}.permission-page.module-layout-v4 .user-table-card{padding:0}.permission-page.module-layout-v4 .toolbar{margin-bottom:12px}@media(max-width:720px){.permission-page.module-layout-v4 .toolbar{grid-template-columns:1fr}.account-total{justify-self:end}}
 </style>
