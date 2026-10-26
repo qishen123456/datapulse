@@ -67,3 +67,7 @@ temp/
 tmp/
 .git_backup/
 **/.git_backup/
+
+# 运维手册与服务器信息（含公网地址、面板路径、部署步骤）——本仓库为 public，不入库
+云服务器配置
+datapivot-demo/docs/
