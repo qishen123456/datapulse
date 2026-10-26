@@ -1,0 +1,2304 @@
+[
+  {
+    "id": "GAS_AR-01",
+    "code": "GAS_AR",
+    "dataset_id": 65,
+    "index": 0,
+    "question": "2026年9月末沙湖分公司欠费企业前十名",
+    "reference_sql": "SELECT customer_id,customer_name,org_name,closing_yuan,aging_365_plus_yuan FROM v_gas_ar WHERE month='2026-09' AND branch_id='SHAHU' AND object_kind='模拟客户' AND closing_yuan>0 ORDER BY closing_yuan DESC,customer_id LIMIT 10",
+    "expected": [
+      {
+        "customer_id": "DEMO-SHAHU-S1-W1-工业-1",
+        "customer_name": "汀兰社区恒拓精密制造有限公司",
+        "org_name": "汀兰社区服务网格",
+        "closing_yuan": 32862833.97,
+        "aging_365_plus_yuan": 9167089.15
+      },
+      {
+        "customer_id": "DEMO-SHAHU-S2-W2-工业-1",
+        "customer_name": "青荷路恒拓精密制造有限公司",
+        "org_name": "青荷路服务网格",
+        "closing_yuan": 21269399.99,
+        "aging_365_plus_yuan": 0.0
+      },
+      {
+        "customer_id": "DEMO-SHAHU-S1-W2-工业-1",
+        "customer_name": "荷风路恒拓精密制造有限公司",
+        "org_name": "荷风路服务网格",
+        "closing_yuan": 17001483.96,
+        "aging_365_plus_yuan": 0.0
+      },
+      {
+        "customer_id": "DEMO-SHAHU-S2-W1-工业-1",
+        "customer_name": "湖畔新城恒拓精密制造有限公司",
+        "org_name": "湖畔新城服务网格",
+        "closing_yuan": 13331871.8,
+        "aging_365_plus_yuan": 0.0
+      },
+      {
+        "customer_id": "DEMO-SHAHU-S2-W1-商业-2",
+        "customer_name": "湖畔新城泊庭酒店管理有限公司",
+        "org_name": "湖畔新城服务网格",
+        "closing_yuan": 52510.2,
+        "aging_365_plus_yuan": 0.0
+      },
+      {
+        "customer_id": "DEMO-SHAHU-S1-W2-商业-2",
+        "customer_name": "荷风路泊庭酒店管理有限公司",
+        "org_name": "荷风路服务网格",
+        "closing_yuan": 50616.66,
+        "aging_365_plus_yuan": 0.0
+      },
+      {
+        "customer_id": "DEMO-SHAHU-S1-W1-工业-2",
+        "customer_name": "汀兰社区澄岳新材料有限公司",
+        "org_name": "汀兰社区服务网格",
+        "closing_yuan": 39315.75,
+        "aging_365_plus_yuan": 0.0
+      },
+      {
+        "customer_id": "DEMO-SHAHU-S1-W1-商业-1",
+        "customer_name": "汀兰社区悦里餐饮管理有限公司",
+        "org_name": "汀兰社区服务网格",
+        "closing_yuan": 38496.56,
+        "aging_365_plus_yuan": 0.0
+      },
+      {
+        "customer_id": "DEMO-SHAHU-S2-W1-工业-2",
+        "customer_name": "湖畔新城澄岳新材料有限公司",
+        "org_name": "湖畔新城服务网格",
+        "closing_yuan": 13017.53,
+        "aging_365_plus_yuan": 0.0
+      },
+      {
+        "customer_id": "DEMO-SHAHU-S2-W1-商业-1",
+        "customer_name": "湖畔新城悦里餐饮管理有限公司",
+        "org_name": "湖畔新城服务网格",
+        "closing_yuan": 1348.82,
+        "aging_365_plus_yuan": 0.0
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "id": "GAS_BIZ-01",
+    "code": "GAS_BIZ",
+    "dataset_id": 64,
+    "index": 0,
+    "question": "2026年9月各分公司销气量比8月增减多少",
+    "reference_sql": "WITH a AS (SELECT branch_id,branch_name,SUM(volume_m3) FILTER(WHERE month='2026-09') current_m3,SUM(volume_m3) FILTER(WHERE month='2026-08') previous_m3 FROM v_gas_sales WHERE month IN ('2026-08','2026-09') GROUP BY branch_id,branch_name) SELECT *,current_m3-previous_m3 AS 差量_方,(current_m3-previous_m3)::numeric/NULLIF(previous_m3,0) AS 环比 FROM a ORDER BY 差量_方",
+    "expected": [
+      {
+        "branch_id": "LINGANG",
+        "branch_name": "临港分公司",
+        "current_m3": 20638653.0,
+        "previous_m3": 22378914.0,
+        "差量_方": -1740261.0,
+        "环比": -0.07776342498121222
+      },
+      {
+        "branch_id": "JINGKAI",
+        "branch_name": "经开分公司",
+        "current_m3": 41090081.0,
+        "previous_m3": 41752601.0,
+        "差量_方": -662520.0,
+        "环比": -0.01586775396339979
+      },
+      {
+        "branch_id": "GAOXIN",
+        "branch_name": "高新分公司",
+        "current_m3": 31382980.0,
+        "previous_m3": 30742887.0,
+        "差量_方": 640093.0,
+        "环比": 0.020820848738116234
+      },
+      {
+        "branch_id": "BINJIANG",
+        "branch_name": "滨江分公司",
+        "current_m3": 24131444.0,
+        "previous_m3": 23205999.0,
+        "差量_方": 925445.0,
+        "环比": 0.039879558729619874
+      },
+      {
+        "branch_id": "SHAHU",
+        "branch_name": "沙湖分公司",
+        "current_m3": 26874162.0,
+        "previous_m3": 25855488.0,
+        "差量_方": 1018674.0,
+        "环比": 0.03939875356442702
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        4,
+        5
+      ]
+    ]
+  },
+  {
+    "id": "GAS_SAFE-01",
+    "code": "GAS_SAFE",
+    "dataset_id": 66,
+    "index": 0,
+    "question": "2026年9月各服务网格应检、实检和到访不遇",
+    "reference_sql": "SELECT org_id,org_name,due_inspect,inspected,not_at_home,inspected::numeric/NULLIF(due_inspect,0) AS 安检覆盖率 FROM v_gas_safety WHERE month='2026-09' ORDER BY branch_id,org_id",
+    "expected": [
+      {
+        "org_id": "BINJIANG-S1-W1",
+        "org_name": "望江路服务网格",
+        "due_inspect": 1382,
+        "inspected": 1252,
+        "not_at_home": 130,
+        "安检覆盖率": 0.9059334298118669
+      },
+      {
+        "org_id": "BINJIANG-S1-W2",
+        "org_name": "滨港路服务网格",
+        "due_inspect": 929,
+        "inspected": 800,
+        "not_at_home": 129,
+        "安检覆盖率": 0.8611410118406889
+      },
+      {
+        "org_id": "BINJIANG-S2-W1",
+        "org_name": "锦澜社区服务网格",
+        "due_inspect": 1265,
+        "inspected": 1238,
+        "not_at_home": 27,
+        "安检覆盖率": 0.9786561264822135
+      },
+      {
+        "org_id": "BINJIANG-S2-W2",
+        "org_name": "云麓社区服务网格",
+        "due_inspect": 1135,
+        "inspected": 951,
+        "not_at_home": 184,
+        "安检覆盖率": 0.8378854625550661
+      },
+      {
+        "org_id": "GAOXIN-S1-W1",
+        "org_name": "光谷科创园服务网格",
+        "due_inspect": 1153,
+        "inspected": 1088,
+        "not_at_home": 65,
+        "安检覆盖率": 0.9436253252385083
+      },
+      {
+        "org_id": "GAOXIN-S1-W2",
+        "org_name": "星河产业园服务网格",
+        "due_inspect": 1927,
+        "inspected": 1594,
+        "not_at_home": 333,
+        "安检覆盖率": 0.8271925272444214
+      },
+      {
+        "org_id": "GAOXIN-S2-W1",
+        "org_name": "麓林社区服务网格",
+        "due_inspect": 1627,
+        "inspected": 1387,
+        "not_at_home": 240,
+        "安检覆盖率": 0.8524892440073756
+      },
+      {
+        "org_id": "GAOXIN-S2-W2",
+        "org_name": "文澜路服务网格",
+        "due_inspect": 1775,
+        "inspected": 1736,
+        "not_at_home": 39,
+        "安检覆盖率": 0.9780281690140845
+      },
+      {
+        "org_id": "GYSP-S1-W1",
+        "org_name": "东环干线运维班组",
+        "due_inspect": 0,
+        "inspected": 0,
+        "not_at_home": 0,
+        "安检覆盖率": null
+      },
+      {
+        "org_id": "GYSP-S1-W2",
+        "org_name": "滨江门站运维班组",
+        "due_inspect": 0,
+        "inspected": 0,
+        "not_at_home": 0,
+        "安检覆盖率": null
+      },
+      {
+        "org_id": "GYSP-S2-W1",
+        "org_name": "西环干线运维班组",
+        "due_inspect": 0,
+        "inspected": 0,
+        "not_at_home": 0,
+        "安检覆盖率": null
+      },
+      {
+        "org_id": "GYSP-S2-W2",
+        "org_name": "临港调压站运维班组",
+        "due_inspect": 0,
+        "inspected": 0,
+        "not_at_home": 0,
+        "安检覆盖率": null
+      },
+      {
+        "org_id": "JINGKAI-S1-W1",
+        "org_name": "智造产业园服务网格",
+        "due_inspect": 2035,
+        "inspected": 1931,
+        "not_at_home": 104,
+        "安检覆盖率": 0.9488943488943489
+      },
+      {
+        "org_id": "JINGKAI-S1-W2",
+        "org_name": "兴业大道服务网格",
+        "due_inspect": 1437,
+        "inspected": 1366,
+        "not_at_home": 71,
+        "安检覆盖率": 0.9505915100904663
+      },
+      {
+        "org_id": "JINGKAI-S2-W1",
+        "org_name": "科创产业园服务网格",
+        "due_inspect": 1772,
+        "inspected": 1635,
+        "not_at_home": 137,
+        "安检覆盖率": 0.922686230248307
+      },
+      {
+        "org_id": "JINGKAI-S2-W2",
+        "org_name": "丰裕路服务网格",
+        "due_inspect": 1700,
+        "inspected": 1570,
+        "not_at_home": 130,
+        "安检覆盖率": 0.9235294117647059
+      },
+      {
+        "org_id": "LINGANG-S1-W1",
+        "org_name": "港兴工业园服务网格",
+        "due_inspect": 1282,
+        "inspected": 1167,
+        "not_at_home": 115,
+        "安检覆盖率": 0.9102964118564743
+      },
+      {
+        "org_id": "LINGANG-S1-W2",
+        "org_name": "临江物流园服务网格",
+        "due_inspect": 1497,
+        "inspected": 1245,
+        "not_at_home": 252,
+        "安检覆盖率": 0.8316633266533067
+      },
+      {
+        "org_id": "LINGANG-S2-W1",
+        "org_name": "海棠社区服务网格",
+        "due_inspect": 1420,
+        "inspected": 1154,
+        "not_at_home": 266,
+        "安检覆盖率": 0.8126760563380282
+      },
+      {
+        "org_id": "LINGANG-S2-W2",
+        "org_name": "启航路服务网格",
+        "due_inspect": 2157,
+        "inspected": 2000,
+        "not_at_home": 157,
+        "安检覆盖率": 0.9272137227630969
+      },
+      {
+        "org_id": "SHAHU-S1-W1",
+        "org_name": "汀兰社区服务网格",
+        "due_inspect": 1431,
+        "inspected": 1327,
+        "not_at_home": 104,
+        "安检覆盖率": 0.9273235499650594
+      },
+      {
+        "org_id": "SHAHU-S1-W2",
+        "org_name": "荷风路服务网格",
+        "due_inspect": 1443,
+        "inspected": 1276,
+        "not_at_home": 167,
+        "安检覆盖率": 0.8842688842688843
+      },
+      {
+        "org_id": "SHAHU-S2-W1",
+        "org_name": "湖畔新城服务网格",
+        "due_inspect": 1432,
+        "inspected": 1386,
+        "not_at_home": 46,
+        "安检覆盖率": 0.9678770949720671
+      },
+      {
+        "org_id": "SHAHU-S2-W2",
+        "org_name": "青荷路服务网格",
+        "due_inspect": 1821,
+        "inspected": 1665,
+        "not_at_home": 156,
+        "安检覆盖率": 0.914332784184514
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        2,
+        3,
+        4
+      ]
+    ]
+  },
+  {
+    "id": "GAS_AR-02",
+    "code": "GAS_AR",
+    "dataset_id": 65,
+    "index": 1,
+    "question": "2026年9月末望江路服务网格应收账龄结构",
+    "reference_sql": "SELECT user_type,SUM(closing_yuan) AS 期末应收_元,SUM(aging_0_30_yuan) AS 三十天内_元,SUM(aging_31_90_yuan) AS 三十一至九十天_元,SUM(aging_91_180_yuan) AS 九十一至一百八十天_元,SUM(aging_181_365_yuan) AS 一百八十一至一年_元,SUM(aging_365_plus_yuan) AS 一年以上_元 FROM v_gas_ar WHERE month='2026-09' AND org_id='BINJIANG-S1-W1' GROUP BY user_type",
+    "expected": [
+      {
+        "user_type": "公益机构",
+        "期末应收_元": 0.0,
+        "三十天内_元": 0.0,
+        "三十一至九十天_元": 0.0,
+        "九十一至一百八十天_元": 0.0,
+        "一百八十一至一年_元": 0.0,
+        "一年以上_元": 0.0
+      },
+      {
+        "user_type": "商业",
+        "期末应收_元": 0.0,
+        "三十天内_元": 0.0,
+        "三十一至九十天_元": 0.0,
+        "九十一至一百八十天_元": 0.0,
+        "一百八十一至一年_元": 0.0,
+        "一年以上_元": 0.0
+      },
+      {
+        "user_type": "居民",
+        "期末应收_元": 0.0,
+        "三十天内_元": 0.0,
+        "三十一至九十天_元": 0.0,
+        "九十一至一百八十天_元": 0.0,
+        "一百八十一至一年_元": 0.0,
+        "一年以上_元": 0.0
+      },
+      {
+        "user_type": "工业",
+        "期末应收_元": 247520.46,
+        "三十天内_元": 247520.46,
+        "三十一至九十天_元": 0.0,
+        "九十一至一百八十天_元": 0.0,
+        "一百八十一至一年_元": 0.0,
+        "一年以上_元": 0.0
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    ]
+  },
+  {
+    "id": "GAS_BIZ-02",
+    "code": "GAS_BIZ",
+    "dataset_id": 64,
+    "index": 1,
+    "question": "临港分公司2026年8月和9月按客户类型看销气变化",
+    "reference_sql": "SELECT month,user_type,SUM(volume_m3) AS 销气量_方,SUM(revenue_yuan) AS 销气收入_元 FROM v_gas_sales WHERE branch_id='LINGANG' AND month IN ('2026-08','2026-09') GROUP BY month,user_type ORDER BY user_type,month",
+    "expected": [
+      {
+        "month": "2026-08",
+        "user_type": "公益机构",
+        "销气量_方": 278698.0,
+        "销气收入_元": 719040.84
+      },
+      {
+        "month": "2026-09",
+        "user_type": "公益机构",
+        "销气量_方": 266415.0,
+        "销气收入_元": 687350.7
+      },
+      {
+        "month": "2026-08",
+        "user_type": "商业",
+        "销气量_方": 4397480.0,
+        "销气收入_元": 15385732.3
+      },
+      {
+        "month": "2026-09",
+        "user_type": "商业",
+        "销气量_方": 4238818.0,
+        "销气收入_元": 14881942.0
+      },
+      {
+        "month": "2026-08",
+        "user_type": "居民",
+        "销气量_方": 6458481.0,
+        "销气收入_元": 16469126.55
+      },
+      {
+        "month": "2026-09",
+        "user_type": "居民",
+        "销气量_方": 6966349.0,
+        "销气收入_元": 17764189.95
+      },
+      {
+        "month": "2026-08",
+        "user_type": "工业",
+        "销气量_方": 11244255.0,
+        "销气收入_元": 38021324.81
+      },
+      {
+        "month": "2026-09",
+        "user_type": "工业",
+        "销气量_方": 9167071.0,
+        "销气收入_元": 31145640.53
+      }
+    ],
+    "spec": [
+      [
+        0,
+        1
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "id": "GAS_SAFE-02",
+    "code": "GAS_SAFE",
+    "dataset_id": 66,
+    "index": 1,
+    "question": "截至2026年9月底GIS未入库管段按分公司汇总",
+    "reference_sql": "SELECT branch_name,COUNT(*) AS 未入库管段数,SUM(length_km) AS 未入库里程_公里 FROM v_gas_network WHERE laid_date<='2026-09-30' AND (gis_loaded_date IS NULL OR gis_loaded_date>'2026-09-30') GROUP BY branch_name",
+    "expected": [
+      {
+        "branch_name": "滨江分公司",
+        "未入库管段数": 126,
+        "未入库里程_公里": 177.18
+      },
+      {
+        "branch_name": "高新分公司",
+        "未入库管段数": 151,
+        "未入库里程_公里": 219.74
+      },
+      {
+        "branch_name": "临港分公司",
+        "未入库管段数": 131,
+        "未入库里程_公里": 188.28
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "未入库管段数": 510,
+        "未入库里程_公里": 580.16
+      },
+      {
+        "branch_name": "高压输配分公司",
+        "未入库管段数": 155,
+        "未入库里程_公里": 214.8
+      },
+      {
+        "branch_name": "经开分公司",
+        "未入库管段数": 134,
+        "未入库里程_公里": 195.81
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1,
+        2
+      ]
+    ]
+  },
+  {
+    "id": "GAS_AR-03",
+    "code": "GAS_AR",
+    "dataset_id": 65,
+    "index": 2,
+    "question": "2026年前三季度各分公司累计气费回收率",
+    "reference_sql": "SELECT branch_name,SUM(billed_yuan) AS 期间出账_元,SUM(collected_yuan) AS 期间回款_元,SUM(collected_yuan)/NULLIF(SUM(billed_yuan),0) AS 累计回收率 FROM v_gas_ar WHERE month BETWEEN '2026-01' AND '2026-09' GROUP BY branch_name",
+    "expected": [
+      {
+        "branch_name": "临港分公司",
+        "期间出账_元": 735160904.8,
+        "期间回款_元": 736675759.57,
+        "累计回收率": 1.0020605758006298
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "期间出账_元": 777738208.15,
+        "期间回款_元": 754968560.0,
+        "累计回收率": 0.9707232486312303
+      },
+      {
+        "branch_name": "滨江分公司",
+        "期间出账_元": 694210150.81,
+        "期间回款_元": 693983839.42,
+        "累计回收率": 0.9996740016121402
+      },
+      {
+        "branch_name": "经开分公司",
+        "期间出账_元": 1257329643.19,
+        "期间回款_元": 1261890465.86,
+        "累计回收率": 1.0036273881672182
+      },
+      {
+        "branch_name": "高新分公司",
+        "期间出账_元": 939457225.32,
+        "期间回款_元": 945692057.42,
+        "累计回收率": 1.0066366322297178
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "id": "GAS_BIZ-03",
+    "code": "GAS_BIZ",
+    "dataset_id": 64,
+    "index": 2,
+    "question": "2026年前三季度各分公司销气量同期间同比",
+    "reference_sql": "WITH a AS (SELECT branch_name,SUM(volume_m3) FILTER(WHERE month BETWEEN '2025-01' AND '2025-09') p,SUM(volume_m3) FILTER(WHERE month BETWEEN '2026-01' AND '2026-09') c FROM v_gas_sales GROUP BY branch_name) SELECT branch_name,p,c,(c-p)::numeric/NULLIF(p,0) AS 同比 FROM a",
+    "expected": [
+      {
+        "branch_name": "滨江分公司",
+        "p": 231683897.0,
+        "c": 239464068.0,
+        "同比": 0.033580974339360324
+      },
+      {
+        "branch_name": "临港分公司",
+        "p": 234332112.0,
+        "c": 233257467.0,
+        "同比": -0.004585991185023758
+      },
+      {
+        "branch_name": "经开分公司",
+        "p": 369909329.0,
+        "c": 382264924.0,
+        "同比": 0.03340168530867195
+      },
+      {
+        "branch_name": "高新分公司",
+        "p": 295663790.0,
+        "c": 302584431.0,
+        "同比": 0.0234071307818925
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "p": 256583237.0,
+        "c": 262762670.0,
+        "同比": 0.024083541357769994
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "id": "GAS_SAFE-03",
+    "code": "GAS_SAFE",
+    "dataset_id": 66,
+    "index": 2,
+    "question": "截至2026年9月底各分公司超过20年的管网有多少",
+    "reference_sql": "SELECT branch_name,COUNT(*) AS 超二十年管段数,SUM(length_km) AS 超二十年里程_公里 FROM v_gas_network WHERE laid_date<'2006-09-30' GROUP BY branch_name",
+    "expected": [
+      {
+        "branch_name": "沙湖分公司",
+        "超二十年管段数": 1398,
+        "超二十年里程_公里": 1468.62
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1,
+        2
+      ]
+    ]
+  },
+  {
+    "id": "GAS_AR-04",
+    "code": "GAS_AR",
+    "dataset_id": 65,
+    "index": 3,
+    "question": "2026年各月应收滚动不平衡的对象",
+    "reference_sql": "SELECT month,customer_id,customer_name,opening_yuan,billed_yuan,collected_yuan,adjustment_yuan,closing_yuan,opening_yuan+billed_yuan-collected_yuan+adjustment_yuan-closing_yuan AS 差额_元 FROM v_gas_ar WHERE month BETWEEN '2026-01' AND '2026-09' AND ABS(opening_yuan+billed_yuan-collected_yuan+adjustment_yuan-closing_yuan)>0.01 ORDER BY month,customer_id",
+    "expected": [],
+    "spec": [
+      [
+        0,
+        1
+      ],
+      [
+        8
+      ]
+    ]
+  },
+  {
+    "id": "GAS_BIZ-04",
+    "code": "GAS_BIZ",
+    "dataset_id": 64,
+    "index": 3,
+    "question": "2026年9月滨江沿江营业所各网格估抄情况",
+    "reference_sql": "SELECT org_id,org_name,SUM(estimated_meter_m3) AS 估抄量_方,SUM(volume_m3) AS 销气量_方,SUM(estimated_meter_m3)::numeric/NULLIF(SUM(volume_m3),0) AS 估抄率 FROM v_gas_sales WHERE month='2026-09' AND center_id='BINJIANG-S1' GROUP BY org_id,org_name",
+    "expected": [
+      {
+        "org_id": "BINJIANG-S1-W1",
+        "org_name": "望江路服务网格",
+        "估抄量_方": 78251.0,
+        "销气量_方": 5907824.0,
+        "估抄率": 0.013245316718981473
+      },
+      {
+        "org_id": "BINJIANG-S1-W2",
+        "org_name": "滨港路服务网格",
+        "估抄量_方": 148134.0,
+        "销气量_方": 6242901.0,
+        "估抄率": 0.02372839165637898
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "id": "GAS_SAFE-04",
+    "code": "GAS_SAFE",
+    "dataset_id": 66,
+    "index": 3,
+    "question": "截至2026年9月底各类隐患超期未闭环情况",
+    "reference_sql": "SELECT severity,hazard_type,COUNT(*) AS 超期未闭环工单数 FROM v_gas_hazards WHERE found_date<='2026-09-30' AND due_date<'2026-09-30' AND (completed_date IS NULL OR completed_date>'2026-09-30') GROUP BY severity,hazard_type",
+    "expected": [
+      {
+        "severity": "一般",
+        "hazard_type": "标识缺失",
+        "超期未闭环工单数": 2
+      },
+      {
+        "severity": "一般",
+        "hazard_type": "第三方施工风险",
+        "超期未闭环工单数": 2
+      },
+      {
+        "severity": "一般",
+        "hazard_type": "管线占压",
+        "超期未闭环工单数": 2
+      },
+      {
+        "severity": "一般",
+        "hazard_type": "阀门渗漏",
+        "超期未闭环工单数": 3
+      },
+      {
+        "severity": "一般",
+        "hazard_type": "防腐层破损",
+        "超期未闭环工单数": 2
+      },
+      {
+        "severity": "重大",
+        "hazard_type": "立管腐蚀",
+        "超期未闭环工单数": 1
+      },
+      {
+        "severity": "重大",
+        "hazard_type": "管线占压",
+        "超期未闭环工单数": 1
+      }
+    ],
+    "spec": [
+      [
+        0,
+        1
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "id": "GAS_AR-05",
+    "code": "GAS_AR",
+    "dataset_id": 65,
+    "index": 4,
+    "question": "望江路恒拓精密制造有限公司2026年应收余额趋势",
+    "reference_sql": "SELECT month,customer_id,customer_name,closing_yuan,aging_365_plus_yuan FROM v_gas_ar WHERE customer_id='DEMO-BINJIANG-S1-W1-工业-1' AND month BETWEEN '2026-01' AND '2026-09' ORDER BY month",
+    "expected": [
+      {
+        "month": "2026-01",
+        "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+        "customer_name": "望江路恒拓精密制造有限公司",
+        "closing_yuan": 126915.98,
+        "aging_365_plus_yuan": 0.0
+      },
+      {
+        "month": "2026-02",
+        "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+        "customer_name": "望江路恒拓精密制造有限公司",
+        "closing_yuan": 144239.88,
+        "aging_365_plus_yuan": 0.0
+      },
+      {
+        "month": "2026-03",
+        "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+        "customer_name": "望江路恒拓精密制造有限公司",
+        "closing_yuan": 164629.94,
+        "aging_365_plus_yuan": 0.0
+      },
+      {
+        "month": "2026-04",
+        "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+        "customer_name": "望江路恒拓精密制造有限公司",
+        "closing_yuan": 180860.65,
+        "aging_365_plus_yuan": 0.0
+      },
+      {
+        "month": "2026-05",
+        "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+        "customer_name": "望江路恒拓精密制造有限公司",
+        "closing_yuan": 203475.75,
+        "aging_365_plus_yuan": 0.0
+      },
+      {
+        "month": "2026-06",
+        "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+        "customer_name": "望江路恒拓精密制造有限公司",
+        "closing_yuan": 153673.99,
+        "aging_365_plus_yuan": 0.0
+      },
+      {
+        "month": "2026-07",
+        "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+        "customer_name": "望江路恒拓精密制造有限公司",
+        "closing_yuan": 170193.21,
+        "aging_365_plus_yuan": 0.0
+      },
+      {
+        "month": "2026-08",
+        "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+        "customer_name": "望江路恒拓精密制造有限公司",
+        "closing_yuan": 186613.88,
+        "aging_365_plus_yuan": 0.0
+      },
+      {
+        "month": "2026-09",
+        "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+        "customer_name": "望江路恒拓精密制造有限公司",
+        "closing_yuan": 201339.86,
+        "aging_365_plus_yuan": 0.0
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "id": "GAS_BIZ-05",
+    "code": "GAS_BIZ",
+    "dataset_id": 64,
+    "index": 4,
+    "question": "2026年9月各气源采购气量和加权均价",
+    "reference_sql": "SELECT source,SUM(inlet_m3) AS 采购量_方,SUM(purchase_cost_yuan) AS 采购成本_元,SUM(purchase_cost_yuan)/NULLIF(SUM(inlet_m3),0) AS 购气均价_元每方 FROM v_gas_supply_sources WHERE month='2026-09' GROUP BY source",
+    "expected": [
+      {
+        "source": "LNG现货",
+        "采购量_方": 9099944.0,
+        "采购成本_元": 25881700.23,
+        "购气均价_元每方": 2.844160384943028
+      },
+      {
+        "source": "气源干网",
+        "采购量_方": 29612132.0,
+        "采购成本_元": 73424352.54,
+        "购气均价_元每方": 2.479536175916006
+      },
+      {
+        "source": "长协管道气",
+        "采购量_方": 109348576.0,
+        "采购成本_元": 260896128.79,
+        "购气均价_元每方": 2.385912449285119
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1,
+        3
+      ]
+    ]
+  },
+  {
+    "id": "GAS_SAFE-05",
+    "code": "GAS_SAFE",
+    "dataset_id": 66,
+    "index": 4,
+    "question": "东环干线运维班组截至2026年9月底有哪些未闭环隐患",
+    "reference_sql": "SELECT hazard_id,hazard_type,severity,found_date,due_date,network_id FROM v_gas_hazards WHERE org_id='GYSP-S1-W1' AND found_date<='2026-09-30' AND (completed_date IS NULL OR completed_date>'2026-09-30') ORDER BY due_date,hazard_id",
+    "expected": [
+      {
+        "hazard_id": "HZ-0045",
+        "hazard_type": "标识缺失",
+        "severity": "一般",
+        "found_date": "2025-08-12",
+        "due_date": "2025-09-11",
+        "network_id": "PIPE-0204-047"
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      []
+    ]
+  },
+  {
+    "id": "GAS_AR-06",
+    "code": "GAS_AR",
+    "dataset_id": 65,
+    "index": 5,
+    "question": "2026年9月末工商客户前十大欠费占比",
+    "reference_sql": "WITH a AS (SELECT customer_id,customer_name,closing_yuan,ROW_NUMBER() OVER(ORDER BY closing_yuan DESC,customer_id) rn FROM v_gas_ar WHERE month='2026-09' AND object_kind='模拟客户') SELECT SUM(closing_yuan) FILTER(WHERE rn<=10) AS 前十应收_元,SUM(closing_yuan) AS 工商总应收_元,SUM(closing_yuan) FILTER(WHERE rn<=10)/NULLIF(SUM(closing_yuan),0) AS 集中度 FROM a",
+    "expected": [
+      {
+        "前十应收_元": 88922455.6,
+        "工商总应收_元": 93786229.98,
+        "集中度": 0.9481397814899137
+      }
+    ],
+    "spec": [
+      [],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "id": "GAS_BIZ-06",
+    "code": "GAS_BIZ",
+    "dataset_id": 64,
+    "index": 5,
+    "question": "沙湖分公司2026年各月供销差量和供销差率",
+    "reference_sql": "SELECT month,SUM(inlet_m3) AS 入口_方,SUM(sales_m3) AS 销气_方,SUM(inlet_m3)-SUM(sales_m3) AS 差量_方,(SUM(inlet_m3)-SUM(sales_m3))/NULLIF(SUM(inlet_m3),0) AS 供销差率 FROM v_gas_supply_balance WHERE branch_id='SHAHU' AND month BETWEEN '2026-01' AND '2026-09' GROUP BY month ORDER BY month",
+    "expected": [
+      {
+        "month": "2026-01",
+        "入口_方": 38430271.0,
+        "销气_方": 36651025.0,
+        "差量_方": 1779246.0,
+        "供销差率": 0.04629803417207232
+      },
+      {
+        "month": "2026-02",
+        "入口_方": 32446817.0,
+        "销气_方": 30999070.0,
+        "差量_方": 1447747.0,
+        "供销差率": 0.04461907619474662
+      },
+      {
+        "month": "2026-03",
+        "入口_方": 35534522.0,
+        "销气_方": 34001245.0,
+        "差量_方": 1533277.0,
+        "供销差率": 0.04314894119020371
+      },
+      {
+        "month": "2026-04",
+        "入口_方": 30989572.0,
+        "销气_方": 29701505.0,
+        "差量_方": 1288067.0,
+        "供销差率": 0.04156453015872565
+      },
+      {
+        "month": "2026-05",
+        "入口_方": 29775073.0,
+        "销气_方": 28636240.0,
+        "差量_方": 1138833.0,
+        "供销差率": 0.03824786592462762
+      },
+      {
+        "month": "2026-06",
+        "入口_方": 25640082.0,
+        "销气_方": 24600190.0,
+        "差量_方": 1039892.0,
+        "供销差率": 0.04055728058904024
+      },
+      {
+        "month": "2026-07",
+        "入口_方": 26868513.0,
+        "销气_方": 25443745.0,
+        "差量_方": 1424768.0,
+        "供销差率": 0.053027422842492254
+      },
+      {
+        "month": "2026-08",
+        "入口_方": 27290249.0,
+        "销气_方": 25855488.0,
+        "差量_方": 1434761.0,
+        "供销差率": 0.05257412638484903
+      },
+      {
+        "month": "2026-09",
+        "入口_方": 28342011.0,
+        "销气_方": 26874162.0,
+        "差量_方": 1467849.0,
+        "供销差率": 0.05179057336474818
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        3,
+        4
+      ]
+    ]
+  },
+  {
+    "id": "GAS_SAFE-06",
+    "code": "GAS_SAFE",
+    "dataset_id": 66,
+    "index": 5,
+    "question": "2026年9月新发现隐患截至月底闭环率",
+    "reference_sql": "SELECT branch_name,COUNT(*) AS 当月发现数,COUNT(*) FILTER(WHERE completed_date<='2026-09-30') AS 月底已闭环数,COUNT(*) FILTER(WHERE completed_date<='2026-09-30')::numeric/NULLIF(COUNT(*),0) AS 当月批次闭环率 FROM v_gas_hazards WHERE found_date BETWEEN '2026-09-01' AND '2026-09-30' GROUP BY branch_name",
+    "expected": [
+      {
+        "branch_name": "临港分公司",
+        "当月发现数": 3,
+        "月底已闭环数": 1,
+        "当月批次闭环率": 0.3333333333333333
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "当月发现数": 1,
+        "月底已闭环数": 1,
+        "当月批次闭环率": 1.0
+      },
+      {
+        "branch_name": "经开分公司",
+        "当月发现数": 1,
+        "月底已闭环数": 0,
+        "当月批次闭环率": 0.0
+      },
+      {
+        "branch_name": "高压输配分公司",
+        "当月发现数": 1,
+        "月底已闭环数": 0,
+        "当月批次闭环率": 0.0
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "id": "GAS_AR-07",
+    "code": "GAS_AR",
+    "dataset_id": 65,
+    "index": 6,
+    "question": "2026年9月末各分公司账龄五档与余额能否勾稽",
+    "reference_sql": "SELECT branch_name,SUM(closing_yuan) AS 应收余额_元,SUM(aging_0_30_yuan+aging_31_90_yuan+aging_91_180_yuan+aging_181_365_yuan+aging_365_plus_yuan) AS 账龄合计_元 FROM v_gas_ar WHERE month='2026-09' GROUP BY branch_name",
+    "expected": [
+      {
+        "branch_name": "临港分公司",
+        "应收余额_元": 3450727.65,
+        "账龄合计_元": 3450727.65
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "应收余额_元": 89165105.71,
+        "账龄合计_元": 89165105.71
+      },
+      {
+        "branch_name": "滨江分公司",
+        "应收余额_元": 5594040.68,
+        "账龄合计_元": 5594040.68
+      },
+      {
+        "branch_name": "经开分公司",
+        "应收余额_元": 4291275.36,
+        "账龄合计_元": 4291275.36
+      },
+      {
+        "branch_name": "高新分公司",
+        "应收余额_元": 3656734.06,
+        "账龄合计_元": 3656734.06
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1,
+        2
+      ]
+    ]
+  },
+  {
+    "id": "GAS_BIZ-07",
+    "code": "GAS_BIZ",
+    "dataset_id": 64,
+    "index": 6,
+    "question": "2026年9月各服务中心报装、通气和净增用户",
+    "reference_sql": "SELECT org_id,org_name,SUM(applied_users) AS 报装户数,SUM(connected_users) AS 通气户数,SUM(churn_users) AS 销户数,SUM(connected_users-churn_users) AS 净增户数 FROM v_gas_growth WHERE month='2026-09' GROUP BY org_id,org_name",
+    "expected": [
+      {
+        "org_id": "BINJIANG-S1",
+        "org_name": "滨江沿江营业所",
+        "报装户数": 1676.0,
+        "通气户数": 1498.0,
+        "销户数": 140.0,
+        "净增户数": 1358.0
+      },
+      {
+        "org_id": "BINJIANG-S2",
+        "org_name": "滨江城西营业所",
+        "报装户数": 1233.0,
+        "通气户数": 1112.0,
+        "销户数": 202.0,
+        "净增户数": 910.0
+      },
+      {
+        "org_id": "GAOXIN-S1",
+        "org_name": "高新科创服务中心",
+        "报装户数": 793.0,
+        "通气户数": 733.0,
+        "销户数": 44.0,
+        "净增户数": 689.0
+      },
+      {
+        "org_id": "GAOXIN-S2",
+        "org_name": "高新生活服务中心",
+        "报装户数": 1049.0,
+        "通气户数": 952.0,
+        "销户数": 93.0,
+        "净增户数": 859.0
+      },
+      {
+        "org_id": "JINGKAI-S1",
+        "org_name": "经开东园服务中心",
+        "报装户数": 1887.0,
+        "通气户数": 1523.0,
+        "销户数": 98.0,
+        "净增户数": 1425.0
+      },
+      {
+        "org_id": "JINGKAI-S2",
+        "org_name": "经开西园服务中心",
+        "报装户数": 1494.0,
+        "通气户数": 1294.0,
+        "销户数": 218.0,
+        "净增户数": 1076.0
+      },
+      {
+        "org_id": "LINGANG-S1",
+        "org_name": "临港港区服务中心",
+        "报装户数": 665.0,
+        "通气户数": 523.0,
+        "销户数": 77.0,
+        "净增户数": 446.0
+      },
+      {
+        "org_id": "LINGANG-S2",
+        "org_name": "临港新城营业所",
+        "报装户数": 1236.0,
+        "通气户数": 997.0,
+        "销户数": 138.0,
+        "净增户数": 859.0
+      },
+      {
+        "org_id": "SHAHU-S1",
+        "org_name": "沙湖东岸营业所",
+        "报装户数": 1110.0,
+        "通气户数": 1011.0,
+        "销户数": 50.0,
+        "净增户数": 961.0
+      },
+      {
+        "org_id": "SHAHU-S2",
+        "org_name": "沙湖北岸营业所",
+        "报装户数": 977.0,
+        "通气户数": 834.0,
+        "销户数": 62.0,
+        "净增户数": 772.0
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        2,
+        3,
+        5
+      ]
+    ]
+  },
+  {
+    "id": "GAS_SAFE-07",
+    "code": "GAS_SAFE",
+    "dataset_id": 66,
+    "index": 6,
+    "question": "截至2026年6月底与9月底未闭环隐患数对比",
+    "reference_sql": "SELECT t.cutoff,COUNT(h.hazard_id) AS 未闭环数 FROM (VALUES (DATE '2026-06-30'),(DATE '2026-09-30')) t(cutoff) LEFT JOIN v_gas_hazards h ON h.found_date<=t.cutoff AND (h.completed_date IS NULL OR h.completed_date>t.cutoff) GROUP BY t.cutoff ORDER BY t.cutoff",
+    "expected": [
+      {
+        "cutoff": "2026-06-30",
+        "未闭环数": 14
+      },
+      {
+        "cutoff": "2026-09-30",
+        "未闭环数": 17
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  {
+    "id": "GAS_AR-08",
+    "code": "GAS_AR",
+    "dataset_id": 65,
+    "index": 7,
+    "question": "登记稽核差异与重算量价差异有哪些不一致",
+    "reference_sql": "SELECT month,org_id,org_name,user_type,audit_difference_yuan AS 登记差异_元,revenue_yuan-theoretical_revenue_yuan AS 重算差异_元 FROM v_gas_sales WHERE ABS(audit_difference_yuan-(revenue_yuan-theoretical_revenue_yuan))>0.01 ORDER BY month,org_id",
+    "expected": [
+      {
+        "month": "2024-03",
+        "org_id": "SHAHU-S1-W1",
+        "org_name": "汀兰社区服务网格",
+        "user_type": "商业",
+        "登记差异_元": 32880.0,
+        "重算差异_元": 0.0
+      },
+      {
+        "month": "2024-04",
+        "org_id": "SHAHU-S2-W1",
+        "org_name": "湖畔新城服务网格",
+        "user_type": "工业",
+        "登记差异_元": 45210.0,
+        "重算差异_元": 0.0
+      },
+      {
+        "month": "2024-07",
+        "org_id": "LINGANG-S1-W2",
+        "org_name": "临江物流园服务网格",
+        "user_type": "商业",
+        "登记差异_元": 27400.0,
+        "重算差异_元": 0.0
+      },
+      {
+        "month": "2024-08",
+        "org_id": "LINGANG-S2-W2",
+        "org_name": "启航路服务网格",
+        "user_type": "工业",
+        "登记差异_元": 39730.0,
+        "重算差异_元": 0.0
+      },
+      {
+        "month": "2024-12",
+        "org_id": "BINJIANG-S2-W1",
+        "org_name": "锦澜社区服务网格",
+        "user_type": "商业",
+        "登记差异_元": 21920.0,
+        "重算差异_元": 0.0
+      },
+      {
+        "month": "2025-01",
+        "org_id": "SHAHU-S1-W1",
+        "org_name": "汀兰社区服务网格",
+        "user_type": "工业",
+        "登记差异_元": 34250.0,
+        "重算差异_元": 0.0
+      },
+      {
+        "month": "2025-04",
+        "org_id": "JINGKAI-S2-W2",
+        "org_name": "丰裕路服务网格",
+        "user_type": "商业",
+        "登记差异_元": 16440.0,
+        "重算差异_元": 0.0
+      },
+      {
+        "month": "2025-05",
+        "org_id": "LINGANG-S1-W2",
+        "org_name": "临江物流园服务网格",
+        "user_type": "工业",
+        "登记差异_元": 28770.0,
+        "重算差异_元": 0.0
+      },
+      {
+        "month": "2025-09",
+        "org_id": "BINJIANG-S1-W1",
+        "org_name": "望江路服务网格",
+        "user_type": "商业",
+        "登记差异_元": 10960.0,
+        "重算差异_元": 0.0
+      },
+      {
+        "month": "2025-10",
+        "org_id": "BINJIANG-S2-W1",
+        "org_name": "锦澜社区服务网格",
+        "user_type": "工业",
+        "登记差异_元": 23290.0,
+        "重算差异_元": 0.0
+      },
+      {
+        "month": "2026-01",
+        "org_id": "JINGKAI-S1-W2",
+        "org_name": "兴业大道服务网格",
+        "user_type": "商业",
+        "登记差异_元": 60280.0,
+        "重算差异_元": 0.0
+      },
+      {
+        "month": "2026-02",
+        "org_id": "JINGKAI-S2-W2",
+        "org_name": "丰裕路服务网格",
+        "user_type": "工业",
+        "登记差异_元": 17810.0,
+        "重算差异_元": 0.0
+      },
+      {
+        "month": "2026-05",
+        "org_id": "GAOXIN-S2-W1",
+        "org_name": "麓林社区服务网格",
+        "user_type": "商业",
+        "登记差异_元": 54800.0,
+        "重算差异_元": 0.0
+      },
+      {
+        "month": "2026-07",
+        "org_id": "BINJIANG-S1-W1",
+        "org_name": "望江路服务网格",
+        "user_type": "工业",
+        "登记差异_元": 12330.0,
+        "重算差异_元": 0.0
+      }
+    ],
+    "spec": [
+      [
+        0,
+        1,
+        3
+      ],
+      [
+        4,
+        5
+      ]
+    ]
+  },
+  {
+    "id": "GAS_BIZ-08",
+    "code": "GAS_BIZ",
+    "dataset_id": 64,
+    "index": 7,
+    "question": "2026年9月各分公司每方采购与配气成本",
+    "reference_sql": "SELECT branch_name,SUM(sales_m3) AS 销气量_方,SUM(purchase_cost_yuan)/NULLIF(SUM(sales_m3),0) AS 每销气方采购成本,SUM(distribution_cost_yuan)/NULLIF(SUM(sales_m3),0) AS 每销气方配气成本 FROM v_gas_profit WHERE month='2026-09' GROUP BY branch_name",
+    "expected": [
+      {
+        "branch_name": "临港分公司",
+        "销气量_方": 20638653.0,
+        "每销气方采购成本": 2.4870339692227006,
+        "每销气方配气成本": 0.7942985421577659
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "销气量_方": 26874162.0,
+        "每销气方采购成本": 2.5706185830092116,
+        "每销气方配气成本": 0.8213953804401417
+      },
+      {
+        "branch_name": "滨江分公司",
+        "销气量_方": 24131444.0,
+        "每销气方采购成本": 2.493065022134606,
+        "每销气方配气成本": 0.8140922892969024
+      },
+      {
+        "branch_name": "经开分公司",
+        "销气量_方": 41090081.0,
+        "每销气方采购成本": 2.4800485981032745,
+        "每销气方配气成本": 0.8041651976787293
+      },
+      {
+        "branch_name": "高压输配分公司",
+        "销气量_方": 0.0,
+        "每销气方采购成本": null,
+        "每销气方配气成本": null
+      },
+      {
+        "branch_name": "高新分公司",
+        "销气量_方": 31382980.0,
+        "每销气方采购成本": 2.4766059016702684,
+        "每销气方配气成本": 0.8353740565746146
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        2,
+        3
+      ]
+    ]
+  },
+  {
+    "id": "GAS_SAFE-08",
+    "code": "GAS_SAFE",
+    "dataset_id": 66,
+    "index": 7,
+    "question": "截至2026年9月底关联隐患的管段去重里程",
+    "reference_sql": "SELECT n.branch_name,COUNT(*) AS 关联管段数,SUM(n.length_km) AS 去重里程_公里 FROM v_gas_network n WHERE n.laid_date<='2026-09-30' AND EXISTS(SELECT 1 FROM v_gas_hazards h WHERE h.network_id=n.network_id AND h.found_date<='2026-09-30') GROUP BY n.branch_name",
+    "expected": [
+      {
+        "branch_name": "滨江分公司",
+        "关联管段数": 20,
+        "去重里程_公里": 25.94
+      },
+      {
+        "branch_name": "高新分公司",
+        "关联管段数": 20,
+        "去重里程_公里": 34.31
+      },
+      {
+        "branch_name": "高压输配分公司",
+        "关联管段数": 18,
+        "去重里程_公里": 21.31
+      },
+      {
+        "branch_name": "经开分公司",
+        "关联管段数": 20,
+        "去重里程_公里": 32.57
+      },
+      {
+        "branch_name": "临港分公司",
+        "关联管段数": 20,
+        "去重里程_公里": 25.24
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "关联管段数": 22,
+        "去重里程_公里": 35.11
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1,
+        2
+      ]
+    ]
+  },
+  {
+    "id": "GAS_AR-09",
+    "code": "GAS_AR",
+    "dataset_id": 65,
+    "index": 8,
+    "question": "2026年9月末应收余额是多少",
+    "reference_sql": "SELECT SUM(closing_yuan) AS 期末应收_元 FROM v_gas_ar WHERE month='2026-09'",
+    "expected": [
+      {
+        "期末应收_元": 106157883.46
+      }
+    ],
+    "spec": [
+      [],
+      [
+        0
+      ]
+    ]
+  },
+  {
+    "id": "GAS_BIZ-09",
+    "code": "GAS_BIZ",
+    "dataset_id": 64,
+    "index": 8,
+    "question": "2026年9月各分公司销气量排名",
+    "reference_sql": "SELECT branch_name,SUM(volume_m3) AS 销气量_方 FROM v_gas_sales WHERE month='2026-09' GROUP BY branch_name ORDER BY 销气量_方 DESC",
+    "expected": [
+      {
+        "branch_name": "经开分公司",
+        "销气量_方": 41090081.0
+      },
+      {
+        "branch_name": "高新分公司",
+        "销气量_方": 31382980.0
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "销气量_方": 26874162.0
+      },
+      {
+        "branch_name": "滨江分公司",
+        "销气量_方": 24131444.0
+      },
+      {
+        "branch_name": "临港分公司",
+        "销气量_方": 20638653.0
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  {
+    "id": "GAS_SAFE-09",
+    "code": "GAS_SAFE",
+    "dataset_id": 66,
+    "index": 8,
+    "question": "2026年9月各分公司安检覆盖率",
+    "reference_sql": "SELECT branch_name,SUM(inspected)::numeric/NULLIF(SUM(due_inspect),0) AS 安检覆盖率 FROM v_gas_safety WHERE month='2026-09' GROUP BY branch_name",
+    "expected": [
+      {
+        "branch_name": "临港分公司",
+        "安检覆盖率": 0.8757079924480805
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "安检覆盖率": 0.9228007181328546
+      },
+      {
+        "branch_name": "滨江分公司",
+        "安检覆盖率": 0.9002334960730206
+      },
+      {
+        "branch_name": "经开分公司",
+        "安检覆盖率": 0.9363479262672811
+      },
+      {
+        "branch_name": "高压输配分公司",
+        "安检覆盖率": null
+      },
+      {
+        "branch_name": "高新分公司",
+        "安检覆盖率": 0.8955569268744215
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  {
+    "id": "GAS_AR-10",
+    "code": "GAS_AR",
+    "dataset_id": 65,
+    "index": 9,
+    "question": "2026年9月欠费最多的十个模拟工商客户",
+    "reference_sql": "SELECT customer_name,closing_yuan FROM v_gas_ar WHERE month='2026-09' AND object_kind='模拟客户' ORDER BY closing_yuan DESC LIMIT 10",
+    "expected": [
+      {
+        "customer_name": "汀兰社区恒拓精密制造有限公司",
+        "closing_yuan": 32862833.97
+      },
+      {
+        "customer_name": "青荷路恒拓精密制造有限公司",
+        "closing_yuan": 21269399.99
+      },
+      {
+        "customer_name": "荷风路恒拓精密制造有限公司",
+        "closing_yuan": 17001483.96
+      },
+      {
+        "customer_name": "湖畔新城恒拓精密制造有限公司",
+        "closing_yuan": 13331871.8
+      },
+      {
+        "customer_name": "智造产业园澄岳新材料有限公司",
+        "closing_yuan": 1702698.77
+      },
+      {
+        "customer_name": "星河产业园悦里餐饮管理有限公司",
+        "closing_yuan": 846245.92
+      },
+      {
+        "customer_name": "星河产业园泊庭酒店管理有限公司",
+        "closing_yuan": 577001.81
+      },
+      {
+        "customer_name": "丰裕路泊庭酒店管理有限公司",
+        "closing_yuan": 504764.92
+      },
+      {
+        "customer_name": "智造产业园恒拓精密制造有限公司",
+        "closing_yuan": 438612.44
+      },
+      {
+        "customer_name": "港兴工业园恒拓精密制造有限公司",
+        "closing_yuan": 387542.02
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  {
+    "id": "GAS_BIZ-10",
+    "code": "GAS_BIZ",
+    "dataset_id": 64,
+    "index": 9,
+    "question": "2026年9月各分公司供销差率",
+    "reference_sql": "SELECT branch_name,(SUM(inlet_m3)-SUM(sales_m3))/NULLIF(SUM(inlet_m3),0) AS 供销差率 FROM v_gas_supply_balance WHERE month='2026-09' GROUP BY branch_name ORDER BY 供销差率 DESC",
+    "expected": [
+      {
+        "branch_name": "沙湖分公司",
+        "供销差率": 0.05179057336474818
+      },
+      {
+        "branch_name": "临港分公司",
+        "供销差率": 0.025142525529329253
+      },
+      {
+        "branch_name": "滨江分公司",
+        "供销差率": 0.023163088768598107
+      },
+      {
+        "branch_name": "高新分公司",
+        "供销差率": 0.02103168907749483
+      },
+      {
+        "branch_name": "经开分公司",
+        "供销差率": 0.016674195751040583
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  {
+    "id": "GAS_SAFE-10",
+    "code": "GAS_SAFE",
+    "dataset_id": 66,
+    "index": 9,
+    "question": "截至2026年9月底有哪些超期未闭环隐患",
+    "reference_sql": "SELECT hazard_id,org_name,hazard_type,due_date FROM v_gas_hazards WHERE found_date<='2026-09-30' AND due_date<'2026-09-30' AND (completed_date IS NULL OR completed_date>'2026-09-30')",
+    "expected": [
+      {
+        "hazard_id": "HZ-0012",
+        "org_name": "丰裕路服务网格",
+        "hazard_type": "第三方施工风险",
+        "due_date": "2024-03-17"
+      },
+      {
+        "hazard_id": "HZ-0023",
+        "org_name": "西环干线运维班组",
+        "hazard_type": "防腐层破损",
+        "due_date": "2024-10-21"
+      },
+      {
+        "hazard_id": "HZ-0034",
+        "org_name": "兴业大道服务网格",
+        "hazard_type": "管线占压",
+        "due_date": "2025-10-20"
+      },
+      {
+        "hazard_id": "HZ-0045",
+        "org_name": "东环干线运维班组",
+        "hazard_type": "标识缺失",
+        "due_date": "2025-09-11"
+      },
+      {
+        "hazard_id": "HZ-0056",
+        "org_name": "青荷路服务网格",
+        "hazard_type": "阀门渗漏",
+        "due_date": "2024-12-31"
+      },
+      {
+        "hazard_id": "HZ-0067",
+        "org_name": "麓林社区服务网格",
+        "hazard_type": "第三方施工风险",
+        "due_date": "2026-08-08"
+      },
+      {
+        "hazard_id": "HZ-0078",
+        "org_name": "荷风路服务网格",
+        "hazard_type": "防腐层破损",
+        "due_date": "2025-06-03"
+      },
+      {
+        "hazard_id": "HZ-0089",
+        "org_name": "光谷科创园服务网格",
+        "hazard_type": "管线占压",
+        "due_date": "2024-04-25"
+      },
+      {
+        "hazard_id": "HZ-0100",
+        "org_name": "云麓社区服务网格",
+        "hazard_type": "标识缺失",
+        "due_date": "2026-03-12"
+      },
+      {
+        "hazard_id": "HZ-0001",
+        "org_name": "望江路服务网格",
+        "hazard_type": "阀门渗漏",
+        "due_date": "2025-07-13"
+      },
+      {
+        "hazard_id": "HZ-0111",
+        "org_name": "海棠社区服务网格",
+        "hazard_type": "阀门渗漏",
+        "due_date": "2025-10-06"
+      },
+      {
+        "hazard_id": "HZ-0118",
+        "org_name": "汀兰社区服务网格",
+        "hazard_type": "立管腐蚀",
+        "due_date": "2026-01-02"
+      },
+      {
+        "hazard_id": "HZ-0119",
+        "org_name": "青荷路服务网格",
+        "hazard_type": "管线占压",
+        "due_date": "2024-10-17"
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      []
+    ]
+  },
+  {
+    "id": "GAS_AR-11",
+    "code": "GAS_AR",
+    "dataset_id": 65,
+    "index": 10,
+    "question": "2026年9月超过180天的应收有多少",
+    "reference_sql": "SELECT SUM(aging_181_365_yuan+aging_365_plus_yuan) AS 长账龄应收_元 FROM v_gas_ar WHERE month='2026-09'",
+    "expected": [
+      {
+        "长账龄应收_元": 21927280.78
+      }
+    ],
+    "spec": [
+      [],
+      [
+        0
+      ]
+    ]
+  },
+  {
+    "id": "GAS_BIZ-11",
+    "code": "GAS_BIZ",
+    "dataset_id": 64,
+    "index": 10,
+    "question": "2026年前三季度模拟税前利润是多少",
+    "reference_sql": "SELECT SUM(pretax_profit_yuan) AS 税前利润_元 FROM v_gas_profit WHERE month BETWEEN '2026-01' AND '2026-09'",
+    "expected": [
+      {
+        "税前利润_元": -142000000.03
+      }
+    ],
+    "spec": [
+      [],
+      [
+        0
+      ]
+    ]
+  },
+  {
+    "id": "GAS_SAFE-11",
+    "code": "GAS_SAFE",
+    "dataset_id": 66,
+    "index": 10,
+    "question": "2026年9月各分公司抢修及时率",
+    "reference_sql": "SELECT branch_name,SUM(emergency_on_time)::numeric/NULLIF(SUM(emergency_total),0) AS 抢修及时率 FROM v_gas_safety WHERE month='2026-09' GROUP BY branch_name",
+    "expected": [
+      {
+        "branch_name": "临港分公司",
+        "抢修及时率": 0.9357798165137615
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "抢修及时率": 0.9134615384615384
+      },
+      {
+        "branch_name": "滨江分公司",
+        "抢修及时率": 0.9019607843137255
+      },
+      {
+        "branch_name": "经开分公司",
+        "抢修及时率": 0.8769230769230769
+      },
+      {
+        "branch_name": "高压输配分公司",
+        "抢修及时率": 0.8947368421052632
+      },
+      {
+        "branch_name": "高新分公司",
+        "抢修及时率": 0.8837209302325582
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  {
+    "id": "GAS_AR-12",
+    "code": "GAS_AR",
+    "dataset_id": 65,
+    "index": 11,
+    "question": "2026年9月各分公司气费回收率",
+    "reference_sql": "SELECT branch_name,SUM(collected_yuan)/NULLIF(SUM(billed_yuan),0) AS 回收率 FROM v_gas_ar WHERE month='2026-09' GROUP BY branch_name",
+    "expected": [
+      {
+        "branch_name": "临港分公司",
+        "回收率": 1.0046900473375824
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "回收率": 0.9566968231527546
+      },
+      {
+        "branch_name": "滨江分公司",
+        "回收率": 1.0043231341116887
+      },
+      {
+        "branch_name": "经开分公司",
+        "回收率": 1.003615830621468
+      },
+      {
+        "branch_name": "高新分公司",
+        "回收率": 0.995196265764529
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  {
+    "id": "GAS_BIZ-12",
+    "code": "GAS_BIZ",
+    "dataset_id": 64,
+    "index": 11,
+    "question": "2026年9月居民和工商业销气收入各多少",
+    "reference_sql": "SELECT CASE WHEN user_type='居民' THEN '居民' ELSE '工商业' END user_type,SUM(revenue_yuan) AS 销气收入_元 FROM v_gas_sales WHERE month='2026-09' AND user_type IN ('居民','商业','工业') GROUP BY 1",
+    "expected": [
+      {
+        "user_type": "居民",
+        "销气收入_元": 147762641.7
+      },
+      {
+        "user_type": "工商业",
+        "销气收入_元": 297100071.36
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  {
+    "id": "GAS_SAFE-12",
+    "code": "GAS_SAFE",
+    "dataset_id": 66,
+    "index": 11,
+    "question": "2026年9月到访不遇还有多少户",
+    "reference_sql": "SELECT SUM(not_at_home) AS 到访不遇户数 FROM v_gas_safety WHERE month='2026-09'",
+    "expected": [
+      {
+        "到访不遇户数": 2852.0
+      }
+    ],
+    "spec": [
+      [],
+      [
+        0
+      ]
+    ]
+  },
+  {
+    "id": "GAS_AR-13",
+    "code": "GAS_AR",
+    "dataset_id": 65,
+    "index": 12,
+    "question": "2026年9月重点催收的客户有哪些",
+    "reference_sql": "SELECT customer_name,closing_yuan,collection_status FROM v_gas_ar WHERE month='2026-09' AND collection_status='重点催收'",
+    "expected": [
+      {
+        "customer_name": "汀兰社区恒拓精密制造有限公司",
+        "closing_yuan": 32862833.97,
+        "collection_status": "重点催收"
+      },
+      {
+        "customer_name": "荷风路恒拓精密制造有限公司",
+        "closing_yuan": 17001483.96,
+        "collection_status": "重点催收"
+      },
+      {
+        "customer_name": "湖畔新城恒拓精密制造有限公司",
+        "closing_yuan": 13331871.8,
+        "collection_status": "重点催收"
+      },
+      {
+        "customer_name": "青荷路恒拓精密制造有限公司",
+        "closing_yuan": 21269399.99,
+        "collection_status": "重点催收"
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  {
+    "id": "GAS_BIZ-13",
+    "code": "GAS_BIZ",
+    "dataset_id": 64,
+    "index": 12,
+    "question": "2026年9月哪个分公司估抄率最高",
+    "reference_sql": "SELECT branch_name,SUM(estimated_meter_m3)::numeric/NULLIF(SUM(volume_m3),0) AS 估抄率 FROM v_gas_sales WHERE month='2026-09' GROUP BY branch_name ORDER BY 估抄率 DESC LIMIT 1",
+    "expected": [
+      {
+        "branch_name": "沙湖分公司",
+        "估抄率": 0.10869176125380207
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  {
+    "id": "GAS_SAFE-13",
+    "code": "GAS_SAFE",
+    "dataset_id": 66,
+    "index": 12,
+    "question": "截至2026年9月GIS入库里程占比多少",
+    "reference_sql": "SELECT SUM(CASE WHEN gis_loaded_date<='2026-09-30' THEN length_km ELSE 0 END)/NULLIF(SUM(length_km),0) AS GIS入库率 FROM v_gas_network WHERE laid_date<='2026-09-30'",
+    "expected": [
+      {
+        "gis入库率": 0.9072958823529412
+      }
+    ],
+    "spec": [
+      [],
+      [
+        0
+      ]
+    ]
+  },
+  {
+    "id": "GAS_AR-14",
+    "code": "GAS_AR",
+    "dataset_id": 65,
+    "index": 13,
+    "question": "哪些月份账单收入与量价收入存在差异",
+    "reference_sql": "SELECT month,branch_name,SUM(revenue_yuan-theoretical_revenue_yuan) AS 重算量价差异_元 FROM v_gas_sales GROUP BY month,branch_name HAVING ABS(SUM(revenue_yuan-theoretical_revenue_yuan))>0.01",
+    "expected": [
+      {
+        "month": "2025-08",
+        "branch_name": "沙湖分公司",
+        "重算量价差异_元": 80000.0
+      }
+    ],
+    "spec": [
+      [
+        0,
+        1
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "id": "GAS_BIZ-14",
+    "code": "GAS_BIZ",
+    "dataset_id": 64,
+    "index": 13,
+    "question": "2026年9月各分公司新增通气多少户",
+    "reference_sql": "SELECT branch_name,SUM(connected_users) AS 新增通气户数 FROM v_gas_growth WHERE month='2026-09' GROUP BY branch_name",
+    "expected": [
+      {
+        "branch_name": "临港分公司",
+        "新增通气户数": 1520.0
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "新增通气户数": 1845.0
+      },
+      {
+        "branch_name": "滨江分公司",
+        "新增通气户数": 2610.0
+      },
+      {
+        "branch_name": "经开分公司",
+        "新增通气户数": 2817.0
+      },
+      {
+        "branch_name": "高新分公司",
+        "新增通气户数": 1685.0
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  {
+    "id": "GAS_SAFE-14",
+    "code": "GAS_SAFE",
+    "dataset_id": 66,
+    "index": 13,
+    "question": "沙湖分公司有多少公里超过20年的老旧管网",
+    "reference_sql": "SELECT SUM(length_km) AS 老旧管网_公里 FROM v_gas_network WHERE branch_id='SHAHU' AND laid_date<='2006-09-30'",
+    "expected": [
+      {
+        "老旧管网_公里": 1468.62
+      }
+    ],
+    "spec": [
+      [],
+      [
+        0
+      ]
+    ]
+  },
+  {
+    "id": "GAS_AR-15",
+    "code": "GAS_AR",
+    "dataset_id": 65,
+    "index": 14,
+    "question": "2026年9月末应收账龄结构是什么样",
+    "reference_sql": "SELECT SUM(aging_0_30_yuan) AS 账龄0至30天_元,SUM(aging_31_90_yuan) AS 账龄31至90天_元,SUM(aging_91_180_yuan) AS 账龄91至180天_元,SUM(aging_181_365_yuan) AS 账龄181至365天_元,SUM(aging_365_plus_yuan) AS 超过365天_元 FROM v_gas_ar WHERE month='2026-09'",
+    "expected": [
+      {
+        "账龄0至30天_元": 44524444.31,
+        "账龄31至90天_元": 11482179.07,
+        "账龄91至180天_元": 28223979.3,
+        "账龄181至365天_元": 12760191.63,
+        "超过365天_元": 9167089.15
+      }
+    ],
+    "spec": [
+      [],
+      [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    ]
+  },
+  {
+    "id": "GAS_BIZ-15",
+    "code": "GAS_BIZ",
+    "dataset_id": 64,
+    "index": 14,
+    "question": "2026年9月各客户类型的加权销气均价是多少",
+    "reference_sql": "SELECT user_type,SUM(revenue_yuan)/NULLIF(SUM(volume_m3),0) AS 销气均价_元每方 FROM v_gas_sales WHERE month='2026-09' GROUP BY user_type",
+    "expected": [
+      {
+        "user_type": "公益机构",
+        "销气均价_元每方": 2.58
+      },
+      {
+        "user_type": "商业",
+        "销气均价_元每方": 3.598835761037665
+      },
+      {
+        "user_type": "居民",
+        "销气均价_元每方": 2.55
+      },
+      {
+        "user_type": "工业",
+        "销气均价_元每方": 3.461528482234049
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  {
+    "id": "GAS_SAFE-15",
+    "code": "GAS_SAFE",
+    "dataset_id": 66,
+    "index": 14,
+    "question": "2026年9月各分公司三件套安装和到访不遇情况",
+    "reference_sql": "SELECT branch_name,SUM(three_piece_installed) AS 当月三件套安装户数,SUM(not_at_home) AS 当月到访不遇户次 FROM v_gas_safety WHERE month='2026-09' GROUP BY branch_name",
+    "expected": [
+      {
+        "branch_name": "临港分公司",
+        "当月三件套安装户数": 3879.0,
+        "当月到访不遇户次": 790.0
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "当月三件套安装户数": 3313.0,
+        "当月到访不遇户次": 473.0
+      },
+      {
+        "branch_name": "滨江分公司",
+        "当月三件套安装户数": 2401.0,
+        "当月到访不遇户次": 470.0
+      },
+      {
+        "branch_name": "经开分公司",
+        "当月三件套安装户数": 3469.0,
+        "当月到访不遇户次": 442.0
+      },
+      {
+        "branch_name": "高压输配分公司",
+        "当月三件套安装户数": 0.0,
+        "当月到访不遇户次": 0.0
+      },
+      {
+        "branch_name": "高新分公司",
+        "当月三件套安装户数": 3783.0,
+        "当月到访不遇户次": 677.0
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1,
+        2
+      ]
+    ]
+  },
+  {
+    "id": "GAS_AR-16",
+    "code": "GAS_AR",
+    "dataset_id": 65,
+    "index": 15,
+    "question": "按演示账龄比例复核2026年9月末计提金额",
+    "reference_sql": "SELECT SUM(provision_yuan) AS 已计提_元,SUM(ROUND(aging_0_30_yuan*0.01+aging_31_90_yuan*0.03+aging_91_180_yuan*0.10+aging_181_365_yuan*0.30+aging_365_plus_yuan*0.70,2)) AS 演示应计提_元 FROM v_gas_ar WHERE month='2026-09'",
+    "expected": [
+      {
+        "已计提_元": 13857127.66,
+        "演示应计提_元": 13857127.66
+      }
+    ],
+    "spec": [
+      [],
+      [
+        0,
+        1
+      ]
+    ]
+  },
+  {
+    "id": "GAS_BIZ-16",
+    "code": "GAS_BIZ",
+    "dataset_id": 64,
+    "index": 15,
+    "question": "2026年9月各分公司的估抄量与估抄率是多少",
+    "reference_sql": "SELECT branch_id,branch_name,SUM(estimated_meter_m3) AS 估抄量_方,SUM(volume_m3) AS 销气量_方,SUM(estimated_meter_m3)::numeric/NULLIF(SUM(volume_m3),0) AS 估抄率 FROM v_gas_sales WHERE month='2026-09' GROUP BY branch_id,branch_name",
+    "expected": [
+      {
+        "branch_id": "BINJIANG",
+        "branch_name": "滨江分公司",
+        "估抄量_方": 465611.0,
+        "销气量_方": 24131444.0,
+        "估抄率": 0.01929478401706918
+      },
+      {
+        "branch_id": "GAOXIN",
+        "branch_name": "高新分公司",
+        "估抄量_方": 467115.0,
+        "销气量_方": 31382980.0,
+        "估抄率": 0.014884341767416607
+      },
+      {
+        "branch_id": "JINGKAI",
+        "branch_name": "经开分公司",
+        "估抄量_方": 484072.0,
+        "销气量_方": 41090081.0,
+        "估抄率": 0.011780750687738971
+      },
+      {
+        "branch_id": "LINGANG",
+        "branch_name": "临港分公司",
+        "估抄量_方": 298061.0,
+        "销气量_方": 20638653.0,
+        "估抄率": 0.014441882423237603
+      },
+      {
+        "branch_id": "SHAHU",
+        "branch_name": "沙湖分公司",
+        "估抄量_方": 2921000.0,
+        "销气量_方": 26874162.0,
+        "估抄率": 0.10869176125380207
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        2,
+        4
+      ]
+    ]
+  },
+  {
+    "id": "GAS_SAFE-16",
+    "code": "GAS_SAFE",
+    "dataset_id": 66,
+    "index": 15,
+    "question": "截至2026年9月底各分公司隐患闭环率",
+    "reference_sql": "SELECT branch_name,COUNT(*) AS 已发现工单数,COUNT(*) FILTER(WHERE completed_date<='2026-09-30') AS 截至日已闭环数,COUNT(*) FILTER(WHERE completed_date<='2026-09-30')::numeric/NULLIF(COUNT(*),0) AS 隐患闭环率 FROM v_gas_hazards WHERE found_date<='2026-09-30' GROUP BY branch_name",
+    "expected": [
+      {
+        "branch_name": "高新分公司",
+        "已发现工单数": 20,
+        "截至日已闭环数": 18,
+        "隐患闭环率": 0.9
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "已发现工单数": 22,
+        "截至日已闭环数": 18,
+        "隐患闭环率": 0.8181818181818182
+      },
+      {
+        "branch_name": "经开分公司",
+        "已发现工单数": 20,
+        "截至日已闭环数": 17,
+        "隐患闭环率": 0.85
+      },
+      {
+        "branch_name": "滨江分公司",
+        "已发现工单数": 20,
+        "截至日已闭环数": 18,
+        "隐患闭环率": 0.9
+      },
+      {
+        "branch_name": "临港分公司",
+        "已发现工单数": 20,
+        "截至日已闭环数": 17,
+        "隐患闭环率": 0.85
+      },
+      {
+        "branch_name": "高压输配分公司",
+        "已发现工单数": 18,
+        "截至日已闭环数": 15,
+        "隐患闭环率": 0.8333333333333334
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        3
+      ]
+    ]
+  }
+]

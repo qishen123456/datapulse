@@ -5,18 +5,18 @@
         <svg class="ax-welcome-avatar-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
           <defs>
             <linearGradient id="aiRingWelcome" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#14B8A6" />
-              <stop offset="100%" stop-color="#0E7490" />
+              <stop offset="0%" stop-color="#526b7a" />
+              <stop offset="100%" stop-color="#3c536e" />
             </linearGradient>
             <linearGradient id="aiDiscWelcome" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stop-color="#FFFFFF" />
-              <stop offset="100%" stop-color="#F0FDFA" />
+              <stop offset="100%" stop-color="#edf2f5" />
             </linearGradient>
           </defs>
           <circle cx="50" cy="50" r="48" fill="url(#aiDiscWelcome)" />
           <circle cx="50" cy="50" r="46" fill="none" stroke="url(#aiRingWelcome)" stroke-width="3.5" />
-          <path d="M28 62 L42 40 L52 52 L62 36 L72 44" fill="none" stroke="#0D9488" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
-          <circle cx="72" cy="44" r="4.5" fill="#0D9488" />
+          <path d="M28 62 L42 40 L52 52 L62 36 L72 44" fill="none" stroke="#526b7a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+          <circle cx="72" cy="44" r="4.5" fill="#526b7a" />
         </svg>
       </div>
       <div class="ax-welcome-copy">
@@ -150,7 +150,7 @@ onMounted(() => {
   padding: 0;
   background: transparent;
   border: 0;
-  box-shadow: 0 4px 12px rgba(29, 78, 216, 0.18);
+  box-shadow: 0 4px 12px rgba(66, 95, 131, 0.18);
 }
 
 .ax-welcome-avatar::before {
@@ -165,10 +165,10 @@ onMounted(() => {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #10B981;
+  background: #526b7a;
   box-shadow:
     0 0 0 3px #FFFFFF,
-    0 4px 9px rgba(16, 185, 129, 0.2);
+    0 4px 9px rgba(82, 107, 122, 0.2);
 }
 
 .ax-welcome-avatar-img {
@@ -195,7 +195,7 @@ onMounted(() => {
   padding: 0;
   border-radius: 0;
   background: transparent;
-  color: #1d4ed8;
+  color: #425f83;
   font-size: 14px;
   font-weight: 800;
   letter-spacing: 0;
@@ -216,7 +216,7 @@ onMounted(() => {
 .ax-welcome-text.is-typing::after {
   content: '|';
   margin-left: 5px;
-  color: rgba(29, 78, 216, 0.72);
+  color: rgba(66, 95, 131, 0.72);
   animation: ax-welcome-cursor-blink 1s step-end infinite;
 }
 
@@ -257,10 +257,10 @@ onMounted(() => {
   height: 32px;
   min-width: 84px;
   padding: 0 12px;
-  border: 1px solid #D7DEDC;
+  border: 1px solid #bdcbd3;
   border-radius: 4px;
   background: #FFFFFF;
-  color: #31413F;
+  color: #344652;
   font-size: 12px;
   font-weight: 700;
   line-height: 1;
@@ -271,9 +271,9 @@ onMounted(() => {
 }
 
 .ax-quick-refresh:hover:not(:disabled) {
-  border-color: #1d4ed8;
-  background: #eff6ff;
-  color: #1e40af;
+  border-color: #425f83;
+  background: #edf2f8;
+  color: #425f83;
   box-shadow: none;
 }
 
@@ -312,7 +312,7 @@ onMounted(() => {
   width: 100%;
   padding: 12px 40px 12px 14px;
   background: #FFFFFF;
-  border: 1px solid #DDE4E2;
+  border: 1px solid #dce5eb;
   border-radius: 6px;
   font-size: 11px;
   color: #6B7280;
@@ -339,8 +339,8 @@ onMounted(() => {
 }
 
 .ax-quick-btn:hover {
-  background: #F6FAF9;
-  border-color: #1d4ed8;
+  background: #f5f7f9;
+  border-color: #425f83;
   color: #1A1A1A;
 }
 
@@ -356,9 +356,9 @@ onMounted(() => {
   max-width: 200px;
   padding: 3px 8px;
   border-radius: 3px;
-  border: 1px solid rgba(29, 78, 216, 0.32);
-  background: #eff6ff;
-  color: #1e40af;
+  border: 1px solid rgba(66, 95, 131, 0.32);
+  background: #edf2f8;
+  color: #425f83;
   font-size: 11px;
   font-weight: 700;
   line-height: 1.3;

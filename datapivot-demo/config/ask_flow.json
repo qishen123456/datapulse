@@ -5,6 +5,15 @@
     "super_admin"
   ],
   "datasetPolicies": {},
+  "rolePolicies": {
+    "admin": "basic",
+    "business_admin": "basic",
+    "user": "basic"
+  },
   "fallbackToBasicOnError": false,
-  "attachMetadata": true
+  "attachMetadata": true,
+  "maxParallel": 3,
+  "maxRetries": 2,
+  "queryTimeoutSeconds": 30,
+  "maxResultRows": 10000
 }

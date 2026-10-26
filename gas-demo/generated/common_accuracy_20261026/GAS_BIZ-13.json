@@ -1,0 +1,37 @@
+{
+  "question": "2026年9月哪个分公司估抄率最高",
+  "reference_sql": "SELECT branch_name,SUM(estimated_meter_m3)::numeric/NULLIF(SUM(volume_m3),0) AS 估抄率 FROM v_gas_sales WHERE month='2026-09' GROUP BY branch_name ORDER BY 估抄率 DESC LIMIT 1",
+  "expected": [
+    {
+      "branch_name": "沙湖分公司",
+      "估抄率": 0.10869176125380207
+    }
+  ],
+  "result": {
+    "error": null,
+    "requires_confirmation": false,
+    "confirmation_type": null,
+    "analysis": "## 江城燃气·经营与供销差\n\nAI 问数未完成：未能生成或通过校验的可执行查询。请调整问题或检查模型服务后重试；当前未生成业务答案。",
+    "ask_flow": {
+      "flow": "basic",
+      "reason": "basic_selected",
+      "requested_flow": "basic",
+      "controller": "AskFlowController",
+      "duration_seconds": 1.798
+    }
+  },
+  "datasets": [
+    {
+      "dataset_id": 64,
+      "dataset_name": "江城燃气·经营与供销差",
+      "sql": "",
+      "columns": [],
+      "rows": [],
+      "analysis": "AI 问数未完成：未能生成或通过校验的可执行查询。请调整问题或检查模型服务后重试；当前未生成业务答案。",
+      "analysis_status": "model_unavailable",
+      "query_status": "failed",
+      "error": null,
+      "row_count": 0
+    }
+  ]
+}

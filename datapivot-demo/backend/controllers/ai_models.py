@@ -37,11 +37,12 @@ def list_ai_models():
 
 @ai_models_bp.route('/api/ai-models', methods=['POST'])
 def create_ai_model():
-    _, denied = require_feature("ai_model_edit", "当前账号没有维护模型配置权限")
+    data = request.get_json(silent=True) or {}
+    scope = data.pop("_operation_scope", "model")
+    _, denied = require_feature("ai_channel_edit" if scope == "channel" else "ai_model_edit", "当前账号没有维护模型配置权限")
     if denied:
         return denied
     try:
-        data = request.get_json()
         if not data:
             return jsonify({"error": "请求体不能为空"}), 400
         if not data.get('name'):
@@ -49,6 +50,9 @@ def create_ai_model():
         if not data.get('api_key'):
             return jsonify({"error": "API Key 不能为空"}), 400
 
+        if data.get('is_default'):
+            _, error = require_feature('ai_model_default', '当前账号没有切换默认模型权限')
+            if error: return error
         new_model = save_ai_model(data)
         mark_reinit()
 
@@ -63,11 +67,19 @@ def create_ai_model():
 
 @ai_models_bp.route('/api/ai-models/<int:model_id>', methods=['PUT'])
 def update_ai_model_route(model_id):
-    _, denied = require_feature("ai_model_edit", "当前账号没有维护模型配置权限")
+    data = request.get_json(silent=True) or {}
+    scope = data.pop("_operation_scope", "model")
+    _, denied = require_feature("ai_channel_edit" if scope == "channel" else "ai_model_edit", "当前账号没有维护模型配置权限")
     if denied:
         return denied
     try:
-        data = request.get_json()
+        if scope == 'channel' and set(data) - {'base_url','api_key','channel_display_name','channel_icon','is_active'}:
+            return jsonify({'error':'通道操作不允许修改模型参数'}), 400
+        # Model forms cannot bypass independent default-model permission.
+        existing = get_ai_model_by_id(model_id) or {}
+        if 'is_default' in data and bool(data['is_default']) != bool(existing.get('is_default')):
+            _, error = require_feature('ai_model_default', '当前账号没有切换默认模型权限')
+            if error: return error
         updated = update_ai_model(model_id, data)
         if updated is None:
             return jsonify({"error": f"未找到 ID={model_id} 的模型"}), 404
@@ -84,7 +96,7 @@ def update_ai_model_route(model_id):
 
 @ai_models_bp.route('/api/ai-models/<int:model_id>', methods=['DELETE'])
 def delete_ai_model_route(model_id):
-    _, denied = require_feature("ai_model_edit", "当前账号没有维护模型配置权限")
+    _, denied = require_feature("ai_model_delete", "当前账号没有维护模型配置权限")
     if denied:
         return denied
     try:
@@ -137,7 +149,7 @@ def test_ai_model_route(model_id):
 
 @ai_models_bp.route('/api/ai-models/<int:model_id>/set-default', methods=['POST'])
 def set_default_model(model_id):
-    _, denied = require_feature("ai_model_edit", "当前账号没有维护模型配置权限")
+    _, denied = require_feature("ai_model_default", "当前账号没有维护模型配置权限")
     if denied:
         return denied
     try:

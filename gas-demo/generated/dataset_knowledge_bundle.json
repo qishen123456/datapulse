@@ -3,23 +3,61 @@
     "code": "GAS_BIZ",
     "name": "江城燃气·经营与供销差",
     "synonyms": [
-      "燃气经营",
-      "销气",
-      "供销差",
-      "燃气利润",
-      "燃气新增用户",
+      "售气量",
+      "销售气量",
+      "卖了多少气",
+      "售气收入",
+      "气费销售额",
+      "卖气收入",
+      "平均售气价",
+      "每方卖价",
+      "平均气价",
+      "估表率",
+      "估算抄表占比",
+      "估抄气量占比",
+      "实表气量",
+      "实际抄表气量",
+      "进气量",
+      "入口量",
+      "采购气量",
+      "购销差率",
+      "产销差率",
+      "气差率",
+      "气差量",
+      "购销差量",
+      "采购均价",
+      "平均采购单价",
+      "买气成本",
+      "购气支出",
+      "税前利润",
+      "利润总额",
+      "新开通户数",
+      "新接通用户",
+      "新装通气",
+      "申请接气户数",
+      "新增报装",
+      "在用用户数",
+      "月末用户数",
+      "销售环比",
+      "比上月气量",
+      "同期增幅",
+      "气量同比",
       "销气量",
       "销气收入",
-      "销气均价",
+      "加权销气均价",
       "估抄率",
+      "实抄量",
       "边界入口气量",
-      "采购成本",
-      "供销差量",
       "供销差率",
+      "供销差量",
+      "购气均价",
+      "采购成本",
       "模拟税前利润",
-      "总收入",
       "新增通气户数",
-      "期末户数"
+      "报装户数",
+      "期末户数",
+      "销气环比",
+      "同期间同比"
     ],
     "regression_cases": [
       {
@@ -45,6 +83,54 @@
         "question_text": "计算超标供销差前，请先确认采用每个中心的演示阈值还是另行指定的正式阈值",
         "expected_focus": "按用户要求确认统计范围后再生成SQL，不擅自采用其他口径",
         "expected_intent": "requires_confirmation"
+      },
+      {
+        "case_type": "same_period",
+        "question_text": "2026年9月各分公司销气量比8月增减多少",
+        "expected_focus": "使用已声明视图，限定时间和组织；与EXPLAIN后实际查询结果对齐，不用缓存结论。",
+        "expected_intent": "generate_sql"
+      },
+      {
+        "case_type": "new_org_name",
+        "question_text": "临港分公司2026年8月和9月按客户类型看销气变化",
+        "expected_focus": "解析本轮新片区/组织名到稳定ID，不返回已废弃的第1/第2网格名称。",
+        "expected_intent": "generate_sql"
+      },
+      {
+        "case_type": "empty_month",
+        "question_text": "查询2026年10月本域核心指标",
+        "expected_focus": "保留用户10月条件；应明确无记录，不能暗换9月或把空聚合标为零。",
+        "expected_intent": "generate_sql"
+      },
+      {
+        "case_type": "unsupported",
+        "question_text": "分析2026年9月销量下降与气温的因果关系",
+        "expected_focus": "说明缺失字段/证据；不编造天气、合同到期日或分钟级日志。",
+        "expected_intent": "requires_confirmation"
+      },
+      {
+        "case_type": "permission",
+        "question_text": "查看未授权分公司的所有明细",
+        "expected_focus": "应由服务端组织授权过滤或拒绝，不能只在报告中提示权限；对比范围也必须校验。",
+        "expected_intent": "generate_sql"
+      },
+      {
+        "case_type": "quality",
+        "question_text": "2026年9月各分公司税前利润的收入与费用构成",
+        "expected_focus": "核对真实分子分母、粒度和连接；数据质量差异保留，不用解释覆盖错误。",
+        "expected_intent": "generate_sql"
+      },
+      {
+        "case_type": "entity_type",
+        "question_text": "按网格下钻新增通气户数",
+        "expected_focus": "识别不能下钻的服务中心粒度、汇总对象或零分母；解释不适用，不造数据。",
+        "expected_intent": "requires_confirmation"
+      },
+      {
+        "case_type": "unit",
+        "question_text": "用万元、万方或公里展示本域指标并标单位",
+        "expected_focus": "只转换相应金额或气量字段，保留比例与计数单位；原始数值不得重复除万。",
+        "expected_intent": "generate_sql"
       }
     ],
     "views": [
@@ -70,9 +156,16 @@
       "估抄率首选v_gas_sales：SUM(estimated_meter_m3)/SUM(volume_m3)。v_gas_supply_balance中estimated_m3、sales_m3分别来自同月同服务中心销售明细求和；在相同月份、分公司范围按SUM(estimated_m3)/SUM(sales_m3)计算等价，不能仅因使用此已声明汇总视图就判错。网格/客户类型下钻必须回到销售明细；不跨粒度混算。",
       "供销差优先v_gas_supply_balance；它已按month+center_id/org_id聚合采购与销售后关联。inlet_m3-sales_m3为差量，以inlet_m3为分母。loss_threshold只为演示阈值，不是法定或已核定标准；跨中心不取单个MAX阈值当统一标准。",
       "v_gas_profit. pretax_profit_yuan=销气收入+安装收入+增值收入-采购成本-安装成本-增值成本-配气成本-管理费用-财务费用-减值费用。没有所得税字段，不能回答税后净利润；不能称每方均摊成本为实测逐用户成本。",
-      "v_gas_growth: ending_users=opening_users+connected_users-churn_users。connected_users是新增通气而非报装；applied_users是报装；potential_users是模拟潜在可接入户，不是法定全部人口基数。"
+      "v_gas_growth: ending_users=opening_users+connected_users-churn_users。connected_users是新增通气而非报装；applied_users是报装；potential_users是模拟潜在可接入户，不是法定全部人口基数。",
+      "指标选择与粒度：销售、估抄用网格×客户类型；采购气源用服务中心×气源；经营利润用服务中心；新增/期末用户用服务中心×客户类型。不同粒度不能强行下钻。",
+      "环比与贡献拆解：先确认本月和上月记录齐备；差量=本月-上月，环比=差量/上月。分解各客户类型差量对分公司差量的贡献，分公司总差量为0时贡献率返回空；贡献率可大于100%或为负，不能截断。",
+      "量价拆解：金额按实际收入统计；量影响可用(本期量-基期量)×基期加权均价，价影响用本期量×(本期均价-基期均价)，两项合计应等于收入差；注明这是选定分解顺序，不能混用采购单价。",
+      "税前利润桥：优先利润汇总视图，分别列销气/安装/增值收入及采购/安装/增值/配气/管理/财务/减值费用；利润减少不等同销量减少。高压输配只承担运维费用，无销气记录。",
+      "范围名称解析：滨江沿江营业所=BINJIANG-S1，望江路服务网格=BINJIANG-S1-W1。优先从v_gas_org解析精确名字及路径，再与服务端授权交集；公司名、中心名、网格名不能互相替代。",
+      "场景与解释边界：临港工业用气、沙湖估抄与供销差可进行同月/相邻月取证；数据发生变化不自动证明停产、泄漏或舞弊。内部模拟设定必须标记为设定，不能冒充经营人员确认。",
+      "不支持的追问：无天气、设备小时、企业产能、营销活动、所得税、居民逐户抄表记录；缺这些证据时可给后续取证建议，不能输出已验证因果或预测准确率。"
     ],
-    "content": "# 江城燃气·经营与供销差 · 可执行问数口径\n知识版本：gas-knowledge-20261022\n## 业务边界与红线\n- 全部数据为虚构演示，不代表真实企业。月度事实仅覆盖2024-01至2026-09；“最新月”是数据MAX(month)，不是系统当前月；用户明确问2026-10必须按10月查空，不擅自换成9月。\n- 原始存储单位：气量方/立方米、金额元、里程公里、比例0到1。展示成万元/万方必须显式除10000并标单位；比率百分数展示才乘100。\n- 保留总主理人+领域专家框架。普通问数也实际经过AI，金标只作生成与审核参考，不允许样例直返或缓存答案代替AI。高阶先确认计划，再并行取证。\n- 复用系统gas_jc_tree组织树及现有数据权限。org_id是当前记录所属组织；branch_id是分公司编码、center_id是服务中心编码，不能把分公司编码直接等同网格org_id。跨层级范围用授权组织路径或组织维表解析。\n- 超级管理员可全域汇总，不因SQL没有组织WHERE就认定越权；普通账号权限必须由系统在取数前强制处理，不能由LLM文字代替。未绑定组织普通账号不开放。\n- 分公司：滨江BINJIANG、沙湖SHAHU、经开JINGKAI、临港LINGANG、高新GAOXIN、高压输配GYSP。高压输配没有销气职责；销售榜通常5家，安全/管网可有6家，不补造GYSP销气数据或强行补零。\n- 只使用本数据集声明的业务视图。事实表不得按月份、分公司或org_id单键明细互连；先各自聚合至相同时间与组织粒度，或使用已准备的汇总视图。\n- 组织维表v_gas_org.org_id唯一，事实视图.org_id可多对一关联。任何比例都先加总分子分母，再相除；分母0用NULLIF返回NULL，不补0、不简单平均比例。\n- 空结果不等于业务值0；取证失败不等于源库没有数据。AI/审核失败要明确未完成，禁止把规则摘要标作AI结论。\n- 数值差异、单月估抄率和老旧管网只能作为调查线索，不证明因果、偷盗气或系统性管理问题；无正式统计检验不输出正负相关结论。预测需专门模型和回测。\n- 经营范围：销气量价、购气成本、供销差、模拟税前利润、用户增长。财务应收/账龄应路由GAS_AR；隐患安检管网应路由GAS_SAFE。\n- 估抄率首选v_gas_sales：SUM(estimated_meter_m3)/SUM(volume_m3)。v_gas_supply_balance中estimated_m3、sales_m3分别来自同月同服务中心销售明细求和；在相同月份、分公司范围按SUM(estimated_m3)/SUM(sales_m3)计算等价，不能仅因使用此已声明汇总视图就判错。网格/客户类型下钻必须回到销售明细；不跨粒度混算。\n- 供销差优先v_gas_supply_balance；它已按month+center_id/org_id聚合采购与销售后关联。inlet_m3-sales_m3为差量，以inlet_m3为分母。loss_threshold只为演示阈值，不是法定或已核定标准；跨中心不取单个MAX阈值当统一标准。\n- v_gas_profit. pretax_profit_yuan=销气收入+安装收入+增值收入-采购成本-安装成本-增值成本-配气成本-管理费用-财务费用-减值费用。没有所得税字段，不能回答税后净利润；不能称每方均摊成本为实测逐用户成本。\n- v_gas_growth: ending_users=opening_users+connected_users-churn_users。connected_users是新增通气而非报装；applied_users是报装；potential_users是模拟潜在可接入户，不是法定全部人口基数。\n## 视图与粒度\n- v_gas_sales：一行=月份×销售网格×客户类型；business_key唯一；20个销售网格×4类客户×33个月。\n- v_gas_supply_sources：一行=月份×服务中心×气源；同中心同月有多个气源，不能直接连接销售明细。\n- v_gas_supply_balance：一行=月份×销售服务中心，month+org_id唯一；采购与销售分别聚合后关联，org_id是服务中心编码。\n- v_gas_profit：一行=月份×服务中心，month+org_id唯一；已经带入该中心的销气收入、采购成本，不能再次连接后重复求和。\n- v_gas_growth：一行=月份×销售网格×客户类型；户数为模拟汇总，期末户数不可跨月累加。\n- v_gas_org：一行一个组织节点，org_id全局唯一；层级1集团/2分公司/3服务中心/4网格，43节点。\n## 指标目录（按问题选择，不要求一次返回全部指标）\n- 销气量：v_gas_sales；SUM(volume_m3)；单位方；\n- 销气收入：v_gas_sales；SUM(revenue_yuan)；单位元；\n- 销气均价：v_gas_sales；SUM(revenue_yuan)/NULLIF(SUM(volume_m3),0)；单位元/方；收入/销量加权，不能AVG(price_yuan_m3)。\n- 估抄率：v_gas_sales；SUM(estimated_meter_m3)::numeric/NULLIF(SUM(volume_m3),0)；单位0–1；\n- 边界入口气量：v_gas_supply_balance；SUM(inlet_m3)；单位方；\n- 采购成本：v_gas_supply_balance；SUM(purchase_cost_yuan)；单位元；\n- 供销差量：v_gas_supply_balance；SUM(inlet_m3)-SUM(sales_m3)；单位方；\n- 供销差率：v_gas_supply_balance；(SUM(inlet_m3)-SUM(sales_m3))/NULLIF(SUM(inlet_m3),0)；单位0–1；\n- 模拟税前利润：v_gas_profit；SUM(pretax_profit_yuan)；单位元；缺所得税，绝不能称净利润。\n- 总收入：v_gas_profit；SUM(total_revenue_yuan)；单位元；\n- 新增通气户数：v_gas_growth；SUM(connected_users)；单位户；\n- 期末户数：v_gas_growth；SUM(ending_users)；单位户；只选定期末，不能跨月累加。\n## 高阶分析建议\n- 2026年三季度利润相较去年同期为何变化？拆解量价、采购、损耗和费用贡献\n- 居民每方提价0.1元，在销量不变假设下2026年前三季度可增收多少？",
+    "content": "# 江城燃气·经营与供销差 · 可执行问数口径\n知识版本：gas-semantics-20261025\n## 业务边界与红线\n- 全部数据为虚构演示，不代表真实企业。月度事实仅覆盖2024-01至2026-09；“最新月”是数据MAX(month)，不是系统当前月；用户明确问2026-10必须按10月查空，不擅自换成9月。\n- 原始存储单位：气量方/立方米、金额元、里程公里、比例0到1。展示成万元/万方必须显式除10000并标单位；比率百分数展示才乘100。\n- 保留总主理人+领域专家框架。普通问数也实际经过AI，金标只作生成与审核参考，不允许样例直返或缓存答案代替AI。高阶先确认计划，再并行取证。\n- 复用系统gas_jc_tree组织树及现有数据权限。org_id是当前记录所属组织；branch_id是分公司编码、center_id是服务中心编码，不能把分公司编码直接等同网格org_id。跨层级范围用授权组织路径或组织维表解析。\n- 超级管理员可全域汇总，不因SQL没有组织WHERE就认定越权；普通账号权限必须由系统在取数前强制处理，不能由LLM文字代替。未绑定组织普通账号不开放。\n- 分公司：滨江BINJIANG、沙湖SHAHU、经开JINGKAI、临港LINGANG、高新GAOXIN、高压输配GYSP。高压输配没有销气职责；销售榜通常5家，安全/管网可有6家，不补造GYSP销气数据或强行补零。\n- 只使用本数据集声明的业务视图。事实表不得按月份、分公司或org_id单键明细互连；先各自聚合至相同时间与组织粒度，或使用已准备的汇总视图。\n- 组织维表v_gas_org.org_id唯一，事实视图.org_id可多对一关联。任何比例都先加总分子分母，再相除；分母0用NULLIF返回NULL，不补0、不简单平均比例。\n- 空结果不等于业务值0；取证失败不等于源库没有数据。AI/审核失败要明确未完成，禁止把规则摘要标作AI结论。\n- 数值差异、单月估抄率和老旧管网只能作为调查线索，不证明因果、偷盗气或系统性管理问题；无正式统计检验不输出正负相关结论。预测需专门模型和回测。\n- 经营范围：销气量价、购气成本、供销差、模拟税前利润、用户增长。财务应收/账龄应路由GAS_AR；隐患安检管网应路由GAS_SAFE。\n- 估抄率首选v_gas_sales：SUM(estimated_meter_m3)/SUM(volume_m3)。v_gas_supply_balance中estimated_m3、sales_m3分别来自同月同服务中心销售明细求和；在相同月份、分公司范围按SUM(estimated_m3)/SUM(sales_m3)计算等价，不能仅因使用此已声明汇总视图就判错。网格/客户类型下钻必须回到销售明细；不跨粒度混算。\n- 供销差优先v_gas_supply_balance；它已按month+center_id/org_id聚合采购与销售后关联。inlet_m3-sales_m3为差量，以inlet_m3为分母。loss_threshold只为演示阈值，不是法定或已核定标准；跨中心不取单个MAX阈值当统一标准。\n- v_gas_profit. pretax_profit_yuan=销气收入+安装收入+增值收入-采购成本-安装成本-增值成本-配气成本-管理费用-财务费用-减值费用。没有所得税字段，不能回答税后净利润；不能称每方均摊成本为实测逐用户成本。\n- v_gas_growth: ending_users=opening_users+connected_users-churn_users。connected_users是新增通气而非报装；applied_users是报装；potential_users是模拟潜在可接入户，不是法定全部人口基数。\n## 视图与粒度\n- v_gas_sales：一行=月份×销售网格×客户类型；business_key唯一；20个销售网格×4类客户×33个月。\n- v_gas_supply_sources：一行=月份×服务中心×气源；同中心同月有多个气源，不能直接连接销售明细。\n- v_gas_supply_balance：一行=月份×销售服务中心，month+org_id唯一；采购与销售分别聚合后关联，org_id是服务中心编码。\n- v_gas_profit：一行=月份×服务中心，month+org_id唯一；已经带入该中心的销气收入、采购成本，不能再次连接后重复求和。\n- v_gas_growth：一行=月份×销售服务中心×客户类型；10个服务中心×4类×33个月=1320行。org_id为中心编码，不能按网格下钻或与网格事实明细直连。\n- v_gas_org：一行一个组织节点，org_id全局唯一；层级1集团/2分公司/3服务中心/4网格，43节点。\n## 指标目录（按问题选择，不要求一次返回全部指标）\n- 销气量：v_gas_sales；SUM(volume_m3)；单位方；\n- 销气收入：v_gas_sales；SUM(revenue_yuan)；单位元；\n- 销气均价：v_gas_sales；SUM(revenue_yuan)/NULLIF(SUM(volume_m3),0)；单位元/方；收入/销量加权，不能AVG(price_yuan_m3)。\n- 估抄率：v_gas_sales；SUM(estimated_meter_m3)::numeric/NULLIF(SUM(volume_m3),0)；单位0–1；\n- 边界入口气量：v_gas_supply_balance；SUM(inlet_m3)；单位方；\n- 采购成本：v_gas_supply_balance；SUM(purchase_cost_yuan)；单位元；\n- 供销差量：v_gas_supply_balance；SUM(inlet_m3)-SUM(sales_m3)；单位方；\n- 供销差率：v_gas_supply_balance；(SUM(inlet_m3)-SUM(sales_m3))/NULLIF(SUM(inlet_m3),0)；单位0–1；\n- 模拟税前利润：v_gas_profit；SUM(pretax_profit_yuan)；单位元；缺所得税，绝不能称净利润。\n- 总收入：v_gas_profit；SUM(total_revenue_yuan)；单位元；\n- 新增通气户数：v_gas_growth；SUM(connected_users)；单位户；\n- 期末户数：v_gas_growth；SUM(ending_users)；单位户；只选定期末，不能跨月累加。\n## 高阶分析建议\n- 2026年三季度利润相较去年同期为何变化？拆解量价、采购、损耗和费用贡献\n- 居民每方提价0.1元，在销量不变假设下2026年前三季度可增收多少？\n\n## 业务操作与解释规则\n### 指标选择与粒度\n销售、估抄用网格×客户类型；采购气源用服务中心×气源；经营利润用服务中心；新增/期末用户用服务中心×客户类型。不同粒度不能强行下钻。\n### 环比与贡献拆解\n先确认本月和上月记录齐备；差量=本月-上月，环比=差量/上月。分解各客户类型差量对分公司差量的贡献，分公司总差量为0时贡献率返回空；贡献率可大于100%或为负，不能截断。\n### 量价拆解\n金额按实际收入统计；量影响可用(本期量-基期量)×基期加权均价，价影响用本期量×(本期均价-基期均价)，两项合计应等于收入差；注明这是选定分解顺序，不能混用采购单价。\n### 税前利润桥\n优先利润汇总视图，分别列销气/安装/增值收入及采购/安装/增值/配气/管理/财务/减值费用；利润减少不等同销量减少。高压输配只承担运维费用，无销气记录。\n### 范围名称解析\n滨江沿江营业所=BINJIANG-S1，望江路服务网格=BINJIANG-S1-W1。优先从v_gas_org解析精确名字及路径，再与服务端授权交集；公司名、中心名、网格名不能互相替代。\n### 场景与解释边界\n临港工业用气、沙湖估抄与供销差可进行同月/相邻月取证；数据发生变化不自动证明停产、泄漏或舞弊。内部模拟设定必须标记为设定，不能冒充经营人员确认。\n### 不支持的追问\n无天气、设备小时、企业产能、营销活动、所得税、居民逐户抄表记录；缺这些证据时可给后续取证建议，不能输出已验证因果或预测准确率。\n\n## 术语词典\n- 销气量（售气量、销售气量、卖了多少气）：已计入销售统计的气量；v_gas_sales.volume_m3，原始单位方，不是采购入口量。\n- 销气收入（售气收入、气费销售额、卖气收入）：v_gas_sales.revenue_yuan，单位元；与本期回款、期末应收不同。\n- 加权销气均价（平均售气价、每方卖价、平均气价）：SUM(revenue_yuan)/SUM(volume_m3)，元/方；采购均价需另用采购成本/入口量。\n- 估抄率（估表率、估算抄表占比、估抄气量占比）：SUM(estimated_meter_m3)/SUM(volume_m3)；不是估抄户数占比。\n- 实抄量（实表气量、实际抄表气量）：actual_meter_m3；与estimated_meter_m3之和为volume_m3。\n- 边界入口气量（进气量、入口量、采购气量）：v_gas_supply_balance.inlet_m3；组织边界计量，不能直接叫终端用量。\n- 供销差率（购销差率、产销差率、气差率）：(总入口量-总销气量)/总入口量；包括计量与抄表时差等可能因素，不能直接认定物理漏损。\n- 供销差量（气差量、购销差量）：入口量减销气量，单位方；先按同月同中心对齐。\n- 购气均价（采购均价、平均采购单价）：SUM(purchase_cost_yuan)/SUM(inlet_m3)，元/方；按气源金额气量加权。\n- 采购成本（买气成本、购气支出）：采购成本，不包含全部经营费用，不能等同总成本。\n- 模拟税前利润（税前利润、利润总额）：v_gas_profit.pretax_profit_yuan；无所得税字段，不可答税后净利润。\n- 新增通气户数（新开通户数、新接通用户、新装通气）：connected_users；与报装applied_users不同。\n- 报装户数（申请接气户数、新增报装）：applied_users，为申请量，不能当已通气。\n- 期末户数（在用用户数、月末用户数）：ending_users，为月末快照，不跨月累加。\n- 销气环比（销售环比、比上月气量）：本月与紧邻上一自然月同范围气量比较；同时给差量和比例。\n- 同期间同比（同期增幅、气量同比）：同月比较上年同月；2026年前三季度只能与2025年1至9月比较。\n\n## 当前组织名与稳定编码\n- 江城燃气集团：JC-GROUP；路径 江城燃气集团\n- 滨江分公司：BINJIANG；路径 江城燃气集团 / 滨江分公司\n- 滨江沿江营业所：BINJIANG-S1；路径 江城燃气集团 / 滨江分公司 / 滨江沿江营业所\n- 望江路服务网格：BINJIANG-S1-W1；路径 江城燃气集团 / 滨江分公司 / 滨江沿江营业所 / 望江路服务网格\n- 滨港路服务网格：BINJIANG-S1-W2；路径 江城燃气集团 / 滨江分公司 / 滨江沿江营业所 / 滨港路服务网格\n- 滨江城西营业所：BINJIANG-S2；路径 江城燃气集团 / 滨江分公司 / 滨江城西营业所\n- 锦澜社区服务网格：BINJIANG-S2-W1；路径 江城燃气集团 / 滨江分公司 / 滨江城西营业所 / 锦澜社区服务网格\n- 云麓社区服务网格：BINJIANG-S2-W2；路径 江城燃气集团 / 滨江分公司 / 滨江城西营业所 / 云麓社区服务网格\n- 沙湖分公司：SHAHU；路径 江城燃气集团 / 沙湖分公司\n- 沙湖东岸营业所：SHAHU-S1；路径 江城燃气集团 / 沙湖分公司 / 沙湖东岸营业所\n- 汀兰社区服务网格：SHAHU-S1-W1；路径 江城燃气集团 / 沙湖分公司 / 沙湖东岸营业所 / 汀兰社区服务网格\n- 荷风路服务网格：SHAHU-S1-W2；路径 江城燃气集团 / 沙湖分公司 / 沙湖东岸营业所 / 荷风路服务网格\n- 沙湖北岸营业所：SHAHU-S2；路径 江城燃气集团 / 沙湖分公司 / 沙湖北岸营业所\n- 湖畔新城服务网格：SHAHU-S2-W1；路径 江城燃气集团 / 沙湖分公司 / 沙湖北岸营业所 / 湖畔新城服务网格\n- 青荷路服务网格：SHAHU-S2-W2；路径 江城燃气集团 / 沙湖分公司 / 沙湖北岸营业所 / 青荷路服务网格\n- 经开分公司：JINGKAI；路径 江城燃气集团 / 经开分公司\n- 经开东园服务中心：JINGKAI-S1；路径 江城燃气集团 / 经开分公司 / 经开东园服务中心\n- 智造产业园服务网格：JINGKAI-S1-W1；路径 江城燃气集团 / 经开分公司 / 经开东园服务中心 / 智造产业园服务网格\n- 兴业大道服务网格：JINGKAI-S1-W2；路径 江城燃气集团 / 经开分公司 / 经开东园服务中心 / 兴业大道服务网格\n- 经开西园服务中心：JINGKAI-S2；路径 江城燃气集团 / 经开分公司 / 经开西园服务中心\n- 科创产业园服务网格：JINGKAI-S2-W1；路径 江城燃气集团 / 经开分公司 / 经开西园服务中心 / 科创产业园服务网格\n- 丰裕路服务网格：JINGKAI-S2-W2；路径 江城燃气集团 / 经开分公司 / 经开西园服务中心 / 丰裕路服务网格\n- 临港分公司：LINGANG；路径 江城燃气集团 / 临港分公司\n- 临港港区服务中心：LINGANG-S1；路径 江城燃气集团 / 临港分公司 / 临港港区服务中心\n- 港兴工业园服务网格：LINGANG-S1-W1；路径 江城燃气集团 / 临港分公司 / 临港港区服务中心 / 港兴工业园服务网格\n- 临江物流园服务网格：LINGANG-S1-W2；路径 江城燃气集团 / 临港分公司 / 临港港区服务中心 / 临江物流园服务网格\n- 临港新城营业所：LINGANG-S2；路径 江城燃气集团 / 临港分公司 / 临港新城营业所\n- 海棠社区服务网格：LINGANG-S2-W1；路径 江城燃气集团 / 临港分公司 / 临港新城营业所 / 海棠社区服务网格\n- 启航路服务网格：LINGANG-S2-W2；路径 江城燃气集团 / 临港分公司 / 临港新城营业所 / 启航路服务网格\n- 高新分公司：GAOXIN；路径 江城燃气集团 / 高新分公司\n- 高新科创服务中心：GAOXIN-S1；路径 江城燃气集团 / 高新分公司 / 高新科创服务中心\n- 光谷科创园服务网格：GAOXIN-S1-W1；路径 江城燃气集团 / 高新分公司 / 高新科创服务中心 / 光谷科创园服务网格\n- 星河产业园服务网格：GAOXIN-S1-W2；路径 江城燃气集团 / 高新分公司 / 高新科创服务中心 / 星河产业园服务网格\n- 高新生活服务中心：GAOXIN-S2；路径 江城燃气集团 / 高新分公司 / 高新生活服务中心\n- 麓林社区服务网格：GAOXIN-S2-W1；路径 江城燃气集团 / 高新分公司 / 高新生活服务中心 / 麓林社区服务网格\n- 文澜路服务网格：GAOXIN-S2-W2；路径 江城燃气集团 / 高新分公司 / 高新生活服务中心 / 文澜路服务网格\n- 高压输配分公司：GYSP；路径 江城燃气集团 / 高压输配分公司\n- 高压输配东线运维中心：GYSP-S1；路径 江城燃气集团 / 高压输配分公司 / 高压输配东线运维中心\n- 东环干线运维班组：GYSP-S1-W1；路径 江城燃气集团 / 高压输配分公司 / 高压输配东线运维中心 / 东环干线运维班组\n- 滨江门站运维班组：GYSP-S1-W2；路径 江城燃气集团 / 高压输配分公司 / 高压输配东线运维中心 / 滨江门站运维班组\n- 高压输配西线运维中心：GYSP-S2；路径 江城燃气集团 / 高压输配分公司 / 高压输配西线运维中心\n- 西环干线运维班组：GYSP-S2-W1；路径 江城燃气集团 / 高压输配分公司 / 高压输配西线运维中心 / 西环干线运维班组\n- 临港调压站运维班组：GYSP-S2-W2；路径 江城燃气集团 / 高压输配分公司 / 高压输配西线运维中心 / 临港调压站运维班组\n\n## 时间与组织交付契约\n- 返回实际时间范围、授权范围、指标单位和原始粒度。缺上期数据时环比为空，不能把缺失补0。\n- 用户明确选择2026-10时按10月返回无记录；问“最新”先用MAX(month)。截至日问题不得越过2026-09-30推演工单未来状态。\n- 当前数据为演示，企业和片区名称均为虚构；旧会话名称可按稳定ID衔接，不作真实公司识别。",
     "metrics": [
       {
         "key": "sales_volume",
@@ -208,10 +301,10 @@
       }
     ],
     "prompts": {
-      "1": "本域路由与问题澄清：经营范围：销气量价、购气成本、供销差、模拟税前利润、用户增长。财务应收/账龄应路由GAS_AR；隐患安检管网应路由GAS_SAFE。\n估抄率首选v_gas_sales：SUM(estimated_meter_m3)/SUM(volume_m3)。v_gas_supply_balance中estimated_m3、sales_m3分别来自同月同服务中心销售明细求和；在相同月份、分公司范围按SUM(estimated_m3)/SUM(sales_m3)计算等价，不能仅因使用此已声明汇总视图就判错。网格/客户类型下钻必须回到销售明细；不跨粒度混算。\n供销差优先v_gas_supply_balance；它已按month+center_id/org_id聚合采购与销售后关联。inlet_m3-sales_m3为差量，以inlet_m3为分母。loss_threshold只为演示阈值，不是法定或已核定标准；跨中心不取单个MAX阈值当统一标准。\nv_gas_profit. pretax_profit_yuan=销气收入+安装收入+增值收入-采购成本-安装成本-增值成本-配气成本-管理费用-财务费用-减值费用。没有所得税字段，不能回答税后净利润；不能称每方均摊成本为实测逐用户成本。\nv_gas_growth: ending_users=opening_users+connected_users-churn_users。connected_users是新增通气而非报装；applied_users是报装；potential_users是模拟潜在可接入户，不是法定全部人口基数。\n最新数据2026-09，保留用户指定的时间/组织/指标。指标缺失明确说明，不拿相邻指标替代。",
-      "2": "本域SQL专家：经营范围：销气量价、购气成本、供销差、模拟税前利润、用户增长。财务应收/账龄应路由GAS_AR；隐患安检管网应路由GAS_SAFE。\n估抄率首选v_gas_sales：SUM(estimated_meter_m3)/SUM(volume_m3)。v_gas_supply_balance中estimated_m3、sales_m3分别来自同月同服务中心销售明细求和；在相同月份、分公司范围按SUM(estimated_m3)/SUM(sales_m3)计算等价，不能仅因使用此已声明汇总视图就判错。网格/客户类型下钻必须回到销售明细；不跨粒度混算。\n供销差优先v_gas_supply_balance；它已按month+center_id/org_id聚合采购与销售后关联。inlet_m3-sales_m3为差量，以inlet_m3为分母。loss_threshold只为演示阈值，不是法定或已核定标准；跨中心不取单个MAX阈值当统一标准。\nv_gas_profit. pretax_profit_yuan=销气收入+安装收入+增值收入-采购成本-安装成本-增值成本-配气成本-管理费用-财务费用-减值费用。没有所得税字段，不能回答税后净利润；不能称每方均摊成本为实测逐用户成本。\nv_gas_growth: ending_users=opening_users+connected_users-churn_users。connected_users是新增通气而非报装；applied_users是报装；potential_users是模拟潜在可接入户，不是法定全部人口基数。\nSQL必须以真实字段字典和已声明视图为准，按所问指标选表，不要求输出整个指标目录。金额元、气量方、比率0–1，比例聚合用总分子/总分母。事实关联先聚合，不能多对多。样例仅供本轮AI生成参考。",
-      "3": "本域审核专家：经营范围：销气量价、购气成本、供销差、模拟税前利润、用户增长。财务应收/账龄应路由GAS_AR；隐患安检管网应路由GAS_SAFE。\n估抄率首选v_gas_sales：SUM(estimated_meter_m3)/SUM(volume_m3)。v_gas_supply_balance中estimated_m3、sales_m3分别来自同月同服务中心销售明细求和；在相同月份、分公司范围按SUM(estimated_m3)/SUM(sales_m3)计算等价，不能仅因使用此已声明汇总视图就判错。网格/客户类型下钻必须回到销售明细；不跨粒度混算。\n供销差优先v_gas_supply_balance；它已按month+center_id/org_id聚合采购与销售后关联。inlet_m3-sales_m3为差量，以inlet_m3为分母。loss_threshold只为演示阈值，不是法定或已核定标准；跨中心不取单个MAX阈值当统一标准。\nv_gas_profit. pretax_profit_yuan=销气收入+安装收入+增值收入-采购成本-安装成本-增值成本-配气成本-管理费用-财务费用-减值费用。没有所得税字段，不能回答税后净利润；不能称每方均摊成本为实测逐用户成本。\nv_gas_growth: ending_users=opening_users+connected_users-churn_users。connected_users是新增通气而非报装；applied_users是报装；potential_users是模拟潜在可接入户，不是法定全部人口基数。\n审核真实DDL、时间、粒度、单位及用户明确的组织条件。不能凭字段名相似猜测错误，不能因为合法等价视图与样例不同就拒绝。审核拒绝不得放行原SQL；修复后须重新审核。权限以服务端授权上下文和执行阶段为准。",
-      "4": "本域分析专家：经营范围：销气量价、购气成本、供销差、模拟税前利润、用户增长。财务应收/账龄应路由GAS_AR；隐患安检管网应路由GAS_SAFE。\n估抄率首选v_gas_sales：SUM(estimated_meter_m3)/SUM(volume_m3)。v_gas_supply_balance中estimated_m3、sales_m3分别来自同月同服务中心销售明细求和；在相同月份、分公司范围按SUM(estimated_m3)/SUM(sales_m3)计算等价，不能仅因使用此已声明汇总视图就判错。网格/客户类型下钻必须回到销售明细；不跨粒度混算。\n供销差优先v_gas_supply_balance；它已按month+center_id/org_id聚合采购与销售后关联。inlet_m3-sales_m3为差量，以inlet_m3为分母。loss_threshold只为演示阈值，不是法定或已核定标准；跨中心不取单个MAX阈值当统一标准。\nv_gas_profit. pretax_profit_yuan=销气收入+安装收入+增值收入-采购成本-安装成本-增值成本-配气成本-管理费用-财务费用-减值费用。没有所得税字段，不能回答税后净利润；不能称每方均摊成本为实测逐用户成本。\nv_gas_growth: ending_users=opening_users+connected_users-churn_users。connected_users是新增通气而非报装；applied_users是报装；potential_users是模拟潜在可接入户，不是法定全部人口基数。\n只回答本轮问题，第一段直接给结论与时间/数值/单位。事实、差异、假设分别说明；缺数据或取证失败如实提示。没有检验不声称相关、没有证据不声称因果。相近且舍入相同的比例不强行做细微排名。"
+      "1": "知识版本gas-semantics-20261025。先提取指标、组织层级、时间、粒度、比较基期。解析新组织名，不将行政区与业务网格混淆。只有口径真实有歧义才追问；允许依据授权全集回答。\n全部数据为虚构演示，不代表真实企业。月度事实仅覆盖2024-01至2026-09；“最新月”是数据MAX(month)，不是系统当前月；用户明确问2026-10必须按10月查空，不擅自换成9月。\n原始存储单位：气量方/立方米、金额元、里程公里、比例0到1。展示成万元/万方必须显式除10000并标单位；比率百分数展示才乘100。\n保留总主理人+领域专家框架。普通问数也实际经过AI，金标只作生成与审核参考，不允许样例直返或缓存答案代替AI。高阶先确认计划，再并行取证。\n复用系统gas_jc_tree组织树及现有数据权限。org_id是当前记录所属组织；branch_id是分公司编码、center_id是服务中心编码，不能把分公司编码直接等同网格org_id。跨层级范围用授权组织路径或组织维表解析。\n超级管理员可全域汇总，不因SQL没有组织WHERE就认定越权；普通账号权限必须由系统在取数前强制处理，不能由LLM文字代替。未绑定组织普通账号不开放。\n分公司：滨江BINJIANG、沙湖SHAHU、经开JINGKAI、临港LINGANG、高新GAOXIN、高压输配GYSP。高压输配没有销气职责；销售榜通常5家，安全/管网可有6家，不补造GYSP销气数据或强行补零。\n只使用本数据集声明的业务视图。事实表不得按月份、分公司或org_id单键明细互连；先各自聚合至相同时间与组织粒度，或使用已准备的汇总视图。\n组织维表v_gas_org.org_id唯一，事实视图.org_id可多对一关联。任何比例都先加总分子分母，再相除；分母0用NULLIF返回NULL，不补0、不简单平均比例。\n空结果不等于业务值0；取证失败不等于源库没有数据。AI/审核失败要明确未完成，禁止把规则摘要标作AI结论。\n数值差异、单月估抄率和老旧管网只能作为调查线索，不证明因果、偷盗气或系统性管理问题；无正式统计检验不输出正负相关结论。预测需专门模型和回测。\n经营范围：销气量价、购气成本、供销差、模拟税前利润、用户增长。财务应收/账龄应路由GAS_AR；隐患安检管网应路由GAS_SAFE。\n估抄率首选v_gas_sales：SUM(estimated_meter_m3)/SUM(volume_m3)。v_gas_supply_balance中estimated_m3、sales_m3分别来自同月同服务中心销售明细求和；在相同月份、分公司范围按SUM(estimated_m3)/SUM(sales_m3)计算等价，不能仅因使用此已声明汇总视图就判错。网格/客户类型下钻必须回到销售明细；不跨粒度混算。\n供销差优先v_gas_supply_balance；它已按month+center_id/org_id聚合采购与销售后关联。inlet_m3-sales_m3为差量，以inlet_m3为分母。loss_threshold只为演示阈值，不是法定或已核定标准；跨中心不取单个MAX阈值当统一标准。\nv_gas_profit. pretax_profit_yuan=销气收入+安装收入+增值收入-采购成本-安装成本-增值成本-配气成本-管理费用-财务费用-减值费用。没有所得税字段，不能回答税后净利润；不能称每方均摊成本为实测逐用户成本。\nv_gas_growth: ending_users=opening_users+connected_users-churn_users。connected_users是新增通气而非报装；applied_users是报装；potential_users是模拟潜在可接入户，不是法定全部人口基数。\n指标选择与粒度：销售、估抄用网格×客户类型；采购气源用服务中心×气源；经营利润用服务中心；新增/期末用户用服务中心×客户类型。不同粒度不能强行下钻。\n环比与贡献拆解：先确认本月和上月记录齐备；差量=本月-上月，环比=差量/上月。分解各客户类型差量对分公司差量的贡献，分公司总差量为0时贡献率返回空；贡献率可大于100%或为负，不能截断。\n量价拆解：金额按实际收入统计；量影响可用(本期量-基期量)×基期加权均价，价影响用本期量×(本期均价-基期均价)，两项合计应等于收入差；注明这是选定分解顺序，不能混用采购单价。\n税前利润桥：优先利润汇总视图，分别列销气/安装/增值收入及采购/安装/增值/配气/管理/财务/减值费用；利润减少不等同销量减少。高压输配只承担运维费用，无销气记录。\n范围名称解析：滨江沿江营业所=BINJIANG-S1，望江路服务网格=BINJIANG-S1-W1。优先从v_gas_org解析精确名字及路径，再与服务端授权交集；公司名、中心名、网格名不能互相替代。\n场景与解释边界：临港工业用气、沙湖估抄与供销差可进行同月/相邻月取证；数据发生变化不自动证明停产、泄漏或舞弊。内部模拟设定必须标记为设定，不能冒充经营人员确认。\n不支持的追问：无天气、设备小时、企业产能、营销活动、所得税、居民逐户抄表记录；缺这些证据时可给后续取证建议，不能输出已验证因果或预测准确率。\n本域常见术语：销气量=售气量/销售气量/卖了多少气；销气收入=售气收入/气费销售额/卖气收入；加权销气均价=平均售气价/每方卖价/平均气价；估抄率=估表率/估算抄表占比/估抄气量占比；实抄量=实表气量/实际抄表气量；边界入口气量=进气量/入口量/采购气量；供销差率=购销差率/产销差率/气差率；供销差量=气差量/购销差量；购气均价=采购均价/平均采购单价；采购成本=买气成本/购气支出；模拟税前利润=税前利润/利润总额；新增通气户数=新开通户数/新接通用户/新装通气；报装户数=申请接气户数/新增报装；期末户数=在用用户数/月末用户数；销气环比=销售环比/比上月气量；同期间同比=同期增幅/气量同比",
+      "2": "知识版本gas-semantics-20261025。生成只读PostgreSQL查询。给出选表理由与聚合摘要，比例先加分子分母，快照只取期末。组织条件使用稳定编码与授权路径；禁止查询视图未暴露字段。\n全部数据为虚构演示，不代表真实企业。月度事实仅覆盖2024-01至2026-09；“最新月”是数据MAX(month)，不是系统当前月；用户明确问2026-10必须按10月查空，不擅自换成9月。\n原始存储单位：气量方/立方米、金额元、里程公里、比例0到1。展示成万元/万方必须显式除10000并标单位；比率百分数展示才乘100。\n保留总主理人+领域专家框架。普通问数也实际经过AI，金标只作生成与审核参考，不允许样例直返或缓存答案代替AI。高阶先确认计划，再并行取证。\n复用系统gas_jc_tree组织树及现有数据权限。org_id是当前记录所属组织；branch_id是分公司编码、center_id是服务中心编码，不能把分公司编码直接等同网格org_id。跨层级范围用授权组织路径或组织维表解析。\n超级管理员可全域汇总，不因SQL没有组织WHERE就认定越权；普通账号权限必须由系统在取数前强制处理，不能由LLM文字代替。未绑定组织普通账号不开放。\n分公司：滨江BINJIANG、沙湖SHAHU、经开JINGKAI、临港LINGANG、高新GAOXIN、高压输配GYSP。高压输配没有销气职责；销售榜通常5家，安全/管网可有6家，不补造GYSP销气数据或强行补零。\n只使用本数据集声明的业务视图。事实表不得按月份、分公司或org_id单键明细互连；先各自聚合至相同时间与组织粒度，或使用已准备的汇总视图。\n组织维表v_gas_org.org_id唯一，事实视图.org_id可多对一关联。任何比例都先加总分子分母，再相除；分母0用NULLIF返回NULL，不补0、不简单平均比例。\n空结果不等于业务值0；取证失败不等于源库没有数据。AI/审核失败要明确未完成，禁止把规则摘要标作AI结论。\n数值差异、单月估抄率和老旧管网只能作为调查线索，不证明因果、偷盗气或系统性管理问题；无正式统计检验不输出正负相关结论。预测需专门模型和回测。\n经营范围：销气量价、购气成本、供销差、模拟税前利润、用户增长。财务应收/账龄应路由GAS_AR；隐患安检管网应路由GAS_SAFE。\n估抄率首选v_gas_sales：SUM(estimated_meter_m3)/SUM(volume_m3)。v_gas_supply_balance中estimated_m3、sales_m3分别来自同月同服务中心销售明细求和；在相同月份、分公司范围按SUM(estimated_m3)/SUM(sales_m3)计算等价，不能仅因使用此已声明汇总视图就判错。网格/客户类型下钻必须回到销售明细；不跨粒度混算。\n供销差优先v_gas_supply_balance；它已按month+center_id/org_id聚合采购与销售后关联。inlet_m3-sales_m3为差量，以inlet_m3为分母。loss_threshold只为演示阈值，不是法定或已核定标准；跨中心不取单个MAX阈值当统一标准。\nv_gas_profit. pretax_profit_yuan=销气收入+安装收入+增值收入-采购成本-安装成本-增值成本-配气成本-管理费用-财务费用-减值费用。没有所得税字段，不能回答税后净利润；不能称每方均摊成本为实测逐用户成本。\nv_gas_growth: ending_users=opening_users+connected_users-churn_users。connected_users是新增通气而非报装；applied_users是报装；potential_users是模拟潜在可接入户，不是法定全部人口基数。\n指标选择与粒度：销售、估抄用网格×客户类型；采购气源用服务中心×气源；经营利润用服务中心；新增/期末用户用服务中心×客户类型。不同粒度不能强行下钻。\n环比与贡献拆解：先确认本月和上月记录齐备；差量=本月-上月，环比=差量/上月。分解各客户类型差量对分公司差量的贡献，分公司总差量为0时贡献率返回空；贡献率可大于100%或为负，不能截断。\n量价拆解：金额按实际收入统计；量影响可用(本期量-基期量)×基期加权均价，价影响用本期量×(本期均价-基期均价)，两项合计应等于收入差；注明这是选定分解顺序，不能混用采购单价。\n税前利润桥：优先利润汇总视图，分别列销气/安装/增值收入及采购/安装/增值/配气/管理/财务/减值费用；利润减少不等同销量减少。高压输配只承担运维费用，无销气记录。\n范围名称解析：滨江沿江营业所=BINJIANG-S1，望江路服务网格=BINJIANG-S1-W1。优先从v_gas_org解析精确名字及路径，再与服务端授权交集；公司名、中心名、网格名不能互相替代。\n场景与解释边界：临港工业用气、沙湖估抄与供销差可进行同月/相邻月取证；数据发生变化不自动证明停产、泄漏或舞弊。内部模拟设定必须标记为设定，不能冒充经营人员确认。\n不支持的追问：无天气、设备小时、企业产能、营销活动、所得税、居民逐户抄表记录；缺这些证据时可给后续取证建议，不能输出已验证因果或预测准确率。\n本域常见术语：销气量=售气量/销售气量/卖了多少气；销气收入=售气收入/气费销售额/卖气收入；加权销气均价=平均售气价/每方卖价/平均气价；估抄率=估表率/估算抄表占比/估抄气量占比；实抄量=实表气量/实际抄表气量；边界入口气量=进气量/入口量/采购气量；供销差率=购销差率/产销差率/气差率；供销差量=气差量/购销差量；购气均价=采购均价/平均采购单价；采购成本=买气成本/购气支出；模拟税前利润=税前利润/利润总额；新增通气户数=新开通户数/新接通用户/新装通气；报装户数=申请接气户数/新增报装；期末户数=在用用户数/月末用户数；销气环比=销售环比/比上月气量；同期间同比=同期增幅/气量同比",
+      "3": "知识版本gas-semantics-20261025。核对SQL与实际字段、口径、分母、日期、组织层级、连接基数。登记稽核值与可重算值不一致应标数据质量问题；不能因样例SQL写法不同拒绝等价正确查询。\n全部数据为虚构演示，不代表真实企业。月度事实仅覆盖2024-01至2026-09；“最新月”是数据MAX(month)，不是系统当前月；用户明确问2026-10必须按10月查空，不擅自换成9月。\n原始存储单位：气量方/立方米、金额元、里程公里、比例0到1。展示成万元/万方必须显式除10000并标单位；比率百分数展示才乘100。\n保留总主理人+领域专家框架。普通问数也实际经过AI，金标只作生成与审核参考，不允许样例直返或缓存答案代替AI。高阶先确认计划，再并行取证。\n复用系统gas_jc_tree组织树及现有数据权限。org_id是当前记录所属组织；branch_id是分公司编码、center_id是服务中心编码，不能把分公司编码直接等同网格org_id。跨层级范围用授权组织路径或组织维表解析。\n超级管理员可全域汇总，不因SQL没有组织WHERE就认定越权；普通账号权限必须由系统在取数前强制处理，不能由LLM文字代替。未绑定组织普通账号不开放。\n分公司：滨江BINJIANG、沙湖SHAHU、经开JINGKAI、临港LINGANG、高新GAOXIN、高压输配GYSP。高压输配没有销气职责；销售榜通常5家，安全/管网可有6家，不补造GYSP销气数据或强行补零。\n只使用本数据集声明的业务视图。事实表不得按月份、分公司或org_id单键明细互连；先各自聚合至相同时间与组织粒度，或使用已准备的汇总视图。\n组织维表v_gas_org.org_id唯一，事实视图.org_id可多对一关联。任何比例都先加总分子分母，再相除；分母0用NULLIF返回NULL，不补0、不简单平均比例。\n空结果不等于业务值0；取证失败不等于源库没有数据。AI/审核失败要明确未完成，禁止把规则摘要标作AI结论。\n数值差异、单月估抄率和老旧管网只能作为调查线索，不证明因果、偷盗气或系统性管理问题；无正式统计检验不输出正负相关结论。预测需专门模型和回测。\n经营范围：销气量价、购气成本、供销差、模拟税前利润、用户增长。财务应收/账龄应路由GAS_AR；隐患安检管网应路由GAS_SAFE。\n估抄率首选v_gas_sales：SUM(estimated_meter_m3)/SUM(volume_m3)。v_gas_supply_balance中estimated_m3、sales_m3分别来自同月同服务中心销售明细求和；在相同月份、分公司范围按SUM(estimated_m3)/SUM(sales_m3)计算等价，不能仅因使用此已声明汇总视图就判错。网格/客户类型下钻必须回到销售明细；不跨粒度混算。\n供销差优先v_gas_supply_balance；它已按month+center_id/org_id聚合采购与销售后关联。inlet_m3-sales_m3为差量，以inlet_m3为分母。loss_threshold只为演示阈值，不是法定或已核定标准；跨中心不取单个MAX阈值当统一标准。\nv_gas_profit. pretax_profit_yuan=销气收入+安装收入+增值收入-采购成本-安装成本-增值成本-配气成本-管理费用-财务费用-减值费用。没有所得税字段，不能回答税后净利润；不能称每方均摊成本为实测逐用户成本。\nv_gas_growth: ending_users=opening_users+connected_users-churn_users。connected_users是新增通气而非报装；applied_users是报装；potential_users是模拟潜在可接入户，不是法定全部人口基数。\n指标选择与粒度：销售、估抄用网格×客户类型；采购气源用服务中心×气源；经营利润用服务中心；新增/期末用户用服务中心×客户类型。不同粒度不能强行下钻。\n环比与贡献拆解：先确认本月和上月记录齐备；差量=本月-上月，环比=差量/上月。分解各客户类型差量对分公司差量的贡献，分公司总差量为0时贡献率返回空；贡献率可大于100%或为负，不能截断。\n量价拆解：金额按实际收入统计；量影响可用(本期量-基期量)×基期加权均价，价影响用本期量×(本期均价-基期均价)，两项合计应等于收入差；注明这是选定分解顺序，不能混用采购单价。\n税前利润桥：优先利润汇总视图，分别列销气/安装/增值收入及采购/安装/增值/配气/管理/财务/减值费用；利润减少不等同销量减少。高压输配只承担运维费用，无销气记录。\n范围名称解析：滨江沿江营业所=BINJIANG-S1，望江路服务网格=BINJIANG-S1-W1。优先从v_gas_org解析精确名字及路径，再与服务端授权交集；公司名、中心名、网格名不能互相替代。\n场景与解释边界：临港工业用气、沙湖估抄与供销差可进行同月/相邻月取证；数据发生变化不自动证明停产、泄漏或舞弊。内部模拟设定必须标记为设定，不能冒充经营人员确认。\n不支持的追问：无天气、设备小时、企业产能、营销活动、所得税、居民逐户抄表记录；缺这些证据时可给后续取证建议，不能输出已验证因果或预测准确率。\n本域常见术语：销气量=售气量/销售气量/卖了多少气；销气收入=售气收入/气费销售额/卖气收入；加权销气均价=平均售气价/每方卖价/平均气价；估抄率=估表率/估算抄表占比/估抄气量占比；实抄量=实表气量/实际抄表气量；边界入口气量=进气量/入口量/采购气量；供销差率=购销差率/产销差率/气差率；供销差量=气差量/购销差量；购气均价=采购均价/平均采购单价；采购成本=买气成本/购气支出；模拟税前利润=税前利润/利润总额；新增通气户数=新开通户数/新接通用户/新装通气；报装户数=申请接气户数/新增报装；期末户数=在用用户数/月末用户数；销气环比=销售环比/比上月气量；同期间同比=同期增幅/气量同比",
+      "4": "知识版本gas-semantics-20261025。首段直接回答本题数值和范围；报告明确事实、数据质量提示、待验证假设、行动建议。无查询证据不使用既定场景故事推因果。排名先说明指标和对象范围，不能对零分母做优劣结论。最大增量按绝对差值排序，最大增幅按变化率排序，二者不能混用；金额和气量换算先精确加总再四舍五入，正文近似值必须与后续精确值一致。仅365天以上账龄为0不能推断181天以上长账龄为0；TopN结论仅限所查TopN，不能外推全体。缺总里程分母时，未入库绝对里程最少不等于GIS入库进度最好；短账龄或低余额不能据此判信用风险极低，缺基准也不自行判指标达标。单月或单期间汇总不能声称连续趋势。\n全部数据为虚构演示，不代表真实企业。月度事实仅覆盖2024-01至2026-09；“最新月”是数据MAX(month)，不是系统当前月；用户明确问2026-10必须按10月查空，不擅自换成9月。\n原始存储单位：气量方/立方米、金额元、里程公里、比例0到1。展示成万元/万方必须显式除10000并标单位；比率百分数展示才乘100。\n保留总主理人+领域专家框架。普通问数也实际经过AI，金标只作生成与审核参考，不允许样例直返或缓存答案代替AI。高阶先确认计划，再并行取证。\n复用系统gas_jc_tree组织树及现有数据权限。org_id是当前记录所属组织；branch_id是分公司编码、center_id是服务中心编码，不能把分公司编码直接等同网格org_id。跨层级范围用授权组织路径或组织维表解析。\n超级管理员可全域汇总，不因SQL没有组织WHERE就认定越权；普通账号权限必须由系统在取数前强制处理，不能由LLM文字代替。未绑定组织普通账号不开放。\n分公司：滨江BINJIANG、沙湖SHAHU、经开JINGKAI、临港LINGANG、高新GAOXIN、高压输配GYSP。高压输配没有销气职责；销售榜通常5家，安全/管网可有6家，不补造GYSP销气数据或强行补零。\n只使用本数据集声明的业务视图。事实表不得按月份、分公司或org_id单键明细互连；先各自聚合至相同时间与组织粒度，或使用已准备的汇总视图。\n组织维表v_gas_org.org_id唯一，事实视图.org_id可多对一关联。任何比例都先加总分子分母，再相除；分母0用NULLIF返回NULL，不补0、不简单平均比例。\n空结果不等于业务值0；取证失败不等于源库没有数据。AI/审核失败要明确未完成，禁止把规则摘要标作AI结论。\n数值差异、单月估抄率和老旧管网只能作为调查线索，不证明因果、偷盗气或系统性管理问题；无正式统计检验不输出正负相关结论。预测需专门模型和回测。\n经营范围：销气量价、购气成本、供销差、模拟税前利润、用户增长。财务应收/账龄应路由GAS_AR；隐患安检管网应路由GAS_SAFE。\n估抄率首选v_gas_sales：SUM(estimated_meter_m3)/SUM(volume_m3)。v_gas_supply_balance中estimated_m3、sales_m3分别来自同月同服务中心销售明细求和；在相同月份、分公司范围按SUM(estimated_m3)/SUM(sales_m3)计算等价，不能仅因使用此已声明汇总视图就判错。网格/客户类型下钻必须回到销售明细；不跨粒度混算。\n供销差优先v_gas_supply_balance；它已按month+center_id/org_id聚合采购与销售后关联。inlet_m3-sales_m3为差量，以inlet_m3为分母。loss_threshold只为演示阈值，不是法定或已核定标准；跨中心不取单个MAX阈值当统一标准。\nv_gas_profit. pretax_profit_yuan=销气收入+安装收入+增值收入-采购成本-安装成本-增值成本-配气成本-管理费用-财务费用-减值费用。没有所得税字段，不能回答税后净利润；不能称每方均摊成本为实测逐用户成本。\nv_gas_growth: ending_users=opening_users+connected_users-churn_users。connected_users是新增通气而非报装；applied_users是报装；potential_users是模拟潜在可接入户，不是法定全部人口基数。\n指标选择与粒度：销售、估抄用网格×客户类型；采购气源用服务中心×气源；经营利润用服务中心；新增/期末用户用服务中心×客户类型。不同粒度不能强行下钻。\n环比与贡献拆解：先确认本月和上月记录齐备；差量=本月-上月，环比=差量/上月。分解各客户类型差量对分公司差量的贡献，分公司总差量为0时贡献率返回空；贡献率可大于100%或为负，不能截断。\n量价拆解：金额按实际收入统计；量影响可用(本期量-基期量)×基期加权均价，价影响用本期量×(本期均价-基期均价)，两项合计应等于收入差；注明这是选定分解顺序，不能混用采购单价。\n税前利润桥：优先利润汇总视图，分别列销气/安装/增值收入及采购/安装/增值/配气/管理/财务/减值费用；利润减少不等同销量减少。高压输配只承担运维费用，无销气记录。\n范围名称解析：滨江沿江营业所=BINJIANG-S1，望江路服务网格=BINJIANG-S1-W1。优先从v_gas_org解析精确名字及路径，再与服务端授权交集；公司名、中心名、网格名不能互相替代。\n场景与解释边界：临港工业用气、沙湖估抄与供销差可进行同月/相邻月取证；数据发生变化不自动证明停产、泄漏或舞弊。内部模拟设定必须标记为设定，不能冒充经营人员确认。\n不支持的追问：无天气、设备小时、企业产能、营销活动、所得税、居民逐户抄表记录；缺这些证据时可给后续取证建议，不能输出已验证因果或预测准确率。\n本域常见术语：销气量=售气量/销售气量/卖了多少气；销气收入=售气收入/气费销售额/卖气收入；加权销气均价=平均售气价/每方卖价/平均气价；估抄率=估表率/估算抄表占比/估抄气量占比；实抄量=实表气量/实际抄表气量；边界入口气量=进气量/入口量/采购气量；供销差率=购销差率/产销差率/气差率；供销差量=气差量/购销差量；购气均价=采购均价/平均采购单价；采购成本=买气成本/购气支出；模拟税前利润=税前利润/利润总额；新增通气户数=新开通户数/新接通用户/新装通气；报装户数=申请接气户数/新增报装；期末户数=在用用户数/月末用户数；销气环比=销售环比/比上月气量；同期间同比=同期增幅/气量同比"
     },
     "queries": [
       {
@@ -228,11 +321,11 @@
       },
       {
         "question": "2026年9月居民和工商业销气收入各多少",
-        "sql": "SELECT user_type,SUM(revenue_yuan) AS 销气收入_元 FROM v_gas_sales WHERE month='2026-09' GROUP BY user_type"
+        "sql": "SELECT CASE WHEN user_type='居民' THEN '居民' ELSE '工商业' END AS 客户类别,SUM(revenue_yuan) AS 销气收入_元 FROM v_gas_sales WHERE month='2026-09' AND user_type IN ('居民','商业','工业') GROUP BY 1"
       },
       {
         "question": "2026年9月哪个分公司估抄率最高",
-        "sql": "SELECT branch_name,SUM(estimated_meter_m3)::numeric/NULLIF(SUM(volume_m3),0) AS 估抄率 FROM v_gas_sales WHERE month='2026-09' GROUP BY branch_name ORDER BY 估抄率 DESC"
+        "sql": "SELECT branch_name,SUM(estimated_meter_m3)::numeric/NULLIF(SUM(volume_m3),0) AS 估抄率 FROM v_gas_sales WHERE month='2026-09' GROUP BY branch_name ORDER BY 估抄率 DESC LIMIT 1"
       },
       {
         "question": "2026年9月各分公司新增通气多少户",
@@ -261,27 +354,454 @@
       {
         "question": "数据最新月份各分公司销气量是多少",
         "sql": "SELECT month,branch_name,SUM(volume_m3) AS 销气量_方 FROM v_gas_sales WHERE month=(SELECT MAX(month) FROM v_gas_sales) GROUP BY month,branch_name ORDER BY 销气量_方 DESC"
+      },
+      {
+        "question": "2026年9月各分公司销气量比8月增减多少",
+        "sql": "WITH a AS (SELECT branch_id,branch_name,SUM(volume_m3) FILTER(WHERE month='2026-09') current_m3,SUM(volume_m3) FILTER(WHERE month='2026-08') previous_m3 FROM v_gas_sales WHERE month IN ('2026-08','2026-09') GROUP BY branch_id,branch_name) SELECT *,current_m3-previous_m3 AS 差量_方,(current_m3-previous_m3)::numeric/NULLIF(previous_m3,0) AS 环比 FROM a ORDER BY 差量_方"
+      },
+      {
+        "question": "临港分公司2026年8月和9月按客户类型看销气变化",
+        "sql": "SELECT month,user_type,SUM(volume_m3) AS 销气量_方,SUM(revenue_yuan) AS 销气收入_元 FROM v_gas_sales WHERE branch_id='LINGANG' AND month IN ('2026-08','2026-09') GROUP BY month,user_type ORDER BY user_type,month"
+      },
+      {
+        "question": "2026年前三季度各分公司销气量同期间同比",
+        "sql": "WITH a AS (SELECT branch_name,SUM(volume_m3) FILTER(WHERE month BETWEEN '2025-01' AND '2025-09') p,SUM(volume_m3) FILTER(WHERE month BETWEEN '2026-01' AND '2026-09') c FROM v_gas_sales GROUP BY branch_name) SELECT branch_name,p AS 上年同期_方,c AS 本年同期_方,(c-p)::numeric/NULLIF(p,0) AS 同比 FROM a"
+      },
+      {
+        "question": "2026年9月滨江沿江营业所各网格估抄情况",
+        "sql": "SELECT org_id,org_name,SUM(estimated_meter_m3) AS 估抄量_方,SUM(volume_m3) AS 销气量_方,SUM(estimated_meter_m3)::numeric/NULLIF(SUM(volume_m3),0) AS 估抄率 FROM v_gas_sales WHERE month='2026-09' AND center_id='BINJIANG-S1' GROUP BY org_id,org_name"
+      },
+      {
+        "question": "2026年9月各气源采购气量和加权均价",
+        "sql": "SELECT source,SUM(inlet_m3) AS 采购量_方,SUM(purchase_cost_yuan) AS 采购成本_元,SUM(purchase_cost_yuan)/NULLIF(SUM(inlet_m3),0) AS 购气均价_元每方 FROM v_gas_supply_sources WHERE month='2026-09' GROUP BY source"
+      },
+      {
+        "question": "沙湖分公司2026年各月供销差量和供销差率",
+        "sql": "SELECT month,SUM(inlet_m3) AS 入口_方,SUM(sales_m3) AS 销气_方,SUM(inlet_m3)-SUM(sales_m3) AS 差量_方,(SUM(inlet_m3)-SUM(sales_m3))/NULLIF(SUM(inlet_m3),0) AS 供销差率 FROM v_gas_supply_balance WHERE branch_id='SHAHU' AND month BETWEEN '2026-01' AND '2026-09' GROUP BY month ORDER BY month"
+      },
+      {
+        "question": "2026年9月各服务中心报装、通气和净增用户",
+        "sql": "SELECT org_id,org_name,SUM(applied_users) AS 报装户数,SUM(connected_users) AS 通气户数,SUM(churn_users) AS 销户数,SUM(connected_users-churn_users) AS 净增户数 FROM v_gas_growth WHERE month='2026-09' GROUP BY org_id,org_name"
+      },
+      {
+        "question": "2026年9月各分公司每方采购与配气成本",
+        "sql": "SELECT branch_name,SUM(sales_m3) AS 销气量_方,SUM(purchase_cost_yuan)/NULLIF(SUM(sales_m3),0) AS 每销气方采购成本,SUM(distribution_cost_yuan)/NULLIF(SUM(sales_m3),0) AS 每销气方配气成本 FROM v_gas_profit WHERE month='2026-09' GROUP BY branch_name"
+      },
+      {
+        "question": "2026年9月各分公司税前利润的收入与费用构成",
+        "sql": "SELECT branch_name,SUM(sales_revenue_yuan) AS 销气收入,SUM(installation_revenue_yuan) AS 安装收入,SUM(value_added_revenue_yuan) AS 增值收入,SUM(purchase_cost_yuan) AS 采购成本,SUM(distribution_cost_yuan) AS 配气成本,SUM(admin_expense_yuan) AS 管理费用,SUM(finance_expense_yuan) AS 财务费用,SUM(impairment_yuan) AS 减值费用,SUM(pretax_profit_yuan) AS 模拟税前利润 FROM v_gas_profit WHERE month='2026-09' GROUP BY branch_name"
+      },
+      {
+        "question": "2026年10月销气量有数据吗",
+        "sql": "SELECT month,SUM(volume_m3) AS 销气量_方 FROM v_gas_sales WHERE month='2026-10' GROUP BY month"
       }
+    ],
+    "glossary": [
+      {
+        "alias": "售气量",
+        "canonical": "销气量",
+        "definition": "已计入销售统计的气量；v_gas_sales.volume_m3，原始单位方，不是采购入口量。",
+        "weight": 4
+      },
+      {
+        "alias": "销售气量",
+        "canonical": "销气量",
+        "definition": "已计入销售统计的气量；v_gas_sales.volume_m3，原始单位方，不是采购入口量。",
+        "weight": 4
+      },
+      {
+        "alias": "卖了多少气",
+        "canonical": "销气量",
+        "definition": "已计入销售统计的气量；v_gas_sales.volume_m3，原始单位方，不是采购入口量。",
+        "weight": 4
+      },
+      {
+        "alias": "售气收入",
+        "canonical": "销气收入",
+        "definition": "v_gas_sales.revenue_yuan，单位元；与本期回款、期末应收不同。",
+        "weight": 4
+      },
+      {
+        "alias": "气费销售额",
+        "canonical": "销气收入",
+        "definition": "v_gas_sales.revenue_yuan，单位元；与本期回款、期末应收不同。",
+        "weight": 4
+      },
+      {
+        "alias": "卖气收入",
+        "canonical": "销气收入",
+        "definition": "v_gas_sales.revenue_yuan，单位元；与本期回款、期末应收不同。",
+        "weight": 4
+      },
+      {
+        "alias": "平均售气价",
+        "canonical": "加权销气均价",
+        "definition": "SUM(revenue_yuan)/SUM(volume_m3)，元/方；采购均价需另用采购成本/入口量。",
+        "weight": 4
+      },
+      {
+        "alias": "每方卖价",
+        "canonical": "加权销气均价",
+        "definition": "SUM(revenue_yuan)/SUM(volume_m3)，元/方；采购均价需另用采购成本/入口量。",
+        "weight": 4
+      },
+      {
+        "alias": "平均气价",
+        "canonical": "加权销气均价",
+        "definition": "SUM(revenue_yuan)/SUM(volume_m3)，元/方；采购均价需另用采购成本/入口量。",
+        "weight": 4
+      },
+      {
+        "alias": "估表率",
+        "canonical": "估抄率",
+        "definition": "SUM(estimated_meter_m3)/SUM(volume_m3)；不是估抄户数占比。",
+        "weight": 4
+      },
+      {
+        "alias": "估算抄表占比",
+        "canonical": "估抄率",
+        "definition": "SUM(estimated_meter_m3)/SUM(volume_m3)；不是估抄户数占比。",
+        "weight": 4
+      },
+      {
+        "alias": "估抄气量占比",
+        "canonical": "估抄率",
+        "definition": "SUM(estimated_meter_m3)/SUM(volume_m3)；不是估抄户数占比。",
+        "weight": 4
+      },
+      {
+        "alias": "实表气量",
+        "canonical": "实抄量",
+        "definition": "actual_meter_m3；与estimated_meter_m3之和为volume_m3。",
+        "weight": 4
+      },
+      {
+        "alias": "实际抄表气量",
+        "canonical": "实抄量",
+        "definition": "actual_meter_m3；与estimated_meter_m3之和为volume_m3。",
+        "weight": 4
+      },
+      {
+        "alias": "进气量",
+        "canonical": "边界入口气量",
+        "definition": "v_gas_supply_balance.inlet_m3；组织边界计量，不能直接叫终端用量。",
+        "weight": 4
+      },
+      {
+        "alias": "入口量",
+        "canonical": "边界入口气量",
+        "definition": "v_gas_supply_balance.inlet_m3；组织边界计量，不能直接叫终端用量。",
+        "weight": 4
+      },
+      {
+        "alias": "采购气量",
+        "canonical": "边界入口气量",
+        "definition": "v_gas_supply_balance.inlet_m3；组织边界计量，不能直接叫终端用量。",
+        "weight": 4
+      },
+      {
+        "alias": "购销差率",
+        "canonical": "供销差率",
+        "definition": "(总入口量-总销气量)/总入口量；包括计量与抄表时差等可能因素，不能直接认定物理漏损。",
+        "weight": 4
+      },
+      {
+        "alias": "产销差率",
+        "canonical": "供销差率",
+        "definition": "(总入口量-总销气量)/总入口量；包括计量与抄表时差等可能因素，不能直接认定物理漏损。",
+        "weight": 4
+      },
+      {
+        "alias": "气差率",
+        "canonical": "供销差率",
+        "definition": "(总入口量-总销气量)/总入口量；包括计量与抄表时差等可能因素，不能直接认定物理漏损。",
+        "weight": 4
+      },
+      {
+        "alias": "气差量",
+        "canonical": "供销差量",
+        "definition": "入口量减销气量，单位方；先按同月同中心对齐。",
+        "weight": 4
+      },
+      {
+        "alias": "购销差量",
+        "canonical": "供销差量",
+        "definition": "入口量减销气量，单位方；先按同月同中心对齐。",
+        "weight": 4
+      },
+      {
+        "alias": "采购均价",
+        "canonical": "购气均价",
+        "definition": "SUM(purchase_cost_yuan)/SUM(inlet_m3)，元/方；按气源金额气量加权。",
+        "weight": 4
+      },
+      {
+        "alias": "平均采购单价",
+        "canonical": "购气均价",
+        "definition": "SUM(purchase_cost_yuan)/SUM(inlet_m3)，元/方；按气源金额气量加权。",
+        "weight": 4
+      },
+      {
+        "alias": "买气成本",
+        "canonical": "采购成本",
+        "definition": "采购成本，不包含全部经营费用，不能等同总成本。",
+        "weight": 4
+      },
+      {
+        "alias": "购气支出",
+        "canonical": "采购成本",
+        "definition": "采购成本，不包含全部经营费用，不能等同总成本。",
+        "weight": 4
+      },
+      {
+        "alias": "税前利润",
+        "canonical": "模拟税前利润",
+        "definition": "v_gas_profit.pretax_profit_yuan；无所得税字段，不可答税后净利润。",
+        "weight": 4
+      },
+      {
+        "alias": "利润总额",
+        "canonical": "模拟税前利润",
+        "definition": "v_gas_profit.pretax_profit_yuan；无所得税字段，不可答税后净利润。",
+        "weight": 4
+      },
+      {
+        "alias": "新开通户数",
+        "canonical": "新增通气户数",
+        "definition": "connected_users；与报装applied_users不同。",
+        "weight": 4
+      },
+      {
+        "alias": "新接通用户",
+        "canonical": "新增通气户数",
+        "definition": "connected_users；与报装applied_users不同。",
+        "weight": 4
+      },
+      {
+        "alias": "新装通气",
+        "canonical": "新增通气户数",
+        "definition": "connected_users；与报装applied_users不同。",
+        "weight": 4
+      },
+      {
+        "alias": "申请接气户数",
+        "canonical": "报装户数",
+        "definition": "applied_users，为申请量，不能当已通气。",
+        "weight": 4
+      },
+      {
+        "alias": "新增报装",
+        "canonical": "报装户数",
+        "definition": "applied_users，为申请量，不能当已通气。",
+        "weight": 4
+      },
+      {
+        "alias": "在用用户数",
+        "canonical": "期末户数",
+        "definition": "ending_users，为月末快照，不跨月累加。",
+        "weight": 4
+      },
+      {
+        "alias": "月末用户数",
+        "canonical": "期末户数",
+        "definition": "ending_users，为月末快照，不跨月累加。",
+        "weight": 4
+      },
+      {
+        "alias": "销售环比",
+        "canonical": "销气环比",
+        "definition": "本月与紧邻上一自然月同范围气量比较；同时给差量和比例。",
+        "weight": 4
+      },
+      {
+        "alias": "比上月气量",
+        "canonical": "销气环比",
+        "definition": "本月与紧邻上一自然月同范围气量比较；同时给差量和比例。",
+        "weight": 4
+      },
+      {
+        "alias": "同期增幅",
+        "canonical": "同期间同比",
+        "definition": "同月比较上年同月；2026年前三季度只能与2025年1至9月比较。",
+        "weight": 4
+      },
+      {
+        "alias": "气量同比",
+        "canonical": "同期间同比",
+        "definition": "同月比较上年同月；2026年前三季度只能与2025年1至9月比较。",
+        "weight": 4
+      },
+      {
+        "alias": "销气量",
+        "canonical": "销气量",
+        "definition": "已计入销售统计的气量；v_gas_sales.volume_m3，原始单位方，不是采购入口量。",
+        "weight": 5
+      },
+      {
+        "alias": "销气收入",
+        "canonical": "销气收入",
+        "definition": "v_gas_sales.revenue_yuan，单位元；与本期回款、期末应收不同。",
+        "weight": 5
+      },
+      {
+        "alias": "加权销气均价",
+        "canonical": "加权销气均价",
+        "definition": "SUM(revenue_yuan)/SUM(volume_m3)，元/方；采购均价需另用采购成本/入口量。",
+        "weight": 5
+      },
+      {
+        "alias": "估抄率",
+        "canonical": "估抄率",
+        "definition": "SUM(estimated_meter_m3)/SUM(volume_m3)；不是估抄户数占比。",
+        "weight": 5
+      },
+      {
+        "alias": "实抄量",
+        "canonical": "实抄量",
+        "definition": "actual_meter_m3；与estimated_meter_m3之和为volume_m3。",
+        "weight": 5
+      },
+      {
+        "alias": "边界入口气量",
+        "canonical": "边界入口气量",
+        "definition": "v_gas_supply_balance.inlet_m3；组织边界计量，不能直接叫终端用量。",
+        "weight": 5
+      },
+      {
+        "alias": "供销差率",
+        "canonical": "供销差率",
+        "definition": "(总入口量-总销气量)/总入口量；包括计量与抄表时差等可能因素，不能直接认定物理漏损。",
+        "weight": 5
+      },
+      {
+        "alias": "供销差量",
+        "canonical": "供销差量",
+        "definition": "入口量减销气量，单位方；先按同月同中心对齐。",
+        "weight": 5
+      },
+      {
+        "alias": "购气均价",
+        "canonical": "购气均价",
+        "definition": "SUM(purchase_cost_yuan)/SUM(inlet_m3)，元/方；按气源金额气量加权。",
+        "weight": 5
+      },
+      {
+        "alias": "采购成本",
+        "canonical": "采购成本",
+        "definition": "采购成本，不包含全部经营费用，不能等同总成本。",
+        "weight": 5
+      },
+      {
+        "alias": "模拟税前利润",
+        "canonical": "模拟税前利润",
+        "definition": "v_gas_profit.pretax_profit_yuan；无所得税字段，不可答税后净利润。",
+        "weight": 5
+      },
+      {
+        "alias": "新增通气户数",
+        "canonical": "新增通气户数",
+        "definition": "connected_users；与报装applied_users不同。",
+        "weight": 5
+      },
+      {
+        "alias": "报装户数",
+        "canonical": "报装户数",
+        "definition": "applied_users，为申请量，不能当已通气。",
+        "weight": 5
+      },
+      {
+        "alias": "期末户数",
+        "canonical": "期末户数",
+        "definition": "ending_users，为月末快照，不跨月累加。",
+        "weight": 5
+      },
+      {
+        "alias": "销气环比",
+        "canonical": "销气环比",
+        "definition": "本月与紧邻上一自然月同范围气量比较；同时给差量和比例。",
+        "weight": 5
+      },
+      {
+        "alias": "同期间同比",
+        "canonical": "同期间同比",
+        "definition": "同月比较上年同月；2026年前三季度只能与2025年1至9月比较。",
+        "weight": 5
+      }
+    ],
+    "common": [
+      "2026年9月各分公司销气量比8月增减多少",
+      "临港分公司2026年8月和9月按客户类型看销气变化",
+      "2026年前三季度各分公司销气量同期间同比",
+      "2026年9月滨江沿江营业所各网格估抄情况",
+      "2026年9月各气源采购气量和加权均价",
+      "沙湖分公司2026年各月供销差量和供销差率",
+      "2026年9月各服务中心报装、通气和净增用户",
+      "2026年9月各分公司每方采购与配气成本",
+      "2026年9月各分公司销气量排名",
+      "2026年9月各分公司供销差率",
+      "2026年前三季度模拟税前利润是多少",
+      "2026年9月居民和工商业销气收入各多少",
+      "2026年9月哪个分公司估抄率最高",
+      "2026年9月各分公司新增通气多少户",
+      "2026年9月各客户类型的加权销气均价是多少",
+      "2026年9月各分公司的估抄量与估抄率是多少"
     ]
   },
   {
     "code": "GAS_AR",
     "name": "江城燃气·应收回款与稽核",
     "synonyms": [
-      "燃气欠费",
-      "燃气应收",
-      "账龄",
-      "回款",
-      "量价稽核",
+      "月末欠费",
+      "应收余额",
+      "还欠多少气费",
+      "上期结转欠费",
+      "月初应收",
+      "本月出账金额",
+      "当期气费账单",
+      "实收气费",
+      "到账气费",
+      "收回气费",
+      "收缴率",
+      "回款率",
+      "气费实收率",
+      "半年以上欠费",
+      "超过180天欠款",
+      "365天以上欠费",
+      "超一年欠款",
+      "欠费年龄结构",
+      "应收分层",
+      "超期欠费天数",
+      "合同到期天数",
+      "应收计提",
+      "坏账准备演示",
+      "系统稽核差异",
+      "登记稽核金额",
+      "账单与理论差额",
+      "重新核算气费",
+      "欠费企业名单",
+      "欠费大户",
+      "应收勾稽",
+      "收支滚动平衡",
+      "前十大户欠费占比",
+      "头部应收占比",
+      "欠款迁徙",
+      "账龄滚动",
       "期末应收",
       "期初应收",
       "本期应收",
       "本期回款",
       "气费回收率",
-      "超过180天应收",
-      "期末计提余额",
-      "演示应计提金额",
-      "量价稽核差异"
+      "长账龄应收",
+      "一年以上应收",
+      "账龄分布",
+      "逾期天数",
+      "演示计提余额",
+      "稽核差异字段",
+      "重算量价差异",
+      "工商客户名单",
+      "应收滚动校验",
+      "欠费集中度",
+      "账龄迁移"
     ],
     "regression_cases": [
       {
@@ -307,6 +827,54 @@
         "question_text": "算回收率之前，请先确认按当月还是年累计期间",
         "expected_focus": "按用户要求确认统计范围后再生成SQL，不擅自采用其他口径",
         "expected_intent": "requires_confirmation"
+      },
+      {
+        "case_type": "same_period",
+        "question_text": "2026年9月末沙湖分公司欠费企业前十名",
+        "expected_focus": "使用已声明视图，限定时间和组织；与EXPLAIN后实际查询结果对齐，不用缓存结论。",
+        "expected_intent": "generate_sql"
+      },
+      {
+        "case_type": "new_org_name",
+        "question_text": "2026年9月末望江路服务网格应收账龄结构",
+        "expected_focus": "解析本轮新片区/组织名到稳定ID，不返回已废弃的第1/第2网格名称。",
+        "expected_intent": "generate_sql"
+      },
+      {
+        "case_type": "empty_month",
+        "question_text": "查询2026年10月本域核心指标",
+        "expected_focus": "保留用户10月条件；应明确无记录，不能暗换9月或把空聚合标为零。",
+        "expected_intent": "generate_sql"
+      },
+      {
+        "case_type": "unsupported",
+        "question_text": "列出欠费企业逐张发票的合同逾期天数",
+        "expected_focus": "说明缺失字段/证据；不编造天气、合同到期日或分钟级日志。",
+        "expected_intent": "requires_confirmation"
+      },
+      {
+        "case_type": "permission",
+        "question_text": "查看未授权分公司的所有明细",
+        "expected_focus": "应由服务端组织授权过滤或拒绝，不能只在报告中提示权限；对比范围也必须校验。",
+        "expected_intent": "generate_sql"
+      },
+      {
+        "case_type": "quality",
+        "question_text": "2026年9月按网格与客户类型核对出账和销售收入",
+        "expected_focus": "核对真实分子分母、粒度和连接；数据质量差异保留，不用解释覆盖错误。",
+        "expected_intent": "generate_sql"
+      },
+      {
+        "case_type": "entity_type",
+        "question_text": "居民汇总对象是不是单个欠费客户",
+        "expected_focus": "识别不能下钻的服务中心粒度、汇总对象或零分母；解释不适用，不造数据。",
+        "expected_intent": "requires_confirmation"
+      },
+      {
+        "case_type": "unit",
+        "question_text": "用万元、万方或公里展示本域指标并标单位",
+        "expected_focus": "只转换相应金额或气量字段，保留比例与计数单位；原始数值不得重复除万。",
+        "expected_intent": "generate_sql"
       }
     ],
     "views": [
@@ -329,11 +897,19 @@
       "财务范围：应收余额、回款、账龄、演示计提和销气量价稽核。销气利润供销差属GAS_BIZ；管网安检属GAS_SAFE。",
       "余额是时点：closing=opening+billed-collected+adjustment；账龄五段合计=closing。月末应收不能跨月SUM。累计回收率以期间collected总和/billed总和计算，不平均月度比例。",
       "优先v_gas_ar客户明细。v_gas_ar_summary是同月、网格、客户类型的客户聚合，可以用于组织汇总或长账龄应收；不可把明细与汇总重复累加，不能用汇总视图作客户名单。",
-      "单月120个对象=80个模拟工商客户+40个居民/公益汇总桶。object_kind=模拟客户才是客户名单；汇总桶不是一个真实用户，不能COUNT桶得到居民户数。只有应收及账龄分布，没有逐张发票到期日，不能声称逐发票逾期迁徙已核验。",
+      "单月120个对象=80个虚构工商企业+40个居民/公益汇总对象。object_kind=模拟客户才是客户名单；汇总桶不是一个真实用户，不能COUNT桶得到居民户数。只有应收及账龄分布，没有逐张发票到期日，不能声称逐发票逾期迁徙已核验。",
       "按账龄1%、3%、10%、30%、70%计算演示应计提，逐行四舍五入到分后再SUM，与provision_yuan比较；比例只是假设，不是审计准则或实际会计政策。",
-      "量价稽核用v_gas_sales的theoretical_revenue_yuan、revenue_yuan和audit_difference_yuan；不能用显示的四舍五入均价反算替代。销售和应收事实按月网格客户类型聚合后再关联，且必须同时匹配month+org_id+user_type；禁止明细多对多。"
+      "量价稽核用v_gas_sales的theoretical_revenue_yuan、revenue_yuan和audit_difference_yuan；不能用显示的四舍五入均价反算替代。销售和应收事实按月网格客户类型聚合后再关联，且必须同时匹配month+org_id+user_type；禁止明细多对多。",
+      "对象识别：单月120个统计对象，其中80个虚构工商企业、40个居民/公共机构汇总对象；总数不是实际用户数。object_kind只是类型标记，企业名无“模拟”后缀也仍是演示企业。",
+      "改名后的企业过滤：望江路恒拓精密制造有限公司稳定customer_id为DEMO-BINJIANG-S1-W1-工业-1。用名称定位ID，再保持ID跨期比较，不能按“工业1号”猜ID。",
+      "回收率口径：期间回款包含冲销历史欠款，可能超过期间出账；当期账单回收率需要逐笔账单分配，不得用当前数据替代。月均回收率与累计回收率不同，默认累计用总回款/总出账。",
+      "账龄时间边界：账龄按出账批次到月末的天数分段，0–30/31–90/91–180/181–365/>365，不是客户注册年限。没有合同应付日，因此不能把365天以上直接叫逾期365天。",
+      "稽核双轨核验：audit_difference_yuan为登记差异字段，收入减理论收入为可重算差异。两者应分别返回并指出不一致，禁止为了“守恒”直接修改源数或用登记值冒充已核算金额。原始audit_note目前不在v_gas_sales列中，不能生成查询该字段的SQL。",
+      "销售应收核对：销售按月×网格×类型，应收明细需先聚合到同样粒度后再关联；三键缺一会重复。比较金额需保留差额，不能把差异行过滤掉后声称完全一致。",
+      "风险报告表达：高余额、长账龄占比、连续欠费趋势可作催收优先级线索。无合同、催收履历、诉讼和信用评分，不能认定坏账或给出法律结论。",
+      "勾稽与空值：逐客户检查期初+出账-回款+调整-期末，容差0.01元；五档账龄合计与余额同样检查。无异常行代表本轮检查未检出差异，不等于没有客户或账簿为0。"
     ],
-    "content": "# 江城燃气·应收回款与稽核 · 可执行问数口径\n知识版本：gas-knowledge-20261022\n## 业务边界与红线\n- 全部数据为虚构演示，不代表真实企业。月度事实仅覆盖2024-01至2026-09；“最新月”是数据MAX(month)，不是系统当前月；用户明确问2026-10必须按10月查空，不擅自换成9月。\n- 原始存储单位：气量方/立方米、金额元、里程公里、比例0到1。展示成万元/万方必须显式除10000并标单位；比率百分数展示才乘100。\n- 保留总主理人+领域专家框架。普通问数也实际经过AI，金标只作生成与审核参考，不允许样例直返或缓存答案代替AI。高阶先确认计划，再并行取证。\n- 复用系统gas_jc_tree组织树及现有数据权限。org_id是当前记录所属组织；branch_id是分公司编码、center_id是服务中心编码，不能把分公司编码直接等同网格org_id。跨层级范围用授权组织路径或组织维表解析。\n- 超级管理员可全域汇总，不因SQL没有组织WHERE就认定越权；普通账号权限必须由系统在取数前强制处理，不能由LLM文字代替。未绑定组织普通账号不开放。\n- 分公司：滨江BINJIANG、沙湖SHAHU、经开JINGKAI、临港LINGANG、高新GAOXIN、高压输配GYSP。高压输配没有销气职责；销售榜通常5家，安全/管网可有6家，不补造GYSP销气数据或强行补零。\n- 只使用本数据集声明的业务视图。事实表不得按月份、分公司或org_id单键明细互连；先各自聚合至相同时间与组织粒度，或使用已准备的汇总视图。\n- 组织维表v_gas_org.org_id唯一，事实视图.org_id可多对一关联。任何比例都先加总分子分母，再相除；分母0用NULLIF返回NULL，不补0、不简单平均比例。\n- 空结果不等于业务值0；取证失败不等于源库没有数据。AI/审核失败要明确未完成，禁止把规则摘要标作AI结论。\n- 数值差异、单月估抄率和老旧管网只能作为调查线索，不证明因果、偷盗气或系统性管理问题；无正式统计检验不输出正负相关结论。预测需专门模型和回测。\n- 财务范围：应收余额、回款、账龄、演示计提和销气量价稽核。销气利润供销差属GAS_BIZ；管网安检属GAS_SAFE。\n- 余额是时点：closing=opening+billed-collected+adjustment；账龄五段合计=closing。月末应收不能跨月SUM。累计回收率以期间collected总和/billed总和计算，不平均月度比例。\n- 优先v_gas_ar客户明细。v_gas_ar_summary是同月、网格、客户类型的客户聚合，可以用于组织汇总或长账龄应收；不可把明细与汇总重复累加，不能用汇总视图作客户名单。\n- 单月120个对象=80个模拟工商客户+40个居民/公益汇总桶。object_kind=模拟客户才是客户名单；汇总桶不是一个真实用户，不能COUNT桶得到居民户数。只有应收及账龄分布，没有逐张发票到期日，不能声称逐发票逾期迁徙已核验。\n- 按账龄1%、3%、10%、30%、70%计算演示应计提，逐行四舍五入到分后再SUM，与provision_yuan比较；比例只是假设，不是审计准则或实际会计政策。\n- 量价稽核用v_gas_sales的theoretical_revenue_yuan、revenue_yuan和audit_difference_yuan；不能用显示的四舍五入均价反算替代。销售和应收事实按月网格客户类型聚合后再关联，且必须同时匹配month+org_id+user_type；禁止明细多对多。\n## 视图与粒度\n- v_gas_ar：一行=月份×模拟客户或居民/公益汇总桶；month+customer_id唯一，单月120个对象，非真实全量客户名单。\n- v_gas_ar_summary：一行=月份×销售网格×客户类型；已汇总客户记录，不能与v_gas_ar重复叠加。\n- v_gas_sales：一行=月份×销售网格×客户类型；business_key唯一；20个销售网格×4类客户×33个月。\n- v_gas_org：一行一个组织节点，org_id全局唯一；层级1集团/2分公司/3服务中心/4网格，43节点。\n## 指标目录（按问题选择，不要求一次返回全部指标）\n- 期末应收：v_gas_ar；SUM(closing_yuan)；单位元；只选定期末，不跨月求和。\n- 期初应收：v_gas_ar；SUM(opening_yuan)；单位元；\n- 本期应收：v_gas_ar；SUM(billed_yuan)；单位元；\n- 本期回款：v_gas_ar；SUM(collected_yuan)；单位元；\n- 气费回收率：v_gas_ar；SUM(collected_yuan)/NULLIF(SUM(billed_yuan),0)；单位0–1；可能含历史欠款回收，不强制截断到100%。\n- 超过180天应收：v_gas_ar；SUM(aging_181_365_yuan+aging_365_plus_yuan)；单位元；\n- 期末计提余额：v_gas_ar；SUM(provision_yuan)；单位元；\n- 演示应计提金额：v_gas_ar；SUM(ROUND(aging_0_30_yuan*0.01+aging_31_90_yuan*0.03+aging_91_180_yuan*0.10+aging_181_365_yuan*0.30+aging_365_plus_yuan*0.70,2))；单位元；1/3/10/30/70%仅为演示假设，非准则规定。\n- 量价稽核差异：v_gas_sales；SUM(audit_difference_yuan)；单位元；\n## 高阶分析建议\n- 沙湖应收恶化是哪些客户和账龄推动的？给出证据和催收建议\n- 按1%、3%、10%、30%、70%的演示账龄计提比例复核最新月计提是否充分",
+    "content": "# 江城燃气·应收回款与稽核 · 可执行问数口径\n知识版本：gas-semantics-20261025\n## 业务边界与红线\n- 全部数据为虚构演示，不代表真实企业。月度事实仅覆盖2024-01至2026-09；“最新月”是数据MAX(month)，不是系统当前月；用户明确问2026-10必须按10月查空，不擅自换成9月。\n- 原始存储单位：气量方/立方米、金额元、里程公里、比例0到1。展示成万元/万方必须显式除10000并标单位；比率百分数展示才乘100。\n- 保留总主理人+领域专家框架。普通问数也实际经过AI，金标只作生成与审核参考，不允许样例直返或缓存答案代替AI。高阶先确认计划，再并行取证。\n- 复用系统gas_jc_tree组织树及现有数据权限。org_id是当前记录所属组织；branch_id是分公司编码、center_id是服务中心编码，不能把分公司编码直接等同网格org_id。跨层级范围用授权组织路径或组织维表解析。\n- 超级管理员可全域汇总，不因SQL没有组织WHERE就认定越权；普通账号权限必须由系统在取数前强制处理，不能由LLM文字代替。未绑定组织普通账号不开放。\n- 分公司：滨江BINJIANG、沙湖SHAHU、经开JINGKAI、临港LINGANG、高新GAOXIN、高压输配GYSP。高压输配没有销气职责；销售榜通常5家，安全/管网可有6家，不补造GYSP销气数据或强行补零。\n- 只使用本数据集声明的业务视图。事实表不得按月份、分公司或org_id单键明细互连；先各自聚合至相同时间与组织粒度，或使用已准备的汇总视图。\n- 组织维表v_gas_org.org_id唯一，事实视图.org_id可多对一关联。任何比例都先加总分子分母，再相除；分母0用NULLIF返回NULL，不补0、不简单平均比例。\n- 空结果不等于业务值0；取证失败不等于源库没有数据。AI/审核失败要明确未完成，禁止把规则摘要标作AI结论。\n- 数值差异、单月估抄率和老旧管网只能作为调查线索，不证明因果、偷盗气或系统性管理问题；无正式统计检验不输出正负相关结论。预测需专门模型和回测。\n- 财务范围：应收余额、回款、账龄、演示计提和销气量价稽核。销气利润供销差属GAS_BIZ；管网安检属GAS_SAFE。\n- 余额是时点：closing=opening+billed-collected+adjustment；账龄五段合计=closing。月末应收不能跨月SUM。累计回收率以期间collected总和/billed总和计算，不平均月度比例。\n- 优先v_gas_ar客户明细。v_gas_ar_summary是同月、网格、客户类型的客户聚合，可以用于组织汇总或长账龄应收；不可把明细与汇总重复累加，不能用汇总视图作客户名单。\n- 单月120个对象=80个模拟工商客户+40个居民/公益汇总桶。object_kind=模拟客户才是客户名单；汇总桶不是一个真实用户，不能COUNT桶得到居民户数。只有应收及账龄分布，没有逐张发票到期日，不能声称逐发票逾期迁徙已核验。\n- 按账龄1%、3%、10%、30%、70%计算演示应计提，逐行四舍五入到分后再SUM，与provision_yuan比较；比例只是假设，不是审计准则或实际会计政策。\n- 量价稽核用v_gas_sales的theoretical_revenue_yuan、revenue_yuan和audit_difference_yuan；不能用显示的四舍五入均价反算替代。销售和应收事实按月网格客户类型聚合后再关联，且必须同时匹配month+org_id+user_type；禁止明细多对多。\n## 视图与粒度\n- v_gas_ar：一行=月份×模拟客户或居民/公益汇总桶；month+customer_id唯一，单月120个对象，非真实全量客户名单。\n- v_gas_ar_summary：一行=月份×销售网格×客户类型；已汇总客户记录，不能与v_gas_ar重复叠加。\n- v_gas_sales：一行=月份×销售网格×客户类型；business_key唯一；20个销售网格×4类客户×33个月。\n- v_gas_org：一行一个组织节点，org_id全局唯一；层级1集团/2分公司/3服务中心/4网格，43节点。\n## 指标目录（按问题选择，不要求一次返回全部指标）\n- 期末应收：v_gas_ar；SUM(closing_yuan)；单位元；只选定期末，不跨月求和。\n- 期初应收：v_gas_ar；SUM(opening_yuan)；单位元；\n- 本期应收：v_gas_ar；SUM(billed_yuan)；单位元；\n- 本期回款：v_gas_ar；SUM(collected_yuan)；单位元；\n- 气费回收率：v_gas_ar；SUM(collected_yuan)/NULLIF(SUM(billed_yuan),0)；单位0–1；可能含历史欠款回收，不强制截断到100%。\n- 超过180天应收：v_gas_ar；SUM(aging_181_365_yuan+aging_365_plus_yuan)；单位元；\n- 期末计提余额：v_gas_ar；SUM(provision_yuan)；单位元；\n- 演示应计提金额：v_gas_ar；SUM(ROUND(aging_0_30_yuan*0.01+aging_31_90_yuan*0.03+aging_91_180_yuan*0.10+aging_181_365_yuan*0.30+aging_365_plus_yuan*0.70,2))；单位元；1/3/10/30/70%仅为演示假设，非准则规定。\n- 量价稽核差异：v_gas_sales；SUM(audit_difference_yuan)；单位元；\n## 高阶分析建议\n- 沙湖应收恶化是哪些客户和账龄推动的？给出证据和催收建议\n- 按1%、3%、10%、30%、70%的演示账龄计提比例复核最新月计提是否充分\n\n## 业务操作与解释规则\n### 对象识别\n单月120个统计对象，其中80个虚构工商企业、40个居民/公共机构汇总对象；总数不是实际用户数。object_kind只是类型标记，企业名无“模拟”后缀也仍是演示企业。\n### 改名后的企业过滤\n望江路恒拓精密制造有限公司稳定customer_id为DEMO-BINJIANG-S1-W1-工业-1。用名称定位ID，再保持ID跨期比较，不能按“工业1号”猜ID。\n### 回收率口径\n期间回款包含冲销历史欠款，可能超过期间出账；当期账单回收率需要逐笔账单分配，不得用当前数据替代。月均回收率与累计回收率不同，默认累计用总回款/总出账。\n### 账龄时间边界\n账龄按出账批次到月末的天数分段，0–30/31–90/91–180/181–365/>365，不是客户注册年限。没有合同应付日，因此不能把365天以上直接叫逾期365天。\n### 稽核双轨核验\naudit_difference_yuan为登记差异字段，收入减理论收入为可重算差异。两者应分别返回并指出不一致，禁止为了“守恒”直接修改源数或用登记值冒充已核算金额。原始audit_note目前不在v_gas_sales列中，不能生成查询该字段的SQL。\n### 销售应收核对\n销售按月×网格×类型，应收明细需先聚合到同样粒度后再关联；三键缺一会重复。比较金额需保留差额，不能把差异行过滤掉后声称完全一致。\n### 风险报告表达\n高余额、长账龄占比、连续欠费趋势可作催收优先级线索。无合同、催收履历、诉讼和信用评分，不能认定坏账或给出法律结论。\n### 勾稽与空值\n逐客户检查期初+出账-回款+调整-期末，容差0.01元；五档账龄合计与余额同样检查。无异常行代表本轮检查未检出差异，不等于没有客户或账簿为0。\n\n## 术语词典\n- 期末应收（月末欠费、应收余额、还欠多少气费）：closing_yuan，月末余额；不是本月账单或期间总欠费。\n- 期初应收（上期结转欠费、月初应收）：opening_yuan，与上月期末按同一customer_id衔接。\n- 本期应收（本月出账金额、当期气费账单）：billed_yuan，期间新增应收，不是余额。\n- 本期回款（实收气费、到账气费、收回气费）：collected_yuan，包括历史欠款回收；并非只收当月账单。\n- 气费回收率（收缴率、回款率、气费实收率）：期间总回款/期间总出账，可能超过100%；不是当期发票逐单回收率。\n- 长账龄应收（半年以上欠费、超过180天欠款）：aging_181_365_yuan+aging_365_plus_yuan；月末快照。\n- 一年以上应收（365天以上欠费、超一年欠款）：aging_365_plus_yuan；按出账日至快照日计龄，不等同合同逾期。\n- 账龄分布（欠费年龄结构、应收分层）：0–30、31–90、91–180、181–365、365天以上五档。\n- 逾期天数（超期欠费天数、合同到期天数）：缺逐笔合同到期日，不能把账龄直接称逾期天数；需澄清。\n- 演示计提余额（应收计提、坏账准备演示）：provision_yuan；1/3/10/30/70%为演示假设，不作为企业正式会计政策。\n- 稽核差异字段（系统稽核差异、登记稽核金额）：audit_difference_yuan为已登记差异；可与收入减理论收入不一致，需分别展示核验。\n- 重算量价差异（账单与理论差额、重新核算气费）：revenue_yuan-theoretical_revenue_yuan；不能用四舍五入均价反推。\n- 工商客户名单（欠费企业名单、欠费大户）：仅object_kind=模拟客户；居民与公共机构汇总对象不得当企业。\n- 应收滚动校验（应收勾稽、收支滚动平衡）：期初+出账-回款+调整=期末；按对象逐月核对。\n- 欠费集中度（前十大户欠费占比、头部应收占比）：同月同范围、同对象类型下TopN余额/总余额，明确是否只看工商客户。\n- 账龄迁移（欠款迁徙、账龄滚动）：可比较同一customer_id各月账龄余额；缺发票ID，不能证明逐张发票迁徙。\n\n## 当前组织名与稳定编码\n- 江城燃气集团：JC-GROUP；路径 江城燃气集团\n- 滨江分公司：BINJIANG；路径 江城燃气集团 / 滨江分公司\n- 滨江沿江营业所：BINJIANG-S1；路径 江城燃气集团 / 滨江分公司 / 滨江沿江营业所\n- 望江路服务网格：BINJIANG-S1-W1；路径 江城燃气集团 / 滨江分公司 / 滨江沿江营业所 / 望江路服务网格\n- 滨港路服务网格：BINJIANG-S1-W2；路径 江城燃气集团 / 滨江分公司 / 滨江沿江营业所 / 滨港路服务网格\n- 滨江城西营业所：BINJIANG-S2；路径 江城燃气集团 / 滨江分公司 / 滨江城西营业所\n- 锦澜社区服务网格：BINJIANG-S2-W1；路径 江城燃气集团 / 滨江分公司 / 滨江城西营业所 / 锦澜社区服务网格\n- 云麓社区服务网格：BINJIANG-S2-W2；路径 江城燃气集团 / 滨江分公司 / 滨江城西营业所 / 云麓社区服务网格\n- 沙湖分公司：SHAHU；路径 江城燃气集团 / 沙湖分公司\n- 沙湖东岸营业所：SHAHU-S1；路径 江城燃气集团 / 沙湖分公司 / 沙湖东岸营业所\n- 汀兰社区服务网格：SHAHU-S1-W1；路径 江城燃气集团 / 沙湖分公司 / 沙湖东岸营业所 / 汀兰社区服务网格\n- 荷风路服务网格：SHAHU-S1-W2；路径 江城燃气集团 / 沙湖分公司 / 沙湖东岸营业所 / 荷风路服务网格\n- 沙湖北岸营业所：SHAHU-S2；路径 江城燃气集团 / 沙湖分公司 / 沙湖北岸营业所\n- 湖畔新城服务网格：SHAHU-S2-W1；路径 江城燃气集团 / 沙湖分公司 / 沙湖北岸营业所 / 湖畔新城服务网格\n- 青荷路服务网格：SHAHU-S2-W2；路径 江城燃气集团 / 沙湖分公司 / 沙湖北岸营业所 / 青荷路服务网格\n- 经开分公司：JINGKAI；路径 江城燃气集团 / 经开分公司\n- 经开东园服务中心：JINGKAI-S1；路径 江城燃气集团 / 经开分公司 / 经开东园服务中心\n- 智造产业园服务网格：JINGKAI-S1-W1；路径 江城燃气集团 / 经开分公司 / 经开东园服务中心 / 智造产业园服务网格\n- 兴业大道服务网格：JINGKAI-S1-W2；路径 江城燃气集团 / 经开分公司 / 经开东园服务中心 / 兴业大道服务网格\n- 经开西园服务中心：JINGKAI-S2；路径 江城燃气集团 / 经开分公司 / 经开西园服务中心\n- 科创产业园服务网格：JINGKAI-S2-W1；路径 江城燃气集团 / 经开分公司 / 经开西园服务中心 / 科创产业园服务网格\n- 丰裕路服务网格：JINGKAI-S2-W2；路径 江城燃气集团 / 经开分公司 / 经开西园服务中心 / 丰裕路服务网格\n- 临港分公司：LINGANG；路径 江城燃气集团 / 临港分公司\n- 临港港区服务中心：LINGANG-S1；路径 江城燃气集团 / 临港分公司 / 临港港区服务中心\n- 港兴工业园服务网格：LINGANG-S1-W1；路径 江城燃气集团 / 临港分公司 / 临港港区服务中心 / 港兴工业园服务网格\n- 临江物流园服务网格：LINGANG-S1-W2；路径 江城燃气集团 / 临港分公司 / 临港港区服务中心 / 临江物流园服务网格\n- 临港新城营业所：LINGANG-S2；路径 江城燃气集团 / 临港分公司 / 临港新城营业所\n- 海棠社区服务网格：LINGANG-S2-W1；路径 江城燃气集团 / 临港分公司 / 临港新城营业所 / 海棠社区服务网格\n- 启航路服务网格：LINGANG-S2-W2；路径 江城燃气集团 / 临港分公司 / 临港新城营业所 / 启航路服务网格\n- 高新分公司：GAOXIN；路径 江城燃气集团 / 高新分公司\n- 高新科创服务中心：GAOXIN-S1；路径 江城燃气集团 / 高新分公司 / 高新科创服务中心\n- 光谷科创园服务网格：GAOXIN-S1-W1；路径 江城燃气集团 / 高新分公司 / 高新科创服务中心 / 光谷科创园服务网格\n- 星河产业园服务网格：GAOXIN-S1-W2；路径 江城燃气集团 / 高新分公司 / 高新科创服务中心 / 星河产业园服务网格\n- 高新生活服务中心：GAOXIN-S2；路径 江城燃气集团 / 高新分公司 / 高新生活服务中心\n- 麓林社区服务网格：GAOXIN-S2-W1；路径 江城燃气集团 / 高新分公司 / 高新生活服务中心 / 麓林社区服务网格\n- 文澜路服务网格：GAOXIN-S2-W2；路径 江城燃气集团 / 高新分公司 / 高新生活服务中心 / 文澜路服务网格\n- 高压输配分公司：GYSP；路径 江城燃气集团 / 高压输配分公司\n- 高压输配东线运维中心：GYSP-S1；路径 江城燃气集团 / 高压输配分公司 / 高压输配东线运维中心\n- 东环干线运维班组：GYSP-S1-W1；路径 江城燃气集团 / 高压输配分公司 / 高压输配东线运维中心 / 东环干线运维班组\n- 滨江门站运维班组：GYSP-S1-W2；路径 江城燃气集团 / 高压输配分公司 / 高压输配东线运维中心 / 滨江门站运维班组\n- 高压输配西线运维中心：GYSP-S2；路径 江城燃气集团 / 高压输配分公司 / 高压输配西线运维中心\n- 西环干线运维班组：GYSP-S2-W1；路径 江城燃气集团 / 高压输配分公司 / 高压输配西线运维中心 / 西环干线运维班组\n- 临港调压站运维班组：GYSP-S2-W2；路径 江城燃气集团 / 高压输配分公司 / 高压输配西线运维中心 / 临港调压站运维班组\n\n## 时间与组织交付契约\n- 返回实际时间范围、授权范围、指标单位和原始粒度。缺上期数据时环比为空，不能把缺失补0。\n- 用户明确选择2026-10时按10月返回无记录；问“最新”先用MAX(month)。截至日问题不得越过2026-09-30推演工单未来状态。\n- 当前数据为演示，企业和片区名称均为虚构；旧会话名称可按稳定ID衔接，不作真实公司识别。",
     "metrics": [
       {
         "key": "closing_ar",
@@ -436,10 +1012,10 @@
       }
     ],
     "prompts": {
-      "1": "本域路由与问题澄清：财务范围：应收余额、回款、账龄、演示计提和销气量价稽核。销气利润供销差属GAS_BIZ；管网安检属GAS_SAFE。\n余额是时点：closing=opening+billed-collected+adjustment；账龄五段合计=closing。月末应收不能跨月SUM。累计回收率以期间collected总和/billed总和计算，不平均月度比例。\n优先v_gas_ar客户明细。v_gas_ar_summary是同月、网格、客户类型的客户聚合，可以用于组织汇总或长账龄应收；不可把明细与汇总重复累加，不能用汇总视图作客户名单。\n单月120个对象=80个模拟工商客户+40个居民/公益汇总桶。object_kind=模拟客户才是客户名单；汇总桶不是一个真实用户，不能COUNT桶得到居民户数。只有应收及账龄分布，没有逐张发票到期日，不能声称逐发票逾期迁徙已核验。\n按账龄1%、3%、10%、30%、70%计算演示应计提，逐行四舍五入到分后再SUM，与provision_yuan比较；比例只是假设，不是审计准则或实际会计政策。\n量价稽核用v_gas_sales的theoretical_revenue_yuan、revenue_yuan和audit_difference_yuan；不能用显示的四舍五入均价反算替代。销售和应收事实按月网格客户类型聚合后再关联，且必须同时匹配month+org_id+user_type；禁止明细多对多。\n最新数据2026-09，保留用户指定的时间/组织/指标。指标缺失明确说明，不拿相邻指标替代。",
-      "2": "本域SQL专家：财务范围：应收余额、回款、账龄、演示计提和销气量价稽核。销气利润供销差属GAS_BIZ；管网安检属GAS_SAFE。\n余额是时点：closing=opening+billed-collected+adjustment；账龄五段合计=closing。月末应收不能跨月SUM。累计回收率以期间collected总和/billed总和计算，不平均月度比例。\n优先v_gas_ar客户明细。v_gas_ar_summary是同月、网格、客户类型的客户聚合，可以用于组织汇总或长账龄应收；不可把明细与汇总重复累加，不能用汇总视图作客户名单。\n单月120个对象=80个模拟工商客户+40个居民/公益汇总桶。object_kind=模拟客户才是客户名单；汇总桶不是一个真实用户，不能COUNT桶得到居民户数。只有应收及账龄分布，没有逐张发票到期日，不能声称逐发票逾期迁徙已核验。\n按账龄1%、3%、10%、30%、70%计算演示应计提，逐行四舍五入到分后再SUM，与provision_yuan比较；比例只是假设，不是审计准则或实际会计政策。\n量价稽核用v_gas_sales的theoretical_revenue_yuan、revenue_yuan和audit_difference_yuan；不能用显示的四舍五入均价反算替代。销售和应收事实按月网格客户类型聚合后再关联，且必须同时匹配month+org_id+user_type；禁止明细多对多。\nSQL必须以真实字段字典和已声明视图为准，按所问指标选表，不要求输出整个指标目录。金额元、气量方、比率0–1，比例聚合用总分子/总分母。事实关联先聚合，不能多对多。样例仅供本轮AI生成参考。",
-      "3": "本域审核专家：财务范围：应收余额、回款、账龄、演示计提和销气量价稽核。销气利润供销差属GAS_BIZ；管网安检属GAS_SAFE。\n余额是时点：closing=opening+billed-collected+adjustment；账龄五段合计=closing。月末应收不能跨月SUM。累计回收率以期间collected总和/billed总和计算，不平均月度比例。\n优先v_gas_ar客户明细。v_gas_ar_summary是同月、网格、客户类型的客户聚合，可以用于组织汇总或长账龄应收；不可把明细与汇总重复累加，不能用汇总视图作客户名单。\n单月120个对象=80个模拟工商客户+40个居民/公益汇总桶。object_kind=模拟客户才是客户名单；汇总桶不是一个真实用户，不能COUNT桶得到居民户数。只有应收及账龄分布，没有逐张发票到期日，不能声称逐发票逾期迁徙已核验。\n按账龄1%、3%、10%、30%、70%计算演示应计提，逐行四舍五入到分后再SUM，与provision_yuan比较；比例只是假设，不是审计准则或实际会计政策。\n量价稽核用v_gas_sales的theoretical_revenue_yuan、revenue_yuan和audit_difference_yuan；不能用显示的四舍五入均价反算替代。销售和应收事实按月网格客户类型聚合后再关联，且必须同时匹配month+org_id+user_type；禁止明细多对多。\n审核真实DDL、时间、粒度、单位及用户明确的组织条件。不能凭字段名相似猜测错误，不能因为合法等价视图与样例不同就拒绝。审核拒绝不得放行原SQL；修复后须重新审核。权限以服务端授权上下文和执行阶段为准。",
-      "4": "本域分析专家：财务范围：应收余额、回款、账龄、演示计提和销气量价稽核。销气利润供销差属GAS_BIZ；管网安检属GAS_SAFE。\n余额是时点：closing=opening+billed-collected+adjustment；账龄五段合计=closing。月末应收不能跨月SUM。累计回收率以期间collected总和/billed总和计算，不平均月度比例。\n优先v_gas_ar客户明细。v_gas_ar_summary是同月、网格、客户类型的客户聚合，可以用于组织汇总或长账龄应收；不可把明细与汇总重复累加，不能用汇总视图作客户名单。\n单月120个对象=80个模拟工商客户+40个居民/公益汇总桶。object_kind=模拟客户才是客户名单；汇总桶不是一个真实用户，不能COUNT桶得到居民户数。只有应收及账龄分布，没有逐张发票到期日，不能声称逐发票逾期迁徙已核验。\n按账龄1%、3%、10%、30%、70%计算演示应计提，逐行四舍五入到分后再SUM，与provision_yuan比较；比例只是假设，不是审计准则或实际会计政策。\n量价稽核用v_gas_sales的theoretical_revenue_yuan、revenue_yuan和audit_difference_yuan；不能用显示的四舍五入均价反算替代。销售和应收事实按月网格客户类型聚合后再关联，且必须同时匹配month+org_id+user_type；禁止明细多对多。\n只回答本轮问题，第一段直接给结论与时间/数值/单位。事实、差异、假设分别说明；缺数据或取证失败如实提示。没有检验不声称相关、没有证据不声称因果。相近且舍入相同的比例不强行做细微排名。"
+      "1": "知识版本gas-semantics-20261025。先提取指标、组织层级、时间、粒度、比较基期。解析新组织名，不将行政区与业务网格混淆。只有口径真实有歧义才追问；允许依据授权全集回答。\n全部数据为虚构演示，不代表真实企业。月度事实仅覆盖2024-01至2026-09；“最新月”是数据MAX(month)，不是系统当前月；用户明确问2026-10必须按10月查空，不擅自换成9月。\n原始存储单位：气量方/立方米、金额元、里程公里、比例0到1。展示成万元/万方必须显式除10000并标单位；比率百分数展示才乘100。\n保留总主理人+领域专家框架。普通问数也实际经过AI，金标只作生成与审核参考，不允许样例直返或缓存答案代替AI。高阶先确认计划，再并行取证。\n复用系统gas_jc_tree组织树及现有数据权限。org_id是当前记录所属组织；branch_id是分公司编码、center_id是服务中心编码，不能把分公司编码直接等同网格org_id。跨层级范围用授权组织路径或组织维表解析。\n超级管理员可全域汇总，不因SQL没有组织WHERE就认定越权；普通账号权限必须由系统在取数前强制处理，不能由LLM文字代替。未绑定组织普通账号不开放。\n分公司：滨江BINJIANG、沙湖SHAHU、经开JINGKAI、临港LINGANG、高新GAOXIN、高压输配GYSP。高压输配没有销气职责；销售榜通常5家，安全/管网可有6家，不补造GYSP销气数据或强行补零。\n只使用本数据集声明的业务视图。事实表不得按月份、分公司或org_id单键明细互连；先各自聚合至相同时间与组织粒度，或使用已准备的汇总视图。\n组织维表v_gas_org.org_id唯一，事实视图.org_id可多对一关联。任何比例都先加总分子分母，再相除；分母0用NULLIF返回NULL，不补0、不简单平均比例。\n空结果不等于业务值0；取证失败不等于源库没有数据。AI/审核失败要明确未完成，禁止把规则摘要标作AI结论。\n数值差异、单月估抄率和老旧管网只能作为调查线索，不证明因果、偷盗气或系统性管理问题；无正式统计检验不输出正负相关结论。预测需专门模型和回测。\n财务范围：应收余额、回款、账龄、演示计提和销气量价稽核。销气利润供销差属GAS_BIZ；管网安检属GAS_SAFE。\n余额是时点：closing=opening+billed-collected+adjustment；账龄五段合计=closing。月末应收不能跨月SUM。累计回收率以期间collected总和/billed总和计算，不平均月度比例。\n优先v_gas_ar客户明细。v_gas_ar_summary是同月、网格、客户类型的客户聚合，可以用于组织汇总或长账龄应收；不可把明细与汇总重复累加，不能用汇总视图作客户名单。\n单月120个对象=80个虚构工商企业+40个居民/公益汇总对象。object_kind=模拟客户才是客户名单；汇总桶不是一个真实用户，不能COUNT桶得到居民户数。只有应收及账龄分布，没有逐张发票到期日，不能声称逐发票逾期迁徙已核验。\n按账龄1%、3%、10%、30%、70%计算演示应计提，逐行四舍五入到分后再SUM，与provision_yuan比较；比例只是假设，不是审计准则或实际会计政策。\n量价稽核用v_gas_sales的theoretical_revenue_yuan、revenue_yuan和audit_difference_yuan；不能用显示的四舍五入均价反算替代。销售和应收事实按月网格客户类型聚合后再关联，且必须同时匹配month+org_id+user_type；禁止明细多对多。\n对象识别：单月120个统计对象，其中80个虚构工商企业、40个居民/公共机构汇总对象；总数不是实际用户数。object_kind只是类型标记，企业名无“模拟”后缀也仍是演示企业。\n改名后的企业过滤：望江路恒拓精密制造有限公司稳定customer_id为DEMO-BINJIANG-S1-W1-工业-1。用名称定位ID，再保持ID跨期比较，不能按“工业1号”猜ID。\n回收率口径：期间回款包含冲销历史欠款，可能超过期间出账；当期账单回收率需要逐笔账单分配，不得用当前数据替代。月均回收率与累计回收率不同，默认累计用总回款/总出账。\n账龄时间边界：账龄按出账批次到月末的天数分段，0–30/31–90/91–180/181–365/>365，不是客户注册年限。没有合同应付日，因此不能把365天以上直接叫逾期365天。\n稽核双轨核验：audit_difference_yuan为登记差异字段，收入减理论收入为可重算差异。两者应分别返回并指出不一致，禁止为了“守恒”直接修改源数或用登记值冒充已核算金额。原始audit_note目前不在v_gas_sales列中，不能生成查询该字段的SQL。\n销售应收核对：销售按月×网格×类型，应收明细需先聚合到同样粒度后再关联；三键缺一会重复。比较金额需保留差额，不能把差异行过滤掉后声称完全一致。\n风险报告表达：高余额、长账龄占比、连续欠费趋势可作催收优先级线索。无合同、催收履历、诉讼和信用评分，不能认定坏账或给出法律结论。\n勾稽与空值：逐客户检查期初+出账-回款+调整-期末，容差0.01元；五档账龄合计与余额同样检查。无异常行代表本轮检查未检出差异，不等于没有客户或账簿为0。\n本域常见术语：期末应收=月末欠费/应收余额/还欠多少气费；期初应收=上期结转欠费/月初应收；本期应收=本月出账金额/当期气费账单；本期回款=实收气费/到账气费/收回气费；气费回收率=收缴率/回款率/气费实收率；长账龄应收=半年以上欠费/超过180天欠款；一年以上应收=365天以上欠费/超一年欠款；账龄分布=欠费年龄结构/应收分层；逾期天数=超期欠费天数/合同到期天数；演示计提余额=应收计提/坏账准备演示；稽核差异字段=系统稽核差异/登记稽核金额；重算量价差异=账单与理论差额/重新核算气费；工商客户名单=欠费企业名单/欠费大户；应收滚动校验=应收勾稽/收支滚动平衡；欠费集中度=前十大户欠费占比/头部应收占比；账龄迁移=欠款迁徙/账龄滚动",
+      "2": "知识版本gas-semantics-20261025。生成只读PostgreSQL查询。给出选表理由与聚合摘要，比例先加分子分母，快照只取期末。组织条件使用稳定编码与授权路径；禁止查询视图未暴露字段。\n全部数据为虚构演示，不代表真实企业。月度事实仅覆盖2024-01至2026-09；“最新月”是数据MAX(month)，不是系统当前月；用户明确问2026-10必须按10月查空，不擅自换成9月。\n原始存储单位：气量方/立方米、金额元、里程公里、比例0到1。展示成万元/万方必须显式除10000并标单位；比率百分数展示才乘100。\n保留总主理人+领域专家框架。普通问数也实际经过AI，金标只作生成与审核参考，不允许样例直返或缓存答案代替AI。高阶先确认计划，再并行取证。\n复用系统gas_jc_tree组织树及现有数据权限。org_id是当前记录所属组织；branch_id是分公司编码、center_id是服务中心编码，不能把分公司编码直接等同网格org_id。跨层级范围用授权组织路径或组织维表解析。\n超级管理员可全域汇总，不因SQL没有组织WHERE就认定越权；普通账号权限必须由系统在取数前强制处理，不能由LLM文字代替。未绑定组织普通账号不开放。\n分公司：滨江BINJIANG、沙湖SHAHU、经开JINGKAI、临港LINGANG、高新GAOXIN、高压输配GYSP。高压输配没有销气职责；销售榜通常5家，安全/管网可有6家，不补造GYSP销气数据或强行补零。\n只使用本数据集声明的业务视图。事实表不得按月份、分公司或org_id单键明细互连；先各自聚合至相同时间与组织粒度，或使用已准备的汇总视图。\n组织维表v_gas_org.org_id唯一，事实视图.org_id可多对一关联。任何比例都先加总分子分母，再相除；分母0用NULLIF返回NULL，不补0、不简单平均比例。\n空结果不等于业务值0；取证失败不等于源库没有数据。AI/审核失败要明确未完成，禁止把规则摘要标作AI结论。\n数值差异、单月估抄率和老旧管网只能作为调查线索，不证明因果、偷盗气或系统性管理问题；无正式统计检验不输出正负相关结论。预测需专门模型和回测。\n财务范围：应收余额、回款、账龄、演示计提和销气量价稽核。销气利润供销差属GAS_BIZ；管网安检属GAS_SAFE。\n余额是时点：closing=opening+billed-collected+adjustment；账龄五段合计=closing。月末应收不能跨月SUM。累计回收率以期间collected总和/billed总和计算，不平均月度比例。\n优先v_gas_ar客户明细。v_gas_ar_summary是同月、网格、客户类型的客户聚合，可以用于组织汇总或长账龄应收；不可把明细与汇总重复累加，不能用汇总视图作客户名单。\n单月120个对象=80个虚构工商企业+40个居民/公益汇总对象。object_kind=模拟客户才是客户名单；汇总桶不是一个真实用户，不能COUNT桶得到居民户数。只有应收及账龄分布，没有逐张发票到期日，不能声称逐发票逾期迁徙已核验。\n按账龄1%、3%、10%、30%、70%计算演示应计提，逐行四舍五入到分后再SUM，与provision_yuan比较；比例只是假设，不是审计准则或实际会计政策。\n量价稽核用v_gas_sales的theoretical_revenue_yuan、revenue_yuan和audit_difference_yuan；不能用显示的四舍五入均价反算替代。销售和应收事实按月网格客户类型聚合后再关联，且必须同时匹配month+org_id+user_type；禁止明细多对多。\n对象识别：单月120个统计对象，其中80个虚构工商企业、40个居民/公共机构汇总对象；总数不是实际用户数。object_kind只是类型标记，企业名无“模拟”后缀也仍是演示企业。\n改名后的企业过滤：望江路恒拓精密制造有限公司稳定customer_id为DEMO-BINJIANG-S1-W1-工业-1。用名称定位ID，再保持ID跨期比较，不能按“工业1号”猜ID。\n回收率口径：期间回款包含冲销历史欠款，可能超过期间出账；当期账单回收率需要逐笔账单分配，不得用当前数据替代。月均回收率与累计回收率不同，默认累计用总回款/总出账。\n账龄时间边界：账龄按出账批次到月末的天数分段，0–30/31–90/91–180/181–365/>365，不是客户注册年限。没有合同应付日，因此不能把365天以上直接叫逾期365天。\n稽核双轨核验：audit_difference_yuan为登记差异字段，收入减理论收入为可重算差异。两者应分别返回并指出不一致，禁止为了“守恒”直接修改源数或用登记值冒充已核算金额。原始audit_note目前不在v_gas_sales列中，不能生成查询该字段的SQL。\n销售应收核对：销售按月×网格×类型，应收明细需先聚合到同样粒度后再关联；三键缺一会重复。比较金额需保留差额，不能把差异行过滤掉后声称完全一致。\n风险报告表达：高余额、长账龄占比、连续欠费趋势可作催收优先级线索。无合同、催收履历、诉讼和信用评分，不能认定坏账或给出法律结论。\n勾稽与空值：逐客户检查期初+出账-回款+调整-期末，容差0.01元；五档账龄合计与余额同样检查。无异常行代表本轮检查未检出差异，不等于没有客户或账簿为0。\n本域常见术语：期末应收=月末欠费/应收余额/还欠多少气费；期初应收=上期结转欠费/月初应收；本期应收=本月出账金额/当期气费账单；本期回款=实收气费/到账气费/收回气费；气费回收率=收缴率/回款率/气费实收率；长账龄应收=半年以上欠费/超过180天欠款；一年以上应收=365天以上欠费/超一年欠款；账龄分布=欠费年龄结构/应收分层；逾期天数=超期欠费天数/合同到期天数；演示计提余额=应收计提/坏账准备演示；稽核差异字段=系统稽核差异/登记稽核金额；重算量价差异=账单与理论差额/重新核算气费；工商客户名单=欠费企业名单/欠费大户；应收滚动校验=应收勾稽/收支滚动平衡；欠费集中度=前十大户欠费占比/头部应收占比；账龄迁移=欠款迁徙/账龄滚动",
+      "3": "知识版本gas-semantics-20261025。核对SQL与实际字段、口径、分母、日期、组织层级、连接基数。登记稽核值与可重算值不一致应标数据质量问题；不能因样例SQL写法不同拒绝等价正确查询。\n全部数据为虚构演示，不代表真实企业。月度事实仅覆盖2024-01至2026-09；“最新月”是数据MAX(month)，不是系统当前月；用户明确问2026-10必须按10月查空，不擅自换成9月。\n原始存储单位：气量方/立方米、金额元、里程公里、比例0到1。展示成万元/万方必须显式除10000并标单位；比率百分数展示才乘100。\n保留总主理人+领域专家框架。普通问数也实际经过AI，金标只作生成与审核参考，不允许样例直返或缓存答案代替AI。高阶先确认计划，再并行取证。\n复用系统gas_jc_tree组织树及现有数据权限。org_id是当前记录所属组织；branch_id是分公司编码、center_id是服务中心编码，不能把分公司编码直接等同网格org_id。跨层级范围用授权组织路径或组织维表解析。\n超级管理员可全域汇总，不因SQL没有组织WHERE就认定越权；普通账号权限必须由系统在取数前强制处理，不能由LLM文字代替。未绑定组织普通账号不开放。\n分公司：滨江BINJIANG、沙湖SHAHU、经开JINGKAI、临港LINGANG、高新GAOXIN、高压输配GYSP。高压输配没有销气职责；销售榜通常5家，安全/管网可有6家，不补造GYSP销气数据或强行补零。\n只使用本数据集声明的业务视图。事实表不得按月份、分公司或org_id单键明细互连；先各自聚合至相同时间与组织粒度，或使用已准备的汇总视图。\n组织维表v_gas_org.org_id唯一，事实视图.org_id可多对一关联。任何比例都先加总分子分母，再相除；分母0用NULLIF返回NULL，不补0、不简单平均比例。\n空结果不等于业务值0；取证失败不等于源库没有数据。AI/审核失败要明确未完成，禁止把规则摘要标作AI结论。\n数值差异、单月估抄率和老旧管网只能作为调查线索，不证明因果、偷盗气或系统性管理问题；无正式统计检验不输出正负相关结论。预测需专门模型和回测。\n财务范围：应收余额、回款、账龄、演示计提和销气量价稽核。销气利润供销差属GAS_BIZ；管网安检属GAS_SAFE。\n余额是时点：closing=opening+billed-collected+adjustment；账龄五段合计=closing。月末应收不能跨月SUM。累计回收率以期间collected总和/billed总和计算，不平均月度比例。\n优先v_gas_ar客户明细。v_gas_ar_summary是同月、网格、客户类型的客户聚合，可以用于组织汇总或长账龄应收；不可把明细与汇总重复累加，不能用汇总视图作客户名单。\n单月120个对象=80个虚构工商企业+40个居民/公益汇总对象。object_kind=模拟客户才是客户名单；汇总桶不是一个真实用户，不能COUNT桶得到居民户数。只有应收及账龄分布，没有逐张发票到期日，不能声称逐发票逾期迁徙已核验。\n按账龄1%、3%、10%、30%、70%计算演示应计提，逐行四舍五入到分后再SUM，与provision_yuan比较；比例只是假设，不是审计准则或实际会计政策。\n量价稽核用v_gas_sales的theoretical_revenue_yuan、revenue_yuan和audit_difference_yuan；不能用显示的四舍五入均价反算替代。销售和应收事实按月网格客户类型聚合后再关联，且必须同时匹配month+org_id+user_type；禁止明细多对多。\n对象识别：单月120个统计对象，其中80个虚构工商企业、40个居民/公共机构汇总对象；总数不是实际用户数。object_kind只是类型标记，企业名无“模拟”后缀也仍是演示企业。\n改名后的企业过滤：望江路恒拓精密制造有限公司稳定customer_id为DEMO-BINJIANG-S1-W1-工业-1。用名称定位ID，再保持ID跨期比较，不能按“工业1号”猜ID。\n回收率口径：期间回款包含冲销历史欠款，可能超过期间出账；当期账单回收率需要逐笔账单分配，不得用当前数据替代。月均回收率与累计回收率不同，默认累计用总回款/总出账。\n账龄时间边界：账龄按出账批次到月末的天数分段，0–30/31–90/91–180/181–365/>365，不是客户注册年限。没有合同应付日，因此不能把365天以上直接叫逾期365天。\n稽核双轨核验：audit_difference_yuan为登记差异字段，收入减理论收入为可重算差异。两者应分别返回并指出不一致，禁止为了“守恒”直接修改源数或用登记值冒充已核算金额。原始audit_note目前不在v_gas_sales列中，不能生成查询该字段的SQL。\n销售应收核对：销售按月×网格×类型，应收明细需先聚合到同样粒度后再关联；三键缺一会重复。比较金额需保留差额，不能把差异行过滤掉后声称完全一致。\n风险报告表达：高余额、长账龄占比、连续欠费趋势可作催收优先级线索。无合同、催收履历、诉讼和信用评分，不能认定坏账或给出法律结论。\n勾稽与空值：逐客户检查期初+出账-回款+调整-期末，容差0.01元；五档账龄合计与余额同样检查。无异常行代表本轮检查未检出差异，不等于没有客户或账簿为0。\n本域常见术语：期末应收=月末欠费/应收余额/还欠多少气费；期初应收=上期结转欠费/月初应收；本期应收=本月出账金额/当期气费账单；本期回款=实收气费/到账气费/收回气费；气费回收率=收缴率/回款率/气费实收率；长账龄应收=半年以上欠费/超过180天欠款；一年以上应收=365天以上欠费/超一年欠款；账龄分布=欠费年龄结构/应收分层；逾期天数=超期欠费天数/合同到期天数；演示计提余额=应收计提/坏账准备演示；稽核差异字段=系统稽核差异/登记稽核金额；重算量价差异=账单与理论差额/重新核算气费；工商客户名单=欠费企业名单/欠费大户；应收滚动校验=应收勾稽/收支滚动平衡；欠费集中度=前十大户欠费占比/头部应收占比；账龄迁移=欠款迁徙/账龄滚动",
+      "4": "知识版本gas-semantics-20261025。首段直接回答本题数值和范围；报告明确事实、数据质量提示、待验证假设、行动建议。无查询证据不使用既定场景故事推因果。排名先说明指标和对象范围，不能对零分母做优劣结论。最大增量按绝对差值排序，最大增幅按变化率排序，二者不能混用；金额和气量换算先精确加总再四舍五入，正文近似值必须与后续精确值一致。仅365天以上账龄为0不能推断181天以上长账龄为0；TopN结论仅限所查TopN，不能外推全体。缺总里程分母时，未入库绝对里程最少不等于GIS入库进度最好；短账龄或低余额不能据此判信用风险极低，缺基准也不自行判指标达标。单月或单期间汇总不能声称连续趋势。\n全部数据为虚构演示，不代表真实企业。月度事实仅覆盖2024-01至2026-09；“最新月”是数据MAX(month)，不是系统当前月；用户明确问2026-10必须按10月查空，不擅自换成9月。\n原始存储单位：气量方/立方米、金额元、里程公里、比例0到1。展示成万元/万方必须显式除10000并标单位；比率百分数展示才乘100。\n保留总主理人+领域专家框架。普通问数也实际经过AI，金标只作生成与审核参考，不允许样例直返或缓存答案代替AI。高阶先确认计划，再并行取证。\n复用系统gas_jc_tree组织树及现有数据权限。org_id是当前记录所属组织；branch_id是分公司编码、center_id是服务中心编码，不能把分公司编码直接等同网格org_id。跨层级范围用授权组织路径或组织维表解析。\n超级管理员可全域汇总，不因SQL没有组织WHERE就认定越权；普通账号权限必须由系统在取数前强制处理，不能由LLM文字代替。未绑定组织普通账号不开放。\n分公司：滨江BINJIANG、沙湖SHAHU、经开JINGKAI、临港LINGANG、高新GAOXIN、高压输配GYSP。高压输配没有销气职责；销售榜通常5家，安全/管网可有6家，不补造GYSP销气数据或强行补零。\n只使用本数据集声明的业务视图。事实表不得按月份、分公司或org_id单键明细互连；先各自聚合至相同时间与组织粒度，或使用已准备的汇总视图。\n组织维表v_gas_org.org_id唯一，事实视图.org_id可多对一关联。任何比例都先加总分子分母，再相除；分母0用NULLIF返回NULL，不补0、不简单平均比例。\n空结果不等于业务值0；取证失败不等于源库没有数据。AI/审核失败要明确未完成，禁止把规则摘要标作AI结论。\n数值差异、单月估抄率和老旧管网只能作为调查线索，不证明因果、偷盗气或系统性管理问题；无正式统计检验不输出正负相关结论。预测需专门模型和回测。\n财务范围：应收余额、回款、账龄、演示计提和销气量价稽核。销气利润供销差属GAS_BIZ；管网安检属GAS_SAFE。\n余额是时点：closing=opening+billed-collected+adjustment；账龄五段合计=closing。月末应收不能跨月SUM。累计回收率以期间collected总和/billed总和计算，不平均月度比例。\n优先v_gas_ar客户明细。v_gas_ar_summary是同月、网格、客户类型的客户聚合，可以用于组织汇总或长账龄应收；不可把明细与汇总重复累加，不能用汇总视图作客户名单。\n单月120个对象=80个虚构工商企业+40个居民/公益汇总对象。object_kind=模拟客户才是客户名单；汇总桶不是一个真实用户，不能COUNT桶得到居民户数。只有应收及账龄分布，没有逐张发票到期日，不能声称逐发票逾期迁徙已核验。\n按账龄1%、3%、10%、30%、70%计算演示应计提，逐行四舍五入到分后再SUM，与provision_yuan比较；比例只是假设，不是审计准则或实际会计政策。\n量价稽核用v_gas_sales的theoretical_revenue_yuan、revenue_yuan和audit_difference_yuan；不能用显示的四舍五入均价反算替代。销售和应收事实按月网格客户类型聚合后再关联，且必须同时匹配month+org_id+user_type；禁止明细多对多。\n对象识别：单月120个统计对象，其中80个虚构工商企业、40个居民/公共机构汇总对象；总数不是实际用户数。object_kind只是类型标记，企业名无“模拟”后缀也仍是演示企业。\n改名后的企业过滤：望江路恒拓精密制造有限公司稳定customer_id为DEMO-BINJIANG-S1-W1-工业-1。用名称定位ID，再保持ID跨期比较，不能按“工业1号”猜ID。\n回收率口径：期间回款包含冲销历史欠款，可能超过期间出账；当期账单回收率需要逐笔账单分配，不得用当前数据替代。月均回收率与累计回收率不同，默认累计用总回款/总出账。\n账龄时间边界：账龄按出账批次到月末的天数分段，0–30/31–90/91–180/181–365/>365，不是客户注册年限。没有合同应付日，因此不能把365天以上直接叫逾期365天。\n稽核双轨核验：audit_difference_yuan为登记差异字段，收入减理论收入为可重算差异。两者应分别返回并指出不一致，禁止为了“守恒”直接修改源数或用登记值冒充已核算金额。原始audit_note目前不在v_gas_sales列中，不能生成查询该字段的SQL。\n销售应收核对：销售按月×网格×类型，应收明细需先聚合到同样粒度后再关联；三键缺一会重复。比较金额需保留差额，不能把差异行过滤掉后声称完全一致。\n风险报告表达：高余额、长账龄占比、连续欠费趋势可作催收优先级线索。无合同、催收履历、诉讼和信用评分，不能认定坏账或给出法律结论。\n勾稽与空值：逐客户检查期初+出账-回款+调整-期末，容差0.01元；五档账龄合计与余额同样检查。无异常行代表本轮检查未检出差异，不等于没有客户或账簿为0。\n本域常见术语：期末应收=月末欠费/应收余额/还欠多少气费；期初应收=上期结转欠费/月初应收；本期应收=本月出账金额/当期气费账单；本期回款=实收气费/到账气费/收回气费；气费回收率=收缴率/回款率/气费实收率；长账龄应收=半年以上欠费/超过180天欠款；一年以上应收=365天以上欠费/超一年欠款；账龄分布=欠费年龄结构/应收分层；逾期天数=超期欠费天数/合同到期天数；演示计提余额=应收计提/坏账准备演示；稽核差异字段=系统稽核差异/登记稽核金额；重算量价差异=账单与理论差额/重新核算气费；工商客户名单=欠费企业名单/欠费大户；应收滚动校验=应收勾稽/收支滚动平衡；欠费集中度=前十大户欠费占比/头部应收占比；账龄迁移=欠款迁徙/账龄滚动"
     },
     "queries": [
       {
@@ -464,7 +1040,7 @@
       },
       {
         "question": "哪些月份账单收入与量价收入存在差异",
-        "sql": "SELECT month,branch_name,SUM(audit_difference_yuan) AS 稽核差异_元 FROM v_gas_sales GROUP BY month,branch_name HAVING SUM(audit_difference_yuan)<>0"
+        "sql": "SELECT month,branch_name,SUM(revenue_yuan-theoretical_revenue_yuan) AS 重算量价差异_元 FROM v_gas_sales GROUP BY month,branch_name HAVING ABS(SUM(revenue_yuan-theoretical_revenue_yuan))>0.01"
       },
       {
         "question": "2026年9月末应收账龄结构是什么样",
@@ -488,28 +1064,427 @@
       },
       {
         "question": "2026年前三季度各分公司累计气费回收率",
-        "sql": "SELECT branch_name,SUM(collected_yuan)/NULLIF(SUM(billed_yuan),0) AS 累计气费回收率 FROM v_gas_ar WHERE month BETWEEN '2026-01' AND '2026-09' GROUP BY branch_name"
+        "sql": "SELECT branch_name,SUM(billed_yuan) AS 期间出账_元,SUM(collected_yuan) AS 期间回款_元,SUM(collected_yuan)/NULLIF(SUM(billed_yuan),0) AS 累计回收率 FROM v_gas_ar WHERE month BETWEEN '2026-01' AND '2026-09' GROUP BY branch_name"
+      },
+      {
+        "question": "2026年9月末沙湖分公司欠费企业前十名",
+        "sql": "SELECT customer_id,customer_name,org_name,closing_yuan,aging_365_plus_yuan FROM v_gas_ar WHERE month='2026-09' AND branch_id='SHAHU' AND object_kind='模拟客户' AND closing_yuan>0 ORDER BY closing_yuan DESC,customer_id LIMIT 10"
+      },
+      {
+        "question": "2026年9月末望江路服务网格应收账龄结构",
+        "sql": "SELECT user_type,SUM(closing_yuan) AS 期末应收_元,SUM(aging_0_30_yuan) AS 三十天内_元,SUM(aging_31_90_yuan) AS 三十一至九十天_元,SUM(aging_91_180_yuan) AS 九十一至一百八十天_元,SUM(aging_181_365_yuan) AS 一百八十一至一年_元,SUM(aging_365_plus_yuan) AS 一年以上_元 FROM v_gas_ar WHERE month='2026-09' AND org_id='BINJIANG-S1-W1' GROUP BY user_type"
+      },
+      {
+        "question": "2026年各月应收滚动不平衡的对象",
+        "sql": "SELECT month,customer_id,customer_name,opening_yuan,billed_yuan,collected_yuan,adjustment_yuan,closing_yuan,opening_yuan+billed_yuan-collected_yuan+adjustment_yuan-closing_yuan AS 差额_元 FROM v_gas_ar WHERE month BETWEEN '2026-01' AND '2026-09' AND ABS(opening_yuan+billed_yuan-collected_yuan+adjustment_yuan-closing_yuan)>0.01 ORDER BY month,customer_id"
+      },
+      {
+        "question": "望江路恒拓精密制造有限公司2026年应收余额趋势",
+        "sql": "SELECT month,customer_id,customer_name,closing_yuan,aging_365_plus_yuan FROM v_gas_ar WHERE customer_id='DEMO-BINJIANG-S1-W1-工业-1' AND month BETWEEN '2026-01' AND '2026-09' ORDER BY month"
+      },
+      {
+        "question": "2026年9月末工商客户前十大欠费占比",
+        "sql": "WITH a AS (SELECT customer_id,customer_name,closing_yuan,ROW_NUMBER() OVER(ORDER BY closing_yuan DESC,customer_id) rn FROM v_gas_ar WHERE month='2026-09' AND object_kind='模拟客户') SELECT SUM(closing_yuan) FILTER(WHERE rn<=10) AS 前十应收_元,SUM(closing_yuan) AS 工商总应收_元,SUM(closing_yuan) FILTER(WHERE rn<=10)/NULLIF(SUM(closing_yuan),0) AS 集中度 FROM a"
+      },
+      {
+        "question": "2026年9月末各分公司账龄五档与余额能否勾稽",
+        "sql": "SELECT branch_name,SUM(closing_yuan) AS 应收余额_元,SUM(aging_0_30_yuan+aging_31_90_yuan+aging_91_180_yuan+aging_181_365_yuan+aging_365_plus_yuan) AS 账龄合计_元 FROM v_gas_ar WHERE month='2026-09' GROUP BY branch_name"
+      },
+      {
+        "question": "登记稽核差异与重算量价差异有哪些不一致",
+        "sql": "SELECT month,org_id,org_name,user_type,audit_difference_yuan AS 登记差异_元,revenue_yuan-theoretical_revenue_yuan AS 重算差异_元 FROM v_gas_sales WHERE ABS(audit_difference_yuan-(revenue_yuan-theoretical_revenue_yuan))>0.01 ORDER BY month,org_id"
+      },
+      {
+        "question": "2026年9月按网格与客户类型核对出账和销售收入",
+        "sql": "WITH a AS (SELECT org_id,user_type,SUM(billed_yuan) billed FROM v_gas_ar WHERE month='2026-09' GROUP BY org_id,user_type),b AS (SELECT org_id,user_type,SUM(revenue_yuan) revenue FROM v_gas_sales WHERE month='2026-09' GROUP BY org_id,user_type) SELECT a.org_id,a.user_type,billed,revenue,billed-revenue AS 差额_元 FROM a FULL JOIN b USING(org_id,user_type) ORDER BY a.org_id,a.user_type"
+      },
+      {
+        "question": "2026年10月末应收有记录吗",
+        "sql": "SELECT month,SUM(closing_yuan) AS 期末应收_元 FROM v_gas_ar WHERE month='2026-10' GROUP BY month"
       }
+    ],
+    "glossary": [
+      {
+        "alias": "月末欠费",
+        "canonical": "期末应收",
+        "definition": "closing_yuan，月末余额；不是本月账单或期间总欠费。",
+        "weight": 4
+      },
+      {
+        "alias": "应收余额",
+        "canonical": "期末应收",
+        "definition": "closing_yuan，月末余额；不是本月账单或期间总欠费。",
+        "weight": 4
+      },
+      {
+        "alias": "还欠多少气费",
+        "canonical": "期末应收",
+        "definition": "closing_yuan，月末余额；不是本月账单或期间总欠费。",
+        "weight": 4
+      },
+      {
+        "alias": "上期结转欠费",
+        "canonical": "期初应收",
+        "definition": "opening_yuan，与上月期末按同一customer_id衔接。",
+        "weight": 4
+      },
+      {
+        "alias": "月初应收",
+        "canonical": "期初应收",
+        "definition": "opening_yuan，与上月期末按同一customer_id衔接。",
+        "weight": 4
+      },
+      {
+        "alias": "本月出账金额",
+        "canonical": "本期应收",
+        "definition": "billed_yuan，期间新增应收，不是余额。",
+        "weight": 4
+      },
+      {
+        "alias": "当期气费账单",
+        "canonical": "本期应收",
+        "definition": "billed_yuan，期间新增应收，不是余额。",
+        "weight": 4
+      },
+      {
+        "alias": "实收气费",
+        "canonical": "本期回款",
+        "definition": "collected_yuan，包括历史欠款回收；并非只收当月账单。",
+        "weight": 4
+      },
+      {
+        "alias": "到账气费",
+        "canonical": "本期回款",
+        "definition": "collected_yuan，包括历史欠款回收；并非只收当月账单。",
+        "weight": 4
+      },
+      {
+        "alias": "收回气费",
+        "canonical": "本期回款",
+        "definition": "collected_yuan，包括历史欠款回收；并非只收当月账单。",
+        "weight": 4
+      },
+      {
+        "alias": "收缴率",
+        "canonical": "气费回收率",
+        "definition": "期间总回款/期间总出账，可能超过100%；不是当期发票逐单回收率。",
+        "weight": 4
+      },
+      {
+        "alias": "回款率",
+        "canonical": "气费回收率",
+        "definition": "期间总回款/期间总出账，可能超过100%；不是当期发票逐单回收率。",
+        "weight": 4
+      },
+      {
+        "alias": "气费实收率",
+        "canonical": "气费回收率",
+        "definition": "期间总回款/期间总出账，可能超过100%；不是当期发票逐单回收率。",
+        "weight": 4
+      },
+      {
+        "alias": "半年以上欠费",
+        "canonical": "长账龄应收",
+        "definition": "aging_181_365_yuan+aging_365_plus_yuan；月末快照。",
+        "weight": 4
+      },
+      {
+        "alias": "超过180天欠款",
+        "canonical": "长账龄应收",
+        "definition": "aging_181_365_yuan+aging_365_plus_yuan；月末快照。",
+        "weight": 4
+      },
+      {
+        "alias": "365天以上欠费",
+        "canonical": "一年以上应收",
+        "definition": "aging_365_plus_yuan；按出账日至快照日计龄，不等同合同逾期。",
+        "weight": 4
+      },
+      {
+        "alias": "超一年欠款",
+        "canonical": "一年以上应收",
+        "definition": "aging_365_plus_yuan；按出账日至快照日计龄，不等同合同逾期。",
+        "weight": 4
+      },
+      {
+        "alias": "欠费年龄结构",
+        "canonical": "账龄分布",
+        "definition": "0–30、31–90、91–180、181–365、365天以上五档。",
+        "weight": 4
+      },
+      {
+        "alias": "应收分层",
+        "canonical": "账龄分布",
+        "definition": "0–30、31–90、91–180、181–365、365天以上五档。",
+        "weight": 4
+      },
+      {
+        "alias": "超期欠费天数",
+        "canonical": "逾期天数",
+        "definition": "缺逐笔合同到期日，不能把账龄直接称逾期天数；需澄清。",
+        "weight": 4
+      },
+      {
+        "alias": "合同到期天数",
+        "canonical": "逾期天数",
+        "definition": "缺逐笔合同到期日，不能把账龄直接称逾期天数；需澄清。",
+        "weight": 4
+      },
+      {
+        "alias": "应收计提",
+        "canonical": "演示计提余额",
+        "definition": "provision_yuan；1/3/10/30/70%为演示假设，不作为企业正式会计政策。",
+        "weight": 4
+      },
+      {
+        "alias": "坏账准备演示",
+        "canonical": "演示计提余额",
+        "definition": "provision_yuan；1/3/10/30/70%为演示假设，不作为企业正式会计政策。",
+        "weight": 4
+      },
+      {
+        "alias": "系统稽核差异",
+        "canonical": "稽核差异字段",
+        "definition": "audit_difference_yuan为已登记差异；可与收入减理论收入不一致，需分别展示核验。",
+        "weight": 4
+      },
+      {
+        "alias": "登记稽核金额",
+        "canonical": "稽核差异字段",
+        "definition": "audit_difference_yuan为已登记差异；可与收入减理论收入不一致，需分别展示核验。",
+        "weight": 4
+      },
+      {
+        "alias": "账单与理论差额",
+        "canonical": "重算量价差异",
+        "definition": "revenue_yuan-theoretical_revenue_yuan；不能用四舍五入均价反推。",
+        "weight": 4
+      },
+      {
+        "alias": "重新核算气费",
+        "canonical": "重算量价差异",
+        "definition": "revenue_yuan-theoretical_revenue_yuan；不能用四舍五入均价反推。",
+        "weight": 4
+      },
+      {
+        "alias": "欠费企业名单",
+        "canonical": "工商客户名单",
+        "definition": "仅object_kind=模拟客户；居民与公共机构汇总对象不得当企业。",
+        "weight": 4
+      },
+      {
+        "alias": "欠费大户",
+        "canonical": "工商客户名单",
+        "definition": "仅object_kind=模拟客户；居民与公共机构汇总对象不得当企业。",
+        "weight": 4
+      },
+      {
+        "alias": "应收勾稽",
+        "canonical": "应收滚动校验",
+        "definition": "期初+出账-回款+调整=期末；按对象逐月核对。",
+        "weight": 4
+      },
+      {
+        "alias": "收支滚动平衡",
+        "canonical": "应收滚动校验",
+        "definition": "期初+出账-回款+调整=期末；按对象逐月核对。",
+        "weight": 4
+      },
+      {
+        "alias": "前十大户欠费占比",
+        "canonical": "欠费集中度",
+        "definition": "同月同范围、同对象类型下TopN余额/总余额，明确是否只看工商客户。",
+        "weight": 4
+      },
+      {
+        "alias": "头部应收占比",
+        "canonical": "欠费集中度",
+        "definition": "同月同范围、同对象类型下TopN余额/总余额，明确是否只看工商客户。",
+        "weight": 4
+      },
+      {
+        "alias": "欠款迁徙",
+        "canonical": "账龄迁移",
+        "definition": "可比较同一customer_id各月账龄余额；缺发票ID，不能证明逐张发票迁徙。",
+        "weight": 4
+      },
+      {
+        "alias": "账龄滚动",
+        "canonical": "账龄迁移",
+        "definition": "可比较同一customer_id各月账龄余额；缺发票ID，不能证明逐张发票迁徙。",
+        "weight": 4
+      },
+      {
+        "alias": "期末应收",
+        "canonical": "期末应收",
+        "definition": "closing_yuan，月末余额；不是本月账单或期间总欠费。",
+        "weight": 5
+      },
+      {
+        "alias": "期初应收",
+        "canonical": "期初应收",
+        "definition": "opening_yuan，与上月期末按同一customer_id衔接。",
+        "weight": 5
+      },
+      {
+        "alias": "本期应收",
+        "canonical": "本期应收",
+        "definition": "billed_yuan，期间新增应收，不是余额。",
+        "weight": 5
+      },
+      {
+        "alias": "本期回款",
+        "canonical": "本期回款",
+        "definition": "collected_yuan，包括历史欠款回收；并非只收当月账单。",
+        "weight": 5
+      },
+      {
+        "alias": "气费回收率",
+        "canonical": "气费回收率",
+        "definition": "期间总回款/期间总出账，可能超过100%；不是当期发票逐单回收率。",
+        "weight": 5
+      },
+      {
+        "alias": "长账龄应收",
+        "canonical": "长账龄应收",
+        "definition": "aging_181_365_yuan+aging_365_plus_yuan；月末快照。",
+        "weight": 5
+      },
+      {
+        "alias": "一年以上应收",
+        "canonical": "一年以上应收",
+        "definition": "aging_365_plus_yuan；按出账日至快照日计龄，不等同合同逾期。",
+        "weight": 5
+      },
+      {
+        "alias": "账龄分布",
+        "canonical": "账龄分布",
+        "definition": "0–30、31–90、91–180、181–365、365天以上五档。",
+        "weight": 5
+      },
+      {
+        "alias": "逾期天数",
+        "canonical": "逾期天数",
+        "definition": "缺逐笔合同到期日，不能把账龄直接称逾期天数；需澄清。",
+        "weight": 5
+      },
+      {
+        "alias": "演示计提余额",
+        "canonical": "演示计提余额",
+        "definition": "provision_yuan；1/3/10/30/70%为演示假设，不作为企业正式会计政策。",
+        "weight": 5
+      },
+      {
+        "alias": "稽核差异字段",
+        "canonical": "稽核差异字段",
+        "definition": "audit_difference_yuan为已登记差异；可与收入减理论收入不一致，需分别展示核验。",
+        "weight": 5
+      },
+      {
+        "alias": "重算量价差异",
+        "canonical": "重算量价差异",
+        "definition": "revenue_yuan-theoretical_revenue_yuan；不能用四舍五入均价反推。",
+        "weight": 5
+      },
+      {
+        "alias": "工商客户名单",
+        "canonical": "工商客户名单",
+        "definition": "仅object_kind=模拟客户；居民与公共机构汇总对象不得当企业。",
+        "weight": 5
+      },
+      {
+        "alias": "应收滚动校验",
+        "canonical": "应收滚动校验",
+        "definition": "期初+出账-回款+调整=期末；按对象逐月核对。",
+        "weight": 5
+      },
+      {
+        "alias": "欠费集中度",
+        "canonical": "欠费集中度",
+        "definition": "同月同范围、同对象类型下TopN余额/总余额，明确是否只看工商客户。",
+        "weight": 5
+      },
+      {
+        "alias": "账龄迁移",
+        "canonical": "账龄迁移",
+        "definition": "可比较同一customer_id各月账龄余额；缺发票ID，不能证明逐张发票迁徙。",
+        "weight": 5
+      }
+    ],
+    "common": [
+      "2026年9月末沙湖分公司欠费企业前十名",
+      "2026年9月末望江路服务网格应收账龄结构",
+      "2026年前三季度各分公司累计气费回收率",
+      "2026年各月应收滚动不平衡的对象",
+      "望江路恒拓精密制造有限公司2026年应收余额趋势",
+      "2026年9月末工商客户前十大欠费占比",
+      "2026年9月末各分公司账龄五档与余额能否勾稽",
+      "登记稽核差异与重算量价差异有哪些不一致",
+      "2026年9月末应收余额是多少",
+      "2026年9月欠费最多的十个模拟工商客户",
+      "2026年9月超过180天的应收有多少",
+      "2026年9月各分公司气费回收率",
+      "2026年9月重点催收的客户有哪些",
+      "哪些月份账单收入与量价收入存在差异",
+      "2026年9月末应收账龄结构是什么样",
+      "按演示账龄比例复核2026年9月末计提金额"
     ]
   },
   {
     "code": "GAS_SAFE",
     "name": "江城燃气·安全与管网治理",
     "synonyms": [
-      "燃气安全",
-      "隐患",
-      "安检",
-      "管网",
-      "GIS",
-      "抢修",
+      "入户安检率",
+      "安检完成率",
+      "入户检查完成率",
+      "计划安检量",
+      "应入户数量",
+      "完成安检量",
+      "已入户数量",
+      "上门无人",
+      "入户不遇",
+      "到访未遇",
+      "三件套新增安装",
+      "三件套装了多少户",
+      "及时处置率",
+      "应急到场及时率",
+      "漏气事件数",
+      "燃气泄漏事件",
+      "管网泄漏强度",
+      "千公里漏气次数",
+      "管线长度",
+      "燃气管道公里数",
+      "GIS覆盖率",
+      "管网上图率",
+      "管线入图比例",
+      "GIS缺口",
+      "未上图管线",
+      "超20年管线",
+      "二十年以上管道",
+      "未完成整改",
+      "未销项工单",
+      "逾期整改",
+      "超期未销项",
+      "整改完成率",
+      "隐患销项率",
+      "重大风险工单",
+      "重大隐患清单",
       "安检覆盖率",
-      "抢修及时率",
-      "当月到访不遇户次",
+      "应检户次",
+      "已检户次",
+      "到访不遇户次",
       "当月三件套安装户数",
-      "截止日管网里程",
-      "截止日GIS入库率",
-      "截至日隐患闭环率",
-      "截至日超期未闭环隐患数"
+      "抢修及时率",
+      "泄漏次数",
+      "每千公里泄漏次数",
+      "管网里程",
+      "GIS入库率",
+      "未入库管段",
+      "老旧管网",
+      "未闭环隐患",
+      "超期未闭环隐患",
+      "隐患闭环率",
+      "重大隐患"
     ],
     "regression_cases": [
       {
@@ -535,6 +1510,54 @@
         "question_text": "算隐患闭环率之前，请先确认按当月新发现还是截至日全部工单",
         "expected_focus": "按用户要求确认统计范围后再生成SQL，不擅自采用其他口径",
         "expected_intent": "requires_confirmation"
+      },
+      {
+        "case_type": "same_period",
+        "question_text": "2026年9月各服务网格应检、实检和到访不遇",
+        "expected_focus": "使用已声明视图，限定时间和组织；与EXPLAIN后实际查询结果对齐，不用缓存结论。",
+        "expected_intent": "generate_sql"
+      },
+      {
+        "case_type": "new_org_name",
+        "question_text": "截至2026年9月底GIS未入库管段按分公司汇总",
+        "expected_focus": "解析本轮新片区/组织名到稳定ID，不返回已废弃的第1/第2网格名称。",
+        "expected_intent": "generate_sql"
+      },
+      {
+        "case_type": "empty_month",
+        "question_text": "查询2026年10月本域核心指标",
+        "expected_focus": "保留用户10月条件；应明确无记录，不能暗换9月或把空聚合标为零。",
+        "expected_intent": "generate_sql"
+      },
+      {
+        "case_type": "unsupported",
+        "question_text": "2026年9月抢修平均到场分钟数",
+        "expected_focus": "说明缺失字段/证据；不编造天气、合同到期日或分钟级日志。",
+        "expected_intent": "requires_confirmation"
+      },
+      {
+        "case_type": "permission",
+        "question_text": "查看未授权分公司的所有明细",
+        "expected_focus": "应由服务端组织授权过滤或拒绝，不能只在报告中提示权限；对比范围也必须校验。",
+        "expected_intent": "generate_sql"
+      },
+      {
+        "case_type": "quality",
+        "question_text": "2026年9月高压输配的入户安检覆盖率",
+        "expected_focus": "核对真实分子分母、粒度和连接；数据质量差异保留，不用解释覆盖错误。",
+        "expected_intent": "generate_sql"
+      },
+      {
+        "case_type": "entity_type",
+        "question_text": "高压输配安检覆盖率是0%吗",
+        "expected_focus": "识别不能下钻的服务中心粒度、汇总对象或零分母；解释不适用，不造数据。",
+        "expected_intent": "requires_confirmation"
+      },
+      {
+        "case_type": "unit",
+        "question_text": "用万元、万方或公里展示本域指标并标单位",
+        "expected_focus": "只转换相应金额或气量字段，保留比例与计数单位；原始数值不得重复除万。",
+        "expected_intent": "generate_sql"
       }
     ],
     "views": [
@@ -559,9 +1582,17 @@
       "管段维表v_gas_network.network_id唯一；工单v_gas_hazards.network_id可多对一连接，不能将连接后的length_km按工单行SUM，否则重复计算里程。月度安检事实与工单/管段只能各自按组织汇总后比较。",
       "历史截至日T：仅纳入found_date<=T的工单；completed_date<=T算已闭环；completed_date为空或>T算当时未闭环；due_date<T且当时未闭环算超期（截止日当天不判已过期）。不能直接拿当前status还原历史。",
       "管网截至日T用laid_date<=T作总里程基数，gis_loaded_date<=T作为已入库条件，日期为空为未入库。以2026-09-30为示例时，老旧20年阈值是2006-09-30；用户换日期必须同步换阈值。工单数据截至2026-09-30，不回答未来状态。",
-      "闭环率必须说明是截至日全部已发现工单闭环率还是当期新发现工单闭环率，未说明时先明确口径。泄漏次数每千公里=同期间泄漏次数/截至日有效里程*1000，不能称泄漏率百分比。"
+      "闭环率必须说明是截至日全部已发现工单闭环率还是当期新发现工单闭环率，未说明时先明确口径。泄漏次数每千公里=同期间泄漏次数/截至日有效里程*1000，不能称泄漏率百分比。",
+      "入户与输配分工：高压输配GYSP纳入管网、隐患、泄漏、抢修范围；入户安检分母可为0，返回不适用/无应检计划，不能判0%且排名垫底。",
+      "安检计数限制：应检、实检、到访不遇为月度过程计数，缺户ID与访问记录，不能推断去重户数、重复上门次数或拒检原因。三件套安装同理不能回答存量普及率。",
+      "截至日与批次：“截至9月底闭环率”默认截至日全部已发现工单，若问9月整改则确认分母是9月新发现还是9月完成；两个指标不可混用。",
+      "GIS两种比例：主口径按里程，分子是截至日已入库公里数；按管段数是另一个指标，应在标题写清。既没有入库日期也没有有效里程的记录需返回质量告警，不能默认为已入库。",
+      "管龄与材质：管龄从laid_date到用户截止日；按材质/压力/片区分层后看老旧里程。钢管、老旧年限本身不等于存在泄漏或必须报废，无压力试验/腐蚀检测数据。",
+      "工单与管段关联：工单network_id多对一管段。要统计涉及管段里程用EXISTS或先DISTINCT network_id；同时保留工单数与管段数，二者不必相等。",
+      "整改优先级：可按既有重大等级、是否超期、超期天数排序；截至日超期天数=T-due_date。缺用户密度、事故后果和实时压力，不生成伪量化综合风险分。",
+      "工作日与及时性：emergency_on_time是源系统已标注及时数量，缺到场分钟及SLA定义；可以计算源标注及时率，不能声称遵守某国家分钟标准。"
     ],
-    "content": "# 江城燃气·安全与管网治理 · 可执行问数口径\n知识版本：gas-knowledge-20261022\n## 业务边界与红线\n- 全部数据为虚构演示，不代表真实企业。月度事实仅覆盖2024-01至2026-09；“最新月”是数据MAX(month)，不是系统当前月；用户明确问2026-10必须按10月查空，不擅自换成9月。\n- 原始存储单位：气量方/立方米、金额元、里程公里、比例0到1。展示成万元/万方必须显式除10000并标单位；比率百分数展示才乘100。\n- 保留总主理人+领域专家框架。普通问数也实际经过AI，金标只作生成与审核参考，不允许样例直返或缓存答案代替AI。高阶先确认计划，再并行取证。\n- 复用系统gas_jc_tree组织树及现有数据权限。org_id是当前记录所属组织；branch_id是分公司编码、center_id是服务中心编码，不能把分公司编码直接等同网格org_id。跨层级范围用授权组织路径或组织维表解析。\n- 超级管理员可全域汇总，不因SQL没有组织WHERE就认定越权；普通账号权限必须由系统在取数前强制处理，不能由LLM文字代替。未绑定组织普通账号不开放。\n- 分公司：滨江BINJIANG、沙湖SHAHU、经开JINGKAI、临港LINGANG、高新GAOXIN、高压输配GYSP。高压输配没有销气职责；销售榜通常5家，安全/管网可有6家，不补造GYSP销气数据或强行补零。\n- 只使用本数据集声明的业务视图。事实表不得按月份、分公司或org_id单键明细互连；先各自聚合至相同时间与组织粒度，或使用已准备的汇总视图。\n- 组织维表v_gas_org.org_id唯一，事实视图.org_id可多对一关联。任何比例都先加总分子分母，再相除；分母0用NULLIF返回NULL，不补0、不简单平均比例。\n- 空结果不等于业务值0；取证失败不等于源库没有数据。AI/审核失败要明确未完成，禁止把规则摘要标作AI结论。\n- 数值差异、单月估抄率和老旧管网只能作为调查线索，不证明因果、偷盗气或系统性管理问题；无正式统计检验不输出正负相关结论。预测需专门模型和回测。\n- 安全范围：月度安检、到访不遇、三件套安装、抢修、泄漏次数，以及管段和隐患工单。无伤亡、停气时长、IC卡基表控制器、三单对账、盗气处罚或追缴明细，问到须明确不支持。\n- 安检覆盖率=SUM(inspected)/SUM(due_inspect)；抢修及时率=SUM(emergency_on_time)/SUM(emergency_total)。not_at_home和three_piece_installed是当月过程计数，不是历史未处理存量或累计安装存量。\n- 管段维表v_gas_network.network_id唯一；工单v_gas_hazards.network_id可多对一连接，不能将连接后的length_km按工单行SUM，否则重复计算里程。月度安检事实与工单/管段只能各自按组织汇总后比较。\n- 历史截至日T：仅纳入found_date<=T的工单；completed_date<=T算已闭环；completed_date为空或>T算当时未闭环；due_date<T且当时未闭环算超期（截止日当天不判已过期）。不能直接拿当前status还原历史。\n- 管网截至日T用laid_date<=T作总里程基数，gis_loaded_date<=T作为已入库条件，日期为空为未入库。以2026-09-30为示例时，老旧20年阈值是2006-09-30；用户换日期必须同步换阈值。工单数据截至2026-09-30，不回答未来状态。\n- 闭环率必须说明是截至日全部已发现工单闭环率还是当期新发现工单闭环率，未说明时先明确口径。泄漏次数每千公里=同期间泄漏次数/截至日有效里程*1000，不能称泄漏率百分比。\n## 视图与粒度\n- v_gas_safety：一行=月份×网格；含高压输配网格；计数为当月流量，不是历史未完成存量。\n- v_gas_hazards：一行=一张隐患工单，hazard_id唯一；通过network_id多对一关联管段，时间口径必须明确。\n- v_gas_network：一行=一条管段，network_id唯一；无month字段，按laid_date/gis_loaded_date做截止日判断。\n- v_gas_org：一行一个组织节点，org_id全局唯一；层级1集团/2分公司/3服务中心/4网格，43节点。\n## 指标目录（按问题选择，不要求一次返回全部指标）\n- 安检覆盖率：v_gas_safety；SUM(inspected)::numeric/NULLIF(SUM(due_inspect),0)；单位0–1；\n- 抢修及时率：v_gas_safety；SUM(emergency_on_time)::numeric/NULLIF(SUM(emergency_total),0)；单位0–1；\n- 当月到访不遇户次：v_gas_safety；SUM(not_at_home)；单位户次；月度过程计数，不能解释成历史待处理存量。\n- 当月三件套安装户数：v_gas_safety；SUM(three_piece_installed)；单位户；\n- 截止日管网里程：v_gas_network；SUM(length_km)；单位公里；只纳入laid_date不晚于用户截止日的管段。\n- 截止日GIS入库率：v_gas_network；SUM(CASE WHEN gis_loaded_date<='2026-09-30' THEN length_km ELSE 0 END)/NULLIF(SUM(length_km),0)；单位0–1；示例截止日需与用户问题同步修改，并限定laid_date<=截止日。\n- 截至日隐患闭环率：v_gas_hazards；COUNT(*) FILTER(WHERE completed_date<='2026-09-30')::numeric/NULLIF(COUNT(*),0)；单位0–1；限定found_date<=截止日；示例日期应同步替换；历史状态按完成日期重建。\n- 截至日超期未闭环隐患数：v_gas_hazards；COUNT(*)；单位单；found_date<=截止日 AND due_date<截止日 AND (completed_date IS NULL OR completed_date>截止日)。\n## 高阶分析建议\n- 沙湖哪些网格应优先治理？并行检查隐患、管龄、安检覆盖和抢修\n- 未闭环重大隐患如何安排整改优先级？依据工单截止日和资产信息解释",
+    "content": "# 江城燃气·安全与管网治理 · 可执行问数口径\n知识版本：gas-semantics-20261025\n## 业务边界与红线\n- 全部数据为虚构演示，不代表真实企业。月度事实仅覆盖2024-01至2026-09；“最新月”是数据MAX(month)，不是系统当前月；用户明确问2026-10必须按10月查空，不擅自换成9月。\n- 原始存储单位：气量方/立方米、金额元、里程公里、比例0到1。展示成万元/万方必须显式除10000并标单位；比率百分数展示才乘100。\n- 保留总主理人+领域专家框架。普通问数也实际经过AI，金标只作生成与审核参考，不允许样例直返或缓存答案代替AI。高阶先确认计划，再并行取证。\n- 复用系统gas_jc_tree组织树及现有数据权限。org_id是当前记录所属组织；branch_id是分公司编码、center_id是服务中心编码，不能把分公司编码直接等同网格org_id。跨层级范围用授权组织路径或组织维表解析。\n- 超级管理员可全域汇总，不因SQL没有组织WHERE就认定越权；普通账号权限必须由系统在取数前强制处理，不能由LLM文字代替。未绑定组织普通账号不开放。\n- 分公司：滨江BINJIANG、沙湖SHAHU、经开JINGKAI、临港LINGANG、高新GAOXIN、高压输配GYSP。高压输配没有销气职责；销售榜通常5家，安全/管网可有6家，不补造GYSP销气数据或强行补零。\n- 只使用本数据集声明的业务视图。事实表不得按月份、分公司或org_id单键明细互连；先各自聚合至相同时间与组织粒度，或使用已准备的汇总视图。\n- 组织维表v_gas_org.org_id唯一，事实视图.org_id可多对一关联。任何比例都先加总分子分母，再相除；分母0用NULLIF返回NULL，不补0、不简单平均比例。\n- 空结果不等于业务值0；取证失败不等于源库没有数据。AI/审核失败要明确未完成，禁止把规则摘要标作AI结论。\n- 数值差异、单月估抄率和老旧管网只能作为调查线索，不证明因果、偷盗气或系统性管理问题；无正式统计检验不输出正负相关结论。预测需专门模型和回测。\n- 安全范围：月度安检、到访不遇、三件套安装、抢修、泄漏次数，以及管段和隐患工单。无伤亡、停气时长、IC卡基表控制器、三单对账、盗气处罚或追缴明细，问到须明确不支持。\n- 安检覆盖率=SUM(inspected)/SUM(due_inspect)；抢修及时率=SUM(emergency_on_time)/SUM(emergency_total)。not_at_home和three_piece_installed是当月过程计数，不是历史未处理存量或累计安装存量。\n- 管段维表v_gas_network.network_id唯一；工单v_gas_hazards.network_id可多对一连接，不能将连接后的length_km按工单行SUM，否则重复计算里程。月度安检事实与工单/管段只能各自按组织汇总后比较。\n- 历史截至日T：仅纳入found_date<=T的工单；completed_date<=T算已闭环；completed_date为空或>T算当时未闭环；due_date<T且当时未闭环算超期（截止日当天不判已过期）。不能直接拿当前status还原历史。\n- 管网截至日T用laid_date<=T作总里程基数，gis_loaded_date<=T作为已入库条件，日期为空为未入库。以2026-09-30为示例时，老旧20年阈值是2006-09-30；用户换日期必须同步换阈值。工单数据截至2026-09-30，不回答未来状态。\n- 闭环率必须说明是截至日全部已发现工单闭环率还是当期新发现工单闭环率，未说明时先明确口径。泄漏次数每千公里=同期间泄漏次数/截至日有效里程*1000，不能称泄漏率百分比。\n## 视图与粒度\n- v_gas_safety：一行=月份×网格；含高压输配网格；计数为当月流量，不是历史未完成存量。\n- v_gas_hazards：一行=一张隐患工单，hazard_id唯一；通过network_id多对一关联管段，时间口径必须明确。\n- v_gas_network：一行=一条管段，network_id唯一；无month字段，按laid_date/gis_loaded_date做截止日判断。\n- v_gas_org：一行一个组织节点，org_id全局唯一；层级1集团/2分公司/3服务中心/4网格，43节点。\n## 指标目录（按问题选择，不要求一次返回全部指标）\n- 安检覆盖率：v_gas_safety；SUM(inspected)::numeric/NULLIF(SUM(due_inspect),0)；单位0–1；\n- 抢修及时率：v_gas_safety；SUM(emergency_on_time)::numeric/NULLIF(SUM(emergency_total),0)；单位0–1；\n- 当月到访不遇户次：v_gas_safety；SUM(not_at_home)；单位户次；月度过程计数，不能解释成历史待处理存量。\n- 当月三件套安装户数：v_gas_safety；SUM(three_piece_installed)；单位户；\n- 截止日管网里程：v_gas_network；SUM(length_km)；单位公里；只纳入laid_date不晚于用户截止日的管段。\n- 截止日GIS入库率：v_gas_network；SUM(CASE WHEN gis_loaded_date<='2026-09-30' THEN length_km ELSE 0 END)/NULLIF(SUM(length_km),0)；单位0–1；示例截止日需与用户问题同步修改，并限定laid_date<=截止日。\n- 截至日隐患闭环率：v_gas_hazards；COUNT(*) FILTER(WHERE completed_date<='2026-09-30')::numeric/NULLIF(COUNT(*),0)；单位0–1；限定found_date<=截止日；示例日期应同步替换；历史状态按完成日期重建。\n- 截至日超期未闭环隐患数：v_gas_hazards；COUNT(*)；单位单；found_date<=截止日 AND due_date<截止日 AND (completed_date IS NULL OR completed_date>截止日)。\n## 高阶分析建议\n- 沙湖哪些网格应优先治理？并行检查隐患、管龄、安检覆盖和抢修\n- 未闭环重大隐患如何安排整改优先级？依据工单截止日和资产信息解释\n\n## 业务操作与解释规则\n### 入户与输配分工\n高压输配GYSP纳入管网、隐患、泄漏、抢修范围；入户安检分母可为0，返回不适用/无应检计划，不能判0%且排名垫底。\n### 安检计数限制\n应检、实检、到访不遇为月度过程计数，缺户ID与访问记录，不能推断去重户数、重复上门次数或拒检原因。三件套安装同理不能回答存量普及率。\n### 截至日与批次\n“截至9月底闭环率”默认截至日全部已发现工单，若问9月整改则确认分母是9月新发现还是9月完成；两个指标不可混用。\n### GIS两种比例\n主口径按里程，分子是截至日已入库公里数；按管段数是另一个指标，应在标题写清。既没有入库日期也没有有效里程的记录需返回质量告警，不能默认为已入库。\n### 管龄与材质\n管龄从laid_date到用户截止日；按材质/压力/片区分层后看老旧里程。钢管、老旧年限本身不等于存在泄漏或必须报废，无压力试验/腐蚀检测数据。\n### 工单与管段关联\n工单network_id多对一管段。要统计涉及管段里程用EXISTS或先DISTINCT network_id；同时保留工单数与管段数，二者不必相等。\n### 整改优先级\n可按既有重大等级、是否超期、超期天数排序；截至日超期天数=T-due_date。缺用户密度、事故后果和实时压力，不生成伪量化综合风险分。\n### 工作日与及时性\nemergency_on_time是源系统已标注及时数量，缺到场分钟及SLA定义；可以计算源标注及时率，不能声称遵守某国家分钟标准。\n\n## 术语词典\n- 安检覆盖率（入户安检率、安检完成率、入户检查完成率）：SUM(inspected)/SUM(due_inspect)，不是相邻网格比例均值。\n- 应检户次（计划安检量、应入户数量）：due_inspect，月度计划过程计数，不能当全部燃气用户。\n- 已检户次（完成安检量、已入户数量）：inspected，月度已完成过程计数。\n- 到访不遇户次（上门无人、入户不遇、到访未遇）：not_at_home为当月过程计数，不代表去重客户或历史待复访存量。\n- 当月三件套安装户数（三件套新增安装、三件套装了多少户）：three_piece_installed为当月计数；无累计已装户基数，不能答三件套普及率。\n- 抢修及时率（及时处置率、应急到场及时率）：SUM(emergency_on_time)/SUM(emergency_total)，未提供分钟级到场时长。\n- 泄漏次数（漏气事件数、燃气泄漏事件）：leak_count为当月次数，不能自动判定严重程度。\n- 每千公里泄漏次数（管网泄漏强度、千公里漏气次数）：期间泄漏次数/截至日管网公里×1000，单位次/千公里，不是百分比。\n- 管网里程（管线长度、燃气管道公里数）：SUM(length_km)，按laid_date<=截止日筛选；不同工单关联同管段不得重复累加。\n- GIS入库率（GIS覆盖率、管网上图率、管线入图比例）：截至日已GIS入库里程/有效总里程，采用里程口径；若问管段数比例须另算。\n- 未入库管段（GIS缺口、未上图管线）：gis_loaded_date为空或晚于截止日，且laid_date不晚于截止日。\n- 老旧管网（超20年管线、二十年以上管道）：按用户截止日减20年，筛laid_date早于阈值；“超过”与“满20年”边界需说明。\n- 未闭环隐患（未完成整改、未销项工单）：发现日<=截止日，完成日为空或>截止日；不能直接用当前status代替历史。\n- 超期未闭环隐患（逾期整改、超期未销项）：未闭环且due_date<截止日；到期当日不算已超期。\n- 隐患闭环率（整改完成率、隐患销项率）：需要明确截至日全部发现工单还是当期新发现工单，分母不同。\n- 重大隐患（重大风险工单、重大隐患清单）：severity=重大；不把一般工单自行上调等级，无事故/伤亡字段。\n\n## 当前组织名与稳定编码\n- 江城燃气集团：JC-GROUP；路径 江城燃气集团\n- 滨江分公司：BINJIANG；路径 江城燃气集团 / 滨江分公司\n- 滨江沿江营业所：BINJIANG-S1；路径 江城燃气集团 / 滨江分公司 / 滨江沿江营业所\n- 望江路服务网格：BINJIANG-S1-W1；路径 江城燃气集团 / 滨江分公司 / 滨江沿江营业所 / 望江路服务网格\n- 滨港路服务网格：BINJIANG-S1-W2；路径 江城燃气集团 / 滨江分公司 / 滨江沿江营业所 / 滨港路服务网格\n- 滨江城西营业所：BINJIANG-S2；路径 江城燃气集团 / 滨江分公司 / 滨江城西营业所\n- 锦澜社区服务网格：BINJIANG-S2-W1；路径 江城燃气集团 / 滨江分公司 / 滨江城西营业所 / 锦澜社区服务网格\n- 云麓社区服务网格：BINJIANG-S2-W2；路径 江城燃气集团 / 滨江分公司 / 滨江城西营业所 / 云麓社区服务网格\n- 沙湖分公司：SHAHU；路径 江城燃气集团 / 沙湖分公司\n- 沙湖东岸营业所：SHAHU-S1；路径 江城燃气集团 / 沙湖分公司 / 沙湖东岸营业所\n- 汀兰社区服务网格：SHAHU-S1-W1；路径 江城燃气集团 / 沙湖分公司 / 沙湖东岸营业所 / 汀兰社区服务网格\n- 荷风路服务网格：SHAHU-S1-W2；路径 江城燃气集团 / 沙湖分公司 / 沙湖东岸营业所 / 荷风路服务网格\n- 沙湖北岸营业所：SHAHU-S2；路径 江城燃气集团 / 沙湖分公司 / 沙湖北岸营业所\n- 湖畔新城服务网格：SHAHU-S2-W1；路径 江城燃气集团 / 沙湖分公司 / 沙湖北岸营业所 / 湖畔新城服务网格\n- 青荷路服务网格：SHAHU-S2-W2；路径 江城燃气集团 / 沙湖分公司 / 沙湖北岸营业所 / 青荷路服务网格\n- 经开分公司：JINGKAI；路径 江城燃气集团 / 经开分公司\n- 经开东园服务中心：JINGKAI-S1；路径 江城燃气集团 / 经开分公司 / 经开东园服务中心\n- 智造产业园服务网格：JINGKAI-S1-W1；路径 江城燃气集团 / 经开分公司 / 经开东园服务中心 / 智造产业园服务网格\n- 兴业大道服务网格：JINGKAI-S1-W2；路径 江城燃气集团 / 经开分公司 / 经开东园服务中心 / 兴业大道服务网格\n- 经开西园服务中心：JINGKAI-S2；路径 江城燃气集团 / 经开分公司 / 经开西园服务中心\n- 科创产业园服务网格：JINGKAI-S2-W1；路径 江城燃气集团 / 经开分公司 / 经开西园服务中心 / 科创产业园服务网格\n- 丰裕路服务网格：JINGKAI-S2-W2；路径 江城燃气集团 / 经开分公司 / 经开西园服务中心 / 丰裕路服务网格\n- 临港分公司：LINGANG；路径 江城燃气集团 / 临港分公司\n- 临港港区服务中心：LINGANG-S1；路径 江城燃气集团 / 临港分公司 / 临港港区服务中心\n- 港兴工业园服务网格：LINGANG-S1-W1；路径 江城燃气集团 / 临港分公司 / 临港港区服务中心 / 港兴工业园服务网格\n- 临江物流园服务网格：LINGANG-S1-W2；路径 江城燃气集团 / 临港分公司 / 临港港区服务中心 / 临江物流园服务网格\n- 临港新城营业所：LINGANG-S2；路径 江城燃气集团 / 临港分公司 / 临港新城营业所\n- 海棠社区服务网格：LINGANG-S2-W1；路径 江城燃气集团 / 临港分公司 / 临港新城营业所 / 海棠社区服务网格\n- 启航路服务网格：LINGANG-S2-W2；路径 江城燃气集团 / 临港分公司 / 临港新城营业所 / 启航路服务网格\n- 高新分公司：GAOXIN；路径 江城燃气集团 / 高新分公司\n- 高新科创服务中心：GAOXIN-S1；路径 江城燃气集团 / 高新分公司 / 高新科创服务中心\n- 光谷科创园服务网格：GAOXIN-S1-W1；路径 江城燃气集团 / 高新分公司 / 高新科创服务中心 / 光谷科创园服务网格\n- 星河产业园服务网格：GAOXIN-S1-W2；路径 江城燃气集团 / 高新分公司 / 高新科创服务中心 / 星河产业园服务网格\n- 高新生活服务中心：GAOXIN-S2；路径 江城燃气集团 / 高新分公司 / 高新生活服务中心\n- 麓林社区服务网格：GAOXIN-S2-W1；路径 江城燃气集团 / 高新分公司 / 高新生活服务中心 / 麓林社区服务网格\n- 文澜路服务网格：GAOXIN-S2-W2；路径 江城燃气集团 / 高新分公司 / 高新生活服务中心 / 文澜路服务网格\n- 高压输配分公司：GYSP；路径 江城燃气集团 / 高压输配分公司\n- 高压输配东线运维中心：GYSP-S1；路径 江城燃气集团 / 高压输配分公司 / 高压输配东线运维中心\n- 东环干线运维班组：GYSP-S1-W1；路径 江城燃气集团 / 高压输配分公司 / 高压输配东线运维中心 / 东环干线运维班组\n- 滨江门站运维班组：GYSP-S1-W2；路径 江城燃气集团 / 高压输配分公司 / 高压输配东线运维中心 / 滨江门站运维班组\n- 高压输配西线运维中心：GYSP-S2；路径 江城燃气集团 / 高压输配分公司 / 高压输配西线运维中心\n- 西环干线运维班组：GYSP-S2-W1；路径 江城燃气集团 / 高压输配分公司 / 高压输配西线运维中心 / 西环干线运维班组\n- 临港调压站运维班组：GYSP-S2-W2；路径 江城燃气集团 / 高压输配分公司 / 高压输配西线运维中心 / 临港调压站运维班组\n\n## 时间与组织交付契约\n- 返回实际时间范围、授权范围、指标单位和原始粒度。缺上期数据时环比为空，不能把缺失补0。\n- 用户明确选择2026-10时按10月返回无记录；问“最新”先用MAX(month)。截至日问题不得越过2026-09-30推演工单未来状态。\n- 当前数据为演示，企业和片区名称均为虚构；旧会话名称可按稳定ID衔接，不作真实公司识别。",
     "metrics": [
       {
         "key": "inspection_ratio",
@@ -653,10 +1684,10 @@
       }
     ],
     "prompts": {
-      "1": "本域路由与问题澄清：安全范围：月度安检、到访不遇、三件套安装、抢修、泄漏次数，以及管段和隐患工单。无伤亡、停气时长、IC卡基表控制器、三单对账、盗气处罚或追缴明细，问到须明确不支持。\n安检覆盖率=SUM(inspected)/SUM(due_inspect)；抢修及时率=SUM(emergency_on_time)/SUM(emergency_total)。not_at_home和three_piece_installed是当月过程计数，不是历史未处理存量或累计安装存量。\n管段维表v_gas_network.network_id唯一；工单v_gas_hazards.network_id可多对一连接，不能将连接后的length_km按工单行SUM，否则重复计算里程。月度安检事实与工单/管段只能各自按组织汇总后比较。\n历史截至日T：仅纳入found_date<=T的工单；completed_date<=T算已闭环；completed_date为空或>T算当时未闭环；due_date<T且当时未闭环算超期（截止日当天不判已过期）。不能直接拿当前status还原历史。\n管网截至日T用laid_date<=T作总里程基数，gis_loaded_date<=T作为已入库条件，日期为空为未入库。以2026-09-30为示例时，老旧20年阈值是2006-09-30；用户换日期必须同步换阈值。工单数据截至2026-09-30，不回答未来状态。\n闭环率必须说明是截至日全部已发现工单闭环率还是当期新发现工单闭环率，未说明时先明确口径。泄漏次数每千公里=同期间泄漏次数/截至日有效里程*1000，不能称泄漏率百分比。\n最新数据2026-09，保留用户指定的时间/组织/指标。指标缺失明确说明，不拿相邻指标替代。",
-      "2": "本域SQL专家：安全范围：月度安检、到访不遇、三件套安装、抢修、泄漏次数，以及管段和隐患工单。无伤亡、停气时长、IC卡基表控制器、三单对账、盗气处罚或追缴明细，问到须明确不支持。\n安检覆盖率=SUM(inspected)/SUM(due_inspect)；抢修及时率=SUM(emergency_on_time)/SUM(emergency_total)。not_at_home和three_piece_installed是当月过程计数，不是历史未处理存量或累计安装存量。\n管段维表v_gas_network.network_id唯一；工单v_gas_hazards.network_id可多对一连接，不能将连接后的length_km按工单行SUM，否则重复计算里程。月度安检事实与工单/管段只能各自按组织汇总后比较。\n历史截至日T：仅纳入found_date<=T的工单；completed_date<=T算已闭环；completed_date为空或>T算当时未闭环；due_date<T且当时未闭环算超期（截止日当天不判已过期）。不能直接拿当前status还原历史。\n管网截至日T用laid_date<=T作总里程基数，gis_loaded_date<=T作为已入库条件，日期为空为未入库。以2026-09-30为示例时，老旧20年阈值是2006-09-30；用户换日期必须同步换阈值。工单数据截至2026-09-30，不回答未来状态。\n闭环率必须说明是截至日全部已发现工单闭环率还是当期新发现工单闭环率，未说明时先明确口径。泄漏次数每千公里=同期间泄漏次数/截至日有效里程*1000，不能称泄漏率百分比。\nSQL必须以真实字段字典和已声明视图为准，按所问指标选表，不要求输出整个指标目录。金额元、气量方、比率0–1，比例聚合用总分子/总分母。事实关联先聚合，不能多对多。样例仅供本轮AI生成参考。",
-      "3": "本域审核专家：安全范围：月度安检、到访不遇、三件套安装、抢修、泄漏次数，以及管段和隐患工单。无伤亡、停气时长、IC卡基表控制器、三单对账、盗气处罚或追缴明细，问到须明确不支持。\n安检覆盖率=SUM(inspected)/SUM(due_inspect)；抢修及时率=SUM(emergency_on_time)/SUM(emergency_total)。not_at_home和three_piece_installed是当月过程计数，不是历史未处理存量或累计安装存量。\n管段维表v_gas_network.network_id唯一；工单v_gas_hazards.network_id可多对一连接，不能将连接后的length_km按工单行SUM，否则重复计算里程。月度安检事实与工单/管段只能各自按组织汇总后比较。\n历史截至日T：仅纳入found_date<=T的工单；completed_date<=T算已闭环；completed_date为空或>T算当时未闭环；due_date<T且当时未闭环算超期（截止日当天不判已过期）。不能直接拿当前status还原历史。\n管网截至日T用laid_date<=T作总里程基数，gis_loaded_date<=T作为已入库条件，日期为空为未入库。以2026-09-30为示例时，老旧20年阈值是2006-09-30；用户换日期必须同步换阈值。工单数据截至2026-09-30，不回答未来状态。\n闭环率必须说明是截至日全部已发现工单闭环率还是当期新发现工单闭环率，未说明时先明确口径。泄漏次数每千公里=同期间泄漏次数/截至日有效里程*1000，不能称泄漏率百分比。\n审核真实DDL、时间、粒度、单位及用户明确的组织条件。不能凭字段名相似猜测错误，不能因为合法等价视图与样例不同就拒绝。审核拒绝不得放行原SQL；修复后须重新审核。权限以服务端授权上下文和执行阶段为准。",
-      "4": "本域分析专家：安全范围：月度安检、到访不遇、三件套安装、抢修、泄漏次数，以及管段和隐患工单。无伤亡、停气时长、IC卡基表控制器、三单对账、盗气处罚或追缴明细，问到须明确不支持。\n安检覆盖率=SUM(inspected)/SUM(due_inspect)；抢修及时率=SUM(emergency_on_time)/SUM(emergency_total)。not_at_home和three_piece_installed是当月过程计数，不是历史未处理存量或累计安装存量。\n管段维表v_gas_network.network_id唯一；工单v_gas_hazards.network_id可多对一连接，不能将连接后的length_km按工单行SUM，否则重复计算里程。月度安检事实与工单/管段只能各自按组织汇总后比较。\n历史截至日T：仅纳入found_date<=T的工单；completed_date<=T算已闭环；completed_date为空或>T算当时未闭环；due_date<T且当时未闭环算超期（截止日当天不判已过期）。不能直接拿当前status还原历史。\n管网截至日T用laid_date<=T作总里程基数，gis_loaded_date<=T作为已入库条件，日期为空为未入库。以2026-09-30为示例时，老旧20年阈值是2006-09-30；用户换日期必须同步换阈值。工单数据截至2026-09-30，不回答未来状态。\n闭环率必须说明是截至日全部已发现工单闭环率还是当期新发现工单闭环率，未说明时先明确口径。泄漏次数每千公里=同期间泄漏次数/截至日有效里程*1000，不能称泄漏率百分比。\n只回答本轮问题，第一段直接给结论与时间/数值/单位。事实、差异、假设分别说明；缺数据或取证失败如实提示。没有检验不声称相关、没有证据不声称因果。相近且舍入相同的比例不强行做细微排名。"
+      "1": "知识版本gas-semantics-20261025。先提取指标、组织层级、时间、粒度、比较基期。解析新组织名，不将行政区与业务网格混淆。只有口径真实有歧义才追问；允许依据授权全集回答。\n全部数据为虚构演示，不代表真实企业。月度事实仅覆盖2024-01至2026-09；“最新月”是数据MAX(month)，不是系统当前月；用户明确问2026-10必须按10月查空，不擅自换成9月。\n原始存储单位：气量方/立方米、金额元、里程公里、比例0到1。展示成万元/万方必须显式除10000并标单位；比率百分数展示才乘100。\n保留总主理人+领域专家框架。普通问数也实际经过AI，金标只作生成与审核参考，不允许样例直返或缓存答案代替AI。高阶先确认计划，再并行取证。\n复用系统gas_jc_tree组织树及现有数据权限。org_id是当前记录所属组织；branch_id是分公司编码、center_id是服务中心编码，不能把分公司编码直接等同网格org_id。跨层级范围用授权组织路径或组织维表解析。\n超级管理员可全域汇总，不因SQL没有组织WHERE就认定越权；普通账号权限必须由系统在取数前强制处理，不能由LLM文字代替。未绑定组织普通账号不开放。\n分公司：滨江BINJIANG、沙湖SHAHU、经开JINGKAI、临港LINGANG、高新GAOXIN、高压输配GYSP。高压输配没有销气职责；销售榜通常5家，安全/管网可有6家，不补造GYSP销气数据或强行补零。\n只使用本数据集声明的业务视图。事实表不得按月份、分公司或org_id单键明细互连；先各自聚合至相同时间与组织粒度，或使用已准备的汇总视图。\n组织维表v_gas_org.org_id唯一，事实视图.org_id可多对一关联。任何比例都先加总分子分母，再相除；分母0用NULLIF返回NULL，不补0、不简单平均比例。\n空结果不等于业务值0；取证失败不等于源库没有数据。AI/审核失败要明确未完成，禁止把规则摘要标作AI结论。\n数值差异、单月估抄率和老旧管网只能作为调查线索，不证明因果、偷盗气或系统性管理问题；无正式统计检验不输出正负相关结论。预测需专门模型和回测。\n安全范围：月度安检、到访不遇、三件套安装、抢修、泄漏次数，以及管段和隐患工单。无伤亡、停气时长、IC卡基表控制器、三单对账、盗气处罚或追缴明细，问到须明确不支持。\n安检覆盖率=SUM(inspected)/SUM(due_inspect)；抢修及时率=SUM(emergency_on_time)/SUM(emergency_total)。not_at_home和three_piece_installed是当月过程计数，不是历史未处理存量或累计安装存量。\n管段维表v_gas_network.network_id唯一；工单v_gas_hazards.network_id可多对一连接，不能将连接后的length_km按工单行SUM，否则重复计算里程。月度安检事实与工单/管段只能各自按组织汇总后比较。\n历史截至日T：仅纳入found_date<=T的工单；completed_date<=T算已闭环；completed_date为空或>T算当时未闭环；due_date<T且当时未闭环算超期（截止日当天不判已过期）。不能直接拿当前status还原历史。\n管网截至日T用laid_date<=T作总里程基数，gis_loaded_date<=T作为已入库条件，日期为空为未入库。以2026-09-30为示例时，老旧20年阈值是2006-09-30；用户换日期必须同步换阈值。工单数据截至2026-09-30，不回答未来状态。\n闭环率必须说明是截至日全部已发现工单闭环率还是当期新发现工单闭环率，未说明时先明确口径。泄漏次数每千公里=同期间泄漏次数/截至日有效里程*1000，不能称泄漏率百分比。\n入户与输配分工：高压输配GYSP纳入管网、隐患、泄漏、抢修范围；入户安检分母可为0，返回不适用/无应检计划，不能判0%且排名垫底。\n安检计数限制：应检、实检、到访不遇为月度过程计数，缺户ID与访问记录，不能推断去重户数、重复上门次数或拒检原因。三件套安装同理不能回答存量普及率。\n截至日与批次：“截至9月底闭环率”默认截至日全部已发现工单，若问9月整改则确认分母是9月新发现还是9月完成；两个指标不可混用。\nGIS两种比例：主口径按里程，分子是截至日已入库公里数；按管段数是另一个指标，应在标题写清。既没有入库日期也没有有效里程的记录需返回质量告警，不能默认为已入库。\n管龄与材质：管龄从laid_date到用户截止日；按材质/压力/片区分层后看老旧里程。钢管、老旧年限本身不等于存在泄漏或必须报废，无压力试验/腐蚀检测数据。\n工单与管段关联：工单network_id多对一管段。要统计涉及管段里程用EXISTS或先DISTINCT network_id；同时保留工单数与管段数，二者不必相等。\n整改优先级：可按既有重大等级、是否超期、超期天数排序；截至日超期天数=T-due_date。缺用户密度、事故后果和实时压力，不生成伪量化综合风险分。\n工作日与及时性：emergency_on_time是源系统已标注及时数量，缺到场分钟及SLA定义；可以计算源标注及时率，不能声称遵守某国家分钟标准。\n本域常见术语：安检覆盖率=入户安检率/安检完成率/入户检查完成率；应检户次=计划安检量/应入户数量；已检户次=完成安检量/已入户数量；到访不遇户次=上门无人/入户不遇/到访未遇；当月三件套安装户数=三件套新增安装/三件套装了多少户；抢修及时率=及时处置率/应急到场及时率；泄漏次数=漏气事件数/燃气泄漏事件；每千公里泄漏次数=管网泄漏强度/千公里漏气次数；管网里程=管线长度/燃气管道公里数；GIS入库率=GIS覆盖率/管网上图率/管线入图比例；未入库管段=GIS缺口/未上图管线；老旧管网=超20年管线/二十年以上管道；未闭环隐患=未完成整改/未销项工单；超期未闭环隐患=逾期整改/超期未销项；隐患闭环率=整改完成率/隐患销项率；重大隐患=重大风险工单/重大隐患清单",
+      "2": "知识版本gas-semantics-20261025。生成只读PostgreSQL查询。给出选表理由与聚合摘要，比例先加分子分母，快照只取期末。组织条件使用稳定编码与授权路径；禁止查询视图未暴露字段。\n全部数据为虚构演示，不代表真实企业。月度事实仅覆盖2024-01至2026-09；“最新月”是数据MAX(month)，不是系统当前月；用户明确问2026-10必须按10月查空，不擅自换成9月。\n原始存储单位：气量方/立方米、金额元、里程公里、比例0到1。展示成万元/万方必须显式除10000并标单位；比率百分数展示才乘100。\n保留总主理人+领域专家框架。普通问数也实际经过AI，金标只作生成与审核参考，不允许样例直返或缓存答案代替AI。高阶先确认计划，再并行取证。\n复用系统gas_jc_tree组织树及现有数据权限。org_id是当前记录所属组织；branch_id是分公司编码、center_id是服务中心编码，不能把分公司编码直接等同网格org_id。跨层级范围用授权组织路径或组织维表解析。\n超级管理员可全域汇总，不因SQL没有组织WHERE就认定越权；普通账号权限必须由系统在取数前强制处理，不能由LLM文字代替。未绑定组织普通账号不开放。\n分公司：滨江BINJIANG、沙湖SHAHU、经开JINGKAI、临港LINGANG、高新GAOXIN、高压输配GYSP。高压输配没有销气职责；销售榜通常5家，安全/管网可有6家，不补造GYSP销气数据或强行补零。\n只使用本数据集声明的业务视图。事实表不得按月份、分公司或org_id单键明细互连；先各自聚合至相同时间与组织粒度，或使用已准备的汇总视图。\n组织维表v_gas_org.org_id唯一，事实视图.org_id可多对一关联。任何比例都先加总分子分母，再相除；分母0用NULLIF返回NULL，不补0、不简单平均比例。\n空结果不等于业务值0；取证失败不等于源库没有数据。AI/审核失败要明确未完成，禁止把规则摘要标作AI结论。\n数值差异、单月估抄率和老旧管网只能作为调查线索，不证明因果、偷盗气或系统性管理问题；无正式统计检验不输出正负相关结论。预测需专门模型和回测。\n安全范围：月度安检、到访不遇、三件套安装、抢修、泄漏次数，以及管段和隐患工单。无伤亡、停气时长、IC卡基表控制器、三单对账、盗气处罚或追缴明细，问到须明确不支持。\n安检覆盖率=SUM(inspected)/SUM(due_inspect)；抢修及时率=SUM(emergency_on_time)/SUM(emergency_total)。not_at_home和three_piece_installed是当月过程计数，不是历史未处理存量或累计安装存量。\n管段维表v_gas_network.network_id唯一；工单v_gas_hazards.network_id可多对一连接，不能将连接后的length_km按工单行SUM，否则重复计算里程。月度安检事实与工单/管段只能各自按组织汇总后比较。\n历史截至日T：仅纳入found_date<=T的工单；completed_date<=T算已闭环；completed_date为空或>T算当时未闭环；due_date<T且当时未闭环算超期（截止日当天不判已过期）。不能直接拿当前status还原历史。\n管网截至日T用laid_date<=T作总里程基数，gis_loaded_date<=T作为已入库条件，日期为空为未入库。以2026-09-30为示例时，老旧20年阈值是2006-09-30；用户换日期必须同步换阈值。工单数据截至2026-09-30，不回答未来状态。\n闭环率必须说明是截至日全部已发现工单闭环率还是当期新发现工单闭环率，未说明时先明确口径。泄漏次数每千公里=同期间泄漏次数/截至日有效里程*1000，不能称泄漏率百分比。\n入户与输配分工：高压输配GYSP纳入管网、隐患、泄漏、抢修范围；入户安检分母可为0，返回不适用/无应检计划，不能判0%且排名垫底。\n安检计数限制：应检、实检、到访不遇为月度过程计数，缺户ID与访问记录，不能推断去重户数、重复上门次数或拒检原因。三件套安装同理不能回答存量普及率。\n截至日与批次：“截至9月底闭环率”默认截至日全部已发现工单，若问9月整改则确认分母是9月新发现还是9月完成；两个指标不可混用。\nGIS两种比例：主口径按里程，分子是截至日已入库公里数；按管段数是另一个指标，应在标题写清。既没有入库日期也没有有效里程的记录需返回质量告警，不能默认为已入库。\n管龄与材质：管龄从laid_date到用户截止日；按材质/压力/片区分层后看老旧里程。钢管、老旧年限本身不等于存在泄漏或必须报废，无压力试验/腐蚀检测数据。\n工单与管段关联：工单network_id多对一管段。要统计涉及管段里程用EXISTS或先DISTINCT network_id；同时保留工单数与管段数，二者不必相等。\n整改优先级：可按既有重大等级、是否超期、超期天数排序；截至日超期天数=T-due_date。缺用户密度、事故后果和实时压力，不生成伪量化综合风险分。\n工作日与及时性：emergency_on_time是源系统已标注及时数量，缺到场分钟及SLA定义；可以计算源标注及时率，不能声称遵守某国家分钟标准。\n本域常见术语：安检覆盖率=入户安检率/安检完成率/入户检查完成率；应检户次=计划安检量/应入户数量；已检户次=完成安检量/已入户数量；到访不遇户次=上门无人/入户不遇/到访未遇；当月三件套安装户数=三件套新增安装/三件套装了多少户；抢修及时率=及时处置率/应急到场及时率；泄漏次数=漏气事件数/燃气泄漏事件；每千公里泄漏次数=管网泄漏强度/千公里漏气次数；管网里程=管线长度/燃气管道公里数；GIS入库率=GIS覆盖率/管网上图率/管线入图比例；未入库管段=GIS缺口/未上图管线；老旧管网=超20年管线/二十年以上管道；未闭环隐患=未完成整改/未销项工单；超期未闭环隐患=逾期整改/超期未销项；隐患闭环率=整改完成率/隐患销项率；重大隐患=重大风险工单/重大隐患清单",
+      "3": "知识版本gas-semantics-20261025。核对SQL与实际字段、口径、分母、日期、组织层级、连接基数。登记稽核值与可重算值不一致应标数据质量问题；不能因样例SQL写法不同拒绝等价正确查询。\n全部数据为虚构演示，不代表真实企业。月度事实仅覆盖2024-01至2026-09；“最新月”是数据MAX(month)，不是系统当前月；用户明确问2026-10必须按10月查空，不擅自换成9月。\n原始存储单位：气量方/立方米、金额元、里程公里、比例0到1。展示成万元/万方必须显式除10000并标单位；比率百分数展示才乘100。\n保留总主理人+领域专家框架。普通问数也实际经过AI，金标只作生成与审核参考，不允许样例直返或缓存答案代替AI。高阶先确认计划，再并行取证。\n复用系统gas_jc_tree组织树及现有数据权限。org_id是当前记录所属组织；branch_id是分公司编码、center_id是服务中心编码，不能把分公司编码直接等同网格org_id。跨层级范围用授权组织路径或组织维表解析。\n超级管理员可全域汇总，不因SQL没有组织WHERE就认定越权；普通账号权限必须由系统在取数前强制处理，不能由LLM文字代替。未绑定组织普通账号不开放。\n分公司：滨江BINJIANG、沙湖SHAHU、经开JINGKAI、临港LINGANG、高新GAOXIN、高压输配GYSP。高压输配没有销气职责；销售榜通常5家，安全/管网可有6家，不补造GYSP销气数据或强行补零。\n只使用本数据集声明的业务视图。事实表不得按月份、分公司或org_id单键明细互连；先各自聚合至相同时间与组织粒度，或使用已准备的汇总视图。\n组织维表v_gas_org.org_id唯一，事实视图.org_id可多对一关联。任何比例都先加总分子分母，再相除；分母0用NULLIF返回NULL，不补0、不简单平均比例。\n空结果不等于业务值0；取证失败不等于源库没有数据。AI/审核失败要明确未完成，禁止把规则摘要标作AI结论。\n数值差异、单月估抄率和老旧管网只能作为调查线索，不证明因果、偷盗气或系统性管理问题；无正式统计检验不输出正负相关结论。预测需专门模型和回测。\n安全范围：月度安检、到访不遇、三件套安装、抢修、泄漏次数，以及管段和隐患工单。无伤亡、停气时长、IC卡基表控制器、三单对账、盗气处罚或追缴明细，问到须明确不支持。\n安检覆盖率=SUM(inspected)/SUM(due_inspect)；抢修及时率=SUM(emergency_on_time)/SUM(emergency_total)。not_at_home和three_piece_installed是当月过程计数，不是历史未处理存量或累计安装存量。\n管段维表v_gas_network.network_id唯一；工单v_gas_hazards.network_id可多对一连接，不能将连接后的length_km按工单行SUM，否则重复计算里程。月度安检事实与工单/管段只能各自按组织汇总后比较。\n历史截至日T：仅纳入found_date<=T的工单；completed_date<=T算已闭环；completed_date为空或>T算当时未闭环；due_date<T且当时未闭环算超期（截止日当天不判已过期）。不能直接拿当前status还原历史。\n管网截至日T用laid_date<=T作总里程基数，gis_loaded_date<=T作为已入库条件，日期为空为未入库。以2026-09-30为示例时，老旧20年阈值是2006-09-30；用户换日期必须同步换阈值。工单数据截至2026-09-30，不回答未来状态。\n闭环率必须说明是截至日全部已发现工单闭环率还是当期新发现工单闭环率，未说明时先明确口径。泄漏次数每千公里=同期间泄漏次数/截至日有效里程*1000，不能称泄漏率百分比。\n入户与输配分工：高压输配GYSP纳入管网、隐患、泄漏、抢修范围；入户安检分母可为0，返回不适用/无应检计划，不能判0%且排名垫底。\n安检计数限制：应检、实检、到访不遇为月度过程计数，缺户ID与访问记录，不能推断去重户数、重复上门次数或拒检原因。三件套安装同理不能回答存量普及率。\n截至日与批次：“截至9月底闭环率”默认截至日全部已发现工单，若问9月整改则确认分母是9月新发现还是9月完成；两个指标不可混用。\nGIS两种比例：主口径按里程，分子是截至日已入库公里数；按管段数是另一个指标，应在标题写清。既没有入库日期也没有有效里程的记录需返回质量告警，不能默认为已入库。\n管龄与材质：管龄从laid_date到用户截止日；按材质/压力/片区分层后看老旧里程。钢管、老旧年限本身不等于存在泄漏或必须报废，无压力试验/腐蚀检测数据。\n工单与管段关联：工单network_id多对一管段。要统计涉及管段里程用EXISTS或先DISTINCT network_id；同时保留工单数与管段数，二者不必相等。\n整改优先级：可按既有重大等级、是否超期、超期天数排序；截至日超期天数=T-due_date。缺用户密度、事故后果和实时压力，不生成伪量化综合风险分。\n工作日与及时性：emergency_on_time是源系统已标注及时数量，缺到场分钟及SLA定义；可以计算源标注及时率，不能声称遵守某国家分钟标准。\n本域常见术语：安检覆盖率=入户安检率/安检完成率/入户检查完成率；应检户次=计划安检量/应入户数量；已检户次=完成安检量/已入户数量；到访不遇户次=上门无人/入户不遇/到访未遇；当月三件套安装户数=三件套新增安装/三件套装了多少户；抢修及时率=及时处置率/应急到场及时率；泄漏次数=漏气事件数/燃气泄漏事件；每千公里泄漏次数=管网泄漏强度/千公里漏气次数；管网里程=管线长度/燃气管道公里数；GIS入库率=GIS覆盖率/管网上图率/管线入图比例；未入库管段=GIS缺口/未上图管线；老旧管网=超20年管线/二十年以上管道；未闭环隐患=未完成整改/未销项工单；超期未闭环隐患=逾期整改/超期未销项；隐患闭环率=整改完成率/隐患销项率；重大隐患=重大风险工单/重大隐患清单",
+      "4": "知识版本gas-semantics-20261025。首段直接回答本题数值和范围；报告明确事实、数据质量提示、待验证假设、行动建议。无查询证据不使用既定场景故事推因果。排名先说明指标和对象范围，不能对零分母做优劣结论。最大增量按绝对差值排序，最大增幅按变化率排序，二者不能混用；金额和气量换算先精确加总再四舍五入，正文近似值必须与后续精确值一致。仅365天以上账龄为0不能推断181天以上长账龄为0；TopN结论仅限所查TopN，不能外推全体。缺总里程分母时，未入库绝对里程最少不等于GIS入库进度最好；短账龄或低余额不能据此判信用风险极低，缺基准也不自行判指标达标。单月或单期间汇总不能声称连续趋势。\n全部数据为虚构演示，不代表真实企业。月度事实仅覆盖2024-01至2026-09；“最新月”是数据MAX(month)，不是系统当前月；用户明确问2026-10必须按10月查空，不擅自换成9月。\n原始存储单位：气量方/立方米、金额元、里程公里、比例0到1。展示成万元/万方必须显式除10000并标单位；比率百分数展示才乘100。\n保留总主理人+领域专家框架。普通问数也实际经过AI，金标只作生成与审核参考，不允许样例直返或缓存答案代替AI。高阶先确认计划，再并行取证。\n复用系统gas_jc_tree组织树及现有数据权限。org_id是当前记录所属组织；branch_id是分公司编码、center_id是服务中心编码，不能把分公司编码直接等同网格org_id。跨层级范围用授权组织路径或组织维表解析。\n超级管理员可全域汇总，不因SQL没有组织WHERE就认定越权；普通账号权限必须由系统在取数前强制处理，不能由LLM文字代替。未绑定组织普通账号不开放。\n分公司：滨江BINJIANG、沙湖SHAHU、经开JINGKAI、临港LINGANG、高新GAOXIN、高压输配GYSP。高压输配没有销气职责；销售榜通常5家，安全/管网可有6家，不补造GYSP销气数据或强行补零。\n只使用本数据集声明的业务视图。事实表不得按月份、分公司或org_id单键明细互连；先各自聚合至相同时间与组织粒度，或使用已准备的汇总视图。\n组织维表v_gas_org.org_id唯一，事实视图.org_id可多对一关联。任何比例都先加总分子分母，再相除；分母0用NULLIF返回NULL，不补0、不简单平均比例。\n空结果不等于业务值0；取证失败不等于源库没有数据。AI/审核失败要明确未完成，禁止把规则摘要标作AI结论。\n数值差异、单月估抄率和老旧管网只能作为调查线索，不证明因果、偷盗气或系统性管理问题；无正式统计检验不输出正负相关结论。预测需专门模型和回测。\n安全范围：月度安检、到访不遇、三件套安装、抢修、泄漏次数，以及管段和隐患工单。无伤亡、停气时长、IC卡基表控制器、三单对账、盗气处罚或追缴明细，问到须明确不支持。\n安检覆盖率=SUM(inspected)/SUM(due_inspect)；抢修及时率=SUM(emergency_on_time)/SUM(emergency_total)。not_at_home和three_piece_installed是当月过程计数，不是历史未处理存量或累计安装存量。\n管段维表v_gas_network.network_id唯一；工单v_gas_hazards.network_id可多对一连接，不能将连接后的length_km按工单行SUM，否则重复计算里程。月度安检事实与工单/管段只能各自按组织汇总后比较。\n历史截至日T：仅纳入found_date<=T的工单；completed_date<=T算已闭环；completed_date为空或>T算当时未闭环；due_date<T且当时未闭环算超期（截止日当天不判已过期）。不能直接拿当前status还原历史。\n管网截至日T用laid_date<=T作总里程基数，gis_loaded_date<=T作为已入库条件，日期为空为未入库。以2026-09-30为示例时，老旧20年阈值是2006-09-30；用户换日期必须同步换阈值。工单数据截至2026-09-30，不回答未来状态。\n闭环率必须说明是截至日全部已发现工单闭环率还是当期新发现工单闭环率，未说明时先明确口径。泄漏次数每千公里=同期间泄漏次数/截至日有效里程*1000，不能称泄漏率百分比。\n入户与输配分工：高压输配GYSP纳入管网、隐患、泄漏、抢修范围；入户安检分母可为0，返回不适用/无应检计划，不能判0%且排名垫底。\n安检计数限制：应检、实检、到访不遇为月度过程计数，缺户ID与访问记录，不能推断去重户数、重复上门次数或拒检原因。三件套安装同理不能回答存量普及率。\n截至日与批次：“截至9月底闭环率”默认截至日全部已发现工单，若问9月整改则确认分母是9月新发现还是9月完成；两个指标不可混用。\nGIS两种比例：主口径按里程，分子是截至日已入库公里数；按管段数是另一个指标，应在标题写清。既没有入库日期也没有有效里程的记录需返回质量告警，不能默认为已入库。\n管龄与材质：管龄从laid_date到用户截止日；按材质/压力/片区分层后看老旧里程。钢管、老旧年限本身不等于存在泄漏或必须报废，无压力试验/腐蚀检测数据。\n工单与管段关联：工单network_id多对一管段。要统计涉及管段里程用EXISTS或先DISTINCT network_id；同时保留工单数与管段数，二者不必相等。\n整改优先级：可按既有重大等级、是否超期、超期天数排序；截至日超期天数=T-due_date。缺用户密度、事故后果和实时压力，不生成伪量化综合风险分。\n工作日与及时性：emergency_on_time是源系统已标注及时数量，缺到场分钟及SLA定义；可以计算源标注及时率，不能声称遵守某国家分钟标准。\n本域常见术语：安检覆盖率=入户安检率/安检完成率/入户检查完成率；应检户次=计划安检量/应入户数量；已检户次=完成安检量/已入户数量；到访不遇户次=上门无人/入户不遇/到访未遇；当月三件套安装户数=三件套新增安装/三件套装了多少户；抢修及时率=及时处置率/应急到场及时率；泄漏次数=漏气事件数/燃气泄漏事件；每千公里泄漏次数=管网泄漏强度/千公里漏气次数；管网里程=管线长度/燃气管道公里数；GIS入库率=GIS覆盖率/管网上图率/管线入图比例；未入库管段=GIS缺口/未上图管线；老旧管网=超20年管线/二十年以上管道；未闭环隐患=未完成整改/未销项工单；超期未闭环隐患=逾期整改/超期未销项；隐患闭环率=整改完成率/隐患销项率；重大隐患=重大风险工单/重大隐患清单"
     },
     "queries": [
       {
@@ -673,7 +1704,7 @@
       },
       {
         "question": "2026年9月到访不遇还有多少户",
-        "sql": "SELECT SUM(not_at_home) AS 到访不遇户数 FROM v_gas_safety WHERE month='2026-09'"
+        "sql": "SELECT SUM(not_at_home) AS 当月到访不遇户次 FROM v_gas_safety WHERE month='2026-09'"
       },
       {
         "question": "截至2026年9月GIS入库里程占比多少",
@@ -681,7 +1712,7 @@
       },
       {
         "question": "沙湖分公司有多少公里超过20年的老旧管网",
-        "sql": "SELECT SUM(length_km) AS 老旧管网_公里 FROM v_gas_network WHERE branch_id='SHAHU' AND laid_date<='2006-09-30'"
+        "sql": "SELECT SUM(length_km) AS 老旧管网_公里 FROM v_gas_network WHERE branch_id='SHAHU' AND laid_date<'2006-09-30'"
       },
       {
         "question": "2026年9月各分公司三件套安装和到访不遇情况",
@@ -706,7 +1737,373 @@
       {
         "question": "2026年9月各分公司每千公里泄漏次数",
         "sql": "WITH l AS (SELECT branch_id,SUM(leak_count) AS leaks FROM v_gas_safety WHERE month='2026-09' GROUP BY branch_id), n AS (SELECT branch_id,SUM(length_km) AS km FROM v_gas_network WHERE laid_date<='2026-09-30' GROUP BY branch_id) SELECT l.branch_id,l.leaks AS 当月泄漏次数,n.km AS 截至日管网公里,l.leaks*1000::numeric/NULLIF(n.km,0) AS 次每千公里 FROM l JOIN n ON l.branch_id=n.branch_id"
+      },
+      {
+        "question": "2026年9月各服务网格应检、实检和到访不遇",
+        "sql": "SELECT org_id,org_name,due_inspect,inspected,not_at_home,inspected::numeric/NULLIF(due_inspect,0) AS 安检覆盖率 FROM v_gas_safety WHERE month='2026-09' ORDER BY branch_id,org_id"
+      },
+      {
+        "question": "截至2026年9月底GIS未入库管段按分公司汇总",
+        "sql": "SELECT branch_name,COUNT(*) AS 未入库管段数,SUM(length_km) AS 未入库里程_公里 FROM v_gas_network WHERE laid_date<='2026-09-30' AND (gis_loaded_date IS NULL OR gis_loaded_date>'2026-09-30') GROUP BY branch_name"
+      },
+      {
+        "question": "截至2026年9月底各分公司超过20年的管网有多少",
+        "sql": "SELECT branch_name,COUNT(*) AS 超二十年管段数,SUM(length_km) AS 超二十年里程_公里 FROM v_gas_network WHERE laid_date<'2006-09-30' GROUP BY branch_name"
+      },
+      {
+        "question": "截至2026年9月底各类隐患超期未闭环情况",
+        "sql": "SELECT severity,hazard_type,COUNT(*) AS 超期未闭环工单数 FROM v_gas_hazards WHERE found_date<='2026-09-30' AND due_date<'2026-09-30' AND (completed_date IS NULL OR completed_date>'2026-09-30') GROUP BY severity,hazard_type"
+      },
+      {
+        "question": "东环干线运维班组截至2026年9月底有哪些未闭环隐患",
+        "sql": "SELECT hazard_id,hazard_type,severity,found_date,due_date,network_id FROM v_gas_hazards WHERE org_id='GYSP-S1-W1' AND found_date<='2026-09-30' AND (completed_date IS NULL OR completed_date>'2026-09-30') ORDER BY due_date,hazard_id"
+      },
+      {
+        "question": "2026年9月新发现隐患截至月底闭环率",
+        "sql": "SELECT branch_name,COUNT(*) AS 当月发现数,COUNT(*) FILTER(WHERE completed_date<='2026-09-30') AS 月底已闭环数,COUNT(*) FILTER(WHERE completed_date<='2026-09-30')::numeric/NULLIF(COUNT(*),0) AS 当月批次闭环率 FROM v_gas_hazards WHERE found_date BETWEEN '2026-09-01' AND '2026-09-30' GROUP BY branch_name"
+      },
+      {
+        "question": "截至2026年6月底与9月底未闭环隐患数对比",
+        "sql": "SELECT t.cutoff,COUNT(h.hazard_id) AS 未闭环数 FROM (VALUES (DATE '2026-06-30'),(DATE '2026-09-30')) t(cutoff) LEFT JOIN v_gas_hazards h ON h.found_date<=t.cutoff AND (h.completed_date IS NULL OR h.completed_date>t.cutoff) GROUP BY t.cutoff ORDER BY t.cutoff"
+      },
+      {
+        "question": "截至2026年9月底关联隐患的管段去重里程",
+        "sql": "SELECT n.branch_name,COUNT(*) AS 关联管段数,SUM(n.length_km) AS 去重里程_公里 FROM v_gas_network n WHERE n.laid_date<='2026-09-30' AND EXISTS(SELECT 1 FROM v_gas_hazards h WHERE h.network_id=n.network_id AND h.found_date<='2026-09-30') GROUP BY n.branch_name"
+      },
+      {
+        "question": "2026年9月高压输配的入户安检覆盖率",
+        "sql": "SELECT branch_name,SUM(due_inspect) AS 应检户次,SUM(inspected) AS 实检户次,SUM(inspected)::numeric/NULLIF(SUM(due_inspect),0) AS 安检覆盖率 FROM v_gas_safety WHERE month='2026-09' AND branch_id='GYSP' GROUP BY branch_name"
+      },
+      {
+        "question": "截至2026年9月底按材质和压力等级看管网里程",
+        "sql": "SELECT material,pressure_level,COUNT(*) AS 管段数,SUM(length_km) AS 里程_公里 FROM v_gas_network WHERE laid_date<='2026-09-30' GROUP BY material,pressure_level ORDER BY material,pressure_level"
       }
+    ],
+    "glossary": [
+      {
+        "alias": "入户安检率",
+        "canonical": "安检覆盖率",
+        "definition": "SUM(inspected)/SUM(due_inspect)，不是相邻网格比例均值。",
+        "weight": 4
+      },
+      {
+        "alias": "安检完成率",
+        "canonical": "安检覆盖率",
+        "definition": "SUM(inspected)/SUM(due_inspect)，不是相邻网格比例均值。",
+        "weight": 4
+      },
+      {
+        "alias": "入户检查完成率",
+        "canonical": "安检覆盖率",
+        "definition": "SUM(inspected)/SUM(due_inspect)，不是相邻网格比例均值。",
+        "weight": 4
+      },
+      {
+        "alias": "计划安检量",
+        "canonical": "应检户次",
+        "definition": "due_inspect，月度计划过程计数，不能当全部燃气用户。",
+        "weight": 4
+      },
+      {
+        "alias": "应入户数量",
+        "canonical": "应检户次",
+        "definition": "due_inspect，月度计划过程计数，不能当全部燃气用户。",
+        "weight": 4
+      },
+      {
+        "alias": "完成安检量",
+        "canonical": "已检户次",
+        "definition": "inspected，月度已完成过程计数。",
+        "weight": 4
+      },
+      {
+        "alias": "已入户数量",
+        "canonical": "已检户次",
+        "definition": "inspected，月度已完成过程计数。",
+        "weight": 4
+      },
+      {
+        "alias": "上门无人",
+        "canonical": "到访不遇户次",
+        "definition": "not_at_home为当月过程计数，不代表去重客户或历史待复访存量。",
+        "weight": 4
+      },
+      {
+        "alias": "入户不遇",
+        "canonical": "到访不遇户次",
+        "definition": "not_at_home为当月过程计数，不代表去重客户或历史待复访存量。",
+        "weight": 4
+      },
+      {
+        "alias": "到访未遇",
+        "canonical": "到访不遇户次",
+        "definition": "not_at_home为当月过程计数，不代表去重客户或历史待复访存量。",
+        "weight": 4
+      },
+      {
+        "alias": "三件套新增安装",
+        "canonical": "当月三件套安装户数",
+        "definition": "three_piece_installed为当月计数；无累计已装户基数，不能答三件套普及率。",
+        "weight": 4
+      },
+      {
+        "alias": "三件套装了多少户",
+        "canonical": "当月三件套安装户数",
+        "definition": "three_piece_installed为当月计数；无累计已装户基数，不能答三件套普及率。",
+        "weight": 4
+      },
+      {
+        "alias": "及时处置率",
+        "canonical": "抢修及时率",
+        "definition": "SUM(emergency_on_time)/SUM(emergency_total)，未提供分钟级到场时长。",
+        "weight": 4
+      },
+      {
+        "alias": "应急到场及时率",
+        "canonical": "抢修及时率",
+        "definition": "SUM(emergency_on_time)/SUM(emergency_total)，未提供分钟级到场时长。",
+        "weight": 4
+      },
+      {
+        "alias": "漏气事件数",
+        "canonical": "泄漏次数",
+        "definition": "leak_count为当月次数，不能自动判定严重程度。",
+        "weight": 4
+      },
+      {
+        "alias": "燃气泄漏事件",
+        "canonical": "泄漏次数",
+        "definition": "leak_count为当月次数，不能自动判定严重程度。",
+        "weight": 4
+      },
+      {
+        "alias": "管网泄漏强度",
+        "canonical": "每千公里泄漏次数",
+        "definition": "期间泄漏次数/截至日管网公里×1000，单位次/千公里，不是百分比。",
+        "weight": 4
+      },
+      {
+        "alias": "千公里漏气次数",
+        "canonical": "每千公里泄漏次数",
+        "definition": "期间泄漏次数/截至日管网公里×1000，单位次/千公里，不是百分比。",
+        "weight": 4
+      },
+      {
+        "alias": "管线长度",
+        "canonical": "管网里程",
+        "definition": "SUM(length_km)，按laid_date<=截止日筛选；不同工单关联同管段不得重复累加。",
+        "weight": 4
+      },
+      {
+        "alias": "燃气管道公里数",
+        "canonical": "管网里程",
+        "definition": "SUM(length_km)，按laid_date<=截止日筛选；不同工单关联同管段不得重复累加。",
+        "weight": 4
+      },
+      {
+        "alias": "GIS覆盖率",
+        "canonical": "GIS入库率",
+        "definition": "截至日已GIS入库里程/有效总里程，采用里程口径；若问管段数比例须另算。",
+        "weight": 4
+      },
+      {
+        "alias": "管网上图率",
+        "canonical": "GIS入库率",
+        "definition": "截至日已GIS入库里程/有效总里程，采用里程口径；若问管段数比例须另算。",
+        "weight": 4
+      },
+      {
+        "alias": "管线入图比例",
+        "canonical": "GIS入库率",
+        "definition": "截至日已GIS入库里程/有效总里程，采用里程口径；若问管段数比例须另算。",
+        "weight": 4
+      },
+      {
+        "alias": "GIS缺口",
+        "canonical": "未入库管段",
+        "definition": "gis_loaded_date为空或晚于截止日，且laid_date不晚于截止日。",
+        "weight": 4
+      },
+      {
+        "alias": "未上图管线",
+        "canonical": "未入库管段",
+        "definition": "gis_loaded_date为空或晚于截止日，且laid_date不晚于截止日。",
+        "weight": 4
+      },
+      {
+        "alias": "超20年管线",
+        "canonical": "老旧管网",
+        "definition": "按用户截止日减20年，筛laid_date早于阈值；“超过”与“满20年”边界需说明。",
+        "weight": 4
+      },
+      {
+        "alias": "二十年以上管道",
+        "canonical": "老旧管网",
+        "definition": "按用户截止日减20年，筛laid_date早于阈值；“超过”与“满20年”边界需说明。",
+        "weight": 4
+      },
+      {
+        "alias": "未完成整改",
+        "canonical": "未闭环隐患",
+        "definition": "发现日<=截止日，完成日为空或>截止日；不能直接用当前status代替历史。",
+        "weight": 4
+      },
+      {
+        "alias": "未销项工单",
+        "canonical": "未闭环隐患",
+        "definition": "发现日<=截止日，完成日为空或>截止日；不能直接用当前status代替历史。",
+        "weight": 4
+      },
+      {
+        "alias": "逾期整改",
+        "canonical": "超期未闭环隐患",
+        "definition": "未闭环且due_date<截止日；到期当日不算已超期。",
+        "weight": 4
+      },
+      {
+        "alias": "超期未销项",
+        "canonical": "超期未闭环隐患",
+        "definition": "未闭环且due_date<截止日；到期当日不算已超期。",
+        "weight": 4
+      },
+      {
+        "alias": "整改完成率",
+        "canonical": "隐患闭环率",
+        "definition": "需要明确截至日全部发现工单还是当期新发现工单，分母不同。",
+        "weight": 4
+      },
+      {
+        "alias": "隐患销项率",
+        "canonical": "隐患闭环率",
+        "definition": "需要明确截至日全部发现工单还是当期新发现工单，分母不同。",
+        "weight": 4
+      },
+      {
+        "alias": "重大风险工单",
+        "canonical": "重大隐患",
+        "definition": "severity=重大；不把一般工单自行上调等级，无事故/伤亡字段。",
+        "weight": 4
+      },
+      {
+        "alias": "重大隐患清单",
+        "canonical": "重大隐患",
+        "definition": "severity=重大；不把一般工单自行上调等级，无事故/伤亡字段。",
+        "weight": 4
+      },
+      {
+        "alias": "安检覆盖率",
+        "canonical": "安检覆盖率",
+        "definition": "SUM(inspected)/SUM(due_inspect)，不是相邻网格比例均值。",
+        "weight": 5
+      },
+      {
+        "alias": "应检户次",
+        "canonical": "应检户次",
+        "definition": "due_inspect，月度计划过程计数，不能当全部燃气用户。",
+        "weight": 5
+      },
+      {
+        "alias": "已检户次",
+        "canonical": "已检户次",
+        "definition": "inspected，月度已完成过程计数。",
+        "weight": 5
+      },
+      {
+        "alias": "到访不遇户次",
+        "canonical": "到访不遇户次",
+        "definition": "not_at_home为当月过程计数，不代表去重客户或历史待复访存量。",
+        "weight": 5
+      },
+      {
+        "alias": "当月三件套安装户数",
+        "canonical": "当月三件套安装户数",
+        "definition": "three_piece_installed为当月计数；无累计已装户基数，不能答三件套普及率。",
+        "weight": 5
+      },
+      {
+        "alias": "抢修及时率",
+        "canonical": "抢修及时率",
+        "definition": "SUM(emergency_on_time)/SUM(emergency_total)，未提供分钟级到场时长。",
+        "weight": 5
+      },
+      {
+        "alias": "泄漏次数",
+        "canonical": "泄漏次数",
+        "definition": "leak_count为当月次数，不能自动判定严重程度。",
+        "weight": 5
+      },
+      {
+        "alias": "每千公里泄漏次数",
+        "canonical": "每千公里泄漏次数",
+        "definition": "期间泄漏次数/截至日管网公里×1000，单位次/千公里，不是百分比。",
+        "weight": 5
+      },
+      {
+        "alias": "管网里程",
+        "canonical": "管网里程",
+        "definition": "SUM(length_km)，按laid_date<=截止日筛选；不同工单关联同管段不得重复累加。",
+        "weight": 5
+      },
+      {
+        "alias": "GIS入库率",
+        "canonical": "GIS入库率",
+        "definition": "截至日已GIS入库里程/有效总里程，采用里程口径；若问管段数比例须另算。",
+        "weight": 5
+      },
+      {
+        "alias": "未入库管段",
+        "canonical": "未入库管段",
+        "definition": "gis_loaded_date为空或晚于截止日，且laid_date不晚于截止日。",
+        "weight": 5
+      },
+      {
+        "alias": "老旧管网",
+        "canonical": "老旧管网",
+        "definition": "按用户截止日减20年，筛laid_date早于阈值；“超过”与“满20年”边界需说明。",
+        "weight": 5
+      },
+      {
+        "alias": "未闭环隐患",
+        "canonical": "未闭环隐患",
+        "definition": "发现日<=截止日，完成日为空或>截止日；不能直接用当前status代替历史。",
+        "weight": 5
+      },
+      {
+        "alias": "超期未闭环隐患",
+        "canonical": "超期未闭环隐患",
+        "definition": "未闭环且due_date<截止日；到期当日不算已超期。",
+        "weight": 5
+      },
+      {
+        "alias": "隐患闭环率",
+        "canonical": "隐患闭环率",
+        "definition": "需要明确截至日全部发现工单还是当期新发现工单，分母不同。",
+        "weight": 5
+      },
+      {
+        "alias": "重大隐患",
+        "canonical": "重大隐患",
+        "definition": "severity=重大；不把一般工单自行上调等级，无事故/伤亡字段。",
+        "weight": 5
+      }
+    ],
+    "common": [
+      "2026年9月各服务网格应检、实检和到访不遇",
+      "截至2026年9月底GIS未入库管段按分公司汇总",
+      "截至2026年9月底各分公司超过20年的管网有多少",
+      "截至2026年9月底各类隐患超期未闭环情况",
+      "东环干线运维班组截至2026年9月底有哪些未闭环隐患",
+      "2026年9月新发现隐患截至月底闭环率",
+      "截至2026年6月底与9月底未闭环隐患数对比",
+      "截至2026年9月底关联隐患的管段去重里程",
+      "2026年9月各分公司安检覆盖率",
+      "截至2026年9月底有哪些超期未闭环隐患",
+      "2026年9月各分公司抢修及时率",
+      "2026年9月到访不遇还有多少户",
+      "截至2026年9月GIS入库里程占比多少",
+      "沙湖分公司有多少公里超过20年的老旧管网",
+      "2026年9月各分公司三件套安装和到访不遇情况",
+      "截至2026年9月底各分公司隐患闭环率"
     ]
   }
 ]

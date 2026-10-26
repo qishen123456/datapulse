@@ -17,7 +17,10 @@
       </div>
     </section>
 
-    <section class="fs-stat-grid" aria-label="同步任务概览">
+    <aside class="sync-control-rail" aria-label="同步工作区导航">
+      <div class="sync-rail-title"><span>同步工作区</span><strong>数据管道</strong></div>
+      <nav class="sync-section-nav" aria-label="同步功能"><button v-for="item in [{key:'schedule',label:'任务调度',index:'01'},{key:'logs',label:'运行日志',index:'02'},{key:'tasks',label:'任务配置',index:'03'}]" :key="item.key" :aria-current="opsActiveTab===item.key ? 'page' : undefined" @click="opsActiveTab=item.key"><span>{{ item.index }}</span>{{ item.label }}<span aria-hidden="true">›</span></button></nav>
+      <section class="fs-stat-grid" aria-label="同步任务概览">
       <article v-for="card in statCards" :key="card.label" class="fs-stat-card" :class="card.tone">
         <div class="fs-stat-copy">
           <span class="fs-stat-label">{{ card.label }}</span>
@@ -26,6 +29,8 @@
         </div>
       </article>
     </section>
+      <div class="sync-rail-foot"><span class="sync-connection-line"></span><span>飞书多维表格</span><span aria-hidden="true">↓</span><span>目标数据库</span><small>同步后的表可作为问数数据来源</small></div>
+    </aside>
 
     <section class="fs-ops-board" v-loading="loading || loadingAllLogs">
       <div class="fs-board-head"><span class="fs-board-status"><i></i>{{ nextRunSummary }}</span><span>{{ filteredAllLogs.length }} 条运行日志</span></div>
@@ -1153,9 +1158,9 @@ onUnmounted(() => {
   padding: 28px;
   color: #111827;
   background:
-    radial-gradient(circle at 8% 0%, rgba(29, 78, 216, 0.10), transparent 30%),
-    radial-gradient(circle at 90% 16%, rgba(8, 145, 178, 0.08), transparent 28%),
-    linear-gradient(180deg, #EDF2F1 0%, #F2F5F4 100%);
+    radial-gradient(circle at 8% 0%, rgba(66, 95, 131, 0.10), transparent 30%),
+    radial-gradient(circle at 90% 16%, rgba(60, 83, 110, 0.08), transparent 28%),
+    linear-gradient(180deg, #edf2f5 0%, #edf2f5 100%);
 }
 
 .fs-hero {
@@ -1164,10 +1169,10 @@ onUnmounted(() => {
   min-height: 138px;
   padding: 30px 32px;
   border-radius: 8px;
-  border: 1px solid #D7DEDC;
+  border: 1px solid #bdcbd3;
   background:
-    linear-gradient(120deg, rgba(255, 255, 255, 0.98) 0%, rgba(236, 254, 255, 0.9) 54%, rgba(240, 253, 250, 0.95) 100%);
-  box-shadow: 0 1px 3px rgba(13, 25, 24, 0.06);
+    linear-gradient(120deg, rgba(255, 255, 255, 0.98) 0%, rgba(237, 242, 245, 0.9) 54%, rgba(237, 242, 245, 0.95) 100%);
+  box-shadow: 0 1px 3px rgba(52, 70, 82, 0.06);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1181,7 +1186,7 @@ onUnmounted(() => {
   width: 210px;
   height: 210px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(29, 78, 216, 0.28), transparent 62%);
+  background: radial-gradient(circle, rgba(66, 95, 131, 0.28), transparent 62%);
   filter: blur(2px);
 }
 
@@ -1195,7 +1200,7 @@ onUnmounted(() => {
   font-size: 12px;
   font-weight: 900;
   letter-spacing: 0.14em;
-  color: #1d4ed8;
+  color: #425f83;
 }
 
 .fs-hero h2 {
@@ -1247,7 +1252,7 @@ onUnmounted(() => {
 
 .fs-btn-primary {
   color: #fff;
-  background: linear-gradient(135deg, #1A1A1A 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #1A1A1A 0%, #425f83 100%);
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24);
 }
 
@@ -1286,23 +1291,23 @@ onUnmounted(() => {
   justify-content: center;
   font-size: 18px;
   font-weight: 900;
-  color: #1d4ed8;
-  background: linear-gradient(180deg, #eff6ff 0%, #eff6ff 100%);
+  color: #425f83;
+  background: linear-gradient(180deg, #edf2f8 0%, #edf2f8 100%);
 }
 
 .fs-stat-card.running .fs-stat-icon {
-  color: #b45309;
-  background: linear-gradient(180deg, #FFFBEB 0%, #FFFBEB 100%);
+  color: #806b47;
+  background: linear-gradient(180deg, #f5f2ec 0%, #f5f2ec 100%);
 }
 
 .fs-stat-card.failed .fs-stat-icon {
-  color: #1d4ed8;
-  background: linear-gradient(180deg, #eff6ff 0%, #eff6ff 100%);
+  color: #425f83;
+  background: linear-gradient(180deg, #edf2f8 0%, #edf2f8 100%);
 }
 
 .fs-stat-card.quiet .fs-stat-icon {
   color: #6B7280;
-  background: linear-gradient(180deg, #F2F5F4 0%, #F3F4F6 100%);
+  background: linear-gradient(180deg, #edf2f5 0%, #F3F4F6 100%);
 }
 
 .fs-stat-copy {
@@ -1355,9 +1360,9 @@ onUnmounted(() => {
   height: 30px;
   padding: 0 12px;
   border-radius: 999px;
-  background: #F2F5F4;
-  border: 1px solid rgba(29, 78, 216, 0.12);
-  color: #1d4ed8;
+  background: #edf2f5;
+  border: 1px solid rgba(66, 95, 131, 0.12);
+  color: #425f83;
   font-size: 12px;
   font-weight: 800;
   display: inline-flex;
@@ -1394,7 +1399,7 @@ onUnmounted(() => {
 }
 
 .fs-ops-tabs :deep(.el-tabs__item.is-active) {
-  color: #1d4ed8;
+  color: #425f83;
 }
 
 .fs-tab-label {
@@ -1408,7 +1413,7 @@ onUnmounted(() => {
   padding: 14px;
   border-radius: 6px;
   border: 1px solid rgba(107, 114, 128, 0.08);
-  background: #F2F5F4;
+  background: #edf2f5;
 }
 
 .fs-panel-title {
@@ -1488,7 +1493,7 @@ onUnmounted(() => {
 
 .fs-next-run.is-soon,
 .fs-next-run.is-running {
-  color: #b45309;
+  color: #806b47;
   font-weight: 800;
 }
 
@@ -1497,7 +1502,7 @@ onUnmounted(() => {
 }
 
 .fs-next-run.is-waiting {
-  color: #1d4ed8;
+  color: #425f83;
   font-weight: 800;
 }
 
@@ -1521,7 +1526,7 @@ onUnmounted(() => {
   padding: 20px;
   border-radius: 8px;
   border: 1px solid rgba(107, 114, 128, 0.1);
-  background: linear-gradient(180deg, #ffffff 0%, #F2F5F4 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #edf2f5 100%);
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.07);
 }
 
@@ -1533,9 +1538,9 @@ onUnmounted(() => {
   background: #9CA3AF;
 }
 
-.fs-task-card.is-success::before { background: linear-gradient(90deg, #1d4ed8, #10B981); }
-.fs-task-card.is-running::before { background: linear-gradient(90deg, #f59e0b, #9CA3AF); }
-.fs-task-card.is-failed::before { background: linear-gradient(90deg, #1d4ed8, #F87171); }
+.fs-task-card.is-success::before { background: linear-gradient(90deg, #425f83, #526b7a); }
+.fs-task-card.is-running::before { background: linear-gradient(90deg, #806b47, #9CA3AF); }
+.fs-task-card.is-failed::before { background: linear-gradient(90deg, #425f83, #b29396); }
 
 .fs-task-top {
   display: flex;
@@ -1561,18 +1566,18 @@ onUnmounted(() => {
 }
 
 .is-success .fs-task-status-dot {
-  background: #10B981;
+  background: #526b7a;
   box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.12);
 }
 
 .is-running .fs-task-status-dot {
-  background: #f59e0b;
+  background: #806b47;
   box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.16);
   animation: fsPulse 1.3s ease-in-out infinite;
 }
 
 .is-failed .fs-task-status-dot {
-  background: #1d4ed8;
+  background: #425f83;
   box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.12);
 }
 
@@ -1604,18 +1609,18 @@ onUnmounted(() => {
 }
 
 .fs-status-pill.is-success {
-  color: #10B981;
-  background: #ECFDF5;
+  color: #526b7a;
+  background: #edf2f5;
 }
 
 .fs-status-pill.is-running {
-  color: #b45309;
-  background: #FFFBEB;
+  color: #806b47;
+  background: #f5f2ec;
 }
 
 .fs-status-pill.is-failed {
-  color: #1d4ed8;
-  background: #eff6ff;
+  color: #425f83;
+  background: #edf2f8;
 }
 
 .fs-task-meta {
@@ -1628,7 +1633,7 @@ onUnmounted(() => {
 .fs-task-meta div {
   padding: 12px;
   border-radius: 6px;
-  background: #F2F5F4;
+  background: #edf2f5;
   border: 1px solid rgba(107, 114, 128, 0.06);
   display: flex;
   flex-direction: column;
@@ -1661,7 +1666,7 @@ onUnmounted(() => {
 .fs-task-route i {
   height: 1px;
   flex: 1;
-  background: linear-gradient(90deg, rgba(29, 78, 216, 0.18), rgba(0, 0, 0, 0.38), rgba(29, 78, 216, 0.18));
+  background: linear-gradient(90deg, rgba(66, 95, 131, 0.18), rgba(0, 0, 0, 0.38), rgba(66, 95, 131, 0.18));
 }
 
 .fs-task-actions {
@@ -1675,7 +1680,7 @@ onUnmounted(() => {
   padding: 0 12px;
   border-radius: 999px;
   color: #1A1A1A;
-  background: #F2F5F4;
+  background: #edf2f5;
   border: 1px solid rgba(107, 114, 128, 0.09);
 }
 
@@ -1686,13 +1691,13 @@ onUnmounted(() => {
 }
 
 .fs-action-primary {
-  color: #1d4ed8;
-  background: #eff6ff;
+  color: #425f83;
+  background: #edf2f8;
 }
 
 .fs-action-danger {
-  color: #1d4ed8;
-  background: #eff6ff;
+  color: #425f83;
+  background: #edf2f8;
 }
 
 .fs-url-assist,
@@ -1700,10 +1705,10 @@ onUnmounted(() => {
   margin-bottom: 18px;
   padding: 16px;
   border-radius: 6px;
-  border: 1px solid rgba(29, 78, 216, 0.12);
+  border: 1px solid rgba(66, 95, 131, 0.12);
   background:
-    radial-gradient(circle at 96% 0%, rgba(29, 78, 216, 0.12), transparent 34%),
-    #F2F5F4;
+    radial-gradient(circle at 96% 0%, rgba(66, 95, 131, 0.12), transparent 34%),
+    #edf2f5;
 }
 
 .fs-url-assist strong,
@@ -1742,11 +1747,11 @@ onUnmounted(() => {
 .fs-schema-panel {
   margin: 8px 0 0;
   background:
-    linear-gradient(135deg, rgba(236, 254, 255, 0.92), rgba(255, 255, 255, 0.96));
+    linear-gradient(135deg, rgba(237, 242, 245, 0.92), rgba(255, 255, 255, 0.96));
 }
 
 .fs-schema-panel.is-ready {
-  border-color: rgba(29, 78, 216, 0.24);
+  border-color: rgba(66, 95, 131, 0.24);
 }
 
 .fs-schema-summary {
@@ -1787,8 +1792,8 @@ onUnmounted(() => {
   margin-top: 12px;
   padding: 12px 14px;
   border-radius: 6px;
-  border: 1px solid rgba(29, 78, 216, 0.14);
-  background: rgba(236, 254, 255, 0.82);
+  border: 1px solid rgba(66, 95, 131, 0.14);
+  background: rgba(237, 242, 245, 0.82);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1796,8 +1801,8 @@ onUnmounted(() => {
 }
 
 .fs-schema-alert.has-diff {
-  border-color: rgba(245, 158, 11, 0.22);
-  background: rgba(255, 251, 235, 0.88);
+  border-color: rgba(128, 107, 71, 0.22);
+  background: rgba(245, 242, 236, 0.88);
 }
 
 .fs-schema-alert strong {
@@ -1821,11 +1826,11 @@ onUnmounted(() => {
 }
 
 .fs-field-box.added {
-  border-color: rgba(16, 185, 129, 0.18);
+  border-color: rgba(82, 107, 122, 0.18);
 }
 
 .fs-field-box.removed {
-  border-color: rgba(29, 78, 216, 0.16);
+  border-color: rgba(66, 95, 131, 0.16);
 }
 
 .fs-field-box-title {
@@ -1980,13 +1985,13 @@ onUnmounted(() => {
 .fs-page{padding:0;background:transparent;color:#18222f}
 .fs-hero{min-height:0;overflow:visible;padding:0;margin:0 0 24px;border:0;border-radius:0;background:none;box-shadow:none;gap:20px}
 .fs-hero h2{margin:0;font-size:24px;font-weight:600;letter-spacing:-.6px}.fs-hero p{margin-top:8px;font-size:13px;color:#778292}.fs-hero-actions{gap:8px}
-.fs-btn,.fs-action-btn{font-weight:500;transition:background .15s,border-color .15s}.fs-btn{height:34px;padding:0 13px;border-radius:7px;font-size:12px}.fs-btn:hover,.fs-action-btn:hover{transform:none}.fs-btn-primary{background:#365f91;box-shadow:none}.fs-btn-primary:hover{background:#294d77}.fs-btn-ghost{color:#526278;background:#fff;border:1px solid #dde3eb;box-shadow:none}
+.fs-btn,.fs-action-btn{font-weight:500;transition:background .15s,border-color .15s}.fs-btn{height:34px;padding:0 13px;border-radius:7px;font-size:12px}.fs-btn:hover,.fs-action-btn:hover{transform:none}.fs-btn-primary{background:#3c536e;box-shadow:none}.fs-btn-primary:hover{background:#3c536e}.fs-btn-ghost{color:#526278;background:#fff;border:1px solid #dde3eb;box-shadow:none}
 .fs-stat-grid{display:flex;flex-wrap:wrap;gap:0;margin:0 0 24px;border-top:1px solid #e3e7ed;border-bottom:1px solid #e3e7ed;padding:18px 0;background:none}
 .fs-stat-card{flex:1;min-width:150px;min-height:0;padding:0 24px;border:0;border-right:1px solid #e3e7ed;border-radius:0;background:transparent;box-shadow:none}.fs-stat-card:first-child{padding-left:0}.fs-stat-card:last-child{border:0}.fs-stat-copy{display:grid;grid-template-columns:auto 1fr;gap:7px 14px;align-items:center}.fs-stat-label{font-size:12px;font-weight:400;color:#6f7c8e}.fs-stat-copy strong{font-size:20px;font-weight:600;letter-spacing:-.4px;color:#33465f}.fs-stat-copy small{grid-column:1/-1;font-size:10px;color:#8a95a4}
 .fs-ops-board{padding:0 22px 22px;margin:0;border:1px solid #e1e5eb;border-radius:12px;background:#fff;box-shadow:none;min-height:400px}.fs-board-head{margin:0;padding:16px 0 12px;align-items:center;font-size:11px;color:#8a95a4;gap:12px}.fs-board-status{display:flex;align-items:center;gap:7px;color:#6b7c90}.fs-board-status i{width:5px;height:5px;border-radius:50%;background:#8799af}
-.fs-ops-tabs{margin:0}.fs-ops-tabs :deep(.el-tabs__header){margin:0 0 20px}.fs-ops-tabs :deep(.el-tabs__item){font-weight:500;font-size:13px;height:44px;color:#758294}.fs-ops-tabs :deep(.el-tabs__item.is-active){color:#365f91}
+.fs-ops-tabs{margin:0}.fs-ops-tabs :deep(.el-tabs__header){margin:0 0 20px}.fs-ops-tabs :deep(.el-tabs__item){font-weight:500;font-size:13px;height:44px;color:#758294}.fs-ops-tabs :deep(.el-tabs__item.is-active){color:#3c536e}
 .fs-ops-panel{padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}.fs-panel-title{margin-bottom:18px;gap:18px}.fs-panel-title strong{font-size:13px;font-weight:500;color:#33465f}.fs-panel-title span{font-size:11px;color:#8490a1}.fs-schedule-actions,.fs-log-actions{gap:8px}.fs-compact-table{border-radius:0}.fs-compact-table :deep(th.el-table__cell){font-size:11px;font-weight:500;color:#7d8898}.fs-compact-table :deep(td.el-table__cell){height:62px}.fs-compact-table :deep(.cell>strong){font-weight:500}.fs-compact-table :deep(.cell>small){font-size:11px;color:#8993a1}
-.fs-task-card{border:1px solid #e2e7ed;border-radius:10px;background:#fff;box-shadow:none}.fs-task-card:hover{transform:none;box-shadow:none;border-color:#bccbda}.fs-task-grid{gap:16px}.fs-task-meta{background:#f8fafc}.fs-task-icon{background:#eef3f8;color:#5c7899;box-shadow:none}.fs-action-btn{box-shadow:none}.fs-section-title h3{font-size:16px;font-weight:600}.fs-empty{background:transparent;border:0;box-shadow:none}
+.fs-task-card{border:1px solid #e2e7ed;border-radius:10px;background:#fff;box-shadow:none}.fs-task-card:hover{transform:none;box-shadow:none;border-color:#bccbda}.fs-task-grid{gap:16px}.fs-task-meta{background:#f5f7fa}.fs-task-icon{background:#edf2f8;color:#5c7899;box-shadow:none}.fs-action-btn{box-shadow:none}.fs-section-title h3{font-size:16px;font-weight:600}.fs-empty{background:transparent;border:0;box-shadow:none}
 @media(max-width:760px){.fs-page{padding:0}.fs-hero{gap:16px}.fs-hero-actions{justify-content:flex-start}.fs-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 0}.fs-stat-card{min-width:0;padding:0 16px}.fs-stat-card:nth-child(odd){padding-left:0}.fs-stat-card:nth-child(even){border:0}.fs-stat-copy{gap:7px 10px}.fs-stat-copy strong{font-size:18px}.fs-ops-board{padding:0 16px 18px}.fs-board-head{flex-direction:row;align-items:center}.fs-panel-title{align-items:stretch}.fs-schedule-actions .el-input,.fs-schedule-actions .el-select{width:100%}.fs-ops-tabs :deep(.el-tabs__item){padding:0 14px}.fs-hero h2{font-size:22px}}
 
 </style>

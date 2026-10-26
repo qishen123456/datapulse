@@ -1,5 +1,5 @@
 <template>
-  <div class="console-page">
+  <div class="console-page console-layout-fixed">
     <section class="console-hero">
       <div class="hero-copy">
         <span class="hero-kicker">{{ activeHero.kicker }}</span>
@@ -40,6 +40,7 @@
 
     <section class="console-command-layout" :class="{ 'is-data-tab': activeConsoleTab === 'data' }">
       <main class="console-command-main">
+      <div v-if="activeConsoleTab === 'permissions' || activeConsoleTab === 'fields'" class="mobile-permission-role"><label for="console-mobile-role">查看角色权限</label><select id="console-mobile-role" v-model="mobilePermissionRole"><option v-for="role in roles" :key="role.value" :value="role.value">{{ role.label }}</option></select></div>
     <template v-if="activeConsoleTab === 'dashboard'">
       <section class="dashboard-toolbar">
         <div>
@@ -226,11 +227,11 @@
               <span class="card-kicker">保护策略</span>
               <h3>双路径问数控制</h3>
             </div>
-            <el-button text type="primary" @click="askFlowAdvancedOpen = !askFlowAdvancedOpen">
-              {{ askFlowAdvancedOpen ? '收起' : '展开设置' }}
-            </el-button>
+            <button class="flow-disclosure" type="button" :aria-expanded="askFlowAdvancedOpen" aria-controls="flow-protection-settings" @click="askFlowAdvancedOpen = !askFlowAdvancedOpen">
+              <span>{{ askFlowAdvancedOpen ? '收起设置' : '展开设置' }}</span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </button>
           </div>
-          <div v-if="askFlowAdvancedOpen" class="flow-settings-grid">
+          <div v-if="askFlowAdvancedOpen" id="flow-protection-settings" class="flow-settings-grid">
             <div class="role-route-policy"><h4>按角色分配问数路径</h4><p>用户界面不显示路径切换。角色分配优先于数据集策略和默认路径；高阶仍需总开关、角色开放名单与功能权限同时准入。</p><label v-for="item in [{key:'user',label:'普通用户'},{key:'business_admin',label:'业务管理员'},{key:'admin',label:'管理员'},{key:'super_admin',label:'超级管理员'}]" :key="item.key"><span>{{ item.label }}</span><el-select v-model="askFlowConfig.rolePolicies[item.key]" clearable placeholder="沿用数据集 / 默认策略"><el-option label="普通问数" value="basic"/><el-option label="高阶研究" value="advanced"/></el-select></label></div>
             <label class="flow-setting-item"><span>开放高阶研究入口</span><small>独立于默认路径；同时检查功能权限、角色灰度与能力中心开关。</small><el-switch v-model="askFlowConfig.advancedEnabled" /></label>
             <label class="flow-setting-item"><span>高阶并发上限</span><small>每任务最多同时执行的研究分支。</small><el-input-number v-model="askFlowConfig.maxParallel" :min="1" :max="4" /></label>
@@ -268,11 +269,11 @@
               <span class="card-kicker">可选灰度</span>
               <h3>按数据集指定流程</h3>
             </div>
-            <el-button text type="primary" @click="askFlowDatasetOpen = !askFlowDatasetOpen">
-              {{ askFlowDatasetOpen ? '收起' : '展开灰度' }}
-            </el-button>
+            <button class="flow-disclosure" type="button" :aria-expanded="askFlowDatasetOpen" aria-controls="flow-dataset-settings" @click="askFlowDatasetOpen = !askFlowDatasetOpen">
+              <span>{{ askFlowDatasetOpen ? '收起设置' : '展开设置' }}</span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </button>
           </div>
-          <div v-if="askFlowDatasetOpen" class="flow-dataset-policy">
+          <div v-if="askFlowDatasetOpen" id="flow-dataset-settings" class="flow-dataset-policy">
             <p>只在需要让某个数据集先试用高阶研究时配置。留空则全部跟随上面的默认流程。</p>
             <div v-for="(row, index) in askFlowDatasetPolicyRows" :key="row.key" class="flow-dataset-row">
               <el-input v-model="row.datasetId" placeholder="数据集 ID，例如 12" />
@@ -344,7 +345,7 @@
           <div v-show="isModuleOpen(group.module)" class="matrix-table compact">
             <div class="matrix-row matrix-head">
               <div class="feature-col">字段项</div>
-              <label v-for="role in roles" :key="role.value" class="role-head" :class="{ checked: isRoleAllChecked(group.items, role.value) }">
+              <label v-for="role in roles" :key="role.value" class="role-head" :class="{ 'mobile-role-hidden': role.value !== mobilePermissionRole, checked: isRoleAllChecked(group.items, role.value) }">
                 <input type="checkbox" :checked="isRoleAllChecked(group.items, role.value)" @change="toggleRoleAll(group.items, role.value, $event.target.checked)" />
                 <span class="check-box"></span>
                 <span class="role-name">{{ role.label }}</span>
@@ -361,7 +362,7 @@
                 v-for="role in roles"
                 :key="role.value"
                 class="permission-check"
-                :class="{ checked: hasRole(item, role.value), disabled: isFixedPermission(item, role.value) }"
+                :class="{ 'mobile-role-hidden': role.value !== mobilePermissionRole, checked: hasRole(item, role.value), disabled: isFixedPermission(item, role.value) }"
               >
                 <input
                   type="checkbox"
@@ -457,7 +458,7 @@
         <div class="matrix-table">
           <div class="matrix-row matrix-head">
             <div class="feature-col">功能项</div>
-            <label v-for="role in roles" :key="role.value" class="role-head" :class="{ checked: isRoleAllChecked(navigationItems, role.value) }">
+            <label v-for="role in roles" :key="role.value" class="role-head" :class="{ 'mobile-role-hidden': role.value !== mobilePermissionRole, checked: isRoleAllChecked(navigationItems, role.value) }">
               <input type="checkbox" :checked="isRoleAllChecked(navigationItems, role.value)" @change="toggleRoleAll(navigationItems, role.value, $event.target.checked)" />
               <span class="check-box"></span>
               <span class="role-name">{{ role.label }}</span>
@@ -473,7 +474,7 @@
               v-for="role in roles"
               :key="role.value"
               class="permission-check"
-              :class="{ checked: hasRole(item, role.value), disabled: isFixedPermission(item, role.value) }"
+              :class="{ 'mobile-role-hidden': role.value !== mobilePermissionRole, checked: hasRole(item, role.value), disabled: isFixedPermission(item, role.value) }"
             >
               <input
                 type="checkbox"
@@ -526,7 +527,7 @@
               <div class="matrix-table compact">
                 <div class="matrix-row matrix-head">
                   <div class="feature-col">功能项</div>
-                  <label v-for="role in roles" :key="role.value" class="role-head" :class="{ checked: isRoleAllChecked(section.items, role.value) }">
+                  <label v-for="role in roles" :key="role.value" class="role-head" :class="{ 'mobile-role-hidden': role.value !== mobilePermissionRole, checked: isRoleAllChecked(section.items, role.value) }">
                     <input type="checkbox" :checked="isRoleAllChecked(section.items, role.value)" @change="toggleRoleAll(section.items, role.value, $event.target.checked)" />
                     <span class="check-box"></span>
                     <span class="role-name">{{ role.label }}</span>
@@ -544,7 +545,7 @@
                     v-for="role in roles"
                     :key="role.value"
                     class="permission-check"
-                    :class="{ checked: hasRole(item, role.value), disabled: isFixedPermission(item, role.value) }"
+                    :class="{ 'mobile-role-hidden': role.value !== mobilePermissionRole, checked: hasRole(item, role.value), disabled: isFixedPermission(item, role.value) }"
                   >
                     <input
                       type="checkbox"
@@ -901,6 +902,7 @@ const saving = ref(false)
 const resetting = ref(false)
 const features = ref({})
 const openModules = ref(['organization_tree_management', 'employee_permissions', 'runtime_migration'])
+const mobilePermissionRole = ref('user')
 const activeConsoleTab = ref('dashboard')
 const askFlowLoading = ref(false)
 const askFlowSaving = ref(false)
@@ -2274,8 +2276,8 @@ onMounted(() => {
   padding: 24px 28px 36px;
   color: #111827;
   background:
-    radial-gradient(circle at 8% 6%, rgba(29, 78, 216, 0.12), transparent 28%),
-    linear-gradient(135deg, #F2F5F4 0%, #F2F5F4 54%, #eff6ff 100%);
+    radial-gradient(circle at 8% 6%, rgba(66, 95, 131, 0.12), transparent 28%),
+    linear-gradient(135deg, #edf2f5 0%, #edf2f5 54%, #edf2f8 100%);
 }
 
 .ask-flow-panel { display: flex; flex-direction: column; gap: 16px; }
@@ -2286,9 +2288,9 @@ onMounted(() => {
   justify-content: space-between;
   gap: 20px;
   padding: 22px;
-  border: 1px solid #eff6ff;
+  border: 1px solid #edf2f8;
   border-radius: 4px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(236, 254, 255, 0.9));
+  background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(237, 242, 245, 0.9));
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.07);
 }
 
@@ -2329,7 +2331,7 @@ onMounted(() => {
   width: 30px;
   height: 30px;
   border-radius: 999px;
-  background: #1d4ed8;
+  background: #425f83;
   color: #fff;
   font-weight: 800;
 }
@@ -2350,31 +2352,31 @@ onMounted(() => {
   text-align: left;
   border: 1px solid #F3F4F6;
   border-radius: 4px;
-  background: #F2F5F4;
+  background: #edf2f5;
   cursor: pointer;
   transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
 }
 
 .flow-choice-card:hover {
-  border-color: #eff6ff;
+  border-color: #edf2f8;
   background: #ffffff;
 }
 
 .flow-choice-card.active {
-  border-color: #1d4ed8;
-  background: #eff6ff;
+  border-color: #425f83;
+  background: #edf2f8;
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.10);
 }
 
 .flow-choice-card strong { font-size: 22px; color: #111827; }
 .flow-choice-card small { color: #6B7280; line-height: 1.65; }
-.flow-choice-card i { margin-top: auto; font-style: normal; color: #1d4ed8; font-weight: 700; }
+.flow-choice-card i { margin-top: auto; font-style: normal; color: #425f83; font-weight: 700; }
 
 .flow-choice-tag {
   padding: 3px 8px;
   border-radius: 999px;
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: #edf2f8;
+  color: #425f83;
   font-size: 12px;
   font-weight: 700;
 }
@@ -2410,7 +2412,7 @@ onMounted(() => {
   padding: 14px;
   border: 1px solid #E5E7EB;
   border-radius: 4px;
-  background: #F2F5F4;
+  background: #edf2f5;
 }
 
 .flow-setting-item > span { font-weight: 700; color: #111827; }
@@ -2507,7 +2509,7 @@ onMounted(() => {
 .card-kicker {
   display: inline-flex;
   margin-bottom: 5px;
-  color: #1d4ed8;
+  color: #425f83;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -2547,7 +2549,7 @@ onMounted(() => {
   bottom: 28px;
   z-index: 30;
   padding: 8px;
-  border: 1px solid rgba(29, 78, 216, 0.18);
+  border: 1px solid rgba(66, 95, 131, 0.18);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.16);
@@ -2631,19 +2633,19 @@ onMounted(() => {
 }
 
 .dashboard-card.is-danger strong {
-  color: #1d4ed8;
+  color: #425f83;
 }
 
 .dashboard-card.is-warning strong {
-  color: #D97706;
+  color: #806b47;
 }
 
 .dashboard-card.is-success strong {
-  color: #10B981;
+  color: #526b7a;
 }
 
 .dashboard-card.is-primary strong {
-  color: #1d4ed8;
+  color: #425f83;
 }
 
 .dashboard-panels {
@@ -2713,19 +2715,19 @@ onMounted(() => {
 }
 
 .rank-metric.is-primary {
-  color: #1d4ed8;
+  color: #425f83;
 }
 
 .rank-metric.is-success {
-  color: #10B981;
+  color: #526b7a;
 }
 
 .rank-metric.is-danger {
-  color: #1d4ed8;
+  color: #425f83;
 }
 
 .rank-metric.is-warning {
-  color: #D97706;
+  color: #806b47;
 }
 
 .summary-strip div {
@@ -2738,7 +2740,7 @@ onMounted(() => {
 
 .summary-strip strong {
   display: block;
-  color: #1d4ed8;
+  color: #425f83;
   font-size: 21px;
   line-height: 1.1;
 }
@@ -2775,7 +2777,7 @@ onMounted(() => {
 
 .console-tabs button.active {
   color: #ffffff;
-  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  background: linear-gradient(135deg, #425f83 0%, #425f83 100%);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.22);
 }
 
@@ -2806,7 +2808,7 @@ onMounted(() => {
   gap: 12px;
   padding: 16px 18px;
   border-bottom: 1px solid #F3F4F6;
-  background: linear-gradient(180deg, #ffffff 0%, #F2F5F4 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #edf2f5 100%);
 }
 
 .card-head em,
@@ -2842,7 +2844,7 @@ onMounted(() => {
   margin-bottom: 4px;
   border: 0;
   border-radius: 4px;
-  background: #F2F5F4;
+  background: #edf2f5;
   color: #6B7280;
 }
 
@@ -2873,8 +2875,8 @@ onMounted(() => {
   margin-left: 8px;
   padding: 2px 7px;
   border-radius: 999px;
-  color: #1d4ed8;
-  background: #eff6ff;
+  color: #425f83;
+  background: #edf2f8;
   font-size: 11px;
 }
 
@@ -2911,8 +2913,8 @@ onMounted(() => {
 }
 
 .role-head.checked small {
-  color: #1d4ed8;
-  background: #eff6ff;
+  color: #425f83;
+  background: #edf2f8;
 }
 
 .role-head input,
@@ -2933,9 +2935,9 @@ onMounted(() => {
 
 .role-head.checked .check-box,
 .permission-check.checked .check-box {
-  border-color: #1d4ed8;
-  background: #1d4ed8;
-  box-shadow: inset 0 0 0 3px #1d4ed8;
+  border-color: #425f83;
+  background: #425f83;
+  box-shadow: inset 0 0 0 3px #425f83;
 }
 
 .role-head.checked .check-box::after,
@@ -2969,7 +2971,7 @@ onMounted(() => {
 }
 
 .is-risk {
-  background: linear-gradient(90deg, rgba(236, 254, 255, 0.78), transparent 52%);
+  background: linear-gradient(90deg, rgba(237, 242, 245, 0.78), transparent 52%);
 }
 
 .module-section {
@@ -2999,7 +3001,7 @@ onMounted(() => {
   gap: 12px;
   cursor: pointer;
   color: inherit;
-  background: linear-gradient(180deg, #ffffff 0%, #F2F5F4 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #edf2f5 100%);
   user-select: none;
   text-align: left;
 }
@@ -3041,7 +3043,7 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  background: #F2F5F4;
+  background: #edf2f5;
   border-bottom: 1px solid #F3F4F6;
 }
 
@@ -3063,8 +3065,8 @@ onMounted(() => {
   flex-shrink: 0;
   padding: 3px 8px;
   border-radius: 999px;
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: #edf2f8;
+  color: #425f83;
   font-size: 12px;
   font-style: normal;
   font-weight: 800;
@@ -3076,8 +3078,8 @@ onMounted(() => {
   margin: 0 8px 3px 0;
   padding: 2px 7px;
   border-radius: 999px;
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: #edf2f8;
+  color: #425f83;
   font-size: 11px;
   font-weight: 800;
   vertical-align: middle;
@@ -3118,8 +3120,8 @@ onMounted(() => {
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
-  color: #1d4ed8;
-  background: #eff6ff;
+  color: #425f83;
+  background: #edf2f8;
   font-size: 11px;
   font-weight: 800;
 }
@@ -3144,7 +3146,7 @@ onMounted(() => {
 }
 
 .data-summary-strip strong {
-  color: #1d4ed8;
+  color: #425f83;
 }
 
 .data-permission-card {
@@ -3253,7 +3255,7 @@ onMounted(() => {
   padding: 10px 12px;
   border: 1px solid #E5E7EB;
   border-radius: 4px;
-  background: #F2F5F4;
+  background: #edf2f5;
 }
 
 .detail-grid span {
@@ -3277,8 +3279,8 @@ onMounted(() => {
 }
 
 .detail-highlight {
-  border-color: #eff6ff;
-  background: #eff6ff;
+  border-color: #edf2f8;
+  background: #edf2f8;
 }
 
 .detail-section h3 {
@@ -3300,7 +3302,7 @@ onMounted(() => {
   overflow: auto;
   border-radius: 4px;
   color: #111827;
-  background: #F2F5F4;
+  background: #edf2f5;
   font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
   font-size: 12px;
   line-height: 1.55;
@@ -3309,7 +3311,7 @@ onMounted(() => {
 }
 
 .console-page {
-  background: #F2F5F4;
+  background: #edf2f5;
 }
 
 .console-page > * {
@@ -3321,7 +3323,7 @@ onMounted(() => {
   border-radius: 6px;
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 249, 250, 0.96)),
-    radial-gradient(circle at 0 0, rgba(29, 78, 216, 0.1), transparent 34%);
+    radial-gradient(circle at 0 0, rgba(66, 95, 131, 0.1), transparent 34%);
 }
 
 .console-hero h1 {
@@ -3366,7 +3368,7 @@ onMounted(() => {
   top: 0;
   z-index: 2;
   margin-bottom: 2px;
-  background: #eff6ff;
+  background: #edf2f8;
 }
 
 .feature-col {
@@ -3398,8 +3400,8 @@ onMounted(() => {
 }
 
 .role-head.checked {
-  border-color: rgba(29, 78, 216, 0.24);
-  background: #eff6ff;
+  border-color: rgba(66, 95, 131, 0.24);
+  background: #edf2f8;
 }
 
 .role-head small {
@@ -3448,7 +3450,7 @@ onMounted(() => {
 }
 
 .scope-summary strong {
-  color: #1d4ed8;
+  color: #425f83;
   font-size: 18px;
 }
 
@@ -3475,7 +3477,7 @@ onMounted(() => {
   padding: 12px;
   border: 1px solid #E5E7EB;
   border-radius: 4px;
-  background: #F2F5F4;
+  background: #edf2f5;
 }
 
 .scoped-employee-head span,
@@ -3567,6 +3569,10 @@ onMounted(() => {
     bottom: 16px;
   }
 }
+/* Disclosure controls have explicit contrast, independent of primary action styles. */
+.flow-disclosure{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:36px;padding:0 12px;border:1px solid #b7c7da;border-radius:8px;background:#edf2f8;color:#425f83;font:inherit;font-size:12px;font-weight:550;white-space:nowrap;cursor:pointer;flex-shrink:0;transition:background 150ms,border-color 150ms}
+.flow-disclosure span{color:inherit}.flow-disclosure svg{width:16px;height:16px;transition:transform 150ms}.flow-disclosure[aria-expanded=true] svg{transform:rotate(180deg)}.flow-disclosure:hover{background:#edf2f8;border-color:#7188a5}.flow-disclosure:focus-visible{outline:3px solid #425f8335;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.flow-disclosure,.flow-disclosure svg{transition:none}}
 </style>
 
 <style>
@@ -3576,7 +3582,7 @@ onMounted(() => {
   gap: 6px;
   padding: 8px;
   border-bottom: 1px solid #F3F4F6;
-  background: #F2F5F4;
+  background: #edf2f5;
 }
 
 .tree-select-panel-actions.compact-actions {
@@ -3594,8 +3600,67 @@ onMounted(() => {
     grid-template-columns: 1fr 1fr;
   }
 }
+/* Disclosure controls have explicit contrast, independent of primary action styles. */
+.flow-disclosure{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:36px;padding:0 12px;border:1px solid #b7c7da;border-radius:8px;background:#edf2f8;color:#425f83;font:inherit;font-size:12px;font-weight:550;white-space:nowrap;cursor:pointer;flex-shrink:0;transition:background 150ms,border-color 150ms}
+.flow-disclosure span{color:inherit}.flow-disclosure svg{width:16px;height:16px;transition:transform 150ms}.flow-disclosure[aria-expanded=true] svg{transform:rotate(180deg)}.flow-disclosure:hover{background:#edf2f8;border-color:#7188a5}.flow-disclosure:focus-visible{outline:3px solid #425f8335;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.flow-disclosure,.flow-disclosure svg{transition:none}}
 </style>
 
 <style scoped>
-.role-route-policy{grid-column:1/-1;padding:18px 20px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px}.role-route-policy h4{font-size:14px;font-weight:500;margin:0 0 8px}.role-route-policy p{font-size:12px;color:#64748b;line-height:1.8}.role-route-policy>label{display:flex;align-items:center;gap:20px;justify-content:space-between;padding:10px 0}.role-route-policy .el-select{width:min(270px,65%)}.role-route-policy>label>span{font-size:12px;color:#435976}
+.role-route-policy{grid-column:1/-1;padding:18px 20px;background:#f5f7fa;border:1px solid #e2e8f0;border-radius:9px}.role-route-policy h4{font-size:14px;font-weight:500;margin:0 0 8px}.role-route-policy p{font-size:12px;color:#617085;line-height:1.8}.role-route-policy>label{display:flex;align-items:center;gap:20px;justify-content:space-between;padding:10px 0}.role-route-policy .el-select{width:min(270px,65%)}.role-route-policy>label>span{font-size:12px;color:#435976}
+/* Disclosure controls have explicit contrast, independent of primary action styles. */
+.flow-disclosure{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:36px;padding:0 12px;border:1px solid #b7c7da;border-radius:8px;background:#edf2f8;color:#425f83;font:inherit;font-size:12px;font-weight:550;white-space:nowrap;cursor:pointer;flex-shrink:0;transition:background 150ms,border-color 150ms}
+.flow-disclosure span{color:inherit}.flow-disclosure svg{width:16px;height:16px;transition:transform 150ms}.flow-disclosure[aria-expanded=true] svg{transform:rotate(180deg)}.flow-disclosure:hover{background:#edf2f8;border-color:#7188a5}.flow-disclosure:focus-visible{outline:3px solid #425f8335;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.flow-disclosure,.flow-disclosure svg{transition:none}}
+</style>
+
+<style scoped>
+/* Explicit grid placement prevents legacy auto-placement from splitting the header. */
+.console-page.console-layout-fixed.console-layout-fixed{display:grid;grid-template-columns:180px minmax(0,1fr);grid-template-areas:"heading heading" "sections content";gap:24px;align-items:start;padding:0;min-width:0;width:100%;box-sizing:border-box}
+.console-layout-fixed>.console-hero{grid-area:heading;width:100%;box-sizing:border-box;min-width:0;flex-wrap:wrap}
+.console-layout-fixed>.console-tabs{grid-area:sections;display:flex;flex-direction:column;align-items:stretch;gap:4px;width:100%;box-sizing:border-box;margin:0;position:sticky;top:12px}
+.console-layout-fixed>.console-tabs button{text-align:left;white-space:normal;height:auto;min-height:40px;line-height:1.5;padding:10px 12px}
+.console-layout-fixed>.console-command-layout{grid-area:content;margin:0;width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+.console-layout-fixed .console-command-main{width:100%;min-width:0;max-width:100%}
+.console-layout-fixed .hero-actions{display:flex;flex-wrap:wrap;gap:8px;max-width:100%}.console-layout-fixed .hero-actions .el-button{margin:0}
+.console-layout-fixed :is(.dashboard-panel,.dashboard-toolbar,.ask-flow-panel,.permission-card,.module-card,.console-section,.data-permission-card,.log-panel){min-width:0;max-width:100%;box-sizing:border-box}
+.console-layout-fixed :is(.dashboard-panels,.dashboard-grid,.summary-strip,.log-summary-strip,.flow-settings-grid,.flow-choice-grid){min-width:0}
+.console-layout-fixed .matrix-table{width:100%;box-sizing:border-box;max-width:100%;overflow:auto;overscroll-behavior-x:contain}
+.console-layout-fixed :deep(.el-table){max-width:100%;width:100%}
+.console-layout-fixed .log-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.console-layout-fixed .log-toolbar>.el-input{flex:1 1 240px}.console-layout-fixed .log-toolbar>.el-button{margin:0}
+.console-layout-fixed .dashboard-toolbar :deep(.el-date-editor){max-width:100%;box-sizing:border-box}
+.console-layout-fixed .console-floating-save{grid-column:1/-1;margin:0}
+@media(max-width:1100px){
+.console-page.console-layout-fixed.console-layout-fixed{grid-template-columns:minmax(0,1fr);grid-template-areas:"heading" "sections" "content";gap:18px}
+.console-layout-fixed>.console-tabs{position:static;flex-direction:row;flex-wrap:nowrap;overflow:auto;justify-content:flex-start;overscroll-behavior-x:contain}.console-layout-fixed>.console-tabs button{flex:0 0 auto;white-space:nowrap}
+.console-layout-fixed .dashboard-panels{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:600px){
+.console-layout-fixed>.console-hero{flex-direction:column;align-items:stretch!important;gap:16px!important;padding-bottom:16px!important}.console-layout-fixed .hero-actions{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.console-layout-fixed .hero-actions .el-button{width:100%;min-width:0;padding:8px;font-size:12px}
+.console-layout-fixed .hero-copy p{overflow-wrap:anywhere}.console-layout-fixed .dashboard-grid,.console-layout-fixed .summary-strip,.console-layout-fixed .log-summary-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.console-layout-fixed .dashboard-card{padding:14px!important}.console-layout-fixed .dashboard-card strong{font-size:24px!important}
+.console-layout-fixed .dashboard-toolbar{padding:12px!important;align-items:stretch}.console-layout-fixed .dashboard-toolbar-actions{display:flex;flex-wrap:wrap;gap:8px}.console-layout-fixed .dashboard-toolbar-actions .el-button{margin:0}
+.console-layout-fixed .log-toolbar>:is(.el-select,.el-input,.el-date-editor){width:100%!important;min-width:0;flex:1 1 100%}
+.console-layout-fixed :is(.card-head,.module-title,.data-permission-toolbar){flex-wrap:wrap;gap:10px;padding:12px}.console-layout-fixed .data-permission-toolbar>.el-select{width:100%!important}
+.console-layout-fixed .role-route-policy{padding:14px}.console-layout-fixed .role-route-policy>label{gap:10px}.console-layout-fixed .role-route-policy .el-select{width:65%}
+.console-layout-fixed .flow-setting-item{grid-template-columns:minmax(0,1fr);gap:10px}.console-layout-fixed .flow-setting-item :deep(.el-select){width:100%}
+.console-layout-fixed .console-floating-save{position:static;grid-column:1;justify-self:end;padding:0;border:0;background:none;box-shadow:none;backdrop-filter:none}.console-layout-fixed .ask-flow-actions{position:static;flex-wrap:wrap}
+.console-layout-fixed :is(.permission-card,.module-card){padding:10px!important}.console-layout-fixed .detail-grid{grid-template-columns:minmax(0,1fr)}
+}
+/* Disclosure controls have explicit contrast, independent of primary action styles. */
+.flow-disclosure{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:36px;padding:0 12px;border:1px solid #b7c7da;border-radius:8px;background:#edf2f8;color:#425f83;font:inherit;font-size:12px;font-weight:550;white-space:nowrap;cursor:pointer;flex-shrink:0;transition:background 150ms,border-color 150ms}
+.flow-disclosure span{color:inherit}.flow-disclosure svg{width:16px;height:16px;transition:transform 150ms}.flow-disclosure[aria-expanded=true] svg{transform:rotate(180deg)}.flow-disclosure:hover{background:#edf2f8;border-color:#7188a5}.flow-disclosure:focus-visible{outline:3px solid #425f8335;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.flow-disclosure,.flow-disclosure svg{transition:none}}
+</style>
+
+<style scoped>
+.mobile-permission-role{display:none}
+@media(max-width:600px){
+.console-layout-fixed .mobile-permission-role{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;padding:12px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;color:#475569}
+.mobile-permission-role select{min-width:135px;max-width:65%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:6px;background:white;color:#0f172a;font:inherit}
+.console-layout-fixed .matrix-row{grid-template-columns:minmax(0,1fr) 92px;min-width:0;width:100%}.console-layout-fixed .matrix-table{padding:8px 0}.console-layout-fixed .matrix-row .mobile-role-hidden{display:none}.console-layout-fixed .feature-col{padding:12px 8px}.console-layout-fixed .feature-col strong{display:block;line-height:1.6}.console-layout-fixed .role-head{gap:4px;padding:8px 0;flex-wrap:wrap}.console-layout-fixed .role-head small{display:none}.console-layout-fixed .permission-check{min-height:48px}
+}
+/* Disclosure controls have explicit contrast, independent of primary action styles. */
+.flow-disclosure{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:36px;padding:0 12px;border:1px solid #b7c7da;border-radius:8px;background:#edf2f8;color:#425f83;font:inherit;font-size:12px;font-weight:550;white-space:nowrap;cursor:pointer;flex-shrink:0;transition:background 150ms,border-color 150ms}
+.flow-disclosure span{color:inherit}.flow-disclosure svg{width:16px;height:16px;transition:transform 150ms}.flow-disclosure[aria-expanded=true] svg{transform:rotate(180deg)}.flow-disclosure:hover{background:#edf2f8;border-color:#7188a5}.flow-disclosure:focus-visible{outline:3px solid #425f8335;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.flow-disclosure,.flow-disclosure svg{transition:none}}
 </style>

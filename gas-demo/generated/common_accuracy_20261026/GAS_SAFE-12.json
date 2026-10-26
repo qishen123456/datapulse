@@ -1,0 +1,42 @@
+{
+  "question": "2026年9月到访不遇还有多少户",
+  "reference_sql": "SELECT SUM(not_at_home) AS 到访不遇户数 FROM v_gas_safety WHERE month='2026-09'",
+  "expected": [
+    {
+      "到访不遇户数": 2852.0
+    }
+  ],
+  "result": {
+    "error": null,
+    "requires_confirmation": false,
+    "confirmation_type": null,
+    "analysis": "## 江城燃气·安全与管网治理\n\n## 查询事实\n\n本次从“江城燃气·安全与管网治理”返回 1 行、1 个字段。\n\n首行记录：当月到访不遇户次：2,852。\n\n\n\n模型解读暂不可用。以上为查询数据的确定性摘要，不包含自动归因。\n\n\n\n口径与单位以字段定义为准；完整结果见数据视图。",
+    "ask_flow": {
+      "flow": "basic",
+      "reason": "basic_selected",
+      "requested_flow": "basic",
+      "controller": "AskFlowController",
+      "duration_seconds": 22.26
+    }
+  },
+  "datasets": [
+    {
+      "dataset_id": 66,
+      "dataset_name": "江城燃气·安全与管网治理",
+      "sql": "SELECT SUM(not_at_home) AS 当月到访不遇户次 FROM v_gas_safety WHERE month='2026-09'",
+      "columns": [
+        "当月到访不遇户次"
+      ],
+      "rows": [
+        {
+          "当月到访不遇户次": 2852.0
+        }
+      ],
+      "analysis": "## 查询事实\n\n本次从“江城燃气·安全与管网治理”返回 1 行、1 个字段。\n\n首行记录：当月到访不遇户次：2,852。\n\n\n\n模型解读暂不可用。以上为查询数据的确定性摘要，不包含自动归因。\n\n\n\n口径与单位以字段定义为准；完整结果见数据视图。",
+      "analysis_status": "model_unavailable",
+      "query_status": "completed",
+      "error": null,
+      "row_count": 1
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "question": "东环干线运维班组截至2026年9月底有哪些未闭环隐患",
+  "reference_sql": "SELECT hazard_id,hazard_type,severity,found_date,due_date,network_id FROM v_gas_hazards WHERE org_id='GYSP-S1-W1' AND found_date<='2026-09-30' AND (completed_date IS NULL OR completed_date>'2026-09-30') ORDER BY due_date,hazard_id",
+  "expected": [
+    {
+      "hazard_id": "HZ-0045",
+      "hazard_type": "标识缺失",
+      "severity": "一般",
+      "found_date": "2025-08-12",
+      "due_date": "2025-09-11",
+      "network_id": "PIPE-0204-047"
+    }
+  ],
+  "result": {
+    "error": null,
+    "requires_confirmation": false,
+    "confirmation_type": null,
+    "analysis": "## 江城燃气·安全与管网治理\n\n截至2026年9月30日，东环干线运维班组（GYSP-S1-W1）共有1项未闭环隐患。\n\n该隐患详情如下：\n*   **隐患编号**：HZ-0045\n*   **隐患类型**：标识缺失\n*   **严重程度**：一般\n*   **发现日期**：2025-08-12\n*   **整改期限**：2025-09-11\n*   **关联管段**：PIPE-0204-047\n\n**管理提示**：\n该隐患已超期345天（截至2026-09-30），虽严重程度为“一般”，但长期未闭环可能影响现场运维效率或应急定位准确性。建议运维班组核实该管段标识缺失的具体原因，并尽快安排整改销项。",
+    "ask_flow": {
+      "flow": "basic",
+      "reason": "basic_selected",
+      "requested_flow": "basic",
+      "controller": "AskFlowController",
+      "duration_seconds": 77.819
+    }
+  },
+  "datasets": [
+    {
+      "dataset_id": 66,
+      "dataset_name": "江城燃气·安全与管网治理",
+      "sql": "SELECT hazard_id, hazard_type, severity, found_date, due_date, network_id FROM v_gas_hazards WHERE org_id = 'GYSP-S1-W1' AND found_date <= '2026-09-30' AND (completed_date IS NULL OR completed_date > '2026-09-30') ORDER BY due_date, hazard_id",
+      "columns": [
+        "hazard_id",
+        "hazard_type",
+        "severity",
+        "found_date",
+        "due_date",
+        "network_id"
+      ],
+      "rows": [
+        {
+          "hazard_id": "HZ-0045",
+          "hazard_type": "标识缺失",
+          "severity": "一般",
+          "found_date": "2025-08-12",
+          "due_date": "2025-09-11",
+          "network_id": "PIPE-0204-047"
+        }
+      ],
+      "analysis": "截至2026年9月30日，东环干线运维班组（GYSP-S1-W1）共有1项未闭环隐患。\n\n该隐患详情如下：\n*   **隐患编号**：HZ-0045\n*   **隐患类型**：标识缺失\n*   **严重程度**：一般\n*   **发现日期**：2025-08-12\n*   **整改期限**：2025-09-11\n*   **关联管段**：PIPE-0204-047\n\n**管理提示**：\n该隐患已超期345天（截至2026-09-30），虽严重程度为“一般”，但长期未闭环可能影响现场运维效率或应急定位准确性。建议运维班组核实该管段标识缺失的具体原因，并尽快安排整改销项。",
+      "analysis_status": "model_generated",
+      "query_status": "completed",
+      "error": null,
+      "row_count": 1
+    }
+  ]
+}

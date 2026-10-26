@@ -859,7 +859,7 @@ DEFAULT_FEATURE_FLAGS: dict[str, Any] = {
         },
         "ai_model_edit": {
             "label": "模型维护",
-            "description": "模型服务页，控制模型新增、编辑、设默认和删除。",
+            "description": "模型服务页，控制模型新增和参数编辑；删除及默认模型单独授权。",
             "category": "按钮 · 模型服务配置",
             "module": "ai_model_config",
             "module_label": "模型服务配置",
@@ -1317,6 +1317,17 @@ for _key, (_label, _description, _module, _module_label, _order, _risk, _roles) 
             "experimental": False,
         },
     )
+
+# Separate high-impact model actions from general editing; persisted overrides merge by key.
+for _key, _label, _order, _description in [
+    ('ai_model_delete', '删除模型', 615, '删除模型资源；与新增和编辑模型分别授权。'),
+    ('ai_model_default', '切换默认模型', 616, '变更后续问数的默认模型，独立于模型参数编辑。'),
+]:
+    DEFAULT_FEATURE_FLAGS['features'].setdefault(_key, dict(
+        label=_label, description=_description, category='按钮 · 模型服务',
+        module='ai_model_config', module_label='模型服务配置', kind='button', order=_order,
+        risk='high', enabled=True, roles=['super_admin'], experimental=False))
+
 
 _BUSINESS_ADMIN_DEFAULT_FEATURES = {
     "ask_workspace",

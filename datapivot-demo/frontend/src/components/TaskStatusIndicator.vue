@@ -116,19 +116,19 @@ const ariaLabel = computed(() => {
 }
 
 .task-status-indicator.task-status--running {
-  color: var(--el-color-primary, #1d4ed8);
+  color: var(--el-color-primary, #425f83);
 }
 
 .task-status-indicator.task-status--completed {
-  color: var(--el-color-success, #67C23A);
+  color: var(--el-color-success, #526b7a);
 }
 
 .task-status-indicator.task-status--pending_confirmation {
-  color: var(--el-color-warning, #F59E0B);
+  color: var(--el-color-warning, #806b47);
 }
 
 .task-status-indicator.task-status--failed {
-  color: var(--el-color-danger, #F56C6C);
+  color: var(--el-color-danger, #b29396);
 }
 
 .ax-status-content {
@@ -175,10 +175,10 @@ const ariaLabel = computed(() => {
   flex-shrink: 0;
 }
 .ax-dot--success {
-  background: var(--el-color-success, #67C23A);
+  background: var(--el-color-success, #526b7a);
 }
 .ax-dot--danger {
-  background: var(--el-color-danger, #F56C6C);
+  background: var(--el-color-danger, #b29396);
 }
 
 /* 辅助文字 */
@@ -196,7 +196,7 @@ const ariaLabel = computed(() => {
   font-size: 12px;
   line-height: 1.4;
   color: #fff;
-  background: var(--el-color-warning, #F59E0B);
+  background: var(--el-color-warning, #806b47);
   animation: ax-breathe 2s ease-in-out infinite;
   white-space: nowrap;
 }

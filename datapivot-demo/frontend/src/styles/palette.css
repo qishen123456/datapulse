@@ -1,0 +1,117 @@
+/* DataPulse / Slate & Ink. Color-only contract, shared by pages and portals. */
+:root {
+  --dp-accent: #425f83;
+  --dp-accent-hover: #344c69;
+  --dp-accent-active: #293e57;
+  --dp-accent-soft: #edf2f8;
+  --dp-canvas: #f4f6f8;
+  --dp-surface: #ffffff;
+  --dp-ink: #172331;
+  --dp-body: #334155;
+  --dp-secondary: #526177;
+  --dp-muted: #617085;
+  --dp-line: #dfe5ec;
+  --dp-success: #526b7a;
+  --dp-warning: #806b47;
+  --dp-danger: #8b6064;
+  --dp-primary: var(--dp-accent);
+  --dp-primary-hover: var(--dp-accent-hover);
+  --dp-primary-active: var(--dp-accent-active);
+  --dp-primary-soft: var(--dp-accent-soft);
+  --dp-primary-border: #b7c7da;
+  --dp-navy-bg: #172331;
+  --dp-navy-surface: #223243;
+  --dp-navy-hover: #2c4056;
+  --dp-navy-text-muted: #94a3b8;
+  --brand-primary: var(--dp-accent);
+  --brand-primary-hover: var(--dp-accent-hover);
+  --brand-primary-active: var(--dp-accent-active);
+  --brand-action: var(--dp-accent);
+  --brand-action-hover: var(--dp-accent-hover);
+  --brand-action-active: var(--dp-accent-active);
+  --brand-accent: var(--dp-accent);
+  --brand-primary-soft: var(--dp-accent-soft);
+  --brand-action-soft: var(--dp-accent-soft);
+  --brand-gradient: linear-gradient(var(--dp-accent), var(--dp-accent));
+  --brand-gradient-hover: linear-gradient(var(--dp-accent-hover), var(--dp-accent-hover));
+  --studio-bg: var(--dp-canvas);
+  --studio-ink: var(--dp-ink);
+  --studio-accent: var(--dp-accent);
+  --studio-action: var(--dp-accent);
+  --studio-soft: var(--dp-accent-soft);
+  --studio-line: var(--dp-line);
+  --bg-page: var(--dp-canvas);
+  --bg-card: var(--dp-surface);
+  --bg-soft: #f1f4f7;
+  --bg-hover: var(--dp-accent-soft);
+  --text-title: var(--dp-ink);
+  --text-body: var(--dp-body);
+  --text-secondary: var(--dp-secondary);
+  --text-muted: var(--dp-muted);
+  --border: var(--dp-line);
+  --success: var(--dp-success);
+  --success-soft: #edf2f5;
+  --warning: var(--dp-warning);
+  --warning-soft: #f5f2ec;
+  --error: var(--dp-danger);
+  --error-soft: #f5eff0;
+  --el-text-color-primary: var(--dp-ink);
+  --el-text-color-regular: var(--dp-body);
+  --el-text-color-secondary: var(--dp-secondary);
+  --el-border-color: var(--dp-line);
+  --el-color-primary: #425f83;
+  --el-color-primary-rgb: 66, 95, 131;
+  --el-color-primary-dark-2: #354c69;
+  --el-color-primary-light-3: #7b8fa8;
+  --el-color-primary-light-5: #a0afc1;
+  --el-color-primary-light-7: #c6cfda;
+  --el-color-primary-light-8: #d9dfe6;
+  --el-color-primary-light-9: #eceff3;
+  --el-color-success: #526b7a;
+  --el-color-success-rgb: 82, 107, 122;
+  --el-color-success-dark-2: #425662;
+  --el-color-success-light-3: #8697a2;
+  --el-color-success-light-5: #a8b5bc;
+  --el-color-success-light-7: #cbd3d7;
+  --el-color-success-light-8: #dce1e4;
+  --el-color-success-light-9: #eef0f2;
+  --el-color-warning: #806b47;
+  --el-color-warning-rgb: 128, 107, 71;
+  --el-color-warning-dark-2: #665639;
+  --el-color-warning-light-3: #a6977e;
+  --el-color-warning-light-5: #c0b5a3;
+  --el-color-warning-light-7: #d9d3c8;
+  --el-color-warning-light-8: #e6e1da;
+  --el-color-warning-light-9: #f2f0ed;
+  --el-color-danger: #8b6064;
+  --el-color-danger-rgb: 139, 96, 100;
+  --el-color-danger-dark-2: #6f4d50;
+  --el-color-danger-light-3: #ae9092;
+  --el-color-danger-light-5: #c5b0b2;
+  --el-color-danger-light-7: #dccfd0;
+  --el-color-danger-light-8: #e8dfe0;
+  --el-color-danger-light-9: #f3eff0;
+  --el-color-error: #8b6064;
+  --el-color-error-rgb: 139, 96, 100;
+  --el-color-error-dark-2: #6f4d50;
+  --el-color-error-light-3: #ae9092;
+  --el-color-error-light-5: #c5b0b2;
+  --el-color-error-light-7: #dccfd0;
+  --el-color-error-light-8: #e8dfe0;
+  --el-color-error-light-9: #f3eff0;
+  --el-color-info: #617085;
+  --el-color-info-rgb: 100, 116, 139;
+  --el-color-info-dark-2: #505d6f;
+  --el-color-info-light-3: #929eae;
+  --el-color-info-light-5: #b2bac5;
+  --el-color-info-light-7: #d0d5dc;
+  --el-color-info-light-8: #e0e3e8;
+  --el-color-info-light-9: #f0f1f3;
+}
+/* Neutral code colors retain legibility on the existing dark SQL editor. */
+.hljs-keyword, .hljs-selector-tag { color: #a6bdd8; }
+.hljs-string, .hljs-attr { color: #b6c8d2; }
+.hljs-number, .hljs-literal { color: #c7bcaa; }
+/* Native controls and portalled dialogs inherit the same action color. */
+input[type="checkbox"], input[type="radio"] { accent-color: var(--dp-accent); }
+::selection { background: #dce5ef; color: #172331; }

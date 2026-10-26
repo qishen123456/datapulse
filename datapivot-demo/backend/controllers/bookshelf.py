@@ -165,9 +165,10 @@ def _pick_random_common_questions(rows: List[Dict[str, Any]], size: int = 4) -> 
         return []
 
     random.shuffle(dataset_ids)
-    max_dataset_count = min(3, len(dataset_ids), size)
-    min_dataset_count = 2 if len(dataset_ids) >= 2 and size >= 2 else 1
-    target_dataset_count = random.randint(min_dataset_count, max_dataset_count)
+    # 全覆盖采样（2026-10-25）：每批必须覆盖所有数据集——旧逻辑随机取 2~3 个数据集，
+    # 导致总有数据集整批缺席欢迎屏（"数据集展示不全"）。先每个数据集各抽 1 题，
+    # 剩余名额由下方循环按每数据集至多 2 题补齐。
+    target_dataset_count = min(len(dataset_ids), size)
     selected_dataset_ids = dataset_ids[:target_dataset_count]
 
     picked: List[Dict[str, Any]] = []

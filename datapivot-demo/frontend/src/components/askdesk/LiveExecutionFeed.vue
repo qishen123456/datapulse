@@ -437,7 +437,7 @@ onBeforeUnmount(() => {
 }
 
 .ax-lite-toggle:hover {
-  background: #F2F5F4;
+  background: #edf2f5;
   color: #111827;
 }
 
@@ -470,8 +470,8 @@ onBeforeUnmount(() => {
   height: 22px;
   padding: 0 9px;
   border-radius: 4px;
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: #edf2f8;
+  color: #425f83;
   font-size: 11px;
   font-weight: 700;
 }
@@ -519,8 +519,8 @@ onBeforeUnmount(() => {
 
 .ax-lite-marker.success,
 .ax-lite-marker.completed {
-  background: #ECFDF5;
-  color: #10B981;
+  background: #edf2f5;
+  color: #526b7a;
 }
 
 .ax-lite-marker.running {
@@ -539,8 +539,8 @@ onBeforeUnmount(() => {
 }
 
 .ax-lite-marker.warning {
-  background: #FFFBEB;
-  color: #F59E0B;
+  background: #f5f2ec;
+  color: #806b47;
 }
 
 .ax-lite-marker.error {
@@ -600,7 +600,7 @@ onBeforeUnmount(() => {
   margin-top: 6px;
   padding: 6px 8px;
   border-radius: 4px;
-  background: linear-gradient(180deg, #FFFFFF 0%, #F2F5F4 100%);
+  background: linear-gradient(180deg, #FFFFFF 0%, #edf2f5 100%);
   border: 1px solid rgba(229, 233, 242, 0.78);
   color: #9CA3AF;
   font-size: 10px;

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "role_schema_version": 2,
-  "updated_at": "2026-05-21 09:24:34",
+  "updated_at": "2026-10-26 10:03:25",
   "features": {
     "ask_workspace": {
       "label": "智能分析工作台",
@@ -115,8 +115,7 @@
       "order": 65,
       "enabled": true,
       "roles": [
-        "super_admin",
-        "admin"
+        "super_admin"
       ],
       "experimental": true,
       "risk": ""
@@ -433,7 +432,8 @@
       "order": 911,
       "enabled": true,
       "roles": [
-        "super_admin"
+        "super_admin",
+        "admin"
       ],
       "experimental": false,
       "risk": ""
@@ -448,7 +448,8 @@
       "order": 912,
       "enabled": true,
       "roles": [
-        "super_admin"
+        "super_admin",
+        "admin"
       ],
       "experimental": false,
       "risk": ""
@@ -463,7 +464,8 @@
       "order": 913,
       "enabled": true,
       "roles": [
-        "super_admin"
+        "super_admin",
+        "admin"
       ],
       "experimental": false,
       "risk": ""
@@ -478,7 +480,8 @@
       "order": 914,
       "enabled": true,
       "roles": [
-        "super_admin"
+        "super_admin",
+        "admin"
       ],
       "experimental": false,
       "risk": ""
@@ -494,7 +497,8 @@
       "risk": "high",
       "enabled": true,
       "roles": [
-        "super_admin"
+        "super_admin",
+        "admin"
       ],
       "experimental": false
     },
@@ -509,7 +513,8 @@
       "risk": "high",
       "enabled": true,
       "roles": [
-        "super_admin"
+        "super_admin",
+        "admin"
       ],
       "experimental": false
     },
@@ -775,10 +780,7 @@
       "order": 445,
       "enabled": true,
       "roles": [
-        "super_admin",
-        "admin",
-        "business_admin",
-        "user"
+        "super_admin"
       ],
       "experimental": false,
       "risk": ""
@@ -793,10 +795,7 @@
       "order": 446,
       "enabled": true,
       "roles": [
-        "super_admin",
-        "admin",
-        "business_admin",
-        "user"
+        "super_admin"
       ],
       "experimental": false,
       "risk": ""
@@ -899,7 +898,7 @@
     },
     "ai_model_edit": {
       "label": "模型维护",
-      "description": "模型服务页，控制模型新增、编辑、设默认和删除。",
+      "description": "模型服务页，控制模型新增和参数编辑；删除及默认模型单独授权。",
       "category": "按钮 · 模型服务配置",
       "module": "ai_model_config",
       "module_label": "模型服务配置",
@@ -988,8 +987,7 @@
       "order": 130,
       "enabled": true,
       "roles": [
-        "super_admin",
-        "admin"
+        "super_admin"
       ],
       "experimental": false,
       "risk": ""
@@ -1004,8 +1002,7 @@
       "order": 120,
       "enabled": true,
       "roles": [
-        "super_admin",
-        "admin"
+        "super_admin"
       ],
       "experimental": false,
       "risk": ""
@@ -1020,8 +1017,7 @@
       "order": 110,
       "enabled": true,
       "roles": [
-        "super_admin",
-        "admin"
+        "super_admin"
       ],
       "experimental": true,
       "risk": ""
@@ -1125,7 +1121,6 @@
       "enabled": true,
       "roles": [
         "super_admin",
-        "admin",
         "user"
       ],
       "experimental": false,
@@ -2196,6 +2191,38 @@
       "kind": "field",
       "order": 926,
       "risk": "medium",
+      "enabled": true,
+      "roles": [
+        "super_admin",
+        "admin"
+      ],
+      "experimental": false
+    },
+    "ai_model_delete": {
+      "label": "删除模型",
+      "description": "删除模型资源；与新增和编辑模型分别授权。",
+      "category": "按钮 · 模型服务",
+      "module": "ai_model_config",
+      "module_label": "模型服务配置",
+      "kind": "button",
+      "order": 615,
+      "risk": "high",
+      "enabled": true,
+      "roles": [
+        "super_admin",
+        "admin"
+      ],
+      "experimental": false
+    },
+    "ai_model_default": {
+      "label": "切换默认模型",
+      "description": "变更后续问数的默认模型，独立于模型参数编辑。",
+      "category": "按钮 · 模型服务",
+      "module": "ai_model_config",
+      "module_label": "模型服务配置",
+      "kind": "button",
+      "order": 616,
+      "risk": "high",
       "enabled": true,
       "roles": [
         "super_admin",

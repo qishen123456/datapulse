@@ -597,7 +597,7 @@ onBeforeUnmount(() => {
   border: 1px solid rgba(17, 24, 39, 0.06);
   box-shadow:
     0 18px 34px rgba(15, 23, 42, 0.055),
-    inset 0 -4px 0 rgba(29, 78, 216, 0.06);
+    inset 0 -4px 0 rgba(66, 95, 131, 0.06);
   transform: perspective(260px) rotateX(18deg);
 }
 
@@ -609,9 +609,9 @@ onBeforeUnmount(() => {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  border: 6px solid rgba(29, 78, 216, 0.68);
+  border: 6px solid rgba(66, 95, 131, 0.68);
   background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 14px 24px rgba(29, 78, 216, 0.12);
+  box-shadow: 0 14px 24px rgba(66, 95, 131, 0.12);
 }
 
 .ax-empty p {
@@ -653,8 +653,8 @@ onBeforeUnmount(() => {
 }
 
 .ax-node-marker.success {
-  background: #10B981;
-  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.16);
+  background: #526b7a;
+  box-shadow: 0 0 0 1px rgba(82, 107, 122, 0.16);
 }
 
 .ax-node-marker.running {
@@ -668,8 +668,8 @@ onBeforeUnmount(() => {
 }
 
 .ax-node-marker.warning {
-  background: #F59E0B;
-  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.16);
+  background: #806b47;
+  box-shadow: 0 0 0 1px rgba(128, 107, 71, 0.16);
 }
 
 .ax-node-main {
@@ -703,7 +703,7 @@ onBeforeUnmount(() => {
   width: 18px;
   height: 18px;
   border-radius: 6px;
-  background: linear-gradient(180deg, #F2F5F4 0%, #FFFFFF 100%);
+  background: linear-gradient(180deg, #edf2f5 0%, #FFFFFF 100%);
   border: 1px solid rgba(17, 24, 39, 0.12);
   position: relative;
   flex-shrink: 0;
@@ -723,27 +723,27 @@ onBeforeUnmount(() => {
 .ax-node-icon::after { top: 9px; }
 
 .ax-node-icon.dataset {
-  background: linear-gradient(180deg, #ECFDF5 0%, #ECFDF5 100%);
-  border-color: rgba(16, 185, 129, 0.16);
+  background: linear-gradient(180deg, #edf2f5 0%, #edf2f5 100%);
+  border-color: rgba(82, 107, 122, 0.16);
 }
 
 .ax-node-icon.dataset::before,
 .ax-node-icon.dataset::after {
-  background: rgba(16, 185, 129, 0.4);
+  background: rgba(82, 107, 122, 0.4);
 }
 
 .ax-node-icon.report {
-  background: linear-gradient(180deg, #FFFBEB 0%, #FFFBEB 100%);
-  border-color: rgba(245, 158, 11, 0.18);
+  background: linear-gradient(180deg, #f5f2ec 0%, #f5f2ec 100%);
+  border-color: rgba(128, 107, 71, 0.18);
 }
 
 .ax-node-icon.report::before,
 .ax-node-icon.report::after {
-  background: rgba(245, 158, 11, 0.45);
+  background: rgba(128, 107, 71, 0.45);
 }
 
 .ax-node-icon.confirm {
-  background: linear-gradient(180deg, #eff6ff 0%, #eff6ff 100%);
+  background: linear-gradient(180deg, #edf2f8 0%, #edf2f8 100%);
   border-color: rgba(26, 26, 26, 0.16);
 }
 
@@ -753,7 +753,7 @@ onBeforeUnmount(() => {
 }
 
 .ax-node-icon.python {
-  background: linear-gradient(180deg, #eff6ff 0%, #eff6ff 100%);
+  background: linear-gradient(180deg, #edf2f8 0%, #edf2f8 100%);
   border-color: rgba(107, 114, 128, 0.16);
 }
 
@@ -793,11 +793,11 @@ onBeforeUnmount(() => {
   opacity: 0.9;
 }
 
-.ax-node-status.success { color: #10B981; }
+.ax-node-status.success { color: #526b7a; }
 .ax-node-status.running { color: #1A1A1A; }
 .ax-node-status.error { color: #1A1A1A; }
 .ax-node-status.pending { color: #9CA3AF; }
-.ax-node-status.warning { color: #F59E0B; }
+.ax-node-status.warning { color: #806b47; }
 
 .ax-spin {
   color: #1A1A1A;
@@ -851,7 +851,7 @@ onBeforeUnmount(() => {
   margin-bottom: 7px;
   padding: 7px 9px;
   border-radius: 4px;
-  background: #F2F5F4;
+  background: #edf2f5;
   border: 1px solid rgba(229, 230, 235, 0.9);
 }
 
@@ -879,7 +879,7 @@ onBeforeUnmount(() => {
   box-sizing: border-box;
   border-radius: 4px;
   border: 1px solid rgba(229, 233, 242, 0.74);
-  background: linear-gradient(180deg, #FFFFFF 0%, #F2F5F4 100%);
+  background: linear-gradient(180deg, #FFFFFF 0%, #edf2f5 100%);
   overflow: hidden;
 }
 

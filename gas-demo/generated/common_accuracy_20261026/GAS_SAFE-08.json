@@ -1,0 +1,98 @@
+{
+  "question": "截至2026年9月底关联隐患的管段去重里程",
+  "reference_sql": "SELECT n.branch_name,COUNT(*) AS 关联管段数,SUM(n.length_km) AS 去重里程_公里 FROM v_gas_network n WHERE n.laid_date<='2026-09-30' AND EXISTS(SELECT 1 FROM v_gas_hazards h WHERE h.network_id=n.network_id AND h.found_date<='2026-09-30') GROUP BY n.branch_name",
+  "expected": [
+    {
+      "branch_name": "滨江分公司",
+      "关联管段数": 20,
+      "去重里程_公里": 25.94
+    },
+    {
+      "branch_name": "高新分公司",
+      "关联管段数": 20,
+      "去重里程_公里": 34.31
+    },
+    {
+      "branch_name": "高压输配分公司",
+      "关联管段数": 18,
+      "去重里程_公里": 21.31
+    },
+    {
+      "branch_name": "经开分公司",
+      "关联管段数": 20,
+      "去重里程_公里": 32.57
+    },
+    {
+      "branch_name": "临港分公司",
+      "关联管段数": 20,
+      "去重里程_公里": 25.24
+    },
+    {
+      "branch_name": "沙湖分公司",
+      "关联管段数": 22,
+      "去重里程_公里": 35.11
+    }
+  ],
+  "result": {
+    "error": null,
+    "requires_confirmation": false,
+    "confirmation_type": null,
+    "analysis": "## 江城燃气·安全与管网治理\n\n## 查询事实\n\n本次从“江城燃气·安全与管网治理”返回 6 行、3 个字段。\n\n首行记录：branch_name：滨江分公司；关联管段数：20；去重里程_公里：25.94。\n\n\n\n模型解读暂不可用。以上为查询数据的确定性摘要，不包含自动归因。\n\n\n\n口径与单位以字段定义为准；完整结果见数据视图。",
+    "ask_flow": {
+      "flow": "basic",
+      "reason": "basic_selected",
+      "requested_flow": "basic",
+      "controller": "AskFlowController",
+      "duration_seconds": 41.004
+    }
+  },
+  "datasets": [
+    {
+      "dataset_id": 66,
+      "dataset_name": "江城燃气·安全与管网治理",
+      "sql": "SELECT n.branch_name, COUNT(*) AS 关联管段数, SUM(n.length_km) AS 去重里程_公里 FROM v_gas_network n WHERE n.laid_date <= '2026-09-30' AND EXISTS (SELECT 1 FROM v_gas_hazards h WHERE h.network_id = n.network_id AND h.found_date <= '2026-09-30') GROUP BY n.branch_name",
+      "columns": [
+        "branch_name",
+        "关联管段数",
+        "去重里程_公里"
+      ],
+      "rows": [
+        {
+          "branch_name": "滨江分公司",
+          "关联管段数": 20,
+          "去重里程_公里": 25.94
+        },
+        {
+          "branch_name": "高新分公司",
+          "关联管段数": 20,
+          "去重里程_公里": 34.31
+        },
+        {
+          "branch_name": "高压输配分公司",
+          "关联管段数": 18,
+          "去重里程_公里": 21.31
+        },
+        {
+          "branch_name": "经开分公司",
+          "关联管段数": 20,
+          "去重里程_公里": 32.57
+        },
+        {
+          "branch_name": "临港分公司",
+          "关联管段数": 20,
+          "去重里程_公里": 25.24
+        },
+        {
+          "branch_name": "沙湖分公司",
+          "关联管段数": 22,
+          "去重里程_公里": 35.11
+        }
+      ],
+      "analysis": "## 查询事实\n\n本次从“江城燃气·安全与管网治理”返回 6 行、3 个字段。\n\n首行记录：branch_name：滨江分公司；关联管段数：20；去重里程_公里：25.94。\n\n\n\n模型解读暂不可用。以上为查询数据的确定性摘要，不包含自动归因。\n\n\n\n口径与单位以字段定义为准；完整结果见数据视图。",
+      "analysis_status": "model_unavailable",
+      "query_status": "completed",
+      "error": null,
+      "row_count": 6
+    }
+  ]
+}

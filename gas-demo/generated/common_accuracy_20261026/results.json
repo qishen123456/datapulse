@@ -1,0 +1,2515 @@
+{
+  "GAS_BIZ-01": {
+    "id": "GAS_BIZ-01",
+    "question": "2026年9月各分公司销气量比8月增减多少",
+    "code": "GAS_BIZ",
+    "seconds": 209.51,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response"
+      }
+    ],
+    "expected_rows": 5,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 5
+  },
+  "GAS_AR-01": {
+    "id": "GAS_AR-01",
+    "question": "2026年9月末沙湖分公司欠费企业前十名",
+    "code": "GAS_AR",
+    "seconds": 226.65,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response"
+      }
+    ],
+    "expected_rows": 10,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 10
+  },
+  "GAS_SAFE-01": {
+    "id": "GAS_SAFE-01",
+    "question": "2026年9月各服务网格应检、实检和到访不遇",
+    "code": "GAS_SAFE",
+    "seconds": 153.91,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response"
+      }
+    ],
+    "expected_rows": 24,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 24
+  },
+  "GAS_AR-02": {
+    "id": "GAS_AR-02",
+    "question": "2026年9月末望江路服务网格应收账龄结构",
+    "code": "GAS_AR",
+    "seconds": 172.02,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response"
+      }
+    ],
+    "expected_rows": 4,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 4
+  },
+  "GAS_SAFE-02": {
+    "id": "GAS_SAFE-02",
+    "question": "截至2026年9月底GIS未入库管段按分公司汇总",
+    "code": "GAS_SAFE",
+    "seconds": 182.91,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response"
+      }
+    ],
+    "expected_rows": 6,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 6
+  },
+  "GAS_AR-03": {
+    "id": "GAS_AR-03",
+    "question": "2026年前三季度各分公司累计气费回收率",
+    "code": "GAS_AR",
+    "seconds": 204.6,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response"
+      }
+    ],
+    "expected_rows": 5,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 5
+  },
+  "GAS_BIZ-02": {
+    "id": "GAS_BIZ-02",
+    "question": "临港分公司2026年8月和9月按客户类型看销气变化",
+    "code": "GAS_BIZ",
+    "seconds": 206.8,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response"
+      }
+    ],
+    "expected_rows": 8,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 8
+  },
+  "GAS_SAFE-03": {
+    "id": "GAS_SAFE-03",
+    "question": "截至2026年9月底各分公司超过20年的管网有多少",
+    "code": "GAS_SAFE",
+    "seconds": 122.3,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "retry"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response"
+      }
+    ],
+    "expected_rows": 1,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 1
+  },
+  "GAS_BIZ-03": {
+    "id": "GAS_BIZ-03",
+    "question": "2026年前三季度各分公司销气量同期间同比",
+    "code": "GAS_BIZ",
+    "seconds": 198.94,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "retry"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response"
+      }
+    ],
+    "expected_rows": 5,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 5
+  },
+  "GAS_BIZ-04": {
+    "id": "GAS_BIZ-04",
+    "question": "2026年9月滨江沿江营业所各网格估抄情况",
+    "code": "GAS_BIZ",
+    "seconds": 176.15,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "retry"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response"
+      }
+    ],
+    "expected_rows": 2,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 2
+  },
+  "GAS_SAFE-04": {
+    "id": "GAS_SAFE-04",
+    "question": "截至2026年9月底各类隐患超期未闭环情况",
+    "code": "GAS_SAFE",
+    "seconds": 81.96,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "retry"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response"
+      }
+    ],
+    "expected_rows": 7,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 7
+  },
+  "GAS_BIZ-05": {
+    "id": "GAS_BIZ-05",
+    "question": "2026年9月各气源采购气量和加权均价",
+    "code": "GAS_BIZ",
+    "seconds": 97.19,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response",
+        "duration_seconds": 20.9,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response",
+        "duration_seconds": 29.71,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response",
+        "duration_seconds": 0.08,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response",
+        "duration_seconds": 45.33,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 3,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 3
+  },
+  "GAS_SAFE-05": {
+    "id": "GAS_SAFE-05",
+    "question": "东环干线运维班组截至2026年9月底有哪些未闭环隐患",
+    "code": "GAS_SAFE",
+    "seconds": 78.04,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response",
+        "duration_seconds": 28.85,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response",
+        "duration_seconds": 33.56,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response",
+        "duration_seconds": 0.07,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response",
+        "duration_seconds": 14.35,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 1,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 1
+  },
+  "GAS_AR-06": {
+    "id": "GAS_AR-06",
+    "question": "2026年9月末工商客户前十大欠费占比",
+    "code": "GAS_AR",
+    "seconds": 95.51,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response",
+        "duration_seconds": 33.91,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response",
+        "duration_seconds": 25.11,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response",
+        "duration_seconds": 0.1,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response",
+        "duration_seconds": 35.49,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 1,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 1
+  },
+  "GAS_BIZ-06": {
+    "id": "GAS_BIZ-06",
+    "question": "沙湖分公司2026年各月供销差量和供销差率",
+    "code": "GAS_BIZ",
+    "seconds": 116.96,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response",
+        "duration_seconds": 29.17,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response",
+        "duration_seconds": 25.86,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response",
+        "duration_seconds": 0.08,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response",
+        "duration_seconds": 61.04,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 9,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 9
+  },
+  "GAS_AR-04": {
+    "id": "GAS_AR-04",
+    "question": "2026年各月应收滚动不平衡的对象",
+    "code": "GAS_AR",
+    "seconds": 207.86,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response"
+      }
+    ],
+    "expected_rows": 0,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 0
+  },
+  "GAS_SAFE-06": {
+    "id": "GAS_SAFE-06",
+    "question": "2026年9月新发现隐患截至月底闭环率",
+    "code": "GAS_SAFE",
+    "seconds": 147.06,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response",
+        "duration_seconds": 25.54,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response",
+        "duration_seconds": 47.83,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response",
+        "duration_seconds": 0.12,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response",
+        "duration_seconds": 72.4,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 4,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 4
+  },
+  "GAS_AR-05": {
+    "id": "GAS_AR-05",
+    "question": "望江路恒拓精密制造有限公司2026年应收余额趋势",
+    "code": "GAS_AR",
+    "seconds": 50.47,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "retry"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response"
+      }
+    ],
+    "expected_rows": 9,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 9
+  },
+  "GAS_AR-07": {
+    "id": "GAS_AR-07",
+    "question": "2026年9月末各分公司账龄五档与余额能否勾稽",
+    "code": "GAS_AR",
+    "seconds": 141.88,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response",
+        "duration_seconds": 33.01,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response",
+        "duration_seconds": 58.21,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response",
+        "duration_seconds": 0.24,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response",
+        "duration_seconds": 48.88,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 5,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 5
+  },
+  "GAS_BIZ-07": {
+    "id": "GAS_BIZ-07",
+    "question": "2026年9月各服务中心报装、通气和净增用户",
+    "code": "GAS_BIZ",
+    "seconds": 106.83,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response",
+        "duration_seconds": 18.24,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response",
+        "duration_seconds": 32.94,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response",
+        "duration_seconds": 0.11,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response",
+        "duration_seconds": 53.91,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 10,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 10
+  },
+  "GAS_AR-08": {
+    "id": "GAS_AR-08",
+    "question": "登记稽核差异与重算量价差异有哪些不一致",
+    "code": "GAS_AR",
+    "seconds": 47.06,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response",
+        "duration_seconds": 32.75,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry",
+        "duration_seconds": 0.35,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "error",
+        "duration_seconds": 0.54,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review.retry",
+        "status": "error",
+        "duration_seconds": 0.42,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response",
+        "duration_seconds": 0.09,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response",
+        "duration_seconds": 11.68,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 14,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 14
+  },
+  "GAS_SAFE-07": {
+    "id": "GAS_SAFE-07",
+    "question": "截至2026年6月底与9月底未闭环隐患数对比",
+    "code": "GAS_SAFE",
+    "seconds": 95.99,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response",
+        "duration_seconds": 21.6,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response",
+        "duration_seconds": 28.89,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response",
+        "duration_seconds": 0.11,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response",
+        "duration_seconds": 44.42,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 2,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 2
+  },
+  "GAS_AR-09": {
+    "id": "GAS_AR-09",
+    "question": "2026年9月末应收余额是多少",
+    "code": "GAS_AR",
+    "seconds": 2.02,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry",
+        "duration_seconds": 0.51,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.38,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 0.35,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 1,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_SAFE-08": {
+    "id": "GAS_SAFE-08",
+    "question": "截至2026年9月底关联隐患的管段去重里程",
+    "code": "GAS_SAFE",
+    "seconds": 41.18,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response",
+        "duration_seconds": 38.36,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry",
+        "duration_seconds": 0.3,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "error",
+        "duration_seconds": 0.67,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review.retry",
+        "status": "error",
+        "duration_seconds": 0.37,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response",
+        "duration_seconds": 0.1,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error",
+        "duration_seconds": 0.31,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error",
+        "duration_seconds": null,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 6,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_BIZ-08": {
+    "id": "GAS_BIZ-08",
+    "question": "2026年9月各分公司每方采购与配气成本",
+    "code": "GAS_BIZ",
+    "seconds": 25.73,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response",
+        "duration_seconds": 22.99,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry",
+        "duration_seconds": 0.36,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "error",
+        "duration_seconds": 0.39,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review.retry",
+        "status": "error",
+        "duration_seconds": 0.36,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response",
+        "duration_seconds": 0.1,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error",
+        "duration_seconds": 0.31,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error",
+        "duration_seconds": null,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 6,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_BIZ-09": {
+    "id": "GAS_BIZ-09",
+    "question": "2026年9月各分公司销气量排名",
+    "code": "GAS_BIZ",
+    "seconds": 2.16,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.node_index_entity_resolution",
+        "status": "retry",
+        "duration_seconds": 0.18,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent1.node_index_entity_resolution",
+        "status": "error",
+        "duration_seconds": 0.25,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.39,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 0.38,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 5,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_AR-10": {
+    "id": "GAS_AR-10",
+    "question": "2026年9月欠费最多的十个模拟工商客户",
+    "code": "GAS_AR",
+    "seconds": 4.24,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.node_index_entity_resolution",
+        "status": "retry",
+        "duration_seconds": 0.18,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent1.node_index_entity_resolution",
+        "status": "response",
+        "duration_seconds": 0.99,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.47,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 1.78,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 10,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_SAFE-09": {
+    "id": "GAS_SAFE-09",
+    "question": "2026年9月各分公司安检覆盖率",
+    "code": "GAS_SAFE",
+    "seconds": 1.7,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry",
+        "duration_seconds": 0.28,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.4,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 0.35,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 6,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_BIZ-10": {
+    "id": "GAS_BIZ-10",
+    "question": "2026年9月各分公司供销差率",
+    "code": "GAS_BIZ",
+    "seconds": 2.02,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry",
+        "duration_seconds": 0.34,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.4,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 0.51,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 5,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_SAFE-10": {
+    "id": "GAS_SAFE-10",
+    "question": "截至2026年9月底有哪些超期未闭环隐患",
+    "code": "GAS_SAFE",
+    "seconds": 1.69,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry",
+        "duration_seconds": 0.25,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.36,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 0.36,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 13,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_AR-11": {
+    "id": "GAS_AR-11",
+    "question": "2026年9月超过180天的应收有多少",
+    "code": "GAS_AR",
+    "seconds": 1.72,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry",
+        "duration_seconds": 0.32,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.37,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 0.35,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 1,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_BIZ-11": {
+    "id": "GAS_BIZ-11",
+    "question": "2026年前三季度模拟税前利润是多少",
+    "code": "GAS_BIZ",
+    "seconds": 1.76,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry",
+        "duration_seconds": 0.31,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.35,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 0.39,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 1,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_SAFE-11": {
+    "id": "GAS_SAFE-11",
+    "question": "2026年9月各分公司抢修及时率",
+    "code": "GAS_SAFE",
+    "seconds": 1.98,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry",
+        "duration_seconds": 0.29,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.47,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 0.42,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 6,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_AR-12": {
+    "id": "GAS_AR-12",
+    "question": "2026年9月各分公司气费回收率",
+    "code": "GAS_AR",
+    "seconds": 1.83,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry",
+        "duration_seconds": 0.38,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.36,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 0.38,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 5,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_BIZ-12": {
+    "id": "GAS_BIZ-12",
+    "question": "2026年9月居民和工商业销气收入各多少",
+    "code": "GAS_BIZ",
+    "seconds": 2.08,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry",
+        "duration_seconds": 0.33,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.37,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 0.59,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 2,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_BIZ-13": {
+    "id": "GAS_BIZ-13",
+    "question": "2026年9月哪个分公司估抄率最高",
+    "code": "GAS_BIZ",
+    "seconds": 1.95,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.node_index_entity_resolution",
+        "status": "retry",
+        "duration_seconds": 0.25,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent1.node_index_entity_resolution",
+        "status": "error",
+        "duration_seconds": 0.24,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.35,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 0.39,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 1,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_SAFE-12": {
+    "id": "GAS_SAFE-12",
+    "question": "2026年9月到访不遇还有多少户",
+    "code": "GAS_SAFE",
+    "seconds": 22.45,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response",
+        "duration_seconds": 19.08,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry",
+        "duration_seconds": 0.75,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "error",
+        "duration_seconds": 0.42,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review.retry",
+        "status": "error",
+        "duration_seconds": 0.45,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response",
+        "duration_seconds": 0.19,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error",
+        "duration_seconds": 0.3,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error",
+        "duration_seconds": null,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 1,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_BIZ-14": {
+    "id": "GAS_BIZ-14",
+    "question": "2026年9月各分公司新增通气多少户",
+    "code": "GAS_BIZ",
+    "seconds": 69.02,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "retry"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response"
+      }
+    ],
+    "expected_rows": 5,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 5
+  },
+  "GAS_SAFE-13": {
+    "id": "GAS_SAFE-13",
+    "question": "截至2026年9月GIS入库里程占比多少",
+    "code": "GAS_SAFE",
+    "seconds": 89.71,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "retry"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response"
+      }
+    ],
+    "expected_rows": 1,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 1
+  },
+  "GAS_AR-13": {
+    "id": "GAS_AR-13",
+    "question": "2026年9月重点催收的客户有哪些",
+    "code": "GAS_AR",
+    "seconds": 109.59,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response"
+      }
+    ],
+    "expected_rows": 4,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 4
+  },
+  "GAS_AR-15": {
+    "id": "GAS_AR-15",
+    "question": "2026年9月末应收账龄结构是什么样",
+    "code": "GAS_AR",
+    "seconds": 2.64,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry",
+        "duration_seconds": 0.43,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.39,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 0.58,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 1,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_AR-14": {
+    "id": "GAS_AR-14",
+    "question": "哪些月份账单收入与量价收入存在差异",
+    "code": "GAS_AR",
+    "seconds": 1.65,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry",
+        "duration_seconds": 0.27,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.36,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 0.35,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 1,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_SAFE-14": {
+    "id": "GAS_SAFE-14",
+    "question": "沙湖分公司有多少公里超过20年的老旧管网",
+    "code": "GAS_SAFE",
+    "seconds": 2.12,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry",
+        "duration_seconds": 0.26,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.67,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 0.41,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 1,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_BIZ-15": {
+    "id": "GAS_BIZ-15",
+    "question": "2026年9月各客户类型的加权销气均价是多少",
+    "code": "GAS_BIZ",
+    "seconds": 2.09,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry",
+        "duration_seconds": 0.3,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.41,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 0.41,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 4,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_SAFE-15": {
+    "id": "GAS_SAFE-15",
+    "question": "2026年9月各分公司三件套安装和到访不遇情况",
+    "code": "GAS_SAFE",
+    "seconds": 1.99,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry",
+        "duration_seconds": 0.3,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.35,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 0.35,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 6,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_AR-16": {
+    "id": "GAS_AR-16",
+    "question": "按演示账龄比例复核2026年9月末计提金额",
+    "code": "GAS_AR",
+    "seconds": 1.94,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry",
+        "duration_seconds": 0.28,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.4,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 0.41,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 1,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_BIZ-16": {
+    "id": "GAS_BIZ-16",
+    "question": "2026年9月各分公司的估抄量与估抄率是多少",
+    "code": "GAS_BIZ",
+    "seconds": 2.09,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry",
+        "duration_seconds": 0.3,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.33,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 0.43,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 5,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  "GAS_SAFE-16": {
+    "id": "GAS_SAFE-16",
+    "question": "截至2026年9月底各分公司隐患闭环率",
+    "code": "GAS_SAFE",
+    "seconds": 2.06,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry",
+        "duration_seconds": 0.27,
+        "rate_limited": true
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "error",
+        "duration_seconds": 0.34,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error",
+        "duration_seconds": 0.35,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 6,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  }
+}

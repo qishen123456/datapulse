@@ -1,0 +1,111 @@
+{
+  "question": "截至2026年9月底有哪些超期未闭环隐患",
+  "reference_sql": "SELECT hazard_id,org_name,hazard_type,due_date FROM v_gas_hazards WHERE found_date<='2026-09-30' AND due_date<'2026-09-30' AND (completed_date IS NULL OR completed_date>'2026-09-30')",
+  "expected": [
+    {
+      "hazard_id": "HZ-0012",
+      "org_name": "丰裕路服务网格",
+      "hazard_type": "第三方施工风险",
+      "due_date": "2024-03-17"
+    },
+    {
+      "hazard_id": "HZ-0023",
+      "org_name": "西环干线运维班组",
+      "hazard_type": "防腐层破损",
+      "due_date": "2024-10-21"
+    },
+    {
+      "hazard_id": "HZ-0034",
+      "org_name": "兴业大道服务网格",
+      "hazard_type": "管线占压",
+      "due_date": "2025-10-20"
+    },
+    {
+      "hazard_id": "HZ-0045",
+      "org_name": "东环干线运维班组",
+      "hazard_type": "标识缺失",
+      "due_date": "2025-09-11"
+    },
+    {
+      "hazard_id": "HZ-0056",
+      "org_name": "青荷路服务网格",
+      "hazard_type": "阀门渗漏",
+      "due_date": "2024-12-31"
+    },
+    {
+      "hazard_id": "HZ-0067",
+      "org_name": "麓林社区服务网格",
+      "hazard_type": "第三方施工风险",
+      "due_date": "2026-08-08"
+    },
+    {
+      "hazard_id": "HZ-0078",
+      "org_name": "荷风路服务网格",
+      "hazard_type": "防腐层破损",
+      "due_date": "2025-06-03"
+    },
+    {
+      "hazard_id": "HZ-0089",
+      "org_name": "光谷科创园服务网格",
+      "hazard_type": "管线占压",
+      "due_date": "2024-04-25"
+    },
+    {
+      "hazard_id": "HZ-0100",
+      "org_name": "云麓社区服务网格",
+      "hazard_type": "标识缺失",
+      "due_date": "2026-03-12"
+    },
+    {
+      "hazard_id": "HZ-0001",
+      "org_name": "望江路服务网格",
+      "hazard_type": "阀门渗漏",
+      "due_date": "2025-07-13"
+    },
+    {
+      "hazard_id": "HZ-0111",
+      "org_name": "海棠社区服务网格",
+      "hazard_type": "阀门渗漏",
+      "due_date": "2025-10-06"
+    },
+    {
+      "hazard_id": "HZ-0118",
+      "org_name": "汀兰社区服务网格",
+      "hazard_type": "立管腐蚀",
+      "due_date": "2026-01-02"
+    },
+    {
+      "hazard_id": "HZ-0119",
+      "org_name": "青荷路服务网格",
+      "hazard_type": "管线占压",
+      "due_date": "2024-10-17"
+    }
+  ],
+  "result": {
+    "error": null,
+    "requires_confirmation": false,
+    "confirmation_type": null,
+    "analysis": "## 江城燃气·安全与管网治理\n\nAI 问数未完成：未能生成或通过校验的可执行查询。请调整问题或检查模型服务后重试；当前未生成业务答案。",
+    "ask_flow": {
+      "flow": "basic",
+      "reason": "basic_selected",
+      "requested_flow": "basic",
+      "controller": "AskFlowController",
+      "duration_seconds": 1.513
+    }
+  },
+  "datasets": [
+    {
+      "dataset_id": 66,
+      "dataset_name": "江城燃气·安全与管网治理",
+      "sql": "",
+      "columns": [],
+      "rows": [],
+      "analysis": "AI 问数未完成：未能生成或通过校验的可执行查询。请调整问题或检查模型服务后重试；当前未生成业务答案。",
+      "analysis_status": "model_unavailable",
+      "query_status": "failed",
+      "error": null,
+      "row_count": 0
+    }
+  ]
+}

@@ -1,0 +1,324 @@
+{
+  "GAS_SAFE-02": {
+    "id": "GAS_SAFE-02",
+    "question": "截至2026年9月底GIS未入库管段按分公司汇总",
+    "code": "GAS_SAFE",
+    "seconds": 78.33,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response",
+        "duration_seconds": 20.32,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response",
+        "duration_seconds": 18.76,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_repair",
+        "status": "response",
+        "duration_seconds": 5.59,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response",
+        "duration_seconds": 0.11,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response",
+        "duration_seconds": 32.42,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 6,
+    "requested_model_id": 14,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 6
+  },
+  "GAS_BIZ-01": {
+    "id": "GAS_BIZ-01",
+    "question": "2026年9月各分公司销气量比8月增减多少",
+    "code": "GAS_BIZ",
+    "seconds": 204.21,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response",
+        "duration_seconds": 21.61,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response",
+        "duration_seconds": 25.6,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_repair",
+        "status": "response",
+        "duration_seconds": 19.33,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response",
+        "duration_seconds": 26.81,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_repair",
+        "status": "response",
+        "duration_seconds": 32.57,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response",
+        "duration_seconds": 25.29,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response",
+        "duration_seconds": 0.09,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response",
+        "duration_seconds": 51.3,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 5,
+    "requested_model_id": 14,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 5
+  },
+  "GAS_BIZ-14": {
+    "id": "GAS_BIZ-14",
+    "question": "2026年9月各分公司新增通气多少户",
+    "code": "GAS_BIZ",
+    "seconds": 49.83,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response",
+        "duration_seconds": 12.61,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response",
+        "duration_seconds": 8.61,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response",
+        "duration_seconds": 0.1,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response",
+        "duration_seconds": 27.54,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 5,
+    "requested_model_id": 14,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 5
+  },
+  "GAS_BIZ-03": {
+    "id": "GAS_BIZ-03",
+    "question": "2026年前三季度各分公司销气量同期间同比",
+    "code": "GAS_BIZ",
+    "seconds": 249.41,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response",
+        "duration_seconds": 21.73,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response",
+        "duration_seconds": 45.61,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_repair",
+        "status": "response",
+        "duration_seconds": 33.12,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response",
+        "duration_seconds": 25.37,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent2.sql_repair",
+        "status": "response",
+        "duration_seconds": 22.06,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response",
+        "duration_seconds": 50.84,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response",
+        "duration_seconds": null,
+        "rate_limited": false
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response",
+        "duration_seconds": 0.08,
+        "rate_limited": false
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "response",
+        "duration_seconds": 49.16,
+        "rate_limited": false
+      }
+    ],
+    "expected_rows": 5,
+    "requested_model_id": 14,
+    "status": "numeric_match",
+    "reason": "对象范围及必要指标与PG一致",
+    "actual_rows": 5
+  }
+}

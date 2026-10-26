@@ -1,0 +1,48 @@
+{
+  "question": "2026年9月末工商客户前十大欠费占比",
+  "reference_sql": "WITH a AS (SELECT customer_id,customer_name,closing_yuan,ROW_NUMBER() OVER(ORDER BY closing_yuan DESC,customer_id) rn FROM v_gas_ar WHERE month='2026-09' AND object_kind='模拟客户') SELECT SUM(closing_yuan) FILTER(WHERE rn<=10) AS 前十应收_元,SUM(closing_yuan) AS 工商总应收_元,SUM(closing_yuan) FILTER(WHERE rn<=10)/NULLIF(SUM(closing_yuan),0) AS 集中度 FROM a",
+  "expected": [
+    {
+      "前十应收_元": 88922455.6,
+      "工商总应收_元": 93786229.98,
+      "集中度": 0.9481397814899137
+    }
+  ],
+  "result": {
+    "error": null,
+    "requires_confirmation": false,
+    "confirmation_type": null,
+    "analysis": "## 江城燃气·应收回款与稽核\n\n2026年9月末，全域工商客户（object_kind=模拟客户）前十大欠费余额合计88,922,455.60元，占工商客户期末应收总额93,786,229.98元的94.81%。\n\n【核心结论】\n- 欠费高度集中：前十大工商客户贡献了94.81%的期末应收余额，头部风险显著。\n- 数据范围：2026-09月末快照，全域（super_admin_full_scope），仅统计工商客户（排除居民/公益汇总桶）。\n- 金额单位：元；集中度为前十余额/工商总余额，非期间回款或出账口径。\n\n【亮点分析 •】\n- 无正面亮点可提炼：94.81%的集中度本身是风险信号，而非管理成效。\n\n【问题诊断 •】\n- 头部依赖风险：前十大客户欠费占比近95%，若其中任一客户回款恶化，将对整体应收质量产生重大影响。\n- 证据边界：本次仅返回汇总值，未提供前十大客户名单、账龄分布或历史趋势，无法判断集中度是短期波动还是结构性问题，也无法识别具体高风险客户。\n- 数据质量提示：数据为虚构演示，企业非真实主体；单月横截面不能证明因果或系统性管理偏差。\n\n【改进建议】\n- 下钻前十大客户明细：获取具体客户名称、余额、账龄分段及所属组织，识别长账龄（>180天）占比高的客户。\n- 对比历史集中度：拉取2026年Q3各月或2025年同期前十占比，判断集中度是上升、下降还是稳定。\n- 制定分级催收策略：对余额大且账龄长的客户优先介入，结合账龄计提比例评估潜在损失。\n- 监控阈值设定：建议将前十占比>80%设为预警线，>90%设为高风险线，纳入月度经营监控。",
+    "ask_flow": {
+      "flow": "basic",
+      "reason": "basic_selected",
+      "requested_flow": "basic",
+      "controller": "AskFlowController",
+      "duration_seconds": 95.304
+    }
+  },
+  "datasets": [
+    {
+      "dataset_id": 65,
+      "dataset_name": "江城燃气·应收回款与稽核",
+      "sql": "WITH a AS (SELECT customer_id, customer_name, closing_yuan, ROW_NUMBER() OVER (ORDER BY closing_yuan DESC, customer_id) AS rn FROM v_gas_ar WHERE month = '2026-09' AND object_kind = '模拟客户') SELECT SUM(closing_yuan) FILTER (WHERE rn <= 10) AS 前十应收_元, SUM(closing_yuan) AS 工商总应收_元, SUM(closing_yuan) FILTER (WHERE rn <= 10) / NULLIF(SUM(closing_yuan), 0) AS 集中度 FROM a",
+      "columns": [
+        "前十应收_元",
+        "工商总应收_元",
+        "集中度"
+      ],
+      "rows": [
+        {
+          "前十应收_元": 88922455.6,
+          "工商总应收_元": 93786229.98,
+          "集中度": 0.9481397814899137
+        }
+      ],
+      "analysis": "2026年9月末，全域工商客户（object_kind=模拟客户）前十大欠费余额合计88,922,455.60元，占工商客户期末应收总额93,786,229.98元的94.81%。\n\n【核心结论】\n- 欠费高度集中：前十大工商客户贡献了94.81%的期末应收余额，头部风险显著。\n- 数据范围：2026-09月末快照，全域（super_admin_full_scope），仅统计工商客户（排除居民/公益汇总桶）。\n- 金额单位：元；集中度为前十余额/工商总余额，非期间回款或出账口径。\n\n【亮点分析 •】\n- 无正面亮点可提炼：94.81%的集中度本身是风险信号，而非管理成效。\n\n【问题诊断 •】\n- 头部依赖风险：前十大客户欠费占比近95%，若其中任一客户回款恶化，将对整体应收质量产生重大影响。\n- 证据边界：本次仅返回汇总值，未提供前十大客户名单、账龄分布或历史趋势，无法判断集中度是短期波动还是结构性问题，也无法识别具体高风险客户。\n- 数据质量提示：数据为虚构演示，企业非真实主体；单月横截面不能证明因果或系统性管理偏差。\n\n【改进建议】\n- 下钻前十大客户明细：获取具体客户名称、余额、账龄分段及所属组织，识别长账龄（>180天）占比高的客户。\n- 对比历史集中度：拉取2026年Q3各月或2025年同期前十占比，判断集中度是上升、下降还是稳定。\n- 制定分级催收策略：对余额大且账龄长的客户优先介入，结合账龄计提比例评估潜在损失。\n- 监控阈值设定：建议将前十占比>80%设为预警线，>90%设为高风险线，纳入月度经营监控。",
+      "analysis_status": "model_generated",
+      "query_status": "completed",
+      "error": null,
+      "row_count": 1
+    }
+  ]
+}

@@ -1,0 +1,180 @@
+{
+  "question": "2026年9月末沙湖分公司欠费企业前十名",
+  "reference_sql": "SELECT customer_id,customer_name,org_name,closing_yuan,aging_365_plus_yuan FROM v_gas_ar WHERE month='2026-09' AND branch_id='SHAHU' AND object_kind='模拟客户' AND closing_yuan>0 ORDER BY closing_yuan DESC,customer_id LIMIT 10",
+  "expected": [
+    {
+      "customer_id": "DEMO-SHAHU-S1-W1-工业-1",
+      "customer_name": "汀兰社区恒拓精密制造有限公司",
+      "org_name": "汀兰社区服务网格",
+      "closing_yuan": 32862833.97,
+      "aging_365_plus_yuan": 9167089.15
+    },
+    {
+      "customer_id": "DEMO-SHAHU-S2-W2-工业-1",
+      "customer_name": "青荷路恒拓精密制造有限公司",
+      "org_name": "青荷路服务网格",
+      "closing_yuan": 21269399.99,
+      "aging_365_plus_yuan": 0.0
+    },
+    {
+      "customer_id": "DEMO-SHAHU-S1-W2-工业-1",
+      "customer_name": "荷风路恒拓精密制造有限公司",
+      "org_name": "荷风路服务网格",
+      "closing_yuan": 17001483.96,
+      "aging_365_plus_yuan": 0.0
+    },
+    {
+      "customer_id": "DEMO-SHAHU-S2-W1-工业-1",
+      "customer_name": "湖畔新城恒拓精密制造有限公司",
+      "org_name": "湖畔新城服务网格",
+      "closing_yuan": 13331871.8,
+      "aging_365_plus_yuan": 0.0
+    },
+    {
+      "customer_id": "DEMO-SHAHU-S2-W1-商业-2",
+      "customer_name": "湖畔新城泊庭酒店管理有限公司",
+      "org_name": "湖畔新城服务网格",
+      "closing_yuan": 52510.2,
+      "aging_365_plus_yuan": 0.0
+    },
+    {
+      "customer_id": "DEMO-SHAHU-S1-W2-商业-2",
+      "customer_name": "荷风路泊庭酒店管理有限公司",
+      "org_name": "荷风路服务网格",
+      "closing_yuan": 50616.66,
+      "aging_365_plus_yuan": 0.0
+    },
+    {
+      "customer_id": "DEMO-SHAHU-S1-W1-工业-2",
+      "customer_name": "汀兰社区澄岳新材料有限公司",
+      "org_name": "汀兰社区服务网格",
+      "closing_yuan": 39315.75,
+      "aging_365_plus_yuan": 0.0
+    },
+    {
+      "customer_id": "DEMO-SHAHU-S1-W1-商业-1",
+      "customer_name": "汀兰社区悦里餐饮管理有限公司",
+      "org_name": "汀兰社区服务网格",
+      "closing_yuan": 38496.56,
+      "aging_365_plus_yuan": 0.0
+    },
+    {
+      "customer_id": "DEMO-SHAHU-S2-W1-工业-2",
+      "customer_name": "湖畔新城澄岳新材料有限公司",
+      "org_name": "湖畔新城服务网格",
+      "closing_yuan": 13017.53,
+      "aging_365_plus_yuan": 0.0
+    },
+    {
+      "customer_id": "DEMO-SHAHU-S2-W1-商业-1",
+      "customer_name": "湖畔新城悦里餐饮管理有限公司",
+      "org_name": "湖畔新城服务网格",
+      "closing_yuan": 1348.82,
+      "aging_365_plus_yuan": 0.0
+    }
+  ],
+  "result": {
+    "error": null,
+    "requires_confirmation": false,
+    "confirmation_type": null,
+    "analysis": "## 江城燃气·应收回款与稽核\n\n2026年9月末，沙湖分公司欠费企业（模拟工商客户）前十名合计期末应收约8,453.45万元，其中第一名汀兰社区恒拓精密制造有限公司欠费3,286.28万元，占前十总额约38.9%；该客户同时存在916.71万元账龄超过365天的应收，是前十中唯一出现长账龄欠费的企业。\n\n【核心结论】\n- 前十欠费企业高度集中：前4家合计约8,446.47万元，占前十总额约99.9%；第5名起金额骤降至5.25万元以下，头部风险显著。\n- 长账龄风险集中在单一客户：仅汀兰社区恒拓精密制造有限公司有365天以上应收916.71万元，其余9家该字段为0元。\n- 数据范围：2026-09月末、沙湖分公司（branch_id=SHAHU）、对象为模拟工商客户（object_kind=模拟客户），按期末应收（closing_yuan）降序取前10。\n\n【亮点分析 •】\n- 除第一名外，其余9家欠费均无365天以上账龄，说明长账龄问题未扩散至其他头部欠费企业。\n- 第5至第10名金额均在1,348.82元至52,510.20元之间，规模较小，短期现金流压力相对可控。\n\n【问题诊断 •】\n- 头部集中度极高：前4家欠费占前十总额约99.9%，若其中任一客户回款受阻，将对沙湖分公司整体回款产生显著影响。\n- 单一客户长账龄突出：汀兰社区恒拓精密制造有限公司365天以上应收916.71万元，占其自身期末应收约27.9%，需优先核查催收进展与账龄成因。\n- 证据边界：本次仅获取期末应收与365天以上账龄两个字段，未包含完整五档账龄、本期回款、计提余额等信息，无法判断欠费趋势或计提充分性。\n\n【改进建议】\n- 对前4家欠费企业启动专项催收，优先处理汀兰社区恒拓精密制造有限公司的916.71万元长账龄应收，核实是否存在争议、合同或结算问题。\n- 补充查询该客户完整账龄分布、近3个月回款记录及计提余额，评估坏账风险与计提充分性。\n- 建立沙湖分公司月度欠费Top10监控机制，跟踪头部客户余额变化与账龄迁移，避免风险集中累积。",
+    "ask_flow": {
+      "flow": "basic",
+      "reason": "basic_selected",
+      "requested_flow": "basic",
+      "controller": "AskFlowController",
+      "duration_seconds": 226.39
+    }
+  },
+  "datasets": [
+    {
+      "dataset_id": 65,
+      "dataset_name": "江城燃气·应收回款与稽核",
+      "sql": "SELECT customer_id, customer_name, org_name, closing_yuan, aging_365_plus_yuan FROM v_gas_ar WHERE month='2026-09' AND branch_id='SHAHU' AND object_kind='模拟客户' AND closing_yuan>0 ORDER BY closing_yuan DESC, customer_id LIMIT 10",
+      "columns": [
+        "customer_id",
+        "customer_name",
+        "org_name",
+        "closing_yuan",
+        "aging_365_plus_yuan"
+      ],
+      "rows": [
+        {
+          "customer_id": "DEMO-SHAHU-S1-W1-工业-1",
+          "customer_name": "汀兰社区恒拓精密制造有限公司",
+          "org_name": "汀兰社区服务网格",
+          "closing_yuan": 32862833.97,
+          "aging_365_plus_yuan": 9167089.15
+        },
+        {
+          "customer_id": "DEMO-SHAHU-S2-W2-工业-1",
+          "customer_name": "青荷路恒拓精密制造有限公司",
+          "org_name": "青荷路服务网格",
+          "closing_yuan": 21269399.99,
+          "aging_365_plus_yuan": 0.0
+        },
+        {
+          "customer_id": "DEMO-SHAHU-S1-W2-工业-1",
+          "customer_name": "荷风路恒拓精密制造有限公司",
+          "org_name": "荷风路服务网格",
+          "closing_yuan": 17001483.96,
+          "aging_365_plus_yuan": 0.0
+        },
+        {
+          "customer_id": "DEMO-SHAHU-S2-W1-工业-1",
+          "customer_name": "湖畔新城恒拓精密制造有限公司",
+          "org_name": "湖畔新城服务网格",
+          "closing_yuan": 13331871.8,
+          "aging_365_plus_yuan": 0.0
+        },
+        {
+          "customer_id": "DEMO-SHAHU-S2-W1-商业-2",
+          "customer_name": "湖畔新城泊庭酒店管理有限公司",
+          "org_name": "湖畔新城服务网格",
+          "closing_yuan": 52510.2,
+          "aging_365_plus_yuan": 0.0
+        },
+        {
+          "customer_id": "DEMO-SHAHU-S1-W2-商业-2",
+          "customer_name": "荷风路泊庭酒店管理有限公司",
+          "org_name": "荷风路服务网格",
+          "closing_yuan": 50616.66,
+          "aging_365_plus_yuan": 0.0
+        },
+        {
+          "customer_id": "DEMO-SHAHU-S1-W1-工业-2",
+          "customer_name": "汀兰社区澄岳新材料有限公司",
+          "org_name": "汀兰社区服务网格",
+          "closing_yuan": 39315.75,
+          "aging_365_plus_yuan": 0.0
+        },
+        {
+          "customer_id": "DEMO-SHAHU-S1-W1-商业-1",
+          "customer_name": "汀兰社区悦里餐饮管理有限公司",
+          "org_name": "汀兰社区服务网格",
+          "closing_yuan": 38496.56,
+          "aging_365_plus_yuan": 0.0
+        },
+        {
+          "customer_id": "DEMO-SHAHU-S2-W1-工业-2",
+          "customer_name": "湖畔新城澄岳新材料有限公司",
+          "org_name": "湖畔新城服务网格",
+          "closing_yuan": 13017.53,
+          "aging_365_plus_yuan": 0.0
+        },
+        {
+          "customer_id": "DEMO-SHAHU-S2-W1-商业-1",
+          "customer_name": "湖畔新城悦里餐饮管理有限公司",
+          "org_name": "湖畔新城服务网格",
+          "closing_yuan": 1348.82,
+          "aging_365_plus_yuan": 0.0
+        }
+      ],
+      "analysis": "2026年9月末，沙湖分公司欠费企业（模拟工商客户）前十名合计期末应收约8,453.45万元，其中第一名汀兰社区恒拓精密制造有限公司欠费3,286.28万元，占前十总额约38.9%；该客户同时存在916.71万元账龄超过365天的应收，是前十中唯一出现长账龄欠费的企业。\n\n【核心结论】\n- 前十欠费企业高度集中：前4家合计约8,446.47万元，占前十总额约99.9%；第5名起金额骤降至5.25万元以下，头部风险显著。\n- 长账龄风险集中在单一客户：仅汀兰社区恒拓精密制造有限公司有365天以上应收916.71万元，其余9家该字段为0元。\n- 数据范围：2026-09月末、沙湖分公司（branch_id=SHAHU）、对象为模拟工商客户（object_kind=模拟客户），按期末应收（closing_yuan）降序取前10。\n\n【亮点分析 •】\n- 除第一名外，其余9家欠费均无365天以上账龄，说明长账龄问题未扩散至其他头部欠费企业。\n- 第5至第10名金额均在1,348.82元至52,510.20元之间，规模较小，短期现金流压力相对可控。\n\n【问题诊断 •】\n- 头部集中度极高：前4家欠费占前十总额约99.9%，若其中任一客户回款受阻，将对沙湖分公司整体回款产生显著影响。\n- 单一客户长账龄突出：汀兰社区恒拓精密制造有限公司365天以上应收916.71万元，占其自身期末应收约27.9%，需优先核查催收进展与账龄成因。\n- 证据边界：本次仅获取期末应收与365天以上账龄两个字段，未包含完整五档账龄、本期回款、计提余额等信息，无法判断欠费趋势或计提充分性。\n\n【改进建议】\n- 对前4家欠费企业启动专项催收，优先处理汀兰社区恒拓精密制造有限公司的916.71万元长账龄应收，核实是否存在争议、合同或结算问题。\n- 补充查询该客户完整账龄分布、近3个月回款记录及计提余额，评估坏账风险与计提充分性。\n- 建立沙湖分公司月度欠费Top10监控机制，跟踪头部客户余额变化与账龄迁移，避免风险集中累积。",
+      "analysis_status": "model_generated",
+      "query_status": "completed",
+      "error": null,
+      "row_count": 10
+    }
+  ]
+}

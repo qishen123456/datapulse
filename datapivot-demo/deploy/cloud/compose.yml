@@ -1,0 +1,78 @@
+name: datapulse-cloud
+x-runtime: &runtime
+  env_file: ${CLOUD_ENV_FILE:-.env}
+  environment: &env
+    DATAPULSE_DB_HOST: postgres
+    DATAPULSE_DB_PORT: 5432
+    DATAPULSE_DB_DATABASE: postgres
+    DATAPULSE_DB_USERNAME: postgres
+    DATAPULSE_DB_PASSWORD: ${DB_PASSWORD:?Run deploy.sh init first}
+    ASKDESK_DB_HOST: postgres
+    ASKDESK_DB_PORT: 5432
+    ASKDESK_DB_DATABASE: postgres
+    ASKDESK_DB_USERNAME: postgres
+    ASKDESK_DB_PASSWORD: ${DB_PASSWORD}
+    ASKDESK_CONFIG_DIR: /app/config
+    DATAPULSE_CHROMA_PATH: /app/chroma_db
+    ASKDESK_CHROMA_PATH: /app/chroma_db
+    ASKDESK_RUNTIME_BACKUP_DIR: /app/backups/runtime
+    DATAPULSE_BOOTSTRAP_SKIP_BUILTINS: '1'
+    ASKDESK_BOOTSTRAP_SKIP_BUILTINS: '1'
+    ASKDESK_BOOTSTRAP_SKIP_FIRST_IMPORT: '1'
+    DATAPULSE_FEISHU_SYNC_ON_STARTUP: skip
+    TZ: Asia/Shanghai
+  volumes:
+    - ./state/config:/app/config
+    - ./state/backups:/app/backups
+    - ./state/imports:/app/backend/imports
+    - ./state/logs:/app/logs
+    - ./state/backend-logs:/app/backend/logs
+    - chroma:/app/chroma_db
+  logging: &logging
+    driver: json-file
+    options: {max-size: 10m, max-file: '3'}
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../../docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    logging: *logging
+  migrate:
+    <<: *runtime
+    build: {context: ../.., dockerfile: backend/Dockerfile, target: migrate}
+    restart: 'no'
+    depends_on:
+      postgres: {condition: service_healthy}
+  backend:
+    <<: *runtime
+    build: {context: ../.., dockerfile: backend/Dockerfile, target: backend}
+    restart: unless-stopped
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    healthcheck:
+      test: ['CMD', 'python', '-c', "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5002/api/health',timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+  frontend:
+    build: {context: ../../frontend, dockerfile: Dockerfile}
+    restart: unless-stopped
+    ports: ['${BIND_IP:-0.0.0.0}:${WEB_PORT:-8888}:80']
+    depends_on:
+      backend: {condition: service_healthy}
+    logging: *logging
+volumes:
+  pgdata:
+  chroma:

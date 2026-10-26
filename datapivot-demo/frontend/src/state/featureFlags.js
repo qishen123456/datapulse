@@ -44,7 +44,7 @@ export const clearFeatureFlags = () => {
 export const isFeatureEnabled = (key) => {
   if (!key) return true
   const feature = features.value?.[key]
-  if (!ready.value || !feature) return true
+  if (!ready.value || !feature) return false
   if (typeof feature.available === 'boolean') return feature.available
   return Boolean(feature.enabled)
 }

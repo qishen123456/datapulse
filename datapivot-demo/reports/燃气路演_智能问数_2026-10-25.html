@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>让每一方气都有据可查 · DataPulse × 江城燃气 智能问数路演</title>
+<style>
+  :root{
+    --navy:#0D1726; --navy-2:#152238; --em:#11AF8E; --em-soft:#E7F7F4; --em-line:#A7E9DA;
+    --ink:#0F172A; --mut:#64748B; --page:#F4F7FA; --line:#E2E8F0; --red:#E5484D; --amber:#B45309;
+    --mono:'JetBrains Mono','SFMono-Regular',Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei UI',sans-serif;background:var(--navy);color:var(--ink);overflow:hidden}
+  .deck{height:100vh;overflow-y:auto;scroll-snap-type:y mandatory;scroll-padding:0}
+  .slide{min-height:100vh;scroll-snap-align:start;display:flex;flex-direction:column;justify-content:center;padding:64px 8vw;position:relative}
+  .slide.dark{background:var(--navy);color:#E7EEF7}
+  .slide.light{background:var(--page)}
+  .slide.white{background:#fff}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;color:var(--em);text-transform:uppercase;margin-bottom:18px}
+  h1{font-size:clamp(38px,5.4vw,72px);line-height:1.18;letter-spacing:-.02em;font-weight:800}
+  h2{font-size:clamp(28px,3.6vw,46px);line-height:1.25;letter-spacing:-.02em;font-weight:750;margin-bottom:10px}
+  h3{font-size:17px;font-weight:650}
+  .sub{font-size:clamp(15px,1.5vw,19px);color:var(--mut);line-height:1.9;max-width:880px}
+  .dark .sub{color:#94A3B8}
+  .bignum{font-family:var(--mono);font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+  .grid{display:grid;gap:18px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px 26px;box-shadow:0 2px 10px rgba(13,23,38,.04)}
+  .dark .card{background:var(--navy-2);border-color:rgba(255,255,255,.08);box-shadow:none}
+  .card h4{font-size:13px;color:var(--mut);font-weight:600;margin-bottom:8px}
+  .dark .card h4{color:#94A3B8}
+  .card .v{font-family:var(--mono);font-size:clamp(24px,2.6vw,34px);font-weight:700;letter-spacing:-.02em}
+  .card .n{font-size:12.5px;color:var(--mut);margin-top:6px;line-height:1.7}
+  .dark .card .n{color:#94A3B8}
+  .up{color:var(--em)} .down{color:var(--red)} .warn{color:var(--amber)}
+  .dark .up{color:#2DD4BF}
+  .tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;padding:3px 10px;border-radius:6px;background:var(--em-soft);color:#0E967A;border:1px solid var(--em-line)}
+  .dark .tag{background:rgba(17,175,142,.14);color:#2DD4BF;border-color:rgba(45,212,191,.3)}
+  .qbox{border-left:3px solid var(--em);padding:14px 20px;background:var(--em-soft);border-radius:0 10px 10px 0;font-size:clamp(16px,1.8vw,21px);font-weight:650;margin:22px 0}
+  .dark .qbox{background:rgba(17,175,142,.1)}
+  .flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--mut);margin-top:14px}
+  .flow b{color:var(--em);font-weight:600}
+  .flow i{font-style:normal;color:var(--line)}
+  .dark .flow i{color:#334155}
+  .metric-def{display:grid;grid-template-columns:200px 1fr;gap:8px 22px;padding:16px 0;border-bottom:1px solid var(--line)}
+  .metric-def:last-child{border-bottom:0}
+  .metric-def b{font-size:15px}
+  .metric-def p{font-size:13.5px;color:var(--mut);line-height:1.8}
+  .metric-def .f{font-family:var(--mono);font-size:12px;color:#0E967A;background:var(--em-soft);border-radius:6px;padding:2px 8px;display:inline-block;margin-top:5px}
+  table.data{border-collapse:collapse;width:100%;font-size:13px;margin-top:14px}
+  table.data th,table.data td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  table.data th{font-size:12px;color:var(--mut);font-weight:600}
+  table.data td{font-variant-numeric:tabular-nums}
+  .dark table.data th{color:#94A3B8}.dark table.data th,.dark table.data td{border-color:rgba(255,255,255,.09)}
+  .bar{height:8px;border-radius:99px;background:var(--em);display:inline-block;vertical-align:middle;margin-right:10px}
+  .bar.neg{background:var(--red)}
+  .page{position:fixed;right:26px;bottom:22px;font-family:var(--mono);font-size:12px;color:#64748B;z-index:50;background:rgba(13,23,38,.72);color:#cbd5e1;padding:6px 12px;border-radius:99px;backdrop-filter:blur(8px)}
+  .hint{position:fixed;left:26px;bottom:22px;font-family:var(--mono);font-size:11px;color:#64748B;z-index:50}
+  .progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--em),#0EA5E9);z-index:60;transition:width .25s}
+  .chart-title{font-size:12px;color:var(--mut);margin:18px 0 8px;font-family:var(--mono)}
+  svg text{font-family:var(--mono)}
+  .footnote{position:absolute;bottom:26px;left:8vw;font-size:11px;color:#64748B;font-family:var(--mono)}
+  .split{display:grid;grid-template-columns:1.05fr .95fr;gap:5vw;align-items:center}
+  @media(max-width:900px){.split{grid-template-columns:1fr}.slide{padding:48px 6vw}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+
+  <!-- 1 封面 -->
+  <section class="slide dark">
+    <div class="kicker">DATAPULSE × 江城燃气 · 智能问数路演</div>
+    <h1>让每一方气，<br>都有据可查。</h1>
+    <p class="sub" style="margin-top:26px">对着数据直接提问——利润、供销差、应收、隐患。<br>四位 AI 专家协作核验，约 1 分钟给出带口径、带审核、带依据的答案。</p>
+    <div class="flow" style="margin-top:34px"><b>提问</b><i>→</i><b>路由数据集</b><i>→</i><b>生成 SQL</b><i>→</i><b>安全复核</b><i>→</i><b>出数+经营报告</b></div>
+    <div class="footnote">演示主体「江城燃气」为虚构城市燃气公司 · 数据为可复现模拟数据 · 2026-10</div>
+  </section>
+
+  <!-- 2 客户画像 -->
+  <section class="slide light">
+    <div class="kicker">01 · 客户画像</div>
+    <h2>一座中型城市的燃气日常</h2>
+    <p class="sub">江城燃气承担全市居民与工商业供气。规模不大，但经营要素一样不少：价格管制、供销差、回款、管网安全。</p>
+    <div class="grid" style="grid-template-columns:repeat(4,1fr);margin-top:34px">
+      <div class="card"><h4>年销气量（2024）</h4><div class="v">18.5<small style="font-size:14px"> 亿方</small></div><div class="n">居民做饭热水 + 工商业生产</div></div>
+      <div class="card"><h4>组织</h4><div class="v">6 <small style="font-size:14px">分公司</small></div><div class="n">5 家销售分公司 + 高压输配，43 个组织节点、10 个服务中心</div></div>
+      <div class="card"><h4>管网资产</h4><div class="v">1.7<small style="font-size:14px"> 万公里</small></div><div class="n">12,000 条独立管段台账，逐一登记管龄材质</div></div>
+      <div class="card"><h4>应收对象</h4><div class="v">120<small style="font-size:14px"> 个/月</small></div><div class="n">80 工商业客户 + 40 居民/公益汇总桶</div></div>
+    </div>
+    <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:18px">
+      <div class="card"><h4>气量结构（33 个月累计）</h4><div class="n" style="font-size:13.5px">居民 21.75 亿方（42%）· 工业 18.77 亿方（36%）· 商业 10.70 亿方（21%）<br><b>户数 99% 是居民，气量却只占约四成</b>——这正是倒挂的结构性根源。</div></div>
+      <div class="card"><h4>价格与成本（2026-09 实测）</h4><div class="n" style="font-size:13.5px">居民售价 <b>2.55 元/方</b>（管制）｜采购均价 <b>2.57 元/方</b>｜配气成本约 <b>0.81 元/方</b><br>居民板块每卖一方气，亏 <span class="down"><b>0.83 元</b></span>。</div></div>
+    </div>
+  </section>
+
+  <!-- 3 困局：亏损地图 -->
+  <section class="slide dark">
+    <div class="kicker">02 · 困局</div>
+    <h2>一门"卖得越多、亏得越多"的生意</h2>
+    <p class="sub">居民气价被管制，采购价随行就市——购销价格倒挂。2024 年尚能微利，2025 年转亏，2026 年 5 月上游涨价后亏损逐月扩大。</p>
+    <div class="split" style="margin-top:20px">
+      <div>
+        <div class="chart-title" style="color:#94A3B8">集团模拟税前利润 · 万元/月（2024-01 → 2026-09）</div>
+        <svg viewBox="0 0 640 300" style="width:100%">
+          <line x1="40" y1="140" x2="630" y2="140" stroke="#334155" stroke-width="1"/>
+          <text x="2" y="144" font-size="10" fill="#64748B">0</text>
+          <g id="profit-bars"></g>
+          <text x="46" y="290" font-size="10" fill="#64748B">2024</text>
+          <text x="252" y="290" font-size="10" fill="#64748B">2025</text>
+          <text x="458" y="290" font-size="10" fill="#64748B">2026</text>
+        </svg>
+      </div>
+      <div class="grid" style="grid-template-columns:1fr 1fr">
+        <div class="card"><h4>2024 全年</h4><div class="v up">+0.54<small style="font-size:13px"> 亿</small></div><div class="n">微利，靠冬季取暖季支撑</div></div>
+        <div class="card"><h4>2025 全年</h4><div class="v down">−0.32<small style="font-size:13px"> 亿</small></div><div class="n">正式转亏</div></div>
+        <div class="card"><h4>2026 前三季度</h4><div class="v down">−1.42<small style="font-size:13px"> 亿</small></div><div class="n">5 月起逐月扩大</div></div>
+        <div class="card"><h4>2026-09 单月</h4><div class="v down">−2548<small style="font-size:13px"> 万</small></div><div class="n">六家分公司「两盈四亏」</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 指标白话课·经营 -->
+  <section class="slide white">
+    <div class="kicker">03 · 指标白话课（上）经营指标</div>
+    <h2>这些词，用大白话讲</h2>
+    <div style="max-width:980px;margin-top:16px">
+      <div class="metric-def"><b>销气量</b><p>卖给用户的天然气总量（立方米/万方）。分居民、工业、商业等客户类型统计，是经营的"出货量"。<span class="f">问法示例：2026年9月各分公司销气量排名</span></p></div>
+      <div class="metric-def"><b>供销差率</b><p>买进来的气和卖出去的气对不上账的比例：差量 ÷ 进气量。来自管网易泄漏、表计误差、估抄、偷盗气。行业核定红线：新建管网 4.5%、运行 3 年以上 3.5%，超过就要查。<span class="f">(进气 − 销气) ÷ 进气</span></p></div>
+      <div class="metric-def"><b>购销倒挂</b><p>买气比卖气还贵。居民售价被政府管制（2.55 元/方），采购价随行就市（2.57 元/方），再加上把气送到家的配气成本（约 0.8 元/方），居民板块卖一方亏 0.83 元。</p></div>
+      <div class="metric-def"><b>配气成本</b><p>把气从门站送到用户家里的全部中间成本：管网折旧、运维、人工分摊。它是倒挂的"隐形大头"，不算它就讲不清亏损。</p></div>
+      <div class="metric-def"><b>估抄率</b><p>没抄到表、按经验估算的气量占比。估多了容易账实不符，是稽核重点盯的先行指标。本月集团合计 3.2%——但沙湖高达 10.9%，其余分公司仅 1.2%~1.9%，老城片区的计量管理明显失守。<span class="f">估抄量 ÷ 销气量</span></p></div>
+    </div>
+  </section>
+
+  <!-- 5 指标白话课·风控 -->
+  <section class="slide white">
+    <div class="kicker">03 · 指标白话课（下）财务与风控指标</div>
+    <h2>钱和安全，各有一套词</h2>
+    <div style="max-width:980px;margin-top:16px">
+      <div class="metric-def"><b>应收余额 / 账龄</b><p>用户欠费还没收回来的钱。账龄按"挂账天数"分桶：0–30 天是正常在途，超过 180 天基本要计提坏账。本月末余额 1.06 亿，其中超 180 天 2,193 万（占 20.7%，偏高）。</p></div>
+      <div class="metric-def"><b>气费回收率</b><p>账单收回来的比例。可以接近或超过 100%——因为当月收回了以前月份的旧账。本月临港 100.5% 最高、沙湖 95.7% 垫底。<span class="f">实收 ÷ 应收账单</span></p></div>
+      <div class="metric-def"><b>隐患闭环率</b><p>发现隐患 → 整改 → 复核销号，走完流程才算"闭环"。未闭环就是悬着的风险：当前 120 单隐患中 17 单未闭环，含 2 单重大超期。</p></div>
+      <div class="metric-def"><b>GIS 入库率</b><p>管网资产数字化进地图系统的比例。不入库，巡检、抢修、第三方施工交底都缺依据。当前 89.9%，1,207 段管段未入库。</p></div>
+      <div class="metric-def"><b>老旧管网（>20 年）</b><p>敷设超 20 年的管段长度。老旧管段是泄漏和隐患的高发区——全市 1,469 公里，几乎全在老城沙湖片区，这也解释了沙湖亏损最重、供销差最高。</p></div>
+      <div class="metric-def"><b>到访不遇 / 三件套</b><p>上门安检扑空叫"到访不遇"（影响安检覆盖率）；"三件套"指燃气报警器、自闭阀、金属波纹管——入户安全的最后一道防线。</p></div>
+    </div>
+  </section>
+
+  <!-- 6 演示五问·引入 -->
+  <section class="slide dark">
+    <div class="kicker">04 · 现场演示</div>
+    <h2>五个问题，讲完整条经营线</h2>
+    <p class="sub">每一问都是真实操作：键盘敲进去的是业务问题，回来的是核验过的数字和一份经营简报。</p>
+    <div class="grid" style="grid-template-columns:repeat(5,1fr);margin-top:30px">
+      <div class="card"><h4>第一问 · 利润</h4><div class="n">前三季度亏了多少？</div></div>
+      <div class="card"><h4>第二问 · 分化</h4><div class="n">谁还在赚钱？</div></div>
+      <div class="card"><h4>第三问 · 供销差</h4><div class="n">哪里的气对不上账？</div></div>
+      <div class="card"><h4>第四问 · 回款</h4><div class="n">多少欠费收不回来？</div></div>
+      <div class="card"><h4>第五问 · 安全</h4><div class="n">老旧管网与隐患在哪？</div></div>
+    </div>
+    <div class="flow" style="margin-top:30px"><b>理解问题</b><i>→</i><b>准备查询</b><i>→</i><b>查询与核验</b><i>→</i><b>形成回答</b><i>｜</i>全程约 60~120 秒 · 每一步可追溯</div>
+  </section>
+
+  <!-- 7 第一问 利润 -->
+  <section class="slide light">
+    <div class="kicker">第一问 · 利润</div>
+    <div class="qbox">「2026年前三季度税前利润是多少？」</div>
+    <div class="split">
+      <div>
+        <div class="bignum down" style="font-size:clamp(48px,6vw,84px)">−1.42 亿</div>
+        <p class="sub" style="margin-top:16px">累计模拟税前利润。亏损主因是居民气购销价格倒挂，且自 2026 年 5 月上游成本上涨以来逐月扩大——这不是财务口径问题，是结构性经营现实。</p>
+      </div>
+      <div class="card"><h4>问数过程（实测 60 秒）</h4><div class="n" style="font-family:var(--mono);font-size:12px;line-height:2.1">理解问题 5s → 生成 SQL 11s → 专家复核 8s → 出数 0.03s → 经营简报 15s<br>复核要点：只读校验 ✓ 字段字典校验 ✓ 口径与 Golden SQL 一致 ✓</div></div>
+    </div>
+  </section>
+
+  <!-- 8 第二问 分化 -->
+  <section class="slide light">
+    <div class="kicker">第二问 · 分化</div>
+    <div class="qbox">「2026年9月各分公司税前利润是多少？」</div>
+    <table class="data">
+      <thead><tr><th>分公司</th><th>税前利润（2026-09）</th><th>形态</th></tr></thead>
+      <tbody>
+        <tr><td>经开分公司</td><td class="up">+14.0 万</td><td><span class="bar" style="width:36px"></span>勉强打平</td></tr>
+        <tr><td>高压输配分公司</td><td class="up">+34.6 万</td><td><span class="bar" style="width:56px"></span>管输费稳定</td></tr>
+        <tr><td>临港分公司</td><td class="down">−322.9 万</td><td><span class="bar neg" style="width:120px"></span></td></tr>
+        <tr><td>高新分公司</td><td class="down">−647.7 万</td><td><span class="bar neg" style="width:180px"></span></td></tr>
+        <tr><td>滨江分公司</td><td class="down">−876.2 万</td><td><span class="bar neg" style="width:240px"></span></td></tr>
+        <tr><td>沙湖分公司</td><td class="down"><b>−1,001.8 万</b></td><td><span class="bar neg" style="width:300px"></span>老城片区 · 老旧管网集中</td></tr>
+      </tbody>
+    </table>
+    <p class="sub" style="margin-top:18px">「两盈四亏」：亏损面集中在居民占比高、管网老旧的片区。补亏不能只靠集团摊薄，要按片区一企一策。</p>
+  </section>
+
+  <!-- 9 第三问 供销差 -->
+  <section class="slide light">
+    <div class="kicker">第三问 · 供销差</div>
+    <div class="qbox">「2026年9月哪些服务中心超过供销差警戒阈值？」</div>
+    <div class="split">
+      <div>
+        <div class="bignum warn" style="font-size:clamp(40px,4.6vw,64px)">沙湖双中心<br>5.43% / 4.92%</div>
+        <p class="sub" style="margin-top:16px">运行 3 年以上管网核定阈值 3.5%。沙湖两个服务中心连续越线，优先排查老旧管段泄漏与表计偏差；其余 8 个服务中心全部在 1.56%~2.62% 的合格区间。</p>
+      </div>
+      <div class="card"><h4>服务中心供销差率（2026-09）</h4><div class="n" style="font-family:var(--mono);font-size:12.5px;line-height:2.15">沙湖S1 <b class="warn">5.43%</b> ▓▓▓▓▓ 超阈<br>沙湖S2 <b class="warn">4.92%</b> ▓▓▓▓ 超阈<br>临港S2 2.62% ▓▓<br>滨江S1 2.59% ▓▓<br>临港S1 2.40% ▓▓<br>高新S1 2.23% ▓▓<br>滨江S2 2.03% ▓<br>高新S2 1.92% ▓<br>经开S1 1.75% ▓<br>经开S2 1.56% ▓</div></div>
+    </div>
+  </section>
+
+  <!-- 10 第四问 回款 -->
+  <section class="slide light">
+    <div class="kicker">第四问 · 回款</div>
+    <div class="qbox">「2026年9月超过180天的应收有多少？」</div>
+    <div class="split">
+      <div>
+        <div class="bignum" style="font-size:clamp(48px,6vw,80px)">1.06 亿<small style="font-size:20px;color:var(--mut)"> 应收余额</small></div>
+        <div class="bignum warn" style="font-size:clamp(28px,3.4vw,44px);margin-top:8px">2,193 万<small style="font-size:15px;color:var(--mut)"> 超 180 天</small></div>
+        <p class="sub" style="margin-top:16px">账龄超 180 天的占余额 20.7%，已达坏账计提敏感区。回收率分化明显：临港 100.5%（收回了旧账）、沙湖 95.7% 垫底——又是沙湖。</p>
+      </div>
+      <div class="card"><h4>账龄分桶（2026-09 末）</h4><div class="n" style="font-family:var(--mono);font-size:12.5px;line-height:2.2">0–30 天　<b>4,452 万</b>　正常在途<br>31–90 天　1,148 万　滚动账期<br>91–180 天　2,822 万　催收关注<br>181–365 天　1,276 万　重点关注<br><b class="warn">超 365 天　917 万　坏账计提区</b><br><br>稽核在途案例：偷盗气疑似 5 起 · 计量偏差 5 起 · 估抄复核 4 起</div></div>
+    </div>
+  </section>
+
+  <!-- 11 第五问 安全 -->
+  <section class="slide light">
+    <div class="kicker">第五问 · 安全</div>
+    <div class="qbox">「沙湖分公司有多少公里超过20年的老旧管网？」</div>
+    <div class="split">
+      <div>
+        <div class="bignum" style="font-size:clamp(48px,6vw,80px)">1,469<small style="font-size:20px;color:var(--mut)"> 公里</small></div>
+        <p class="sub" style="margin-top:16px">几乎全市超 20 年管段都集中在沙湖老城。叠加 17 单未闭环隐患（含 2 单重大超期）、GIS 入库率 89.9%（1,207 段未入库）——老旧管网治理既是安全账，也是供销差和亏损账。</p>
+      </div>
+      <div class="card"><h4>安全台账速览</h4><div class="n" style="font-family:var(--mono);font-size:12.5px;line-height:2.2">隐患工单 120 单：已闭环 103 · 未闭环 17<br>未闭环构成：一般 15 · <b class="down">重大 2</b><br>管网资产 12,000 段 / 1.7 万公里<br>GIS 入库 89.9% · 未入库 1,207 段<br>抢修及时率、安检覆盖率逐月可查</div></div>
+    </div>
+  </section>
+
+  <!-- 12 可信架构 -->
+  <section class="slide dark">
+    <div class="kicker">05 · 为什么敢信它</div>
+    <h2>每个数字背后，都站着一层核验</h2>
+    <div class="grid" style="grid-template-columns:repeat(4,1fr);margin-top:26px">
+      <div class="card"><h4>① 查询专家</h4><div class="n">按数据集 LLD、字段字典、Golden SQL 样例生成查询；口径不符样例时不猜字段</div></div>
+      <div class="card"><h4>② 复核专家</h4><div class="n">只读安全 + 字段字典 + 业务口径裁定三重把关；意见不一致时降级为本地校验并如实标注</div></div>
+      <div class="card"><h4>③ 权限注入</h4><div class="n">组织范围由服务端按账号授权强制注入，模型说了不算</div></div>
+      <div class="card"><h4>④ 分析专家</h4><div class="n">报告只许引用本次结果数值；建议必须绑定对象与数值；负利润不许误读为数据异常</div></div>
+    </div>
+    <div class="flow" style="margin-top:26px"><b>PIPELINE TRACE</b><i>｜</i>六项执行依据常驻展示：问题范围 · 数据来源 · 查询方案 · 聚合方式 · 审核结果 · 返回字段与数据量<i>｜</i>SQL 与审核记录可展开</div>
+  </section>
+
+  <!-- 13 收尾 -->
+  <section class="slide dark" style="text-align:left">
+    <div class="kicker">06 · 下一步</div>
+    <h1 style="font-size:clamp(34px,4.6vw,60px)">从「等报表」<br>到「问数据」。</h1>
+    <p class="sub" style="margin-top:22px">经营分析会上的每一个"大概"、"应该是"，都值得一次 60 秒的当场核验。<br>接入贵司真实数据源后，同一套口径、审核与追溯体系原样保留。</p>
+    <div class="flow" style="margin-top:30px"><b>模拟 CSV</b><i>→</i><b>飞书多维表格</b><i>→</i><b>系统同步入库</b><i>→</i><b>智能问数</b><i>｜</i>演示链路即交付链路</div>
+    <div class="footnote">DataPulse 脉策智能 · 江城燃气为虚构演示主体 · 数据为可复现模拟数据</div>
+  </section>
+
+</div>
+<div class="hint">↑↓ / 滚轮翻页 · P 打印</div>
+<div class="page" id="page">01 / 13</div>
+<script>
+// 利润柱状图（2024-01 ~ 2026-09，万元/月）
+const profit=[900,400,1100,1000,600,300,-100,-400,-300,100,700,1100,800,200,500,-200,-700,-900,-1200,-1100,-800,-400,100,500,300,-400,-200,-900,-1800,-2400,-2900,-3100,-2800];
+const svg=document.getElementById('profit-bars');
+const W=640,X0=40,n=profit.length,bw=(W-X0-8)/n,zero=140,scale=0.026;
+profit.forEach((v,i)=>{
+  const x=X0+i*bw,h=Math.abs(v)*scale,y=v>=0?zero-h:zero;
+  const r=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  r.setAttribute('x',x.toFixed(1));r.setAttribute('y',y.toFixed(1));
+  r.setAttribute('width',(bw-2).toFixed(1));r.setAttribute('height',Math.max(h,1.5).toFixed(1));
+  r.setAttribute('rx',2);r.setAttribute('fill',v>=0?'#11AF8E':'#E5484D');
+  if(v>=0)r.setAttribute('opacity','0.85');
+  svg.appendChild(r);
+});
+// 翻页与进度
+const deck=document.getElementById('deck'),slides=[...document.querySelectorAll('.slide')],pageEl=document.getElementById('page'),prog=document.getElementById('progress');
+function update(){
+  const i=Math.round(deck.scrollTop/deck.clientHeight),idx=Math.min(Math.max(i,0),slides.length-1);
+  pageEl.textContent=String(idx+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');
+  prog.style.width=((idx+1)/slides.length*100)+'%';
+}
+deck.addEventListener('scroll',()=>requestAnimationFrame(update));update();
+addEventListener('keydown',e=>{
+  if(['ArrowDown','PageDown',' '].includes(e.key)){e.preventDefault();deck.scrollBy({top:deck.clientHeight,behavior:'smooth'})}
+  if(['ArrowUp','PageUp'].includes(e.key)){e.preventDefault();deck.scrollBy({top:-deck.clientHeight,behavior:'smooth'})}
+  if(e.key==='Home')deck.scrollTo({top:0,behavior:'smooth'});
+  if(e.key==='End')deck.scrollTo({top:deck.scrollHeight,behavior:'smooth'});
+  if(e.key.toLowerCase()==='p')print();
+});
+</script>
+</body>
+</html>

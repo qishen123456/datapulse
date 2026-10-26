@@ -91,7 +91,7 @@ const normalizedSteps = computed(() => {
 }
 
 .ax-thinking-header:hover {
-  background: #F2F5F4;
+  background: #edf2f5;
 }
 
 .ax-arrow {
@@ -125,17 +125,17 @@ const normalizedSteps = computed(() => {
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  color: #10B981;
-  background: #ECFDF5;
+  color: #526b7a;
+  background: #edf2f5;
 }
 
 .ax-check.loading {
   color: #1A1A1A;
-  background: #eff6ff;
+  background: #edf2f8;
 }
 
 .ax-thinking-body {
-  background: #F2F5F4;
+  background: #edf2f5;
   border-top: 1px solid rgba(26, 26, 26, 0.08);
   padding: 11px 13px 13px;
 }
@@ -161,7 +161,7 @@ const normalizedSteps = computed(() => {
 }
 
 .ax-dot.completed {
-  background: #10B981;
+  background: #526b7a;
 }
 
 .ax-dot.pending {
@@ -169,7 +169,7 @@ const normalizedSteps = computed(() => {
 }
 
 .ax-dot.warning {
-  background: #F59E0B;
+  background: #806b47;
 }
 
 .ax-dot.error {
@@ -205,12 +205,12 @@ const normalizedSteps = computed(() => {
 }
 
 .ax-step-status.completed {
-  background: #ECFDF5;
-  color: #10B981;
+  background: #edf2f5;
+  color: #526b7a;
 }
 
 .ax-step-status.running {
-  background: #eff6ff;
+  background: #edf2f8;
   color: #1A1A1A;
 }
 
@@ -220,12 +220,12 @@ const normalizedSteps = computed(() => {
 }
 
 .ax-step-status.warning {
-  background: #FFFBEB;
-  color: #F59E0B;
+  background: #f5f2ec;
+  color: #806b47;
 }
 
 .ax-step-status.error {
-  background: #eff6ff;
+  background: #edf2f8;
   color: #1A1A1A;
 }
 

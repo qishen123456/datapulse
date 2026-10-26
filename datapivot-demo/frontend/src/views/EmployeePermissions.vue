@@ -55,7 +55,7 @@
             <el-switch
               class="status-switch"
               :model-value="row.enabled !== false"
-              active-color="#2563EB"
+              active-color="#425f83"
               inactive-color="#D1D5DB"
               :disabled="!isFeatureEnabled('employee_status_update')"
               @change="toggleUserEnabled(row)"
@@ -699,7 +699,7 @@ onMounted(() => {
 
 .kicker {
   margin: 0 0 8px;
-  color: #1d4ed8;
+  color: #425f83;
   font-size: 12px;
   font-weight: 800;
 }
@@ -795,11 +795,11 @@ onMounted(() => {
 }
 
 .channel-header:hover {
-  background: #ECF5FF;
+  background: #edf2f8;
 }
 
 .channel-toggle-icon {
-  color: #409EFF;
+  color: #425f83;
   font-size: 14px;
   transition: transform 0.2s ease;
 }
@@ -837,7 +837,7 @@ onMounted(() => {
 }
 
 .default-model-tag {
-  color: #E6A23C;
+  color: #806b47;
   font-weight: 500;
 }
 
@@ -921,7 +921,7 @@ onMounted(() => {
 }
 
 :deep(.status-switch.el-switch) {
-  --el-switch-on-color: #1d4ed8;
+  --el-switch-on-color: #425f83;
   --el-switch-off-color: #D1D5DB;
   height: 24px;
 }
@@ -951,7 +951,7 @@ onMounted(() => {
 
 .permission-page.module-layout-v4 .toolbar{grid-template-columns:minmax(180px,1fr) 150px 140px auto}.account-total{font-size:13px;color:#475569;align-self:center;white-space:nowrap}.permission-page.module-layout-v4 .user-table-card{padding:0}.permission-page.module-layout-v4 .toolbar{margin-bottom:12px}@media(max-width:720px){.permission-page.module-layout-v4 .toolbar{grid-template-columns:1fr}.account-total{justify-self:end}}
 
-.access-workspace .access-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:28px;align-items:start}.access-directory{min-width:0}.access-workspace .toolbar{display:flex;flex-wrap:wrap;gap:10px;padding:0;margin-bottom:18px;background:none;border:0}.access-workspace .toolbar>.el-input{flex:1 1 220px}.access-workspace .toolbar>.el-select{width:125px}.access-workspace .account-total{width:100%;font-size:12px}.access-workspace .user-table-card{border:0;border-radius:0;padding:0;overflow:hidden}.access-workspace :deep(.el-table td){height:66px}.account-name-button{border:0;background:none;font:inherit;font-weight:600;color:#0f172a;cursor:pointer;padding:8px 0;text-align:left}.access-inspector{position:sticky;top:20px;background:#f6f8fb;border:1px solid #e6eaf0;border-radius:12px;overflow:hidden}.access-inspector>header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;color:#475569}.identity-profile{padding:12px 24px 24px}.identity-avatar{width:48px;height:48px;display:grid;place-items:center;border-radius:14px;background:#e3eaf5;color:#35537a;font-size:20px;margin-bottom:14px}.identity-profile h2{margin:0 0 8px;font-size:21px;color:#0f172a}.identity-profile>span{font-size:12px;color:#475569}.identity-facts{display:grid;grid-template-columns:80px minmax(0,1fr);gap:16px 12px;padding:0 24px 24px;margin:0;font-size:12px}.identity-facts dt{color:#64748b}.identity-facts dd{margin:0;overflow-wrap:anywhere;color:#334155;font-variant-numeric:tabular-nums}.access-scope{padding:20px 24px;background:#fff;border-top:1px solid #e6eaf0}.access-scope h3{font-size:13px;display:flex;justify-content:space-between;margin:0 0 18px}.access-scope h3 span{color:#64748b;font-weight:400}.access-scope ul{list-style:none;padding:0;margin:0;max-height:340px;overflow:auto}.access-scope li{display:flex;align-items:baseline;gap:12px;padding:10px 0;font-size:12px;color:#334155}.scope-node-mark{width:6px;height:6px;flex-shrink:0;background:#a6b7cf;border-radius:2px}.access-scope code{display:block;font:10px ui-monospace,monospace;color:#64748b;margin-top:5px}.scope-empty{padding:24px;color:#64748b;font-size:13px}.access-workspace .account-bulk-actions{width:100%;display:flex;align-items:center;gap:10px;font-size:12px;padding:12px;background:#eff6ff;border-radius:8px}
+.access-workspace .access-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:28px;align-items:start}.access-directory{min-width:0}.access-workspace .toolbar{display:flex;flex-wrap:wrap;gap:10px;padding:0;margin-bottom:18px;background:none;border:0}.access-workspace .toolbar>.el-input{flex:1 1 220px}.access-workspace .toolbar>.el-select{width:125px}.access-workspace .account-total{width:100%;font-size:12px}.access-workspace .user-table-card{border:0;border-radius:0;padding:0;overflow:hidden}.access-workspace :deep(.el-table td){height:66px}.account-name-button{border:0;background:none;font:inherit;font-weight:600;color:#0f172a;cursor:pointer;padding:8px 0;text-align:left}.access-inspector{position:sticky;top:20px;background:#f6f8fb;border:1px solid #e6eaf0;border-radius:12px;overflow:hidden}.access-inspector>header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;color:#475569}.identity-profile{padding:12px 24px 24px}.identity-avatar{width:48px;height:48px;display:grid;place-items:center;border-radius:14px;background:#dce5ef;color:#35537a;font-size:20px;margin-bottom:14px}.identity-profile h2{margin:0 0 8px;font-size:21px;color:#0f172a}.identity-profile>span{font-size:12px;color:#475569}.identity-facts{display:grid;grid-template-columns:80px minmax(0,1fr);gap:16px 12px;padding:0 24px 24px;margin:0;font-size:12px}.identity-facts dt{color:#617085}.identity-facts dd{margin:0;overflow-wrap:anywhere;color:#334155;font-variant-numeric:tabular-nums}.access-scope{padding:20px 24px;background:#fff;border-top:1px solid #e6eaf0}.access-scope h3{font-size:13px;display:flex;justify-content:space-between;margin:0 0 18px}.access-scope h3 span{color:#617085;font-weight:400}.access-scope ul{list-style:none;padding:0;margin:0;max-height:340px;overflow:auto}.access-scope li{display:flex;align-items:baseline;gap:12px;padding:10px 0;font-size:12px;color:#334155}.scope-node-mark{width:6px;height:6px;flex-shrink:0;background:#a6b7cf;border-radius:2px}.access-scope code{display:block;font:10px ui-monospace,monospace;color:#617085;margin-top:5px}.scope-empty{padding:24px;color:#617085;font-size:13px}.access-workspace .account-bulk-actions{width:100%;display:flex;align-items:center;gap:10px;font-size:12px;padding:12px;background:#edf2f8;border-radius:8px}
 @media(max-width:1100px){.access-workspace .access-layout{grid-template-columns:1fr}.access-inspector{position:static}.access-workspace .toolbar>.el-select{flex:1}.access-directory{overflow:hidden}}
 </style>
 
@@ -963,7 +963,7 @@ onMounted(() => {
   gap: 6px;
   padding: 8px;
   border-bottom: 1px solid #F3F4F6;
-  background: #F2F5F4;
+  background: #edf2f5;
 }
 
 .tree-select-panel-actions .el-button {

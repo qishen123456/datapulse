@@ -206,13 +206,13 @@
         <div v-else-if="!currentResult.error" class="result-empty">
           <div class="result-empty-inner">
             <svg class="result-empty-svg" viewBox="0 0 88 64" fill="none">
-              <rect x="2" y="2" width="84" height="60" rx="10" fill="rgba(13,148,136,0.04)" stroke="#0d9488" stroke-width="1.5" stroke-dasharray="6 3"/>
-              <rect x="12" y="18" width="20" height="3" rx="1.5" fill="#0d9488" opacity=".35"/>
-              <rect x="12" y="25" width="30" height="3" rx="1.5" fill="#0d9488" opacity=".2"/>
-              <rect x="12" y="32" width="24" height="3" rx="1.5" fill="#0d9488" opacity=".15"/>
-              <rect x="12" y="39" width="18" height="3" rx="1.5" fill="#0d9488" opacity=".1"/>
-              <circle cx="65" cy="38" r="14" fill="rgba(13,148,136,0.07)" stroke="#0d9488" stroke-width="1.5"/>
-              <path d="M59 38l4 4 8-8" stroke="#0d9488" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="2" y="2" width="84" height="60" rx="10" fill="rgba(82, 107, 122,0.04)" stroke="#526b7a" stroke-width="1.5" stroke-dasharray="6 3"/>
+              <rect x="12" y="18" width="20" height="3" rx="1.5" fill="#526b7a" opacity=".35"/>
+              <rect x="12" y="25" width="30" height="3" rx="1.5" fill="#526b7a" opacity=".2"/>
+              <rect x="12" y="32" width="24" height="3" rx="1.5" fill="#526b7a" opacity=".15"/>
+              <rect x="12" y="39" width="18" height="3" rx="1.5" fill="#526b7a" opacity=".1"/>
+              <circle cx="65" cy="38" r="14" fill="rgba(82, 107, 122,0.07)" stroke="#526b7a" stroke-width="1.5"/>
+              <path d="M59 38l4 4 8-8" stroke="#526b7a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <div class="result-empty-text">
               {{ activeTab === 'sql' ? '执行 SQL 后数据将出现在这里' : '提交问题后，AI 将生成并执行 SQL，结果将显示在这里' }}
@@ -503,8 +503,8 @@ onUnmounted(() => {
   align-items: center;
   gap: 10px;
   padding: 20px 24px;
-  background: #fef2f2;
-  color: #b91c1c;
+  background: #faf7f7;
+  color: #8b6064;
   font-size: 14px;
 }
 
@@ -523,7 +523,7 @@ onUnmounted(() => {
   gap: 12px;
   padding: 0 16px;
   height: 52px;
-  background: #f8fafc;
+  background: #f5f7fa;
   border-bottom: 1px solid #e2e8f0;
   flex-shrink: 0;
 }
@@ -562,7 +562,7 @@ onUnmounted(() => {
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: #64748b;
+  color: #617085;
   font-size: 12.5px;
   font-weight: 500;
   cursor: pointer;
@@ -575,14 +575,14 @@ onUnmounted(() => {
 }
 
 .mode-btn:hover {
-  background: rgba(29, 78, 216, 0.08);
-  color: #1d4ed8;
+  background: rgba(66, 95, 131, 0.08);
+  color: #425f83;
 }
 
 .mode-btn.active {
-  background: #1d4ed8;
+  background: #425f83;
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(29, 78, 216, 0.25);
+  box-shadow: 0 2px 8px rgba(66, 95, 131, 0.25);
 }
 
 /* 分隔线 */
@@ -598,14 +598,14 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  color: #64748b;
+  color: #617085;
   font-size: 12px;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .topbar-label .el-icon {
-  color: #1d4ed8;
+  color: #425f83;
   font-size: 14px;
 }
 
@@ -622,11 +622,11 @@ onUnmounted(() => {
 }
 
 :deep(.studio-dataset-select .el-input__wrapper:hover) {
-  box-shadow: 0 0 0 1px #1d4ed8 inset !important;
+  box-shadow: 0 0 0 1px #425f83 inset !important;
 }
 
 :deep(.studio-dataset-select .el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 1.5px #1d4ed8 inset, 0 0 0 3px rgba(29, 78, 216, 0.12) !important;
+  box-shadow: 0 0 0 1.5px #425f83 inset, 0 0 0 3px rgba(66, 95, 131, 0.12) !important;
 }
 
 /* 行限输入 */
@@ -648,22 +648,22 @@ onUnmounted(() => {
   border: 1px solid #e2e8f0;
   border-radius: 7px;
   background: #ffffff;
-  color: #64748b;
+  color: #617085;
   cursor: pointer;
   transition: all 0.18s ease;
   font-size: 15px;
 }
 
 .topbar-icon-btn:hover {
-  border-color: #1d4ed8;
-  color: #1d4ed8;
-  background: rgba(29, 78, 216, 0.05);
+  border-color: #425f83;
+  color: #425f83;
+  background: rgba(66, 95, 131, 0.05);
 }
 
 .topbar-icon-btn.active {
-  background: rgba(29, 78, 216, 0.1);
-  border-color: #1d4ed8;
-  color: #1d4ed8;
+  background: rgba(66, 95, 131, 0.1);
+  border-color: #425f83;
+  color: #425f83;
 }
 
 /* 执行按钮 */
@@ -675,13 +675,13 @@ onUnmounted(() => {
   height: 34px;
   border: none;
   border-radius: 8px;
-  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  background: linear-gradient(135deg, #425f83, #425f83);
   color: #ffffff;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(29, 78, 216, 0.3);
+  box-shadow: 0 2px 8px rgba(66, 95, 131, 0.3);
   white-space: nowrap;
 }
 
@@ -690,8 +690,8 @@ onUnmounted(() => {
 }
 
 .studio-run-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #1e40af, #1e3a8a);
-  box-shadow: 0 4px 14px rgba(29, 78, 216, 0.4);
+  background: linear-gradient(135deg, #425f83, #3c536e);
+  box-shadow: 0 4px 14px rgba(66, 95, 131, 0.4);
   transform: translateY(-1px);
 }
 
@@ -744,13 +744,13 @@ onUnmounted(() => {
 }
 
 .statusbar-mode.sql {
-  color: #5eead4;
-  background: rgba(29, 78, 216, 0.15);
+  color: #8297a4;
+  background: rgba(66, 95, 131, 0.15);
 }
 
 .statusbar-mode.ask {
-  color: #a5b4fc;
-  background: rgba(99, 102, 241, 0.15);
+  color: #b7c7da;
+  background: rgba(113, 136, 165, 0.15);
 }
 
 .statusbar-dataset {
@@ -782,7 +782,7 @@ onUnmounted(() => {
   border-radius: 0 !important;
   box-shadow: none !important;
   padding: 18px 20px !important;
-  caret-color: #1d4ed8;
+  caret-color: #425f83;
   resize: none !important;
 }
 
@@ -859,9 +859,9 @@ onUnmounted(() => {
 }
 
 .sql-pane-copy:hover {
-  background: rgba(29, 78, 216, 0.2);
-  border-color: #1d4ed8;
-  color: #5eead4;
+  background: rgba(66, 95, 131, 0.2);
+  border-color: #425f83;
+  color: #8297a4;
 }
 
 .sql-pane-body {
@@ -870,7 +870,7 @@ onUnmounted(() => {
   min-height: 120px;
   max-height: 240px;
   overflow: auto;
-  color: #9ecf8c;
+  color: #8297a4;
   font-family: ui-monospace, 'JetBrains Mono', monospace;
   font-size: 12px;
   line-height: 1.65;
@@ -895,7 +895,7 @@ onUnmounted(() => {
   justify-content: space-between;
   padding: 10px 18px;
   border-bottom: 1px solid #e2e8f0;
-  background: #f8fafc;
+  background: #f5f7fa;
   flex-shrink: 0;
   gap: 12px;
   flex-wrap: wrap;
@@ -918,13 +918,13 @@ onUnmounted(() => {
 }
 
 .result-dot.is-ok {
-  background: #1d4ed8;
-  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15);
+  background: #425f83;
+  box-shadow: 0 0 0 3px rgba(66, 95, 131, 0.15);
 }
 
 .result-dot.is-err {
-  background: #dc2626;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+  background: #8b6064;
+  box-shadow: 0 0 0 3px rgba(139, 96, 100, 0.15);
 }
 
 .result-title {
@@ -934,13 +934,13 @@ onUnmounted(() => {
 }
 
 .result-count {
-  color: #1d4ed8;
+  color: #425f83;
   font-size: 12px;
   font-weight: 500;
-  background: rgba(29, 78, 216, 0.08);
+  background: rgba(66, 95, 131, 0.08);
   padding: 2px 10px;
   border-radius: 20px;
-  border: 1px solid rgba(29, 78, 216, 0.2);
+  border: 1px solid rgba(66, 95, 131, 0.2);
 }
 
 .result-waiting {
@@ -973,9 +973,9 @@ onUnmounted(() => {
 }
 
 .result-btn:hover {
-  border-color: #1d4ed8;
-  color: #1d4ed8;
-  background: rgba(29, 78, 216, 0.04);
+  border-color: #425f83;
+  color: #425f83;
+  background: rgba(66, 95, 131, 0.04);
 }
 
 /* 错误提示 */
@@ -985,10 +985,10 @@ onUnmounted(() => {
   gap: 8px;
   margin: 14px 18px;
   padding: 12px 14px;
-  border: 1px solid rgba(220, 38, 38, 0.2);
+  border: 1px solid rgba(139, 96, 100, 0.2);
   border-radius: 8px;
-  background: #fef2f2;
-  color: #b91c1c;
+  background: #faf7f7;
+  color: #8b6064;
   font-size: 13px;
   line-height: 1.5;
 }
@@ -1005,7 +1005,7 @@ onUnmounted(() => {
 }
 
 :deep(.studio-table .el-table__header-wrapper th) {
-  background: #f8fafc !important;
+  background: #f5f7fa !important;
   color: #334155 !important;
   font-size: 12px !important;
   font-weight: 700 !important;
@@ -1044,7 +1044,7 @@ onUnmounted(() => {
 }
 
 .result-empty-text {
-  color: #64748b;
+  color: #617085;
   font-size: 13.5px;
   max-width: 380px;
   line-height: 1.6;
@@ -1056,7 +1056,7 @@ onUnmounted(() => {
   margin: 14px 18px;
   padding: 12px 14px;
   border-radius: 8px;
-  background: #f8fafc;
+  background: #f5f7fa;
   border: 1px solid #e2e8f0;
   flex-shrink: 0;
 }
@@ -1093,11 +1093,11 @@ onUnmounted(() => {
 }
 
 .result-log-row.is-error .log-level-tag {
-  color: #dc2626;
+  color: #8b6064;
 }
 
 .result-log-row.is-error .log-message {
-  color: #b91c1c;
+  color: #8b6064;
 }
 
 /* ============================================================

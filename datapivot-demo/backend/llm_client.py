@@ -96,6 +96,11 @@ class LLMClient:
         return candidates
 
     @staticmethod
+    def _task_config_key(config: Dict[str, Any]) -> Tuple[str, str, str]:
+        # Deliberately excludes secrets and lives only in the request context.
+        return (str(config.get('id') or ''), str(config.get('model') or ''), str(config.get('base_url') or ''))
+
+    @staticmethod
     def _config_signature(config: Dict[str, Any]) -> Tuple[str, str, str]:
         return (
             str(config.get("model") or ""),
@@ -124,6 +129,17 @@ class LLMClient:
         candidate_configs = self._candidate_llm_configs(preferred_model_id=self._preferred_model_id)
         if not candidate_configs:
             raise RuntimeError("Default AI model is not configured.")
+        run = current_run()
+        # Keep a successful fallback for this task. Re-probing a throttled primary
+        # at every specialist wastes the shared <=2 repair budget.
+        if run:
+            with run.lock:
+                preferred = getattr(run, '_llm_success_key', None)
+                failed = set(getattr(run, '_llm_failed_keys', set()))
+            available = [c for c in candidate_configs if self._task_config_key(c) not in failed]
+            if not available:
+                raise RuntimeError('本任务已无可用模型渠道，请稍后重试。')
+            candidate_configs = sorted(available, key=lambda c: self._task_config_key(c) != preferred)
         last_error: Optional[Exception] = None
 
         for index, config in enumerate(candidate_configs, start=1):
@@ -153,7 +169,7 @@ class LLMClient:
                     temperature=0.1,
                     max_tokens=max_tokens,
                     stream=True,
-                    timeout=180,
+                    timeout=120,
                     extra_body=self._llm_extra_body,
                 )
                 content = self._consume_stream(stream, trace, stage, agent_name, started)
@@ -165,9 +181,17 @@ class LLMClient:
                     duration_seconds=round(time.time() - started, 2),
                     response_text=self._truncate_text(content, 16000),
                 )
+                if run:
+                    with run.lock:
+                        run._llm_success_key = self._task_config_key(config)
                 return content
             except Exception as exc:
                 last_error = exc
+                if run and self._should_retry(exc):
+                    with run.lock:
+                        failed = set(getattr(run, '_llm_failed_keys', set()))
+                        failed.add(self._task_config_key(config))
+                        run._llm_failed_keys = failed
                 checkpoint()
                 retryable = index < len(candidate_configs) and self._should_retry(exc)
                 run = current_run()
@@ -198,40 +222,63 @@ class LLMClient:
         pending_reasoning = ""
         last_emit_at = time.time()
         last_reasoning_emit_at = time.time()
-        for chunk in stream:
+        # 硬性总时限（2026-10-25 云上回归发现）：供应商流"滴一半停摆"时连接不断、
+        # keepalive 字节让读超时永不触发，Agent 会无限挂起（实测挂 16 分钟+）。
+        # 看门狗线程到点强制关流（迭代器抛错退出），抛给上层走候选渠道故障转移。
+        import threading
+        done_flag = threading.Event()
+        hard_seconds = getattr(self, "_stream_hard_timeout", 240.0)
+
+        def _watchdog(s):
+            if done_flag.wait(hard_seconds):
+                return
             try:
-                delta_obj = chunk.choices[0].delta
-                delta, reasoning_delta = self._extract_stream_delta(delta_obj)
+                s.close()
             except Exception:
-                delta = ""
-                reasoning_delta = ""
-            if not delta and not reasoning_delta:
-                continue
-            now = time.time()
-            if delta:
-                chunks.append(delta)
-                pending_delta += delta
-            if reasoning_delta:
-                reasoning_chunks.append(reasoning_delta)
-                pending_reasoning += reasoning_delta
-            if pending_delta and (len(pending_delta) >= 24 or now - last_emit_at >= 0.35):
-                self._append_llm_delta(trace, stage or "llm.call", agent_name, pending_delta, "".join(chunks), started)
-                pending_delta = ""
-                last_emit_at = now
-            if pending_reasoning and (len(pending_reasoning) >= 24 or now - last_reasoning_emit_at >= 0.35):
-                self._append_llm_delta(
-                    trace,
-                    stage or "llm.call",
-                    agent_name,
-                    "",
-                    "",
-                    started,
-                    reasoning_delta=pending_reasoning,
-                    reasoning_text="".join(reasoning_chunks),
-                    delta_kind="reasoning",
-                )
-                pending_reasoning = ""
-                last_reasoning_emit_at = now
+                pass
+
+        watchdog = threading.Thread(target=_watchdog, args=(stream,), daemon=True)
+        watchdog.start()
+        try:
+            for chunk in stream:
+                now_tick = time.time()
+                if now_tick - started > hard_seconds:
+                    raise TimeoutError(f"LLM 流式响应超 {hard_seconds:.0f}s（stage={stage}），中止并转移候选渠道")
+                try:
+                    delta_obj = chunk.choices[0].delta
+                    delta, reasoning_delta = self._extract_stream_delta(delta_obj)
+                except Exception:
+                    delta = ""
+                    reasoning_delta = ""
+                if not delta and not reasoning_delta:
+                    continue
+                now = time.time()
+                if delta:
+                    chunks.append(delta)
+                    pending_delta += delta
+                if reasoning_delta:
+                    reasoning_chunks.append(reasoning_delta)
+                    pending_reasoning += reasoning_delta
+                if pending_delta and (len(pending_delta) >= 24 or now - last_emit_at >= 0.35):
+                    self._append_llm_delta(trace, stage or "llm.call", agent_name, pending_delta, "".join(chunks), started)
+                    pending_delta = ""
+                    last_emit_at = now
+                if pending_reasoning and (len(pending_reasoning) >= 24 or now - last_reasoning_emit_at >= 0.35):
+                    self._append_llm_delta(
+                        trace,
+                        stage or "llm.call",
+                        agent_name,
+                        "",
+                        "",
+                        started,
+                        reasoning_delta=pending_reasoning,
+                        reasoning_text="".join(reasoning_chunks),
+                        delta_kind="reasoning",
+                    )
+                    pending_reasoning = ""
+                    last_reasoning_emit_at = now
+        finally:
+            done_flag.set()
 
         content = "".join(chunks).strip()
         if pending_delta:
@@ -258,9 +305,10 @@ class LLMClient:
         trace: Optional[Dict[str, Any]] = None,
         stage: str = "",
         agent_name: str = "",
+        max_tokens: int = 2400,
     ) -> Dict[str, Any]:
         try:
-            raw = self._chat(system_prompt, user_prompt, trace=trace, stage=stage, agent_name=agent_name)
+            raw = self._chat(system_prompt, user_prompt, max_tokens=max_tokens, trace=trace, stage=stage, agent_name=agent_name)
             parsed = json.loads(self._extract_json_block(raw))
             self._append_trace(trace, stage or "llm.call", "parsed", agent=agent_name, parsed_json=parsed)
             return parsed

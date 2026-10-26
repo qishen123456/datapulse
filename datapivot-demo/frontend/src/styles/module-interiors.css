@@ -1,692 +1,322 @@
-/* Module interiors only. Every selector requires a module root; no shell or ask selectors. */
+/* ==========================================================================
+   Module Interiors V5 — Enterprise Studio Dual-Pane & Card Grid System
+   ========================================================================== */
 .workspace-shell .page-wrap .module-layout-v4 {
-  --module-line: #e5eaf1;
-  --module-muted: #526174
+  --module-line: #E2E8F0;
+  --module-muted: #617085;
+  --module-accent: #425f83;
+  --module-accent-soft: #edf2f8;
 }
 
-/* Connections: inspect the selected endpoint above an edge-to-edge inventory. */
+/* --------------------------------------------------------------------------
+   1. 数据集管理 (DatasetManagement): 左 280px 资产目录 + 右侧知识工作台
+   -------------------------------------------------------------------------- */
+.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-workspace {
+  display: grid !important;
+  grid-template-columns: 280px minmax(0, 1fr) !important;
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 10px rgba(13, 23, 38, 0.04) !important;
+  overflow: hidden !important;
+  min-height: 680px;
+}
+
+.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-catalog {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100%;
+  padding: 0 !important;
+  background: #f5f7fa !important;
+  border-right: 1px solid #E2E8F0 !important;
+  border-radius: 0 !important;
+}
+
+.workspace-shell .page-wrap .module-layout-v4.dataset-page .catalog-heading {
+  padding: 20px 16px 12px !important;
+  margin: 0 !important;
+}
+
+.workspace-shell .page-wrap .module-layout-v4.dataset-page .toolbar-col {
+  padding: 0 14px 14px !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+  gap: 10px !important;
+}
+
+.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-catalog-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  padding: 12px !important;
+  overflow-y: auto !important;
+  max-height: calc(100dvh - 340px) !important;
+}
+
+.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-tile {
+  flex: none !important;
+  width: 100% !important;
+  min-height: auto !important;
+  margin: 0 !important;
+  padding: 13px 14px !important;
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 9px !important;
+  box-shadow: 0 1px 2px rgba(13, 23, 38, 0.02) !important;
+  transition: all 0.16s ease !important;
+}
+
+.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-tile:hover {
+  border-color: #b7c7da !important;
+  background: #FFFFFF !important;
+  transform: translateY(-1px);
+}
+
+.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-tile.active {
+  border-color: #425f83 !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 4px 12px rgba(66, 95, 131, 0.1), inset 3px 0 0 #425f83 !important;
+}
+
+.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-tile.active .dataset-asset-icon {
+  color: #425f83 !important;
+}
+
+.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-tile-meta {
+  font-family: var(--font-mono) !important;
+}
+
+.workspace-shell .page-wrap .module-layout-v4.dataset-page .catalog-footnote {
+  padding: 12px 16px !important;
+  border-top: 1px solid #E2E8F0 !important;
+  margin-top: auto !important;
+}
+
+.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-editor {
+  background: #FFFFFF !important;
+  min-width: 0;
+}
+
+.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-identity {
+  padding: 22px 28px !important;
+  border-bottom: 1px solid #EEF2F6 !important;
+  background: linear-gradient(180deg, #f5f7fa 0%, #FFFFFF 100%);
+}
+
+.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-editor-body {
+  padding: 0 28px 28px !important;
+}
+
+.workspace-shell .page-wrap .module-layout-v4.dataset-page .knowledge-category-nav button[aria-pressed=true] {
+  color: #425f83 !important;
+  border-color: #425f83 !important;
+  font-weight: 600 !important;
+}
+
+.workspace-shell .page-wrap .module-layout-v4.dataset-page .knowledge-section-nav button[aria-current=page] {
+  color: #425f83 !important;
+  background: #edf2f8 !important;
+  border-color: #b7c7da !important;
+  font-weight: 600 !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. 数据源管理 (Databases): 顶部精致连接检视卡 + 下方圆角表格卡
+   -------------------------------------------------------------------------- */
 .workspace-shell .page-wrap .module-layout-v4.db-page .db-workbench {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 20px;
   background: transparent;
   border: 0 !important;
-  box-shadow: none !important
+  box-shadow: none !important;
 }
 
 .workspace-shell .page-wrap .module-layout-v4.db-page .db-detail {
   display: grid;
-  grid-template-columns: 38px minmax(150px, .8fr) auto;
+  grid-template-columns: 42px minmax(180px, 1fr) auto;
   gap: 8px 18px;
   align-items: center;
-  width: auto;
-  background: #f4f6fa !important;
-  border: 0;
-  border-radius: 10px;
-  padding: 24px;
-  position: static;
-  min-width: 0
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 12px !important;
+  padding: 22px 24px !important;
+  box-shadow: 0 2px 10px rgba(13, 23, 38, 0.04) !important;
 }
 
 .workspace-shell .page-wrap .module-layout-v4.db-page .db-detail-mark {
   grid-column: 1;
-  grid-row: 1/3;
-  width: 36px;
-  height: 36px;
-  margin: 0;
-  background: #e4eaf3;
-  color: #334155;
-  border-radius: 8px
-}
-
-.workspace-shell .page-wrap .module-layout-v4.db-page .db-detail-eyebrow {
-  grid-column: 2;
-  grid-row: 1;
-  margin: 0;
-  font-size: 10px
-}
-
-.workspace-shell .page-wrap .module-layout-v4.db-page .db-detail h3 {
-  grid-column: 2;
-  grid-row: 2;
-  font-size: 18px;
-  margin: 0
-}
-
-.workspace-shell .page-wrap .module-layout-v4.db-page .db-engine {
-  grid-column: 3;
-  grid-row: 1/3;
-  justify-self: end;
-  margin: 0
+  grid-row: 1 / 3;
+  width: 40px;
+  height: 40px;
+  background: #edf2f8 !important;
+  color: #425f83 !important;
+  border-radius: 10px;
 }
 
 .workspace-shell .page-wrap .module-layout-v4.db-page .db-detail dl {
-  grid-column: 1/-1;
+  grid-column: 1 / -1;
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1.2fr;
   gap: 20px;
-  border-top: 1px solid #e1e6ee;
+  border-top: 1px solid #EEF2F6;
   margin: 14px 0 0;
-  padding-top: 20px
-}
-
-.workspace-shell .page-wrap .module-layout-v4.db-page .db-detail dl>div {
-  padding: 0;
-  border: 0;
-  min-width: 0
-}
-
-.workspace-shell .page-wrap .module-layout-v4.db-page .db-detail dd {
-  overflow-wrap: anywhere;
-  margin: 8px 0 0;
-  font-size: 13px
-}
-
-.workspace-shell .page-wrap .module-layout-v4.db-page .db-detail-actions {
-  grid-column: 1/-1;
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
-  padding: 0;
-  border: 0
-}
-
-.workspace-shell .page-wrap .module-layout-v4.db-page .db-inventory {
-  width: 100%;
-  min-width: 0
+  padding-top: 18px;
 }
 
 .workspace-shell .page-wrap .module-layout-v4.db-page .admin-table-card {
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 10px rgba(13, 23, 38, 0.04) !important;
+  padding: 8px 20px 20px !important;
 }
 
-.workspace-shell .page-wrap .module-layout-v4.db-page .admin-table-card>.el-card__body {
-  padding: 0
-}
-
-.workspace-shell .page-wrap .module-layout-v4.db-page .admin-table-card>.el-card__header {
-  padding: 12px 0
-}
-
-/* Model services: providers are a horizontal catalog, settings are the main document. */
+/* --------------------------------------------------------------------------
+   3. 模型服务 (AIModels): 恢复左通道列表 + 右参数配置卡片
+   -------------------------------------------------------------------------- */
 .workspace-shell .page-wrap .module-layout-v4.cs-page .cs-layout {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  border: 0;
-  overflow: visible
+  display: grid !important;
+  grid-template-columns: 280px minmax(0, 1fr) !important;
+  gap: 0 !important;
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 10px rgba(13, 23, 38, 0.04) !important;
+  overflow: hidden !important;
 }
 
 .workspace-shell .page-wrap .module-layout-v4.cs-page .cs-sidebar {
-  width: 100%;
-  min-width: 0;
-  display: grid;
-  grid-template-columns: 150px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 18px;
-  padding: 16px;
-  background: #f4f6fa;
-  border: 0;
-  border-radius: 10px;
-  box-sizing: border-box
-}
-
-.workspace-shell .page-wrap .module-layout-v4.cs-page .cs-sidebar-head {
-  padding: 0;
-  border: 0
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 12px !important;
+  padding: 18px 14px !important;
+  background: #f5f7fa !important;
+  border-right: 1px solid #E2E8F0 !important;
+  border-radius: 0 !important;
 }
 
 .workspace-shell .page-wrap .module-layout-v4.cs-page .cs-sidebar-scroll {
-  display: flex;
-  gap: 8px;
-  min-width: 0;
-  overflow-x: auto;
-  padding: 4px;
-  flex: none
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
 }
 
 .workspace-shell .page-wrap .module-layout-v4.cs-page .cs-ch-item {
-  flex: 0 0 190px;
-  margin: 0;
-  padding: 12px;
-  min-height: 70px;
-  border-radius: 8px;
-  background: #fff;
-  border: 1px solid transparent;
-  box-shadow: none
+  flex: none !important;
+  padding: 12px 14px !important;
+  border-radius: 9px !important;
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
 }
 
 .workspace-shell .page-wrap .module-layout-v4.cs-page .cs-ch-item.is-active {
-  border-color: #9cb4d8;
-  background: #fff;
-  box-shadow: 0 2px 6px #17212f07
-}
-
-.workspace-shell .page-wrap .module-layout-v4.cs-page .cs-ch-icon {
-  width: 28px;
-  height: 28px;
-  background: #edf1f7;
-  box-shadow: none;
-  border-radius: 7px;
-  color: #334155
-}
-
-.workspace-shell .page-wrap .module-layout-v4.cs-page .cs-sidebar-footer {
-  padding: 0;
-  border: 0
+  border-color: #425f83 !important;
+  box-shadow: 0 4px 12px rgba(66, 95, 131, 0.1), inset 3px 0 0 #425f83 !important;
 }
 
 .workspace-shell .page-wrap .module-layout-v4.cs-page .cs-main {
-  padding: 0;
-  overflow: visible;
-  border: 0 !important;
-  background: white
+  padding: 24px 28px !important;
+  background: #FFFFFF !important;
 }
 
-.workspace-shell .page-wrap .module-layout-v4.cs-page .cs-hero {
-  background: white;
-  border: 0;
-  border-bottom: 1px solid var(--module-line);
-  border-radius: 0;
-  padding: 0 0 22px
-}
-
-.workspace-shell .page-wrap .module-layout-v4.cs-page .cs-config-grid {
-  grid-template-columns: minmax(0, 1fr);
-  max-width: 900px;
-  gap: 0
-}
-
-.workspace-shell .page-wrap .module-layout-v4.cs-page .cs-config-card {
-  border: 0;
-  border-bottom: 1px solid var(--module-line);
-  border-radius: 0;
-  padding: 24px 0;
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 24px;
-  background: #fff;
-  box-shadow: none
-}
-
-.workspace-shell .page-wrap .module-layout-v4.cs-page .cs-section-head {
-  margin: 0;
-  align-items: flex-start
-}
-
-.workspace-shell .page-wrap .module-layout-v4.cs-page .cs-provider-icon {
-  width: 40px;
-  height: 40px;
-  box-shadow: none;
-  background: #e7edf6;
-  color: #334155;
-  border-radius: 8px
-}
-
-/* Dataset knowledge: asset switcher across the top, knowledge workspace underneath. */
-.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-workspace {
-  display: flex;
-  flex-direction: column;
-  border: 0 !important;
-  overflow: visible
-}
-
-.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-catalog {
-  width: 100%;
-  min-width: 0;
-  padding: 16px;
-  background: #f4f6fa !important;
-  border: 0;
-  border-radius: 10px;
-  display: grid;
-  grid-template-columns: 210px minmax(0, 1fr);
-  gap: 12px 20px;
-  box-sizing: border-box
-}
-
-.workspace-shell .page-wrap .module-layout-v4.dataset-page .catalog-heading {
-  grid-column: 1;
-  margin: 0;
-  padding: 0;
-  align-self: start
-}
-
-.workspace-shell .page-wrap .module-layout-v4.dataset-page .toolbar-col {
-  grid-column: 1;
-  grid-row: 2;
-  gap: 8px
-}
-
-.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-catalog-list {
-  grid-column: 2;
-  grid-row: 1/3;
-  display: flex;
-  overflow: auto;
-  gap: 10px;
-  padding: 3px;
-  min-height: 0;
-  max-height: none
-}
-
-.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-tile {
-  flex: 0 0 245px;
-  margin: 0;
-  padding: 16px;
-  align-self: stretch;
-  background: #fff;
-  border: 1px solid transparent;
-  min-height: 115px;
-  box-shadow: none
-}
-
-.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-tile.active {
-  border-color: #9cb4d8;
-  background: #fff;
-  box-shadow: 0 2px 6px #17212f07
-}
-
-.workspace-shell .page-wrap .module-layout-v4.dataset-page .catalog-footnote {
-  grid-column: 1/-1;
-  padding: 0;
-  border: 0;
-  margin: 0
-}
-
-.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-editor {
-  border: 0;
-  min-width: 0
-}
-
-.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-identity {
-  padding: 28px 0 22px
-}
-
-.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-editor-body {
-  padding: 0
-}
-
-.workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-properties {
-  margin-top: 0
-}
-
-/* Organization: types are top-level tabs; tree and property inspector share the canvas. */
-.workspace-shell .page-wrap .module-layout-v4.org-page .workspace {
-  display: flex;
-  flex-direction: column;
-  gap: 22px
-}
-
-.workspace-shell .page-wrap .module-layout-v4.org-page .type-panel {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 12px;
-  background: #f4f6fa;
-  border: 0;
-  border-radius: 10px;
-  box-sizing: border-box
-}
-
-.workspace-shell .page-wrap .module-layout-v4.org-page .type-panel .panel-head {
-  margin: 0;
-  padding: 0 14px 0 0;
-  border: 0;
-  min-width: 120px
-}
-
-.workspace-shell .page-wrap .module-layout-v4.org-page .type-panel .panel-head h2 {
-  font-size: 13px
-}
-
-.workspace-shell .page-wrap .module-layout-v4.org-page .type-panel .panel-head p {
-  font-size: 11px
-}
-
-.workspace-shell .page-wrap .module-layout-v4.org-page .type-item {
-  width: auto;
-  min-width: 210px;
-  margin: 0;
-  padding: 14px 18px;
-  border: 1px solid transparent;
-  background: white
-}
-
-.workspace-shell .page-wrap .module-layout-v4.org-page .type-item.active {
-  background: #fff;
-  border-color: #9cb4d8
-}
-
-.workspace-shell .page-wrap .module-layout-v4.org-page .detail-panel {
-  padding: 0;
-  border: 0;
-  box-shadow: none
-}
-
-.workspace-shell .page-wrap .module-layout-v4.org-page .tree-layout {
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 24px
-}
-
-.workspace-shell .page-wrap .module-layout-v4.org-page .tree-box {
-  padding: 16px;
-  background: #fff;
-  border: 1px solid #e5eaf1;
-  border-radius: 10px;
-  max-height: 650px;
-  overflow: auto
-}
-
-.workspace-shell .page-wrap .module-layout-v4.org-page .node-panel {
-  position: sticky;
-  top: 0;
-  align-self: start;
-  min-height: 360px
-}
-
-/* Sync: tasks own the left canvas, counts become a compact operational side strip. */
+/* --------------------------------------------------------------------------
+   4. 飞书同步 (FeishuSync) & 技能工作台 (AdvancedCapabilities)
+   -------------------------------------------------------------------------- */
+/* Explicit placement prevents the header from reserving an implicit grid column. */
 .workspace-shell .page-wrap .module-layout-v4.fs-page {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 190px;
-  gap: 0 24px;
-  align-items: start
+  grid-template-columns: 216px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 24px;
+  align-items: start;
+  align-content: start;
 }
-
-.workspace-shell .page-wrap .module-layout-v4.fs-page>.fs-hero {
-  grid-column: 1/-1
+.workspace-shell .page-wrap .module-layout-v4.fs-page > .fs-hero {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  width: 100%;
+  padding-bottom: 20px !important;
 }
-
-.workspace-shell .page-wrap .module-layout-v4.fs-page>.fs-stat-grid {
-  grid-column: 2;
-  grid-row: 2;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  border: 0;
-  background: #f4f6fa;
-  border-radius: 10px;
-  padding: 8px 18px;
-  margin: 0
-}
-
-.workspace-shell .page-wrap .module-layout-v4.fs-page .fs-stat-card {
-  padding: 18px 0;
-  border: 0;
-  border-bottom: 1px solid #e1e6ee;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  min-height: 0
-}
-
-.workspace-shell .page-wrap .module-layout-v4.fs-page .fs-stat-card:last-child {
-  border-bottom: 0
-}
-
-.workspace-shell .page-wrap .module-layout-v4.fs-page .fs-stat-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 6px
-}
-
-.workspace-shell .page-wrap .module-layout-v4.fs-page .fs-stat-copy strong {
-  font-size: 28px;
-  line-height: 1.4;
-  font-weight: 500
-}
-
-.workspace-shell .page-wrap .module-layout-v4.fs-page>.fs-ops-board {
+.workspace-shell .page-wrap .module-layout-v4.fs-page > .sync-control-rail {
   grid-column: 1;
   grid-row: 2;
   min-width: 0;
-  padding: 0;
-  border: 0 !important;
-  box-shadow: none !important
+  position: sticky;
+  top: 16px;
+  padding: 0 20px 0 0;
+  border-right: 1px solid var(--studio-line);
+}
+.sync-rail-title { display: grid; gap: 7px; padding: 0 10px 22px; }
+.sync-rail-title span { font-size: 11px; color: #617085; }
+.sync-rail-title strong { font-size: 20px; font-weight: 550; color: #142238; }
+.sync-section-nav { display: grid; gap: 6px; }
+.sync-section-nav button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 13px 12px; border: 0; border-radius: 8px; background: transparent; color: #475569; text-align: left; font: inherit; font-size: 13px; cursor: pointer; transition: background 150ms; }
+.sync-section-nav button span:first-child { font: 10px ui-monospace, monospace; color: #617085; }
+.sync-section-nav button span:last-child { margin-left: auto; font-size: 18px; }
+.sync-section-nav button:hover { background: #edf2f8; }
+.sync-section-nav button[aria-current=page] { background: #edf2f8; color: #425f83; font-weight: 600; }
+.workspace-shell .page-wrap .fs-page .fs-stat-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px 10px;
+  border: 0; border-top: 1px solid #dce3ee; padding: 24px 10px; margin: 28px 0 0;
+  background: transparent; box-shadow: none;
+}
+.workspace-shell .page-wrap .fs-page .fs-stat-card { min-width: 0; padding: 0; border: 0; background: none; box-shadow: none; }
+.workspace-shell .page-wrap .fs-page .fs-stat-copy { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.workspace-shell .page-wrap .fs-page .fs-stat-copy strong { font-size: 27px; line-height: 1; color: #142238; font-weight: 550; font-variant-numeric: tabular-nums; }
+.workspace-shell .page-wrap .fs-page .fs-stat-copy small { display: none; }
+.sync-rail-foot { display: grid; justify-items: start; gap: 10px; padding: 24px 10px 0; border-top: 1px solid #dce3ee; font-size: 12px; color: #475569; }
+.sync-rail-foot small { line-height: 1.8; font-size: 11px; color: #617085; }
+.sync-connection-line { width: 24px; height: 2px; background: #425f83; margin-bottom: 6px; }
+.workspace-shell .page-wrap .module-layout-v4.fs-page > .fs-ops-board {
+  grid-column: 2; grid-row: 2; min-width: 0; min-height: 520px;
+  margin: 0; padding: 0 26px 26px !important;
+  background: #FFFFFF; border: 1px solid #e2e8f0; border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(20, 34, 56, .025);
+}
+.workspace-shell .page-wrap .fs-page .fs-board-head { min-height: 58px; padding: 16px 0; border-bottom: 1px solid #e8edf4; margin-bottom: 26px; }
+.workspace-shell .page-wrap .fs-page .fs-ops-tabs > .el-tabs__header { display: none; }
+.workspace-shell .page-wrap .fs-page .fs-panel-title strong { font-size: 17px; font-weight: 550; color: #142238; }
+.workspace-shell .page-wrap .fs-page .fs-panel-title > div:first-child { display: grid; gap: 8px; }
+.workspace-shell .page-wrap .fs-page .fs-panel-title { align-items: flex-start; flex-wrap: wrap; }
+.workspace-shell .page-wrap .fs-page .fs-schedule-actions { flex-wrap: wrap; }
+@media (max-width: 1100px) {
+  .workspace-shell .page-wrap .module-layout-v4.fs-page { grid-template-columns: 180px minmax(0, 1fr) !important; gap: 18px; }
+  .workspace-shell .page-wrap .module-layout-v4.fs-page > .fs-ops-board { padding: 0 18px 22px !important; }
+}
+@media (max-width: 760px) {
+  .workspace-shell .page-wrap .module-layout-v4.fs-page { display: flex; flex-direction: column; gap: 18px; }
+  .workspace-shell .page-wrap .module-layout-v4.fs-page > .sync-control-rail { width: 100%; position: static; padding: 0; border: 0; }
+  .sync-rail-title, .sync-rail-foot { display: none; }
+  .sync-section-nav { display: flex; gap: 6px; }
+  .sync-section-nav button { justify-content: center; padding: 12px 6px; font-size: 12px; }
+  .sync-section-nav button span { display: none; }
+  .workspace-shell .page-wrap .fs-page .fs-stat-grid { display: flex; padding: 18px 0 0; margin: 14px 0 0; justify-content: space-between; gap: 10px; }
+  .workspace-shell .page-wrap .fs-page .fs-stat-copy strong { font-size: 22px; }
+  .workspace-shell .page-wrap .module-layout-v4.fs-page > .fs-ops-board { width: 100%; }
 }
 
-.workspace-shell .page-wrap .module-layout-v4.fs-page .fs-ops-panel {
-  padding-inline: 0
-}
-
-/* Release: import and impact preview come first, resources are an optional audit appendix. */
-.workspace-shell .page-wrap .module-layout-v4.migration-page .workbench {
-  padding-top: 0;
-  border-top: 0;
-  grid-template-columns: minmax(300px, .8fr) minmax(0, 1.2fr);
-  gap: 28px
-}
-
-.release-resource-drawer {
-  margin-top: 24px;
-  border: 1px solid #e5eaf1;
-  border-radius: 10px;
-  padding: 18px
-}
-
-.release-resource-drawer>summary {
-  font-size: 13px;
-  font-weight: 550;
-  color: #334155;
-  cursor: pointer
-}
-
-.release-resource-drawer[open]>summary {
-  margin-bottom: 20px
-}
-
-.workspace-shell .page-wrap .module-layout-v4.migration-page .metric-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border: 0;
-  gap: 12px
-}
-
-.workspace-shell .page-wrap .module-layout-v4.migration-page .metric-card {
-  background: #f4f6fa !important;
-  border: 0 !important;
-  border-radius: 8px !important
-}
-
-/* Accounts: selection actions share the list toolbar, descriptive fields keep more room. */
-.workspace-shell .page-wrap .module-layout-v4.permission-page .toolbar {
-  display: grid;
-  grid-template-columns: minmax(240px, 1fr) 160px 150px auto;
-  gap: 12px
-}
-
-.workspace-shell .page-wrap .module-layout-v4.permission-page .user-table-card {
-  border: 1px solid #e5eaf1;
-  border-radius: 10px;
-  overflow: hidden;
-  padding: 0
-}
-
-.workspace-shell .page-wrap .module-layout-v4.permission-page .el-table td {
-  height: 64px
-}
-
-/* Skill workspace: separate section index and editable capability surface. */
-.workspace-shell .page-wrap .module-layout-v4.advanced-page .advanced-workbench {
-  padding: 0;
-  border: 0
-}
-
-.workspace-shell .page-wrap .module-layout-v4.advanced-page .advanced-tabs>.el-tabs__header {
-  width: 155px;
-  padding: 12px;
-  background: #f4f6fa;
-  border-radius: 10px;
-  margin-right: 26px
-}
-
-.workspace-shell .page-wrap .module-layout-v4.advanced-page .advanced-tabs>.el-tabs__content {
-  padding: 0;
-  min-width: 0
-}
-
-.workspace-shell .page-wrap .module-layout-v4.advanced-page .advanced-tabs .el-tabs__item {
-  justify-content: flex-start;
-  text-align: left;
-  height: 44px
+.workspace-shell .page-wrap .module-layout-v4.advanced-page .advanced-tabs > .el-tabs__header {
+  width: 180px;
+  padding: 10px;
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  margin-right: 24px;
+  box-shadow: 0 2px 8px rgba(13, 23, 38, 0.03);
 }
 
 .workspace-shell .page-wrap .module-layout-v4.advanced-page .plain-panel {
-  padding: 0;
-  border: 0;
-  box-shadow: none
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 12px !important;
+  padding: 24px !important;
+  box-shadow: 0 2px 10px rgba(13, 23, 38, 0.04) !important;
 }
 
-@media(max-width:1100px) {
-  .workspace-shell .page-wrap .module-layout-v4.fs-page {
-    grid-template-columns: minmax(0, 1fr)
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.fs-page>.fs-stat-grid {
-    grid-column: 1;
-    grid-row: 2;
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
-    margin-bottom: 20px
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.fs-page>.fs-ops-board {
-    grid-row: 3
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.cs-page .cs-sidebar {
-    grid-template-columns: 1fr
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.cs-page .cs-sidebar-scroll {
-    width: 100%
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.cs-page .cs-config-card {
-    grid-template-columns: 180px minmax(0, 1fr)
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.org-page .tree-layout {
-    grid-template-columns: minmax(0, 1fr) 260px
-  }
-}
-
-@media(max-width:720px) {
-  .workspace-shell .page-wrap .module-layout-v4.db-page .db-detail {
-    padding: 16px;
-    grid-template-columns: 32px minmax(0, 1fr)
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.db-page .db-engine {
-    grid-column: 2;
-    grid-row: 3;
-    justify-self: start
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.db-page .db-detail dl {
-    grid-template-columns: 1fr 1fr;
-    gap: 20px 12px
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.cs-page .cs-config-card {
-    grid-template-columns: 1fr;
-    gap: 16px
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-catalog {
-    grid-template-columns: 1fr
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-catalog-list {
-    grid-column: 1;
-    grid-row: 3
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.dataset-page .catalog-footnote {
-    grid-row: 4
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.org-page .tree-layout {
-    grid-template-columns: 1fr
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.org-page .node-panel {
-    position: static
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.migration-page .workbench {
-    grid-template-columns: 1fr
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.migration-page .metric-grid {
-    grid-template-columns: 1fr 1fr
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.permission-page .toolbar {
-    grid-template-columns: 1fr
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.fs-page>.fs-stat-grid {
-    grid-template-columns: 1fr 1fr
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.advanced-page .advanced-tabs>.el-tabs__header {
-    width: 120px;
-    margin-right: 14px;
-    padding: 6px
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.advanced-page .advanced-tabs .el-tabs__item {
-    font-size: 12px !important
-  }
-}
-
-.workspace-shell .page-wrap .module-layout-v4.permission-page .account-bulk-actions {
-  grid-column: 1/-1;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-top: 1px solid #e1e6ee;
-  padding-top: 12px
-}
-
-.workspace-shell .page-wrap .module-layout-v4.permission-page .account-bulk-actions>span {
-  margin-right: auto;
-  font-size: 12px;
-  color: #475569
-}
-
-.workspace-shell .page-wrap .module-layout-v4.fs-page {
-  align-content: start;
-  grid-template-rows: auto auto;
-  min-height: 0
-}
-
-.workspace-shell .page-wrap .module-layout-v4.cs-page .cs-sidebar-scroll {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  overflow: visible
-}
-
-.workspace-shell .page-wrap .module-layout-v4.cs-page .cs-ch-item {
-  min-width: 0;
-  width: 100%;
-  box-sizing: border-box
-}
-
-@media(max-width:720px) {
-  .workspace-shell .page-wrap .module-layout-v4.cs-page .cs-sidebar-scroll {
-    grid-template-columns: repeat(2, minmax(0, 1fr))
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.cs-page .cs-ch-item {
-    padding: 10px 8px;
-    gap: 8px
-  }
-
-  .workspace-shell .page-wrap .module-layout-v4.cs-page .cs-ch-icon {
-    display: none
+@media (max-width: 1024px) {
+  .workspace-shell .page-wrap .module-layout-v4.dataset-page .dataset-workspace,
+  .workspace-shell .page-wrap .module-layout-v4.cs-page .cs-layout {
+    grid-template-columns: 1fr !important;
   }
 }

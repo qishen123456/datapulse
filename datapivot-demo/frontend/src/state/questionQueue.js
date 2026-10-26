@@ -1,8 +1,14 @@
 export const QUEUE_LIMIT=5
+// crypto.randomUUID 仅在安全上下文（HTTPS 或 localhost）可用；
+// HTTP+裸 IP 访问（如云服务器演示地址）下 window.crypto.randomUUID 为 undefined，
+// 裸调用会抛 TypeError 让发送链路静默死亡——统一带兜底（2026-10-25 修复"发送按钮没反应"）。
+const newQueueId = () => (typeof window !== 'undefined' && window.crypto?.randomUUID)
+  ? window.crypto.randomUUID()
+  : `q-${Date.now()}-${Math.random().toString(16).slice(2)}`
 export function queuedQuestion(question,settings={}) {
   const text=String(question || '').trim()
   if(!text)return null
-  return {id:crypto.randomUUID(),question:text,createdAt:Date.now(),datasetId:settings.datasetId || null,
+  return {id:newQueueId(),question:text,createdAt:Date.now(),datasetId:settings.datasetId || null,
     datasetName:settings.datasetName || '自动选择数据集',modelId:settings.modelId || null,flow:settings.flow || 'basic'}
 }
 export function appendQuestion(items,item){

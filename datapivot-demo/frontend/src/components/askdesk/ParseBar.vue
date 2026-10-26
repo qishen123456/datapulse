@@ -264,12 +264,12 @@ const confirmAsk = () => {
   gap: 4px;
   margin: 8px 0 4px;
   padding: 6px 12px;
-  background: #F8FAFC;
+  background: #f5f7fa;
   border: 1px solid #E2E8F0;
   border-radius: 4px;
   font-size: 13px;
   line-height: 1.8;
-  color: #64748B;
+  color: #617085;
 }
 
 .ax-parse-icon {
@@ -278,7 +278,7 @@ const confirmAsk = () => {
 }
 
 .ax-parse-label {
-  color: #64748B;
+  color: #617085;
   flex-shrink: 0;
 }
 
@@ -296,15 +296,15 @@ const confirmAsk = () => {
 }
 
 .ax-parse-token-dataset {
-  background: #f0f4ef;
-  color: #1D4ED8;
-  border: 1px solid #BFDBFE;
+  background: #edf2f5;
+  color: #425f83;
+  border: 1px solid #dce5ef;
 }
 
 .ax-parse-token-node {
-  background: #f0f4ef;
-  color: #294e3e;
-  border: 1px solid #cfddd1;
+  background: #edf2f5;
+  color: #344652;
+  border: 1px solid #bdcbd3;
 }
 
 .ax-parse-token-inherited {
@@ -313,9 +313,9 @@ const confirmAsk = () => {
 }
 
 .ax-parse-token-metric {
-  background: #F0FDF4;
-  color: #15803D;
-  border: 1px solid #BBF7D0;
+  background: #edf2f5;
+  color: #526b7a;
+  border: 1px solid #bdcbd3;
 }
 
 .ax-parse-token-editable {
@@ -390,30 +390,30 @@ const confirmAsk = () => {
   background: transparent;
   border-radius: 7px;
   font-size: 13px;
-  color: #39463f;
+  color: #526b7a;
   cursor: pointer;
 }
 
 .ax-parse-picker-item:hover {
-  background: #F1F5F9;
-  color: #294e3e;
+  background: #edf2f8;
+  color: #344652;
 }
 
 .ax-parse-picker-current {
   font-weight: 600;
   color: #0F172A;
-  background: #F8FAFC;
+  background: #f5f7fa;
 }
 
 .ax-parse-picker-restore {
-  color: #64748B;
+  color: #617085;
 }
 
 .ax-parse-picker-check {
   display: inline-block;
   width: 16px;
   margin-right: 4px;
-  color: #15803D;
+  color: #526b7a;
   font-weight: 700;
 }
 
@@ -424,7 +424,7 @@ const confirmAsk = () => {
 .ax-parse-picker-foot {
   padding: 6px 8px 4px;
   font-size: 12px;
-  color: #B45309;
+  color: #806b47;
   border-top: 1px dashed #E2E8F0;
   margin-top: 4px;
 }
@@ -443,21 +443,21 @@ const confirmAsk = () => {
 
 .ax-parse-confirm-text {
   font-size: 12px;
-  color: #B45309;
+  color: #806b47;
 }
 
 .ax-parse-confirm-btn {
   padding: 4px 12px;
   border: none;
   border-radius: 7px;
-  background: #294e3e;
+  background: #344652;
   color: #FFFFFF;
   font-size: 12px;
   cursor: pointer;
 }
 
 .ax-parse-confirm-btn:hover {
-  background: #1e3a8a;
+  background: #3c536e;
 }
 
 .ax-parse-undo {
@@ -465,13 +465,13 @@ const confirmAsk = () => {
   border: 1px solid #E2E8F0;
   border-radius: 7px;
   background: #FFFFFF;
-  color: #64748B;
+  color: #617085;
   font-size: 12px;
   cursor: pointer;
 }
 
 .ax-parse-undo:hover {
-  color: #39463f;
+  color: #526b7a;
   border-color: #CBD5E1;
 }
 </style>

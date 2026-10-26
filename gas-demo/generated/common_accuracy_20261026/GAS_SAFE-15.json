@@ -1,0 +1,63 @@
+{
+  "question": "2026年9月各分公司三件套安装和到访不遇情况",
+  "reference_sql": "SELECT branch_name,SUM(three_piece_installed) AS 当月三件套安装户数,SUM(not_at_home) AS 当月到访不遇户次 FROM v_gas_safety WHERE month='2026-09' GROUP BY branch_name",
+  "expected": [
+    {
+      "branch_name": "临港分公司",
+      "当月三件套安装户数": 3879.0,
+      "当月到访不遇户次": 790.0
+    },
+    {
+      "branch_name": "沙湖分公司",
+      "当月三件套安装户数": 3313.0,
+      "当月到访不遇户次": 473.0
+    },
+    {
+      "branch_name": "滨江分公司",
+      "当月三件套安装户数": 2401.0,
+      "当月到访不遇户次": 470.0
+    },
+    {
+      "branch_name": "经开分公司",
+      "当月三件套安装户数": 3469.0,
+      "当月到访不遇户次": 442.0
+    },
+    {
+      "branch_name": "高压输配分公司",
+      "当月三件套安装户数": 0.0,
+      "当月到访不遇户次": 0.0
+    },
+    {
+      "branch_name": "高新分公司",
+      "当月三件套安装户数": 3783.0,
+      "当月到访不遇户次": 677.0
+    }
+  ],
+  "result": {
+    "error": null,
+    "requires_confirmation": false,
+    "confirmation_type": null,
+    "analysis": "## 江城燃气·安全与管网治理\n\nAI 问数未完成：未能生成或通过校验的可执行查询。请调整问题或检查模型服务后重试；当前未生成业务答案。",
+    "ask_flow": {
+      "flow": "basic",
+      "reason": "basic_selected",
+      "requested_flow": "basic",
+      "controller": "AskFlowController",
+      "duration_seconds": 1.728
+    }
+  },
+  "datasets": [
+    {
+      "dataset_id": 66,
+      "dataset_name": "江城燃气·安全与管网治理",
+      "sql": "",
+      "columns": [],
+      "rows": [],
+      "analysis": "AI 问数未完成：未能生成或通过校验的可执行查询。请调整问题或检查模型服务后重试；当前未生成业务答案。",
+      "analysis_status": "model_unavailable",
+      "query_status": "failed",
+      "error": null,
+      "row_count": 0
+    }
+  ]
+}

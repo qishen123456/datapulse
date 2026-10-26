@@ -41,7 +41,7 @@ onMounted(() => {
   min-height: 100%;
   display: grid;
   place-items: center;
-  background: #F2F5F4;
+  background: #edf2f5;
 }
 
 .auth-callback-card {
@@ -58,7 +58,7 @@ onMounted(() => {
   height: 42px;
   margin: 0 auto 16px;
   border-radius: 6px;
-  background: linear-gradient(135deg, #1d4ed8, #9CA3AF);
+  background: linear-gradient(135deg, #425f83, #9CA3AF);
 }
 
 .auth-callback-card h1 {

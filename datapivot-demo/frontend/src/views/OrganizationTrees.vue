@@ -611,7 +611,7 @@ onMounted(async () => {
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #1d4ed8;
+  color: #425f83;
   font-size: 13px;
   font-weight: 800;
   letter-spacing: 0;
@@ -700,15 +700,15 @@ onMounted(async () => {
   padding: 14px;
   border: 1px solid transparent;
   border-radius: 4px;
-  background: #F2F5F4;
+  background: #edf2f5;
   color: #111827;
   text-align: left;
   cursor: pointer;
 }
 
 .type-item.active {
-  border-color: #1d4ed8;
-  background: #eff6ff;
+  border-color: #425f83;
+  background: #edf2f8;
 }
 
 .type-item strong,
@@ -734,8 +734,8 @@ onMounted(async () => {
   height: 24px;
   padding: 0 10px;
   border-radius: 999px;
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: #edf2f8;
+  color: #425f83;
   font-size: 12px;
   font-weight: 800;
 }
@@ -800,8 +800,8 @@ onMounted(async () => {
 }
 
 .tree-node-row button.active {
-  background: #ecfdf5;
-  box-shadow: inset 3px 0 0 #1d4ed8;
+  background: #edf2f5;
+  box-shadow: inset 3px 0 0 #425f83;
 }
 
 .node-title-line {
@@ -833,8 +833,8 @@ onMounted(async () => {
   flex: 0 0 auto;
   padding: 1px 6px;
   border-radius: 999px;
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: #edf2f8;
+  color: #425f83;
   font-size: 11px;
   font-style: normal;
   font-weight: 800;
@@ -850,7 +850,7 @@ onMounted(async () => {
   padding: 12px;
   border: 1px solid #F3F4F6;
   border-radius: 4px;
-  background: #F2F5F4;
+  background: #edf2f5;
 }
 
 .node-meta dt {
@@ -914,7 +914,7 @@ onMounted(async () => {
   padding: 10px;
   border: 1px solid #E5E7EB;
   border-radius: 4px;
-  background: #F2F5F4;
+  background: #edf2f5;
 }
 
 .preview-stats span {

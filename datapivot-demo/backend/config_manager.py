@@ -679,6 +679,27 @@ def get_ai_model_by_id(model_id: int) -> Optional[Dict]:
     return None
 
 
+def _resolve_ai_api_key_b64(data: dict, models: list) -> str:
+    """解析 AI 模型的 API Key 并返回密文。
+
+    前端约定：新增/编辑模型时密钥留空会提交哨兵值 'inherit-channel'，
+    语义为"继承同 provider 通道下最近更新的已有密钥"。
+    此前后端未实现该语义，哨兵被当真实密钥加密入库，导致连通性测试 401。
+    """
+    api_key = data.get('api_key', '')
+    if api_key != 'inherit-channel':
+        return encode_secret(api_key)
+    provider = data.get('provider', '')
+    donor = next(
+        (m for m in sorted(models, key=lambda x: str(x.get('updated_at', '')), reverse=True)
+         if m.get('provider') == provider and m.get('api_key_b64')),
+        None,
+    )
+    if not donor:
+        raise ValueError('当前通道下没有可继承的 API Key，请手动填写后再保存')
+    return donor['api_key_b64']
+
+
 def save_ai_model(data: dict) -> dict:
     config = read_json('ai_settings.json')
     models = config.get('models', [])
@@ -691,7 +712,7 @@ def save_ai_model(data: dict) -> dict:
         "provider": data.get('provider', 'custom'),
         "model": data.get('model', ''),
         "base_url": data.get('base_url', ''),
-        "api_key_b64": encode_secret(data.get('api_key', '')),
+        "api_key_b64": _resolve_ai_api_key_b64(data, models),
         "channel_display_name": data.get('channel_display_name', ''),
         "channel_icon": data.get('channel_icon', ''),
         "is_active": data.get('is_active', True),
@@ -736,7 +757,9 @@ def update_ai_model(model_id: int, data: dict) -> Optional[Dict]:
                 "updated_at": now
             })
             if data.get('api_key') and data['api_key'] != '***已保存***':
-                models[i]['api_key_b64'] = encode_secret(data['api_key'])
+                models[i]['api_key_b64'] = _resolve_ai_api_key_b64(
+                    {**data, 'provider': data.get('provider', m['provider'])}, models
+                )
 
             config['models'] = models
             write_json('ai_settings.json', config)

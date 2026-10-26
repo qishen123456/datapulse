@@ -1,0 +1,196 @@
+[
+  {
+    "id": "GAS_BIZ-01",
+    "code": "GAS_BIZ",
+    "dataset_id": 64,
+    "index": 0,
+    "question": "2026年9月各分公司销气量比8月增减多少",
+    "reference_sql": "WITH a AS (SELECT branch_id,branch_name,SUM(volume_m3) FILTER(WHERE month='2026-09') current_m3,SUM(volume_m3) FILTER(WHERE month='2026-08') previous_m3 FROM v_gas_sales WHERE month IN ('2026-08','2026-09') GROUP BY branch_id,branch_name) SELECT *,current_m3-previous_m3 AS 差量_方,(current_m3-previous_m3)::numeric/NULLIF(previous_m3,0) AS 环比 FROM a ORDER BY 差量_方",
+    "expected": [
+      {
+        "branch_id": "LINGANG",
+        "branch_name": "临港分公司",
+        "current_m3": 20638653.0,
+        "previous_m3": 22378914.0,
+        "差量_方": -1740261.0,
+        "环比": -0.07776342498121222
+      },
+      {
+        "branch_id": "JINGKAI",
+        "branch_name": "经开分公司",
+        "current_m3": 41090081.0,
+        "previous_m3": 41752601.0,
+        "差量_方": -662520.0,
+        "环比": -0.01586775396339979
+      },
+      {
+        "branch_id": "GAOXIN",
+        "branch_name": "高新分公司",
+        "current_m3": 31382980.0,
+        "previous_m3": 30742887.0,
+        "差量_方": 640093.0,
+        "环比": 0.020820848738116234
+      },
+      {
+        "branch_id": "BINJIANG",
+        "branch_name": "滨江分公司",
+        "current_m3": 24131444.0,
+        "previous_m3": 23205999.0,
+        "差量_方": 925445.0,
+        "环比": 0.039879558729619874
+      },
+      {
+        "branch_id": "SHAHU",
+        "branch_name": "沙湖分公司",
+        "current_m3": 26874162.0,
+        "previous_m3": 25855488.0,
+        "差量_方": 1018674.0,
+        "环比": 0.03939875356442702
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        4,
+        5
+      ]
+    ]
+  },
+  {
+    "id": "GAS_SAFE-02",
+    "code": "GAS_SAFE",
+    "dataset_id": 66,
+    "index": 1,
+    "question": "截至2026年9月底GIS未入库管段按分公司汇总",
+    "reference_sql": "SELECT branch_name,COUNT(*) AS 未入库管段数,SUM(length_km) AS 未入库里程_公里 FROM v_gas_network WHERE laid_date<='2026-09-30' AND (gis_loaded_date IS NULL OR gis_loaded_date>'2026-09-30') GROUP BY branch_name",
+    "expected": [
+      {
+        "branch_name": "滨江分公司",
+        "未入库管段数": 126,
+        "未入库里程_公里": 177.18
+      },
+      {
+        "branch_name": "高新分公司",
+        "未入库管段数": 151,
+        "未入库里程_公里": 219.74
+      },
+      {
+        "branch_name": "临港分公司",
+        "未入库管段数": 131,
+        "未入库里程_公里": 188.28
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "未入库管段数": 510,
+        "未入库里程_公里": 580.16
+      },
+      {
+        "branch_name": "高压输配分公司",
+        "未入库管段数": 155,
+        "未入库里程_公里": 214.8
+      },
+      {
+        "branch_name": "经开分公司",
+        "未入库管段数": 134,
+        "未入库里程_公里": 195.81
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1,
+        2
+      ]
+    ]
+  },
+  {
+    "id": "GAS_BIZ-03",
+    "code": "GAS_BIZ",
+    "dataset_id": 64,
+    "index": 2,
+    "question": "2026年前三季度各分公司销气量同期间同比",
+    "reference_sql": "WITH a AS (SELECT branch_name,SUM(volume_m3) FILTER(WHERE month BETWEEN '2025-01' AND '2025-09') p,SUM(volume_m3) FILTER(WHERE month BETWEEN '2026-01' AND '2026-09') c FROM v_gas_sales GROUP BY branch_name) SELECT branch_name,p,c,(c-p)::numeric/NULLIF(p,0) AS 同比 FROM a",
+    "expected": [
+      {
+        "branch_name": "滨江分公司",
+        "p": 231683897.0,
+        "c": 239464068.0,
+        "同比": 0.033580974339360324
+      },
+      {
+        "branch_name": "临港分公司",
+        "p": 234332112.0,
+        "c": 233257467.0,
+        "同比": -0.004585991185023758
+      },
+      {
+        "branch_name": "经开分公司",
+        "p": 369909329.0,
+        "c": 382264924.0,
+        "同比": 0.03340168530867195
+      },
+      {
+        "branch_name": "高新分公司",
+        "p": 295663790.0,
+        "c": 302584431.0,
+        "同比": 0.0234071307818925
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "p": 256583237.0,
+        "c": 262762670.0,
+        "同比": 0.024083541357769994
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "id": "GAS_BIZ-14",
+    "code": "GAS_BIZ",
+    "dataset_id": 64,
+    "index": 13,
+    "question": "2026年9月各分公司新增通气多少户",
+    "reference_sql": "SELECT branch_name,SUM(connected_users) AS 新增通气户数 FROM v_gas_growth WHERE month='2026-09' GROUP BY branch_name",
+    "expected": [
+      {
+        "branch_name": "临港分公司",
+        "新增通气户数": 1520.0
+      },
+      {
+        "branch_name": "沙湖分公司",
+        "新增通气户数": 1845.0
+      },
+      {
+        "branch_name": "滨江分公司",
+        "新增通气户数": 2610.0
+      },
+      {
+        "branch_name": "经开分公司",
+        "新增通气户数": 2817.0
+      },
+      {
+        "branch_name": "高新分公司",
+        "新增通气户数": 1685.0
+      }
+    ],
+    "spec": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ]
+  }
+]

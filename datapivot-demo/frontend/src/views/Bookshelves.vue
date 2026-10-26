@@ -370,8 +370,8 @@ onMounted(async () => {
   transform: translateY(-1px);
 }
 .dataset-item.active {
-  border-color: var(--color-primary, #1d4ed8);
-  background: var(--color-primary-light, #eff6ff);
+  border-color: var(--color-primary, #425f83);
+  background: var(--color-primary-light, #edf2f8);
 }
 .dataset-name {
   font-weight: 600;
@@ -396,6 +396,6 @@ onMounted(async () => {
   border-radius: var(--radius-md, 4px);
   padding: 12px;
   margin-bottom: 10px;
-  background: var(--gray-50, #F2F5F4);
+  background: var(--gray-50, #edf2f5);
 }
 </style>

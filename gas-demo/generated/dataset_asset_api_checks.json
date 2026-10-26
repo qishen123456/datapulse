@@ -7,9 +7,10 @@
       "fields": 110,
       "metrics": 12,
       "prompts": 4,
-      "standard_cases": 4,
-      "common_questions": 12,
-      "sql_samples": 12,
+      "standard_cases": 12,
+      "common_questions": 16,
+      "sql_samples": 22,
+      "glossary": 55,
       "asset_coverage_score": 100
     },
     {
@@ -18,9 +19,10 @@
       "fields": 75,
       "metrics": 9,
       "prompts": 4,
-      "standard_cases": 4,
-      "common_questions": 12,
-      "sql_samples": 12,
+      "standard_cases": 12,
+      "common_questions": 16,
+      "sql_samples": 21,
+      "glossary": 51,
       "asset_coverage_score": 100
     },
     {
@@ -29,11 +31,12 @@
       "fields": 64,
       "metrics": 8,
       "prompts": 4,
-      "standard_cases": 4,
-      "common_questions": 12,
-      "sql_samples": 12,
+      "standard_cases": 12,
+      "common_questions": 16,
+      "sql_samples": 22,
+      "glossary": 51,
       "asset_coverage_score": 100
     }
   ],
-  "note": "资产覆盖度不等于AI准确率；本次未执行36题的完整AI链路。"
+  "note": "资产覆盖度不等于AI准确率；本次已执行65条SQL，未执行全部问题的完整AI链路。"
 }

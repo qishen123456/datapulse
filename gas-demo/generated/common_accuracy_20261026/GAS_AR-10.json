@@ -1,0 +1,73 @@
+{
+  "question": "2026年9月欠费最多的十个模拟工商客户",
+  "reference_sql": "SELECT customer_name,closing_yuan FROM v_gas_ar WHERE month='2026-09' AND object_kind='模拟客户' ORDER BY closing_yuan DESC LIMIT 10",
+  "expected": [
+    {
+      "customer_name": "汀兰社区恒拓精密制造有限公司",
+      "closing_yuan": 32862833.97
+    },
+    {
+      "customer_name": "青荷路恒拓精密制造有限公司",
+      "closing_yuan": 21269399.99
+    },
+    {
+      "customer_name": "荷风路恒拓精密制造有限公司",
+      "closing_yuan": 17001483.96
+    },
+    {
+      "customer_name": "湖畔新城恒拓精密制造有限公司",
+      "closing_yuan": 13331871.8
+    },
+    {
+      "customer_name": "智造产业园澄岳新材料有限公司",
+      "closing_yuan": 1702698.77
+    },
+    {
+      "customer_name": "星河产业园悦里餐饮管理有限公司",
+      "closing_yuan": 846245.92
+    },
+    {
+      "customer_name": "星河产业园泊庭酒店管理有限公司",
+      "closing_yuan": 577001.81
+    },
+    {
+      "customer_name": "丰裕路泊庭酒店管理有限公司",
+      "closing_yuan": 504764.92
+    },
+    {
+      "customer_name": "智造产业园恒拓精密制造有限公司",
+      "closing_yuan": 438612.44
+    },
+    {
+      "customer_name": "港兴工业园恒拓精密制造有限公司",
+      "closing_yuan": 387542.02
+    }
+  ],
+  "result": {
+    "error": null,
+    "requires_confirmation": false,
+    "confirmation_type": null,
+    "analysis": "## 江城燃气·应收回款与稽核\n\nAI 问数未完成：未能生成或通过校验的可执行查询。请调整问题或检查模型服务后重试；当前未生成业务答案。",
+    "ask_flow": {
+      "flow": "basic",
+      "reason": "basic_selected",
+      "requested_flow": "basic",
+      "controller": "AskFlowController",
+      "duration_seconds": 4.066
+    }
+  },
+  "datasets": [
+    {
+      "dataset_id": 65,
+      "dataset_name": "江城燃气·应收回款与稽核",
+      "sql": "",
+      "columns": [],
+      "rows": [],
+      "analysis": "AI 问数未完成：未能生成或通过校验的可执行查询。请调整问题或检查模型服务后重试；当前未生成业务答案。",
+      "analysis_status": "model_unavailable",
+      "query_status": "failed",
+      "error": null,
+      "row_count": 0
+    }
+  ]
+}

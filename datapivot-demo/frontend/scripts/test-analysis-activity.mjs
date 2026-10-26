@@ -48,3 +48,26 @@ test('retries replace only their own review; unknown counts remain unknown',()=>
  assert.equal(fact(w,null,'review').value,'SQL 审核通过')
  assert.equal(fact(w,null,'results').value,'返回行数未记录')
 })
+
+import {analysisNarrative,latestAnalysisSummary} from '../src/utils/analysisActivity.js'
+test('progress narrative shows recorded evidence instead of six empty future cards',()=>{
+ const w={run_id:'now',status:'running',events:[{run_id:'old',activity:{kind:'query',public_summary:'旧任务'}},{run_id:'now',dataset_id:66,activity:{kind:'assets',question:'9月安检覆盖率',dataset_name:'安全治理',time_mentions:['9月'],field_count:64,relation_count:4,reference_count:5}}]}
+ const steps=analysisNarrative(w)
+ assert.deepEqual(steps.map(s=>s.id),['scope','sources'])
+ assert.match(JSON.stringify(steps),/64 个字段定义/)
+ assert(!JSON.stringify(steps).includes('旧任务'))
+ assert(!JSON.stringify(steps).includes('审核通过'))
+})
+test('query narrative includes the actual public plan and calculation evidence, never raw reasoning',()=>{
+ const steps=analysisNarrative({events:[{dataset_id:66,activity:{kind:'query',public_summary:'按分公司汇总已安检户数与应安检户数后计算覆盖率',methods:['SUM'],aggregation:['按查询维度分组'],thought:'private',sql:'SELECT secret'}}]})
+ assert.match(JSON.stringify(steps),/计算覆盖率/)
+ assert.match(JSON.stringify(steps),/求和/)
+ assert(!JSON.stringify(steps).includes('private'))
+ assert(!JSON.stringify(steps).includes('SELECT secret'))
+})
+test('failed result stays a warning in the narrative instead of a zero-row conclusion',()=>{
+ const steps=analysisNarrative({}, {dataset_results:[{dataset_id:66,dataset_name:'安全治理',query_status:'failed',rows:[]}]})
+ const result=steps.find(s=>s.id==='results')
+ assert.equal(result.status,'warning')
+ assert.match(result.value,/不能认定为零行/)
+})

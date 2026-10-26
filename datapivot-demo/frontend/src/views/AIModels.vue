@@ -113,17 +113,17 @@
             <div class="model-spec-card-footer">
               <div class="telemetry-latency">
                 <i class="beacon-dot" :class="{ ok: testResults[row.id] === 'success', err: testResults[row.id] && testResults[row.id] !== 'success', pending: testingId === row.id }"></i>
-                <span>{{ testingId === row.id ? '测速中...' : testResults[row.id] === 'success' ? '就绪 · 185ms' : testResults[row.id] ? '连接异常' : (row.is_active ? '就绪' : '已停用') }}</span>
+                <span>{{ testingId === row.id ? '测速中...' : testResults[row.id] === 'success' ? '检测通过' : testResults[row.id] ? '连接异常' : (row.is_active ? '未检测 · 已启用' : '已停用') }}</span>
               </div>
               <div class="model-spec-actions">
                 <el-button v-if="isFeatureEnabled('ai_model_test')" size="small" text :loading="testingId === row.id" @click="testModel(row)">测速</el-button>
                 <el-button v-if="isFeatureEnabled('ai_model_edit')" size="small" text @click="openEditModel(row)">配置</el-button>
-                <el-dropdown v-if="isFeatureEnabled('ai_model_edit')" trigger="click">
+                <el-dropdown v-if="isFeatureEnabled('ai_model_delete') || isFeatureEnabled('ai_model_default')" trigger="click">
                   <el-button size="small" text>···</el-button>
                   <template #dropdown>
                     <el-dropdown-menu>
-                      <el-dropdown-item v-if="!row.is_default && row.is_active" @click="setDefault(row)">设为默认</el-dropdown-item>
-                      <el-dropdown-item @click="deleteModel(row.id)">删除模型…</el-dropdown-item>
+                      <el-dropdown-item v-if="!row.is_default && row.is_active && isFeatureEnabled('ai_model_default')" @click="setDefault(row)">设为默认</el-dropdown-item>
+                      <el-dropdown-item v-if="isFeatureEnabled('ai_model_delete')" @click="deleteModel(row.id)">删除模型…</el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>
@@ -274,7 +274,7 @@
             <el-form-item label="启用"><el-switch v-model="modelForm.is_active" /></el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="默认"><el-switch v-model="modelForm.is_default" /></el-form-item>
+            <el-form-item label="默认"><el-switch :disabled="!isFeatureEnabled('ai_model_default')" v-model="modelForm.is_default" /></el-form-item>
           </el-col>
         </el-row>
       </el-form>
@@ -540,7 +540,7 @@ watch(activeChannel, (ch) => {
 
 const toggleChannelActive = async (ch, val) => {
   for (const m of ch.models) {
-    await updateAIModel(m.id, { is_active: val })
+    await updateAIModel(m.id, { is_active: val, _operation_scope: 'channel' })
   }
   ElMessage.success(val ? '通道已启用' : '通道已禁用')
   loadData()
@@ -550,7 +550,7 @@ const onApiKeyChange = async () => {
   const ch = activeChannel.value
   if (!ch || !editableApiKey.value) return
   for (const m of ch.models) {
-    await updateAIModel(m.id, { api_key: editableApiKey.value })
+    await updateAIModel(m.id, { api_key: editableApiKey.value, _operation_scope: 'channel' })
   }
   ElMessage.success('API Key 已保存')
   loadData()
@@ -560,7 +560,7 @@ const onBaseUrlChange = async () => {
   const ch = activeChannel.value
   if (!ch || !editableBaseUrl.value) return
   for (const m of ch.models) {
-    await updateAIModel(m.id, { base_url: editableBaseUrl.value })
+    await updateAIModel(m.id, { base_url: editableBaseUrl.value, _operation_scope: 'channel' })
   }
   const nextKey = `${ch.provider}||${editableBaseUrl.value}`
   await loadData()
@@ -581,7 +581,7 @@ const saveProviderName = async () => {
   if (!ch) return
   const name = editProviderNameValue.value.trim()
   for (const model of ch.models) {
-    await updateAIModel(model.id, { channel_display_name: name })
+    await updateAIModel(model.id, { channel_display_name: name, _operation_scope: 'channel' })
   }
   editingProviderName.value = false
   ElMessage.success('通道名称已保存')
@@ -599,7 +599,7 @@ const saveChannelIcon = async (icon) => {
   const normalizedIcon = normalizeIconKey(icon, ch.provider)
   const nextIcon = normalizedIcon && normalizedIcon !== providerIconKey(ch.provider) ? normalizedIcon : ''
   for (const model of ch.models) {
-    await updateAIModel(model.id, { channel_icon: nextIcon })
+    await updateAIModel(model.id, { channel_icon: nextIcon, _operation_scope: 'channel' })
   }
   ElMessage.success('通道图标已保存')
   await loadData()
@@ -629,7 +629,7 @@ const migrateLegacyChannelMetaToBackend = async () => {
     if (pendingIcons[ch.key] && !ch.channelIcon) payload.channel_icon = pendingIcons[ch.key]
     if (!Object.keys(payload).length) continue
     for (const model of ch.models) {
-      await updateAIModel(model.id, payload)
+      await updateAIModel(model.id, { ...payload, _operation_scope: 'channel' })
     }
   }
   localStorage.removeItem('sa_channel_names')
@@ -655,6 +655,7 @@ const submitChannelForm = async () => {
   try {
     if (channelDialogIsNew.value) {
       await createAIModel({
+        _operation_scope: 'channel',
         name: `${providerLabel(channelForm.value.provider)} 默认`,
         provider: channelForm.value.provider,
         model: channelForm.value.provider === 'dashscope' ? 'qwen-max' : 'default',
@@ -667,7 +668,7 @@ const submitChannelForm = async () => {
       const updates = {}
       if (channelForm.value.base_url) updates.base_url = channelForm.value.base_url
       if (channelForm.value.api_key) updates.api_key = channelForm.value.api_key
-      for (const id of channelForm.value._modelIds) await updateAIModel(id, updates)
+      for (const id of channelForm.value._modelIds) await updateAIModel(id, { ...updates, _operation_scope: 'channel' })
       ElMessage.success('通道配置已更新')
     }
     channelDialogVisible.value = false; loadData()
@@ -779,9 +780,9 @@ onMounted(() => {
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 6px;
   background:
-    radial-gradient(circle at 82% 8%, rgba(29, 78, 216, 0.13), transparent 28%),
+    radial-gradient(circle at 82% 8%, rgba(66, 95, 131, 0.13), transparent 28%),
     radial-gradient(circle at 30% 0%, rgba(0, 0, 0, 0.09), transparent 24%),
-    linear-gradient(135deg, #F2F5F4 0%, #F2F5F4 45%, #ffffff 100%);
+    linear-gradient(135deg, #edf2f5 0%, #edf2f5 45%, #ffffff 100%);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.78);
 }
 
@@ -818,7 +819,7 @@ onMounted(() => {
 }
 
 .cs-sidebar-kicker {
-  color: #1d4ed8;
+  color: #425f83;
   font-size: 9px;
   font-weight: 850;
   letter-spacing: 0.14em;
@@ -839,11 +840,11 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #1e40af;
+  color: #425f83;
   font-size: 12px;
   font-weight: 850;
-  background: #eff6ff;
-  border: 1px solid rgba(29, 78, 216, 0.16);
+  background: #edf2f8;
+  border: 1px solid rgba(66, 95, 131, 0.16);
 }
 
 .cs-sidebar-scroll {
@@ -871,16 +872,16 @@ onMounted(() => {
 
 .cs-ch-item:hover {
   transform: translateY(-1px);
-  border-color: rgba(29, 78, 216, 0.2);
+  border-color: rgba(66, 95, 131, 0.2);
   background: #ffffff;
   box-shadow: 0 12px 26px rgba(0, 0, 0, 0.08);
 }
 
 .cs-ch-item.is-active {
-  border-color: rgba(29, 78, 216, 0.32);
+  border-color: rgba(66, 95, 131, 0.32);
   background:
-    linear-gradient(135deg, rgba(236, 254, 255, 0.9), rgba(255, 255, 255, 0.96));
-  box-shadow: 0 2px 8px rgba(13, 25, 24, 0.08), inset 3px 0 0 #1d4ed8;
+    linear-gradient(135deg, rgba(237, 242, 245, 0.9), rgba(255, 255, 255, 0.96));
+  box-shadow: 0 2px 8px rgba(52, 70, 82, 0.08), inset 3px 0 0 #425f83;
 }
 
 .cs-ch-icon {
@@ -891,7 +892,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: linear-gradient(135deg, #1A1A1A 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #1A1A1A 0%, #425f83 100%);
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
 }
 
@@ -968,7 +969,7 @@ onMounted(() => {
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 6px;
   background:
-    radial-gradient(circle at 4% 10%, rgba(29, 78, 216, 0.16), transparent 32%),
+    radial-gradient(circle at 4% 10%, rgba(66, 95, 131, 0.16), transparent 32%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(248, 249, 250, 0.88));
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.055), inset 0 1px 0 rgba(255, 255, 255, 0.88);
 }
@@ -992,7 +993,7 @@ onMounted(() => {
   cursor: pointer;
   background:
     radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.34), transparent 26%),
-    linear-gradient(135deg, #111827 0%, #1A1A1A 48%, #1d4ed8 100%);
+    linear-gradient(135deg, #111827 0%, #1A1A1A 48%, #425f83 100%);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
   transition: all var(--duration-normal, 220ms) var(--ease-out);
 }
@@ -1008,7 +1009,7 @@ onMounted(() => {
 
 .cs-provider-kicker {
   margin-bottom: 4px;
-  color: #1d4ed8;
+  color: #425f83;
   font-size: 10px;
   font-weight: 850;
   letter-spacing: 0.12em;
@@ -1115,7 +1116,7 @@ onMounted(() => {
 
 .cs-config-card-key {
   background:
-    radial-gradient(circle at 100% 0%, rgba(29, 78, 216, 0.12), transparent 30%),
+    radial-gradient(circle at 100% 0%, rgba(66, 95, 131, 0.12), transparent 30%),
     rgba(255, 255, 255, 0.84);
 }
 
@@ -1190,11 +1191,11 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #1e40af;
+  color: #425f83;
   font-size: 12px;
   font-weight: 900;
-  background: #eff6ff;
-  border: 1px solid rgba(29, 78, 216, 0.16);
+  background: #edf2f8;
+  border: 1px solid rgba(66, 95, 131, 0.16);
 }
 
 .cs-models-spacer {
@@ -1214,13 +1215,13 @@ onMounted(() => {
   padding: 11px 12px;
   border: 1px solid rgba(0, 0, 0, 0.07);
   border-radius: 6px;
-  background: linear-gradient(180deg, #ffffff 0%, #F2F5F4 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #edf2f5 100%);
   transition: all var(--duration-normal, 220ms) var(--ease-out);
 }
 
 .cs-model-row:hover {
   transform: translateY(-1px);
-  border-color: rgba(29, 78, 216, 0.18);
+  border-color: rgba(66, 95, 131, 0.18);
   box-shadow: 0 14px 26px rgba(0, 0, 0, 0.08);
 }
 
@@ -1229,10 +1230,10 @@ onMounted(() => {
 }
 
 .cs-model-row.is-default {
-  border-color: rgba(245, 158, 11, 0.2);
+  border-color: rgba(128, 107, 71, 0.2);
   background:
-    radial-gradient(circle at 100% 0%, rgba(245, 158, 11, 0.1), transparent 28%),
-    linear-gradient(180deg, #FFFBEB 0%, #FFFBEB 100%);
+    radial-gradient(circle at 100% 0%, rgba(128, 107, 71, 0.1), transparent 28%),
+    linear-gradient(180deg, #f5f2ec 0%, #f5f2ec 100%);
 }
 
 .cs-model-emoji {
@@ -1243,8 +1244,8 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: #eff6ff;
-  border: 1px solid rgba(29, 78, 216, 0.12);
+  background: #edf2f8;
+  border: 1px solid rgba(66, 95, 131, 0.12);
 }
 
 .cs-ch-icon :deep(.cs-tech-icon),
@@ -1263,7 +1264,7 @@ onMounted(() => {
 
 .cs-ch-icon,
 .cs-provider-icon {
-  color: #eff6ff;
+  color: #edf2f8;
 }
 
 .cs-ch-icon :deep(.cs-tech-icon) {
@@ -1280,7 +1281,7 @@ onMounted(() => {
 }
 
 .cs-model-emoji {
-  color: #1d4ed8;
+  color: #425f83;
 }
 
 .cs-model-emoji :deep(.cs-tech-icon) {
@@ -1329,11 +1330,11 @@ onMounted(() => {
 }
 
 .cs-model-dot.is-ok {
-  background: #10B981;
+  background: #526b7a;
 }
 
 .cs-model-dot.is-err {
-  background: #1d4ed8;
+  background: #425f83;
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.12);
 }
 
@@ -1376,7 +1377,7 @@ onMounted(() => {
   justify-content: center;
   background:
     radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.8), transparent 28%),
-    linear-gradient(180deg, #ffffff 0%, #F2F5F4 100%);
+    linear-gradient(180deg, #ffffff 0%, #edf2f5 100%);
   color: #6B7280;
   cursor: pointer;
   transition: all var(--duration-fast, 150ms) var(--ease-out);
@@ -1384,11 +1385,11 @@ onMounted(() => {
 
 .cs-icon-option:hover,
 .cs-icon-option.is-active {
-  border-color: rgba(29, 78, 216, 0.3);
+  border-color: rgba(66, 95, 131, 0.3);
   background:
     radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.9), transparent 30%),
-    linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
-  color: #1e40af;
+    linear-gradient(135deg, #edf2f8 0%, #ffffff 100%);
+  color: #425f83;
   transform: translateY(-1px);
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
 }
@@ -1401,10 +1402,10 @@ onMounted(() => {
 .cs-add-model-bar {
   margin-top: 12px;
   padding: 14px;
-  border: 1px dashed rgba(29, 78, 216, 0.22);
+  border: 1px dashed rgba(66, 95, 131, 0.22);
   border-radius: 6px;
   text-align: center;
-  background: rgba(236, 254, 255, 0.38);
+  background: rgba(237, 242, 245, 0.38);
 }
 
 @media (max-width: 1180px) {
@@ -1473,13 +1474,13 @@ onMounted(() => {
 .cs-sidebar-head{padding:0 0 12px;justify-content:flex-start;align-items:center;gap:10px}.cs-sidebar-title{margin:0;font-size:12px;font-weight:500;color:#758294}.cs-sidebar-count{height:20px;min-width:22px;padding:0 6px;border:0;background:#e9edf2;color:#62738a;font-size:11px;font-weight:500}
 .cs-sidebar-scroll{display:flex;flex:none;gap:10px;overflow-x:auto;padding:1px 1px 10px;scroll-snap-type:x proximity}
 .cs-ch-item{flex:0 0 225px;min-height:76px;box-sizing:border-box;margin:0;padding:14px;border:1px solid #e1e5eb;border-radius:10px;background:white;box-shadow:none;scroll-snap-align:start;transition:background .15s,border-color .15s}
-.cs-ch-item:hover{transform:none;background:#fafbfd;border-color:#bfcbd9;box-shadow:none}.cs-ch-item.is-active{background:#f1f5fa;border-color:#809bb9;box-shadow:inset 0 -2px 0 #52779f}.cs-ch-item:focus-visible{outline:2px solid #52779f;outline-offset:2px}
+.cs-ch-item:hover{transform:none;background:#f5f7fa;border-color:#bfcbd9;box-shadow:none}.cs-ch-item.is-active{background:#edf2f8;border-color:#809bb9;box-shadow:inset 0 -2px 0 #52779f}.cs-ch-item:focus-visible{outline:2px solid #52779f;outline-offset:2px}
 .cs-ch-icon,.cs-provider-icon{background:#4a627f;box-shadow:none;border-radius:9px}.cs-ch-icon{width:30px;height:30px}.cs-ch-name{font-size:12px;font-weight:600}.cs-ch-meta{font-size:10px;color:#7d8898}.cs-ch-switch{margin-left:0}
 .cs-main{padding:0;min-height:390px;background:#fff;border:1px solid #e1e5eb;border-radius:12px;overflow:hidden}
 .cs-hero{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:24px;margin:0;border:0;border-radius:0;background:transparent;box-shadow:none}
-.cs-provider-icon{width:42px;height:42px}.cs-provider-icon:hover{transform:none;box-shadow:none;background:#365f91}.cs-provider-title{font-size:21px;font-weight:600;letter-spacing:-.5px}.cs-provider-kicker{font-size:10px;letter-spacing:.03em;color:#8490a1;font-weight:500}.cs-provider-url-sub{font-size:11px;color:#7c8797}.cs-hero-main{flex:1;min-width:0}
+.cs-provider-icon{width:42px;height:42px}.cs-provider-icon:hover{transform:none;box-shadow:none;background:#3c536e}.cs-provider-title{font-size:21px;font-weight:600;letter-spacing:-.5px}.cs-provider-kicker{font-size:10px;letter-spacing:.03em;color:#8490a1;font-weight:500}.cs-provider-url-sub{font-size:11px;color:#7c8797}.cs-hero-main{flex:1;min-width:0}
 .cs-hero-stats{display:flex;align-items:center;gap:24px;align-self:center}.cs-stat-card{min-width:0;padding:0 0 0 20px;background:none;border:0;border-left:1px solid #e7ebf0;border-radius:0;max-width:180px}.cs-stat-card span{font-size:11px;color:#8a94a2;font-weight:400}.cs-stat-card strong{font-size:14px;line-height:1.4;font-weight:600;margin-top:5px;overflow-wrap:anywhere}
-.cs-detail-tabs{display:flex;gap:24px;padding:0 24px;border-bottom:1px solid #e7ebf0}.cs-detail-tabs button{display:flex;align-items:center;gap:8px;cursor:pointer;padding:14px 0;border:0;border-bottom:2px solid transparent;background:none;color:#758294;font-family:inherit;font-size:13px;font-weight:500}.cs-detail-tabs button[aria-pressed=true]{color:#294d77;border-bottom-color:#426b99}.cs-detail-tabs button span{font-size:10px;padding:1px 5px;border-radius:4px;background:#f0f3f7;color:#758294}
+.cs-detail-tabs{display:flex;gap:24px;padding:0 24px;border-bottom:1px solid #e7ebf0}.cs-detail-tabs button{display:flex;align-items:center;gap:8px;cursor:pointer;padding:14px 0;border:0;border-bottom:2px solid transparent;background:none;color:#758294;font-family:inherit;font-size:13px;font-weight:500}.cs-detail-tabs button[aria-pressed=true]{color:#3c536e;border-bottom-color:#426b99}.cs-detail-tabs button span{font-size:10px;padding:1px 5px;border-radius:4px;background:#f0f3f7;color:#758294}
 .cs-config-grid{padding:24px;margin:0;gap:20px;grid-template-columns:1fr 1fr}.cs-config-card{padding:20px;border:1px solid #e5e9ef;background:#fafbfc;box-shadow:none;border-radius:9px}.cs-config-card-key{background:#fafbfc}.cs-section-label{font-weight:600}.cs-section-desc{color:#8390a1}
 .cs-model-panel{padding:24px;margin:0;border:0;border-radius:0;box-shadow:none;background:transparent}.cs-models-header{gap:10px;margin-bottom:20px}.cs-models-label{font-size:14px;font-weight:600}.cs-models-count{background:#f0f3f7;color:#6d7f94;border:0;font-size:11px}.cs-models-desc{font-size:12px;color:#8390a1}
 .cs-model-list{display:flex;flex-direction:column;gap:0}.cs-model-row,.cs-model-row.is-default,.cs-model-row.is-inactive{margin:0;padding:18px 8px;border:0;border-top:1px solid #edf0f4;border-radius:0;background:transparent;box-shadow:none;opacity:1}.cs-model-row:hover{transform:none;background:#fafbfc;box-shadow:none}.cs-model-emoji{background:#edf2f7;border:0;color:#597697}.cs-model-emoji :deep(svg){stroke:#597697}.cs-model-name{font-size:13px;font-weight:500}.cs-model-id{font-size:11px;color:#8993a1}.cs-add-model-bar{margin:12px 0 0;padding:16px 0 0;border:0;border-top:1px solid #e7ebf0;border-radius:0;background:none;text-align:left}
@@ -1490,11 +1491,11 @@ onMounted(() => {
 /* One explicit layout contract; channel rows never participate in vertical flex growth. */
 .model-workspace.cs-page{height:auto;min-height:0;display:block}
 .model-workspace .cs-layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:28px;align-items:start;background:none;overflow:visible}
-.model-workspace .cs-sidebar{display:block;width:auto;padding:0;margin:0;background:#f8fafc;border:0;border-radius:12px;overflow:hidden}
+.model-workspace .cs-sidebar{display:block;width:auto;padding:0;margin:0;background:#f5f7fa;border:0;border-radius:12px;overflow:hidden}
 .model-workspace .cs-sidebar-head{padding:18px 16px;display:flex;justify-content:space-between}
 .model-workspace .cs-sidebar-scroll{display:flex;flex-direction:column;gap:4px;overflow:auto;max-height:65vh;padding:0 8px 10px;scroll-snap-type:none}
 .model-workspace .cs-ch-item{flex:0 0 auto;height:72px;min-height:72px;width:100%;padding:12px;margin:0;border:1px solid transparent;background:transparent;box-shadow:none}
-.model-workspace .cs-ch-item.is-active{background:#fff;border-color:#d5e0f0;box-shadow:0 2px 6px #0f172a08}
+.model-workspace .cs-ch-item.is-active{background:#fff;border-color:#dce5ef;box-shadow:0 2px 6px #0f172a08}
 .model-workspace .cs-ch-name{font-size:13px;color:#0f172a}.model-workspace .cs-ch-meta{font-size:12px;color:#475569}
 .model-workspace .cs-ch-icon,.model-workspace .cs-provider-icon{background:#eef2f7;color:#334155;box-shadow:none}
 .model-workspace .cs-main{min-width:0;min-height:0;border:0;background:#fff}
@@ -1504,7 +1505,7 @@ onMounted(() => {
 @media(max-width:900px){.model-workspace .cs-layout{grid-template-columns:1fr;gap:24px}.model-workspace .cs-sidebar-scroll{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-height:240px}.model-workspace .cs-hero{padding-top:0}}
 @media(max-width:520px){.model-workspace .cs-sidebar-scroll{grid-template-columns:1fr;max-height:235px}.model-workspace .cs-model-row{flex-wrap:wrap}.model-workspace .cs-model-actions{width:100%;padding-left:0}.model-workspace .cs-page-heading{margin-bottom:20px}}
 
-.model-workspace .model-routing-strip{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 24px;background:#f4f6fa;border-radius:12px;margin-bottom:32px;font-size:13px;color:#475569}.model-routing-strip>div{display:flex;align-items:center;gap:14px;min-width:0}.model-routing-strip strong{color:#0f172a;font-weight:600;overflow-wrap:anywhere}.routing-dot{height:8px;width:8px;flex-shrink:0;border-radius:50%;background:#2563eb}.model-library-toolbar{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:18px}.model-library-toolbar>div:first-child{display:flex;align-items:baseline;gap:14px}.model-library-toolbar h2{font-size:17px;margin:0}.model-library-toolbar span{font-size:12px;color:#64748b}.model-library-toolbar .el-input{max-width:280px}.provider-group{margin-bottom:24px;border:1px solid #e6eaf0;border-radius:12px;overflow:hidden}.provider-group-heading{display:flex;align-items:center;gap:12px;padding:18px 20px;background:#fafbfc}.provider-group-heading>div:nth-child(2){min-width:0;flex:1}.provider-group-heading h3{font-size:14px;margin:0 0 6px;color:#0f172a}.provider-group-heading code{font:11px ui-monospace,monospace;color:#64748b;overflow-wrap:anywhere}.provider-symbol{width:34px;height:34px;display:grid;place-items:center;background:#eaf0f8;border-radius:8px;color:#3b5578;flex-shrink:0}.provider-symbol :deep(svg){width:20px;height:20px}.provider-group-actions{display:flex;align-items:center;gap:8px}.provider-group-actions .el-button{margin:0}.resource-model-name{font-size:14px;color:#0f172a;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.resource-model-id{font:12px ui-monospace,monospace;color:#64748b}.default-model-tag{font-size:10px;padding:2px 7px;background:#eff6ff;color:#2563eb;border-radius:5px}.resource-status{font-size:12px;display:flex;gap:6px;align-items:center;color:#64748b}.resource-status i{width:5px;height:5px;border-radius:50%;background:#94a3b8}.resource-status.enabled{color:#047857}.resource-status.enabled i{background:#10b981}.resource-table :deep(td.el-table__cell){height:76px}.resource-table :deep(th.el-table__cell){background:#fff;font-size:11px;font-weight:500;color:#64748b}.resource-table :deep(.cell){padding-inline:20px}.model-library-empty{padding:60px;text-align:center;color:#64748b}
+.model-workspace .model-routing-strip{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 24px;background:#f4f6fa;border-radius:12px;margin-bottom:32px;font-size:13px;color:#475569}.model-routing-strip>div{display:flex;align-items:center;gap:14px;min-width:0}.model-routing-strip strong{color:#0f172a;font-weight:600;overflow-wrap:anywhere}.routing-dot{height:8px;width:8px;flex-shrink:0;border-radius:50%;background:#425f83}.model-library-toolbar{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:18px}.model-library-toolbar>div:first-child{display:flex;align-items:baseline;gap:14px}.model-library-toolbar h2{font-size:17px;margin:0}.model-library-toolbar span{font-size:12px;color:#617085}.model-library-toolbar .el-input{max-width:280px}.provider-group{margin-bottom:24px;border:1px solid #e6eaf0;border-radius:12px;overflow:hidden}.provider-group-heading{display:flex;align-items:center;gap:12px;padding:18px 20px;background:#fafbfc}.provider-group-heading>div:nth-child(2){min-width:0;flex:1}.provider-group-heading h3{font-size:14px;margin:0 0 6px;color:#0f172a}.provider-group-heading code{font:11px ui-monospace,monospace;color:#617085;overflow-wrap:anywhere}.provider-symbol{width:34px;height:34px;display:grid;place-items:center;background:#edf2f8;border-radius:8px;color:#3b5578;flex-shrink:0}.provider-symbol :deep(svg){width:20px;height:20px}.provider-group-actions{display:flex;align-items:center;gap:8px}.provider-group-actions .el-button{margin:0}.resource-model-name{font-size:14px;color:#0f172a;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.resource-model-id{font:12px ui-monospace,monospace;color:#617085}.default-model-tag{font-size:10px;padding:2px 7px;background:#edf2f8;color:#425f83;border-radius:5px}.resource-status{font-size:12px;display:flex;gap:6px;align-items:center;color:#617085}.resource-status i{width:5px;height:5px;border-radius:50%;background:#94a3b8}.resource-status.enabled{color:#526b7a}.resource-status.enabled i{background:#526b7a}.resource-table :deep(td.el-table__cell){height:76px}.resource-table :deep(th.el-table__cell){background:#fff;font-size:11px;font-weight:500;color:#617085}.resource-table :deep(.cell){padding-inline:20px}.model-library-empty{padding:60px;text-align:center;color:#617085}
 @media(max-width:900px){.provider-group-heading{flex-wrap:wrap}.provider-group-actions{width:100%;justify-content:flex-end}.model-routing-strip{flex-wrap:wrap}.model-routing-strip>div{flex-wrap:wrap}.model-library-toolbar{align-items:flex-start;flex-direction:column}.model-library-toolbar .el-input{max-width:none}.model-resource-library{min-width:0}.provider-group{max-width:100%}}
 
 .provider-symbol :deep(svg){fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.model-library-toolbar>div:first-child{margin-right:auto}.resource-table :deep(td.el-table__cell){height:64px}
@@ -1533,13 +1534,13 @@ onMounted(() => {
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
 }
 .ai-stat-card.highlight {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: linear-gradient(135deg, #f5f7fa 0%, #edf2f8 100%);
   border-color: #cbd5e1;
 }
 .ai-stat-label {
   font-size: 11px;
   font-weight: 600;
-  color: #64748b;
+  color: #617085;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -1552,7 +1553,7 @@ onMounted(() => {
 .primary-badge {
   font-size: 10px;
   font-weight: 700;
-  background: #0284c7;
+  background: #3c536e;
   color: #ffffff;
   padding: 1px 6px;
   border-radius: 4px;
@@ -1577,21 +1578,21 @@ onMounted(() => {
 }
 .ai-stat-num-row span {
   font-size: 12px;
-  color: #64748b;
+  color: #617085;
 }
 .latency-val {
-  color: #059669 !important;
+  color: #526b7a !important;
 }
 .ai-stat-sub {
   font-size: 11px;
-  color: #64748b;
+  color: #617085;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 .link-test-click {
   cursor: pointer;
-  color: #2563eb !important;
+  color: #425f83 !important;
   font-weight: 500;
 }
 .link-test-click:hover {
@@ -1602,8 +1603,8 @@ onMounted(() => {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #10b981;
-  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+  background: #526b7a;
+  box-shadow: 0 0 6px rgba(82, 107, 122, 0.6);
 }
 
 /* ===== 供应商卡片与规格网格 ===== */
@@ -1641,7 +1642,7 @@ onMounted(() => {
 }
 .model-count-badge {
   font-size: 11px;
-  background: #f1f5f9;
+  background: #edf2f8;
   color: #475569;
   padding: 1px 8px;
   border-radius: 12px;
@@ -1649,7 +1650,7 @@ onMounted(() => {
 }
 .provider-url-code {
   font-size: 11px;
-  color: #64748b;
+  color: #617085;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
@@ -1678,11 +1679,11 @@ onMounted(() => {
   transform: translateY(-1px);
 }
 .model-spec-card.is-default {
-  border-color: #f59e0b;
-  background: #fffdfa;
+  border-color: #806b47;
+  background: #faf9f6;
 }
 .model-spec-card.is-active {
-  border-left: 3px solid #2563eb;
+  border-left: 3px solid #425f83;
 }
 .model-spec-card-head {
   display: flex;
@@ -1704,8 +1705,8 @@ onMounted(() => {
   flex-shrink: 0;
 }
 .model-brand-dot.active {
-  background: #10b981;
-  box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+  background: #526b7a;
+  box-shadow: 0 0 6px rgba(82, 107, 122, 0.5);
 }
 .model-brand-dot.inactive {
   background: #cbd5e1;
@@ -1721,15 +1722,15 @@ onMounted(() => {
 }
 .model-id-code {
   font-size: 11px;
-  color: #64748b;
+  color: #617085;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 .badge-gold {
   font-size: 10px;
   font-weight: 600;
-  background: #fef3c7;
-  color: #b45309;
-  border: 1px solid #fde68a;
+  background: #e8e2d7;
+  color: #806b47;
+  border: 1px solid #d4c9b5;
   padding: 2px 7px;
   border-radius: 6px;
   flex-shrink: 0;
@@ -1749,32 +1750,32 @@ onMounted(() => {
   border-radius: 5px;
 }
 .cap-tag.primary {
-  background: #eff6ff;
-  color: #2563eb;
+  background: #edf2f8;
+  color: #425f83;
 }
 .cap-tag.purple {
-  background: #faf5ff;
-  color: #7e22ce;
-  border: 1px solid #f3e8ff;
+  background: #f8f8fa;
+  color: #696780;
+  border: 1px solid #f1f0f6;
 }
 .cap-tag.cyan {
-  background: #ecfeff;
-  color: #0e7490;
-  border: 1px solid #cffafe;
+  background: #edf2f5;
+  color: #3c536e;
+  border: 1px solid #dce5eb;
 }
 .cap-tag.gold {
-  background: #fffbeb;
-  color: #b45309;
-  border: 1px solid #fef3c7;
+  background: #f5f2ec;
+  color: #806b47;
+  border: 1px solid #e8e2d7;
 }
 .cap-tag.info {
-  background: #f8fafc;
+  background: #f5f7fa;
   color: #475569;
   border: 1px solid #e2e8f0;
 }
 .cap-tag.gray {
-  background: #f8fafc;
-  color: #64748b;
+  background: #f5f7fa;
+  color: #617085;
 }
 
 /* Card Footer */
@@ -1782,7 +1783,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid #edf2f8;
   padding-top: 10px;
   margin-top: 4px;
 }
@@ -1791,7 +1792,7 @@ onMounted(() => {
   align-items: center;
   gap: 6px;
   font-size: 11px;
-  color: #64748b;
+  color: #617085;
 }
 .beacon-dot {
   width: 6px;
@@ -1800,13 +1801,13 @@ onMounted(() => {
   background: #94a3b8;
 }
 .beacon-dot.ok {
-  background: #10b981;
+  background: #526b7a;
 }
 .beacon-dot.err {
-  background: #ef4444;
+  background: #8b6064;
 }
 .beacon-dot.pending {
-  background: #f59e0b;
+  background: #806b47;
   animation: pulse 1s infinite alternate;
 }
 @keyframes pulse {

@@ -1,0 +1,166 @@
+{
+  "question": "望江路恒拓精密制造有限公司2026年应收余额趋势",
+  "reference_sql": "SELECT month,customer_id,customer_name,closing_yuan,aging_365_plus_yuan FROM v_gas_ar WHERE customer_id='DEMO-BINJIANG-S1-W1-工业-1' AND month BETWEEN '2026-01' AND '2026-09' ORDER BY month",
+  "expected": [
+    {
+      "month": "2026-01",
+      "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+      "customer_name": "望江路恒拓精密制造有限公司",
+      "closing_yuan": 126915.98,
+      "aging_365_plus_yuan": 0.0
+    },
+    {
+      "month": "2026-02",
+      "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+      "customer_name": "望江路恒拓精密制造有限公司",
+      "closing_yuan": 144239.88,
+      "aging_365_plus_yuan": 0.0
+    },
+    {
+      "month": "2026-03",
+      "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+      "customer_name": "望江路恒拓精密制造有限公司",
+      "closing_yuan": 164629.94,
+      "aging_365_plus_yuan": 0.0
+    },
+    {
+      "month": "2026-04",
+      "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+      "customer_name": "望江路恒拓精密制造有限公司",
+      "closing_yuan": 180860.65,
+      "aging_365_plus_yuan": 0.0
+    },
+    {
+      "month": "2026-05",
+      "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+      "customer_name": "望江路恒拓精密制造有限公司",
+      "closing_yuan": 203475.75,
+      "aging_365_plus_yuan": 0.0
+    },
+    {
+      "month": "2026-06",
+      "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+      "customer_name": "望江路恒拓精密制造有限公司",
+      "closing_yuan": 153673.99,
+      "aging_365_plus_yuan": 0.0
+    },
+    {
+      "month": "2026-07",
+      "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+      "customer_name": "望江路恒拓精密制造有限公司",
+      "closing_yuan": 170193.21,
+      "aging_365_plus_yuan": 0.0
+    },
+    {
+      "month": "2026-08",
+      "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+      "customer_name": "望江路恒拓精密制造有限公司",
+      "closing_yuan": 186613.88,
+      "aging_365_plus_yuan": 0.0
+    },
+    {
+      "month": "2026-09",
+      "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+      "customer_name": "望江路恒拓精密制造有限公司",
+      "closing_yuan": 201339.86,
+      "aging_365_plus_yuan": 0.0
+    }
+  ],
+  "result": {
+    "error": null,
+    "requires_confirmation": false,
+    "confirmation_type": null,
+    "analysis": "## 江城燃气·应收回款与稽核\n\n望江路恒拓精密制造有限公司2026年1月至9月期末应收余额从12.69万元持续攀升至20.13万元，累计增长58.64%（绝对值增加7.44万元），期间未出现超过365天的长账龄欠款。\n\n# 业绩分析报告\n\n【核心结论】\n该客户2026年前三个季度呈现“余额单边上行、回款滞后于出账”的结构性特征。期末应收余额由年初的12.69万元增至9月末的20.13万元，增幅达58.64%，且9月单月余额较6月低点反弹31%。虽然目前无超一年坏账风险（365天以上账龄始终为0），但连续9个月余额净增表明当期回款未能覆盖新增气费，存在资金占用持续扩大的经营风险。\n\n【亮点分析 •】\n*   **长账龄风险可控**：截至2026-09，该客户所有欠费均处于180天以内（aging_365_plus_yuan=0），说明历史旧欠已清理或尚未形成跨年坏账，当前风险主要集中在短期流动性层面。\n*   **波动中维持高位**：尽管6月曾短暂回落至15.37万元，但随后三个月迅速回升并突破20万元关口，显示其用气规模或结算周期具有刚性，非偶发性拖欠。\n\n【问题诊断 •】\n*   **余额趋势异常**：9个月数据中仅6月出现环比下降（-25%），其余月份均为正增长，且最大单月增量出现在5月（+2.26万元）。这种“进多退少”的累积效应导致9月末余额较年初扩大近6成。\n*   **回款能力存疑**：余额持续上升直接反映“本期回款 < 本期出账 + 期初结转”。缺乏逐月回款明细支撑，无法判断是季节性用气高峰导致账单激增，还是客户支付意愿/能力下降导致回款率不足。\n*   **证据局限性**：当前数据仅为月度快照，缺失“本期出账（billed）”与“本期回款（collected）”的具体数值，无法计算确切的气费回收率，亦无法区分是业务量自然增长还是管理性欠费。\n\n【改进建议】\n1.  **启动专项对账**：立即调取该客户2026年全年的`billed_yuan`（出账）与`collected_yuan`（回款）明细，核算累计回收率。若回收率低于90%，需定性为高风险客户。\n2.  **核查用气与结算逻辑**：确认6月余额回落是否因大额回款所致，以及后续反弹是否源于新签大单或气价调整。排除业务量正常增长导致的余额被动上升。\n3.  **制定催收预案**：鉴于余额已突破20万元且呈上升趋势，建议将该企业纳入重点监控名单。在缺乏合同违约证据前，先进行商务函件提醒；若下月（2026-10）余额继续增长，需升级至现场催缴或暂停供气评估。\n4.  **补充数据维度**：后续分析需关联`v_gas_sales`中的理论收入与实际收入，排查是否存在量价稽核差异导致的争议欠费。",
+    "ask_flow": {
+      "flow": "basic",
+      "reason": "basic_selected",
+      "requested_flow": "basic",
+      "controller": "AskFlowController",
+      "duration_seconds": 50.284
+    }
+  },
+  "datasets": [
+    {
+      "dataset_id": 65,
+      "dataset_name": "江城燃气·应收回款与稽核",
+      "sql": "SELECT month, customer_id, customer_name, closing_yuan, aging_365_plus_yuan FROM v_gas_ar WHERE customer_id='DEMO-BINJIANG-S1-W1-工业-1' AND month BETWEEN '2026-01' AND '2026-09' ORDER BY month",
+      "columns": [
+        "month",
+        "customer_id",
+        "customer_name",
+        "closing_yuan",
+        "aging_365_plus_yuan"
+      ],
+      "rows": [
+        {
+          "month": "2026-01",
+          "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+          "customer_name": "望江路恒拓精密制造有限公司",
+          "closing_yuan": 126915.98,
+          "aging_365_plus_yuan": 0.0
+        },
+        {
+          "month": "2026-02",
+          "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+          "customer_name": "望江路恒拓精密制造有限公司",
+          "closing_yuan": 144239.88,
+          "aging_365_plus_yuan": 0.0
+        },
+        {
+          "month": "2026-03",
+          "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+          "customer_name": "望江路恒拓精密制造有限公司",
+          "closing_yuan": 164629.94,
+          "aging_365_plus_yuan": 0.0
+        },
+        {
+          "month": "2026-04",
+          "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+          "customer_name": "望江路恒拓精密制造有限公司",
+          "closing_yuan": 180860.65,
+          "aging_365_plus_yuan": 0.0
+        },
+        {
+          "month": "2026-05",
+          "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+          "customer_name": "望江路恒拓精密制造有限公司",
+          "closing_yuan": 203475.75,
+          "aging_365_plus_yuan": 0.0
+        },
+        {
+          "month": "2026-06",
+          "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+          "customer_name": "望江路恒拓精密制造有限公司",
+          "closing_yuan": 153673.99,
+          "aging_365_plus_yuan": 0.0
+        },
+        {
+          "month": "2026-07",
+          "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+          "customer_name": "望江路恒拓精密制造有限公司",
+          "closing_yuan": 170193.21,
+          "aging_365_plus_yuan": 0.0
+        },
+        {
+          "month": "2026-08",
+          "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+          "customer_name": "望江路恒拓精密制造有限公司",
+          "closing_yuan": 186613.88,
+          "aging_365_plus_yuan": 0.0
+        },
+        {
+          "month": "2026-09",
+          "customer_id": "DEMO-BINJIANG-S1-W1-工业-1",
+          "customer_name": "望江路恒拓精密制造有限公司",
+          "closing_yuan": 201339.86,
+          "aging_365_plus_yuan": 0.0
+        }
+      ],
+      "analysis": "望江路恒拓精密制造有限公司2026年1月至9月期末应收余额从12.69万元持续攀升至20.13万元，累计增长58.64%（绝对值增加7.44万元），期间未出现超过365天的长账龄欠款。\n\n# 业绩分析报告\n\n【核心结论】\n该客户2026年前三个季度呈现“余额单边上行、回款滞后于出账”的结构性特征。期末应收余额由年初的12.69万元增至9月末的20.13万元，增幅达58.64%，且9月单月余额较6月低点反弹31%。虽然目前无超一年坏账风险（365天以上账龄始终为0），但连续9个月余额净增表明当期回款未能覆盖新增气费，存在资金占用持续扩大的经营风险。\n\n【亮点分析 •】\n*   **长账龄风险可控**：截至2026-09，该客户所有欠费均处于180天以内（aging_365_plus_yuan=0），说明历史旧欠已清理或尚未形成跨年坏账，当前风险主要集中在短期流动性层面。\n*   **波动中维持高位**：尽管6月曾短暂回落至15.37万元，但随后三个月迅速回升并突破20万元关口，显示其用气规模或结算周期具有刚性，非偶发性拖欠。\n\n【问题诊断 •】\n*   **余额趋势异常**：9个月数据中仅6月出现环比下降（-25%），其余月份均为正增长，且最大单月增量出现在5月（+2.26万元）。这种“进多退少”的累积效应导致9月末余额较年初扩大近6成。\n*   **回款能力存疑**：余额持续上升直接反映“本期回款 < 本期出账 + 期初结转”。缺乏逐月回款明细支撑，无法判断是季节性用气高峰导致账单激增，还是客户支付意愿/能力下降导致回款率不足。\n*   **证据局限性**：当前数据仅为月度快照，缺失“本期出账（billed）”与“本期回款（collected）”的具体数值，无法计算确切的气费回收率，亦无法区分是业务量自然增长还是管理性欠费。\n\n【改进建议】\n1.  **启动专项对账**：立即调取该客户2026年全年的`billed_yuan`（出账）与`collected_yuan`（回款）明细，核算累计回收率。若回收率低于90%，需定性为高风险客户。\n2.  **核查用气与结算逻辑**：确认6月余额回落是否因大额回款所致，以及后续反弹是否源于新签大单或气价调整。排除业务量正常增长导致的余额被动上升。\n3.  **制定催收预案**：鉴于余额已突破20万元且呈上升趋势，建议将该企业纳入重点监控名单。在缺乏合同违约证据前，先进行商务函件提醒；若下月（2026-10）余额继续增长，需升级至现场催缴或暂停供气评估。\n4.  **补充数据维度**：后续分析需关联`v_gas_sales`中的理论收入与实际收入，排查是否存在量价稽核差异导致的争议欠费。",
+      "analysis_status": "model_generated",
+      "query_status": "completed",
+      "error": null,
+      "row_count": 9
+    }
+  ]
+}

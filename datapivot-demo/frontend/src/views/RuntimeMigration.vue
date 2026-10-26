@@ -491,7 +491,7 @@ onMounted(() => {
 <style scoped>
 .migration-page {
   padding: 24px;
-  background: #F2F5F4;
+  background: #edf2f5;
   min-height: 100%;
 }
 
@@ -510,13 +510,13 @@ onMounted(() => {
   gap: 24px;
   padding: 28px;
   background:
-    radial-gradient(circle at right top, rgba(29, 78, 216, 0.16), transparent 32%),
-    linear-gradient(135deg, #ffffff 0%, #F2F5F4 100%);
+    radial-gradient(circle at right top, rgba(66, 95, 131, 0.16), transparent 32%),
+    linear-gradient(135deg, #ffffff 0%, #edf2f5 100%);
 }
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #1d4ed8;
+  color: #425f83;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -591,7 +591,7 @@ onMounted(() => {
 .permission-card strong {
   display: block;
   margin: 10px 0 4px;
-  color: #1d4ed8;
+  color: #425f83;
   font-size: 30px;
   line-height: 1.15;
   font-variant-numeric: tabular-nums;
@@ -606,9 +606,9 @@ onMounted(() => {
 
 .permission-card {
   padding: 14px 16px;
-  border: 1px solid #eff6ff;
+  border: 1px solid #edf2f8;
   border-radius: 6px;
-  background: #F2F5F4;
+  background: #edf2f5;
 }
 
 .permission-card strong {
@@ -642,14 +642,14 @@ onMounted(() => {
   justify-content: space-between;
   gap: 18px;
   padding: 20px;
-  border: 1px dashed #eff6ff;
+  border: 1px dashed #edf2f8;
   border-radius: 6px;
-  background: #F2F5F4;
+  background: #edf2f5;
 }
 
 .upload-zone.ready {
-  border-color: #10B981;
-  background: #F2F5F4;
+  border-color: #526b7a;
+  background: #edf2f5;
 }
 
 .file-picker {
@@ -661,7 +661,7 @@ onMounted(() => {
   height: 36px;
   border-radius: 999px;
   color: #fff;
-  background: #1d4ed8;
+  background: #425f83;
   cursor: pointer;
 }
 

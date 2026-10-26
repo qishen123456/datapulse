@@ -1,8 +1,13 @@
-/* ===== 全局基础重置 ===== */
-* {
+/* ===== 全局基础重置与字体规范 ===== */
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+:root {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
 }
 
 html, body {
@@ -12,10 +17,11 @@ html, body {
 }
 
 body {
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  background: var(--bg-page, #F2F5F4);
+  background: var(--bg-page, #F4F7FA);
   color: var(--text-title, #0F172A);
 }
 
@@ -49,7 +55,7 @@ img {
   display: block;
 }
 
-/* 滚动条美化 */
+/* 全局精致滚动条 */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -60,10 +66,10 @@ img {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border, #E5E7EB);
-  border-radius: 3px;
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--border-hover, #D1D5DB);
+  background: rgba(100, 116, 139, 0.55);
 }

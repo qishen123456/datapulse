@@ -1,0 +1,22 @@
+{
+  "GAS_BIZ-01": {
+    "numeric": "matched",
+    "narrative": "failed",
+    "note": "行数据正确；摘要1441.2万方不等于144117320方，并将总差量-1818569方写成+1.8万方微增；单位与方向均错。"
+  },
+  "GAS_BIZ-03": {
+    "numeric": "matched",
+    "narrative": "failed",
+    "note": "行数据正确；累计1420333560方应约14.20亿方/142033.4万方，不是1420.3万方。"
+  },
+  "GAS_BIZ-14": {
+    "numeric": "matched",
+    "narrative": "partially_improved",
+    "note": "51.8%的前两家占比已正确；临港/高新名称数值仍需对照行数据；从单月排名推断拓展能力与工程落后仍越界。"
+  },
+  "GAS_SAFE-02": {
+    "numeric": "matched",
+    "narrative": "failed",
+    "note": "声明不能判断入库率后仍说滨江进度相对领先，缺总里程分母；无源阈值不应判最紧迫风险。"
+  }
+}

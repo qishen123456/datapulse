@@ -241,6 +241,8 @@ def generate():
                             path_names=r["org_name_path"].split("/")) for i,r in enumerate(orgs.values())]}
     from realistic_scenarios import apply
     apply(tables, money)
+    from business_names import apply_names
+    apply_names(tables, org_config)
     return dict(tables), org_config, exceptions
 
 

@@ -48,8 +48,8 @@
       <svg class="ax-user-avatar-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
         <defs>
           <linearGradient id="userAvatarFillChat" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#14B8A6" />
-            <stop offset="100%" stop-color="#0F766E" />
+            <stop offset="0%" stop-color="#526b7a" />
+            <stop offset="100%" stop-color="#526b7a" />
           </linearGradient>
         </defs>
         <circle cx="50" cy="50" r="50" fill="url(#userAvatarFillChat)" />
@@ -146,7 +146,7 @@ const segments = computed(() => {
   justify-content: center;
   flex-shrink: 0;
   border: 0;
-  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.22);
+  box-shadow: 0 4px 12px rgba(82, 107, 122, 0.22);
 }
 
 .ax-user-avatar::before {
@@ -161,10 +161,10 @@ const segments = computed(() => {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #10B981;
+  background: #526b7a;
   box-shadow:
     0 0 0 2.5px #FFFFFF,
-    0 2px 6px rgba(16, 185, 129, 0.25);
+    0 2px 6px rgba(82, 107, 122, 0.25);
 }
 
 .ax-user-avatar-svg {
@@ -175,7 +175,7 @@ const segments = computed(() => {
 
 .ax-user-bubble {
   padding: 12px 18px;
-  background: linear-gradient(135deg, #386553 0%, #294e3e 100%);
+  background: linear-gradient(135deg, #526b7a 0%, #344652 100%);
   color: #ffffff;
   border: none;
   border-radius: 8px 8px 6px 8px;
@@ -183,8 +183,8 @@ const segments = computed(() => {
   line-height: 1.7;
   word-break: break-word;
   box-shadow:
-    0 6px 16px rgba(15, 118, 110, 0.18),
-    0 2px 5px rgba(15, 118, 110, 0.08);
+    0 6px 16px rgba(82, 107, 122, 0.18),
+    0 2px 5px rgba(82, 107, 122, 0.08);
 }
 
 /* 解析片段框出（解析条 v1）：红底气泡上的白边半透框 */
@@ -224,7 +224,7 @@ const segments = computed(() => {
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.98);
-  color: #64748B;
+  color: #617085;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -234,11 +234,11 @@ const segments = computed(() => {
 }
 
 .ax-user-action:hover:not(:disabled) {
-  color: #294e3e;
-  border-color: rgba(29, 78, 216, 0.22);
+  color: #344652;
+  border-color: rgba(66, 95, 131, 0.22);
   background: #ffffff;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.12);
+  box-shadow: 0 4px 12px rgba(82, 107, 122, 0.12);
 }
 
 .ax-user-action:disabled {

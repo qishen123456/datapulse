@@ -1,0 +1,12 @@
+{
+  "registered_features": 136,
+  "literal_referenced_features": 61,
+  "unregistered": {},
+  "new": [
+    "ai_model_delete",
+    "ai_model_default"
+  ],
+  "new_default_roles": [
+    "super_admin"
+  ]
+}

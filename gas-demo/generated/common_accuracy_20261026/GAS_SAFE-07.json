@@ -1,0 +1,53 @@
+{
+  "question": "截至2026年6月底与9月底未闭环隐患数对比",
+  "reference_sql": "SELECT t.cutoff,COUNT(h.hazard_id) AS 未闭环数 FROM (VALUES (DATE '2026-06-30'),(DATE '2026-09-30')) t(cutoff) LEFT JOIN v_gas_hazards h ON h.found_date<=t.cutoff AND (h.completed_date IS NULL OR h.completed_date>t.cutoff) GROUP BY t.cutoff ORDER BY t.cutoff",
+  "expected": [
+    {
+      "cutoff": "2026-06-30",
+      "未闭环数": 14
+    },
+    {
+      "cutoff": "2026-09-30",
+      "未闭环数": 17
+    }
+  ],
+  "result": {
+    "error": null,
+    "requires_confirmation": false,
+    "confirmation_type": null,
+    "analysis": "## 江城燃气·安全与管网治理\n\n截至2026年6月30日，全域未闭环隐患为14单；截至2026年9月30日，全域未闭环隐患为17单。9月底较6月底增加3单，增幅约21.4%。\n\n【核心结论】\n- 全域未闭环隐患存量在2026年6月底至9月底期间净增3单，从14单升至17单，表明该季度内新发现或持续未整改的隐患多于同期完成闭环的隐患。\n- 数据覆盖范围为全域（super_admin_full_scope），时间边界严格限定在2026-06-30与2026-09-30两个历史截至日，符合“found_date<=T 且 completed_date为空或>T”的未闭环定义。\n\n【亮点分析 •】\n- 无显著亮点。未闭环数上升属于风险累积信号，而非正向改善。\n\n【问题诊断 •】\n- 未闭环隐患存量增加3单，可能源于：① 2026年7-9月新发现隐患数量超过同期闭环数量；② 部分原有隐患整改进度滞后，导致跨期未销项。\n- 当前结果仅提供总量对比，未下钻至分公司、网格或隐患等级（如重大/一般），无法定位具体责任主体或高风险区域。\n- 证据不足：无法判断这3单增量中是否包含重大隐患，也无法确认是否存在超期未闭环情形（需额外查询due_date字段）。\n\n【改进建议】\n- 立即下钻分析：按分公司和隐患等级拆解9月底17单未闭环隐患，识别是否集中于特定区域或存在重大隐患未整改情况。\n- 核查超期状态：补充查询截至2026-09-30的超期未闭环隐患数（due_date<2026-09-30且未闭环），评估整改逾期风险。\n- 建立月度监控：将未闭环隐患存量纳入月度安全KPI，设定环比增长预警阈值（如单月净增≥2单触发专项督办），避免存量持续累积。",
+    "ask_flow": {
+      "flow": "basic",
+      "reason": "basic_selected",
+      "requested_flow": "basic",
+      "controller": "AskFlowController",
+      "duration_seconds": 95.741
+    }
+  },
+  "datasets": [
+    {
+      "dataset_id": 66,
+      "dataset_name": "江城燃气·安全与管网治理",
+      "sql": "SELECT t.cutoff, COUNT(h.hazard_id) AS 未闭环数 FROM (VALUES (DATE '2026-06-30'), (DATE '2026-09-30')) t(cutoff) LEFT JOIN v_gas_hazards h ON h.found_date <= t.cutoff AND (h.completed_date IS NULL OR h.completed_date > t.cutoff) GROUP BY t.cutoff ORDER BY t.cutoff",
+      "columns": [
+        "cutoff",
+        "未闭环数"
+      ],
+      "rows": [
+        {
+          "cutoff": "2026-06-30",
+          "未闭环数": 14
+        },
+        {
+          "cutoff": "2026-09-30",
+          "未闭环数": 17
+        }
+      ],
+      "analysis": "截至2026年6月30日，全域未闭环隐患为14单；截至2026年9月30日，全域未闭环隐患为17单。9月底较6月底增加3单，增幅约21.4%。\n\n【核心结论】\n- 全域未闭环隐患存量在2026年6月底至9月底期间净增3单，从14单升至17单，表明该季度内新发现或持续未整改的隐患多于同期完成闭环的隐患。\n- 数据覆盖范围为全域（super_admin_full_scope），时间边界严格限定在2026-06-30与2026-09-30两个历史截至日，符合“found_date<=T 且 completed_date为空或>T”的未闭环定义。\n\n【亮点分析 •】\n- 无显著亮点。未闭环数上升属于风险累积信号，而非正向改善。\n\n【问题诊断 •】\n- 未闭环隐患存量增加3单，可能源于：① 2026年7-9月新发现隐患数量超过同期闭环数量；② 部分原有隐患整改进度滞后，导致跨期未销项。\n- 当前结果仅提供总量对比，未下钻至分公司、网格或隐患等级（如重大/一般），无法定位具体责任主体或高风险区域。\n- 证据不足：无法判断这3单增量中是否包含重大隐患，也无法确认是否存在超期未闭环情形（需额外查询due_date字段）。\n\n【改进建议】\n- 立即下钻分析：按分公司和隐患等级拆解9月底17单未闭环隐患，识别是否集中于特定区域或存在重大隐患未整改情况。\n- 核查超期状态：补充查询截至2026-09-30的超期未闭环隐患数（due_date<2026-09-30且未闭环），评估整改逾期风险。\n- 建立月度监控：将未闭环隐患存量纳入月度安全KPI，设定环比增长预警阈值（如单月净增≥2单触发专项督办），避免存量持续累积。",
+      "analysis_status": "model_generated",
+      "query_status": "completed",
+      "error": null,
+      "row_count": 2
+    }
+  ]
+}

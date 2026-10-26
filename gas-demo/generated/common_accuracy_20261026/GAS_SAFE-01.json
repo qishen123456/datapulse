@@ -1,0 +1,425 @@
+{
+  "question": "2026年9月各服务网格应检、实检和到访不遇",
+  "reference_sql": "SELECT org_id,org_name,due_inspect,inspected,not_at_home,inspected::numeric/NULLIF(due_inspect,0) AS 安检覆盖率 FROM v_gas_safety WHERE month='2026-09' ORDER BY branch_id,org_id",
+  "expected": [
+    {
+      "org_id": "BINJIANG-S1-W1",
+      "org_name": "望江路服务网格",
+      "due_inspect": 1382,
+      "inspected": 1252,
+      "not_at_home": 130,
+      "安检覆盖率": 0.9059334298118669
+    },
+    {
+      "org_id": "BINJIANG-S1-W2",
+      "org_name": "滨港路服务网格",
+      "due_inspect": 929,
+      "inspected": 800,
+      "not_at_home": 129,
+      "安检覆盖率": 0.8611410118406889
+    },
+    {
+      "org_id": "BINJIANG-S2-W1",
+      "org_name": "锦澜社区服务网格",
+      "due_inspect": 1265,
+      "inspected": 1238,
+      "not_at_home": 27,
+      "安检覆盖率": 0.9786561264822135
+    },
+    {
+      "org_id": "BINJIANG-S2-W2",
+      "org_name": "云麓社区服务网格",
+      "due_inspect": 1135,
+      "inspected": 951,
+      "not_at_home": 184,
+      "安检覆盖率": 0.8378854625550661
+    },
+    {
+      "org_id": "GAOXIN-S1-W1",
+      "org_name": "光谷科创园服务网格",
+      "due_inspect": 1153,
+      "inspected": 1088,
+      "not_at_home": 65,
+      "安检覆盖率": 0.9436253252385083
+    },
+    {
+      "org_id": "GAOXIN-S1-W2",
+      "org_name": "星河产业园服务网格",
+      "due_inspect": 1927,
+      "inspected": 1594,
+      "not_at_home": 333,
+      "安检覆盖率": 0.8271925272444214
+    },
+    {
+      "org_id": "GAOXIN-S2-W1",
+      "org_name": "麓林社区服务网格",
+      "due_inspect": 1627,
+      "inspected": 1387,
+      "not_at_home": 240,
+      "安检覆盖率": 0.8524892440073756
+    },
+    {
+      "org_id": "GAOXIN-S2-W2",
+      "org_name": "文澜路服务网格",
+      "due_inspect": 1775,
+      "inspected": 1736,
+      "not_at_home": 39,
+      "安检覆盖率": 0.9780281690140845
+    },
+    {
+      "org_id": "GYSP-S1-W1",
+      "org_name": "东环干线运维班组",
+      "due_inspect": 0,
+      "inspected": 0,
+      "not_at_home": 0,
+      "安检覆盖率": null
+    },
+    {
+      "org_id": "GYSP-S1-W2",
+      "org_name": "滨江门站运维班组",
+      "due_inspect": 0,
+      "inspected": 0,
+      "not_at_home": 0,
+      "安检覆盖率": null
+    },
+    {
+      "org_id": "GYSP-S2-W1",
+      "org_name": "西环干线运维班组",
+      "due_inspect": 0,
+      "inspected": 0,
+      "not_at_home": 0,
+      "安检覆盖率": null
+    },
+    {
+      "org_id": "GYSP-S2-W2",
+      "org_name": "临港调压站运维班组",
+      "due_inspect": 0,
+      "inspected": 0,
+      "not_at_home": 0,
+      "安检覆盖率": null
+    },
+    {
+      "org_id": "JINGKAI-S1-W1",
+      "org_name": "智造产业园服务网格",
+      "due_inspect": 2035,
+      "inspected": 1931,
+      "not_at_home": 104,
+      "安检覆盖率": 0.9488943488943489
+    },
+    {
+      "org_id": "JINGKAI-S1-W2",
+      "org_name": "兴业大道服务网格",
+      "due_inspect": 1437,
+      "inspected": 1366,
+      "not_at_home": 71,
+      "安检覆盖率": 0.9505915100904663
+    },
+    {
+      "org_id": "JINGKAI-S2-W1",
+      "org_name": "科创产业园服务网格",
+      "due_inspect": 1772,
+      "inspected": 1635,
+      "not_at_home": 137,
+      "安检覆盖率": 0.922686230248307
+    },
+    {
+      "org_id": "JINGKAI-S2-W2",
+      "org_name": "丰裕路服务网格",
+      "due_inspect": 1700,
+      "inspected": 1570,
+      "not_at_home": 130,
+      "安检覆盖率": 0.9235294117647059
+    },
+    {
+      "org_id": "LINGANG-S1-W1",
+      "org_name": "港兴工业园服务网格",
+      "due_inspect": 1282,
+      "inspected": 1167,
+      "not_at_home": 115,
+      "安检覆盖率": 0.9102964118564743
+    },
+    {
+      "org_id": "LINGANG-S1-W2",
+      "org_name": "临江物流园服务网格",
+      "due_inspect": 1497,
+      "inspected": 1245,
+      "not_at_home": 252,
+      "安检覆盖率": 0.8316633266533067
+    },
+    {
+      "org_id": "LINGANG-S2-W1",
+      "org_name": "海棠社区服务网格",
+      "due_inspect": 1420,
+      "inspected": 1154,
+      "not_at_home": 266,
+      "安检覆盖率": 0.8126760563380282
+    },
+    {
+      "org_id": "LINGANG-S2-W2",
+      "org_name": "启航路服务网格",
+      "due_inspect": 2157,
+      "inspected": 2000,
+      "not_at_home": 157,
+      "安检覆盖率": 0.9272137227630969
+    },
+    {
+      "org_id": "SHAHU-S1-W1",
+      "org_name": "汀兰社区服务网格",
+      "due_inspect": 1431,
+      "inspected": 1327,
+      "not_at_home": 104,
+      "安检覆盖率": 0.9273235499650594
+    },
+    {
+      "org_id": "SHAHU-S1-W2",
+      "org_name": "荷风路服务网格",
+      "due_inspect": 1443,
+      "inspected": 1276,
+      "not_at_home": 167,
+      "安检覆盖率": 0.8842688842688843
+    },
+    {
+      "org_id": "SHAHU-S2-W1",
+      "org_name": "湖畔新城服务网格",
+      "due_inspect": 1432,
+      "inspected": 1386,
+      "not_at_home": 46,
+      "安检覆盖率": 0.9678770949720671
+    },
+    {
+      "org_id": "SHAHU-S2-W2",
+      "org_name": "青荷路服务网格",
+      "due_inspect": 1821,
+      "inspected": 1665,
+      "not_at_home": 156,
+      "安检覆盖率": 0.914332784184514
+    }
+  ],
+  "result": {
+    "error": null,
+    "requires_confirmation": false,
+    "confirmation_type": null,
+    "analysis": "## 江城燃气·安全与管网治理\n\n2026年9月，全域20个有入户安检计划的服务网格合计应检33,621户次、实检30,145户次、到访不遇3,476户次，整体安检覆盖率为89.66%；高压输配4个班组无应检计划，不适用覆盖率排名。\n\n【核心结论】\n- 全域安检覆盖率89.66%，处于较高水平，但网格间分化明显：最高97.87%（锦澜社区服务网格），最低81.27%（海棠社区服务网格），极差16.60个百分点。\n- 到访不遇是覆盖率未达100%的主要过程性因素之一，全域合计3,476户次；其中星河产业园服务网格（333户次）、海棠社区服务网格（266户次）、临江物流园服务网格（252户次）不遇量居前，需关注其上门时段安排与用户触达方式。\n- 高压输配分公司4个班组应检、实检、到访不遇均为0，属无入户安检职责，不参与覆盖率优劣判断。\n\n【亮点分析 •】\n- 锦澜社区服务网格（滨江城西营业所）：覆盖率97.87%，到访不遇仅27户次，为全域最低，入户执行效率突出。\n- 文澜路服务网格（高新生活服务中心）：覆盖率97.80%，到访不遇39户次，在应检量较大（1,775户次）的情况下仍保持高完成度。\n- 湖畔新城服务网格（沙湖北岸营业所）：覆盖率96.79%，到访不遇46户次，表现稳定。\n\n【问题诊断 •】\n- 海棠社区服务网格（临港新城营业所）：覆盖率81.27%，为全域最低；到访不遇266户次，占其应检量的18.73%，显著高于全域平均不遇占比（10.34%），提示该网格上门时间匹配度或用户配合度存在短板。\n- 星河产业园服务网格（高新科创服务中心）：覆盖率82.72%，到访不遇333户次为全域最高，占其应检量的17.28%，需排查是否因园区用户作息特殊导致集中不遇。\n- 临江物流园服务网格（临港港区服务中心）：覆盖率83.17%，到访不遇252户次，占其应检量的16.83%，同样存在较高的不遇比例。\n- 云麓社区服务网格（滨江城西营业所）：覆盖率83.79%，到访不遇184户次，占其应检量的16.21%，虽非最低覆盖率，但不遇比例偏高，需关注。\n\n【改进建议】\n- 对海棠、星河、临江物流园、云麓4个高不遇网格，建议开展上门时段优化试点（如增加晚间或周末上门），并建立不遇用户二次预约机制，目标将不遇占比压降至10%以内。\n- 将锦澜、文澜路、湖畔新城3个高覆盖网格的入户排班与用户沟通话术整理为最佳实践，在临港、高新、滨江相关营业所内横向推广。\n- 高压输配班组无入户安检职责，无需干预；后续若涉及其抢修或隐患指标，应单独取数分析，不与入户安检混同。\n- 当前数据为单月横截面，不遇高与覆盖率低之间的关联仅为描述性观察，未做统计检验，不能直接归因为“不遇导致覆盖率低”；建议结合历史月度数据验证趋势后再制定长期策略。",
+    "ask_flow": {
+      "flow": "basic",
+      "reason": "basic_selected",
+      "requested_flow": "basic",
+      "controller": "AskFlowController",
+      "duration_seconds": 153.72
+    }
+  },
+  "datasets": [
+    {
+      "dataset_id": 66,
+      "dataset_name": "江城燃气·安全与管网治理",
+      "sql": "SELECT org_id, org_name, due_inspect, inspected, not_at_home, inspected::numeric/NULLIF(due_inspect,0) AS 安检覆盖率 FROM v_gas_safety WHERE month='2026-09' ORDER BY branch_id, org_id",
+      "columns": [
+        "org_id",
+        "org_name",
+        "due_inspect",
+        "inspected",
+        "not_at_home",
+        "安检覆盖率"
+      ],
+      "rows": [
+        {
+          "org_id": "BINJIANG-S1-W1",
+          "org_name": "望江路服务网格",
+          "due_inspect": 1382,
+          "inspected": 1252,
+          "not_at_home": 130,
+          "安检覆盖率": 0.9059334298118669
+        },
+        {
+          "org_id": "BINJIANG-S1-W2",
+          "org_name": "滨港路服务网格",
+          "due_inspect": 929,
+          "inspected": 800,
+          "not_at_home": 129,
+          "安检覆盖率": 0.8611410118406889
+        },
+        {
+          "org_id": "BINJIANG-S2-W1",
+          "org_name": "锦澜社区服务网格",
+          "due_inspect": 1265,
+          "inspected": 1238,
+          "not_at_home": 27,
+          "安检覆盖率": 0.9786561264822135
+        },
+        {
+          "org_id": "BINJIANG-S2-W2",
+          "org_name": "云麓社区服务网格",
+          "due_inspect": 1135,
+          "inspected": 951,
+          "not_at_home": 184,
+          "安检覆盖率": 0.8378854625550661
+        },
+        {
+          "org_id": "GAOXIN-S1-W1",
+          "org_name": "光谷科创园服务网格",
+          "due_inspect": 1153,
+          "inspected": 1088,
+          "not_at_home": 65,
+          "安检覆盖率": 0.9436253252385083
+        },
+        {
+          "org_id": "GAOXIN-S1-W2",
+          "org_name": "星河产业园服务网格",
+          "due_inspect": 1927,
+          "inspected": 1594,
+          "not_at_home": 333,
+          "安检覆盖率": 0.8271925272444214
+        },
+        {
+          "org_id": "GAOXIN-S2-W1",
+          "org_name": "麓林社区服务网格",
+          "due_inspect": 1627,
+          "inspected": 1387,
+          "not_at_home": 240,
+          "安检覆盖率": 0.8524892440073756
+        },
+        {
+          "org_id": "GAOXIN-S2-W2",
+          "org_name": "文澜路服务网格",
+          "due_inspect": 1775,
+          "inspected": 1736,
+          "not_at_home": 39,
+          "安检覆盖率": 0.9780281690140845
+        },
+        {
+          "org_id": "GYSP-S1-W1",
+          "org_name": "东环干线运维班组",
+          "due_inspect": 0,
+          "inspected": 0,
+          "not_at_home": 0,
+          "安检覆盖率": null
+        },
+        {
+          "org_id": "GYSP-S1-W2",
+          "org_name": "滨江门站运维班组",
+          "due_inspect": 0,
+          "inspected": 0,
+          "not_at_home": 0,
+          "安检覆盖率": null
+        },
+        {
+          "org_id": "GYSP-S2-W1",
+          "org_name": "西环干线运维班组",
+          "due_inspect": 0,
+          "inspected": 0,
+          "not_at_home": 0,
+          "安检覆盖率": null
+        },
+        {
+          "org_id": "GYSP-S2-W2",
+          "org_name": "临港调压站运维班组",
+          "due_inspect": 0,
+          "inspected": 0,
+          "not_at_home": 0,
+          "安检覆盖率": null
+        },
+        {
+          "org_id": "JINGKAI-S1-W1",
+          "org_name": "智造产业园服务网格",
+          "due_inspect": 2035,
+          "inspected": 1931,
+          "not_at_home": 104,
+          "安检覆盖率": 0.9488943488943489
+        },
+        {
+          "org_id": "JINGKAI-S1-W2",
+          "org_name": "兴业大道服务网格",
+          "due_inspect": 1437,
+          "inspected": 1366,
+          "not_at_home": 71,
+          "安检覆盖率": 0.9505915100904663
+        },
+        {
+          "org_id": "JINGKAI-S2-W1",
+          "org_name": "科创产业园服务网格",
+          "due_inspect": 1772,
+          "inspected": 1635,
+          "not_at_home": 137,
+          "安检覆盖率": 0.922686230248307
+        },
+        {
+          "org_id": "JINGKAI-S2-W2",
+          "org_name": "丰裕路服务网格",
+          "due_inspect": 1700,
+          "inspected": 1570,
+          "not_at_home": 130,
+          "安检覆盖率": 0.9235294117647059
+        },
+        {
+          "org_id": "LINGANG-S1-W1",
+          "org_name": "港兴工业园服务网格",
+          "due_inspect": 1282,
+          "inspected": 1167,
+          "not_at_home": 115,
+          "安检覆盖率": 0.9102964118564743
+        },
+        {
+          "org_id": "LINGANG-S1-W2",
+          "org_name": "临江物流园服务网格",
+          "due_inspect": 1497,
+          "inspected": 1245,
+          "not_at_home": 252,
+          "安检覆盖率": 0.8316633266533067
+        },
+        {
+          "org_id": "LINGANG-S2-W1",
+          "org_name": "海棠社区服务网格",
+          "due_inspect": 1420,
+          "inspected": 1154,
+          "not_at_home": 266,
+          "安检覆盖率": 0.8126760563380282
+        },
+        {
+          "org_id": "LINGANG-S2-W2",
+          "org_name": "启航路服务网格",
+          "due_inspect": 2157,
+          "inspected": 2000,
+          "not_at_home": 157,
+          "安检覆盖率": 0.9272137227630969
+        },
+        {
+          "org_id": "SHAHU-S1-W1",
+          "org_name": "汀兰社区服务网格",
+          "due_inspect": 1431,
+          "inspected": 1327,
+          "not_at_home": 104,
+          "安检覆盖率": 0.9273235499650594
+        },
+        {
+          "org_id": "SHAHU-S1-W2",
+          "org_name": "荷风路服务网格",
+          "due_inspect": 1443,
+          "inspected": 1276,
+          "not_at_home": 167,
+          "安检覆盖率": 0.8842688842688843
+        },
+        {
+          "org_id": "SHAHU-S2-W1",
+          "org_name": "湖畔新城服务网格",
+          "due_inspect": 1432,
+          "inspected": 1386,
+          "not_at_home": 46,
+          "安检覆盖率": 0.9678770949720671
+        },
+        {
+          "org_id": "SHAHU-S2-W2",
+          "org_name": "青荷路服务网格",
+          "due_inspect": 1821,
+          "inspected": 1665,
+          "not_at_home": 156,
+          "安检覆盖率": 0.914332784184514
+        }
+      ],
+      "analysis": "2026年9月，全域20个有入户安检计划的服务网格合计应检33,621户次、实检30,145户次、到访不遇3,476户次，整体安检覆盖率为89.66%；高压输配4个班组无应检计划，不适用覆盖率排名。\n\n【核心结论】\n- 全域安检覆盖率89.66%，处于较高水平，但网格间分化明显：最高97.87%（锦澜社区服务网格），最低81.27%（海棠社区服务网格），极差16.60个百分点。\n- 到访不遇是覆盖率未达100%的主要过程性因素之一，全域合计3,476户次；其中星河产业园服务网格（333户次）、海棠社区服务网格（266户次）、临江物流园服务网格（252户次）不遇量居前，需关注其上门时段安排与用户触达方式。\n- 高压输配分公司4个班组应检、实检、到访不遇均为0，属无入户安检职责，不参与覆盖率优劣判断。\n\n【亮点分析 •】\n- 锦澜社区服务网格（滨江城西营业所）：覆盖率97.87%，到访不遇仅27户次，为全域最低，入户执行效率突出。\n- 文澜路服务网格（高新生活服务中心）：覆盖率97.80%，到访不遇39户次，在应检量较大（1,775户次）的情况下仍保持高完成度。\n- 湖畔新城服务网格（沙湖北岸营业所）：覆盖率96.79%，到访不遇46户次，表现稳定。\n\n【问题诊断 •】\n- 海棠社区服务网格（临港新城营业所）：覆盖率81.27%，为全域最低；到访不遇266户次，占其应检量的18.73%，显著高于全域平均不遇占比（10.34%），提示该网格上门时间匹配度或用户配合度存在短板。\n- 星河产业园服务网格（高新科创服务中心）：覆盖率82.72%，到访不遇333户次为全域最高，占其应检量的17.28%，需排查是否因园区用户作息特殊导致集中不遇。\n- 临江物流园服务网格（临港港区服务中心）：覆盖率83.17%，到访不遇252户次，占其应检量的16.83%，同样存在较高的不遇比例。\n- 云麓社区服务网格（滨江城西营业所）：覆盖率83.79%，到访不遇184户次，占其应检量的16.21%，虽非最低覆盖率，但不遇比例偏高，需关注。\n\n【改进建议】\n- 对海棠、星河、临江物流园、云麓4个高不遇网格，建议开展上门时段优化试点（如增加晚间或周末上门），并建立不遇用户二次预约机制，目标将不遇占比压降至10%以内。\n- 将锦澜、文澜路、湖畔新城3个高覆盖网格的入户排班与用户沟通话术整理为最佳实践，在临港、高新、滨江相关营业所内横向推广。\n- 高压输配班组无入户安检职责，无需干预；后续若涉及其抢修或隐患指标，应单独取数分析，不与入户安检混同。\n- 当前数据为单月横截面，不遇高与覆盖率低之间的关联仅为描述性观察，未做统计检验，不能直接归因为“不遇导致覆盖率低”；建议结合历史月度数据验证趋势后再制定长期策略。",
+      "analysis_status": "model_generated",
+      "query_status": "completed",
+      "error": null,
+      "row_count": 24
+    }
+  ]
+}

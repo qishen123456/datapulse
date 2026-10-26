@@ -1,38 +1,47 @@
-{
-  "gas_org.csv": {
+[
+  {
+    "table": "gas_org",
     "rows": 43,
-    "sha256": "889b6dcd1c55096af1e4918ad358acfa05ac76f1a38d6066308489e0b1444388"
+    "sha256": "00fca3e7c3c5d8dc0b9017aec0d8ce84254aba26f844f4412351aeb66a4323b6"
   },
-  "gas_sales_monthly.csv": {
+  {
+    "table": "gas_sales_monthly",
     "rows": 2640,
-    "sha256": "27c81dec6d342a3826b6cb8f03c20c43f1fbe5df4fec455bd867526d2b30e931"
+    "sha256": "cd6ab38b245fb313561f57ba5d508d2151c9f74f37cc7673bb4d625af117ebb3"
   },
-  "gas_supply_monthly.csv": {
+  {
+    "table": "gas_supply_monthly",
     "rows": 990,
-    "sha256": "b6de2a4411658eec8687bd78143c60a61b74a8b9d79a6b0b0bd5b418aee8e28e"
+    "sha256": "b4f7085a0d9d5ed22f23a77f6c6474a22317792e261f9a0570ff9c59ca483e03"
   },
-  "gas_profit_monthly.csv": {
+  {
+    "table": "gas_profit_monthly",
     "rows": 396,
-    "sha256": "5595f8ef6d74202cfa4d7f8f6d9a2aa704069e151f0ae4cd98971c2bbd8e4c20"
+    "sha256": "268f44037a66df4d77a853dd45e55870ad19935b4322b7fcac48adcbc2bcf934"
   },
-  "gas_ar_monthly.csv": {
+  {
+    "table": "gas_ar_monthly",
     "rows": 3960,
-    "sha256": "3ba672e8a375146b9746fdd14307d67bc8a37bf2df5020145986a727fdc04ddb"
+    "sha256": "204ee12f1ab511e1566e9df877e1b1f52686687cd260396665bfa27eda746d57"
   },
-  "gas_growth_monthly.csv": {
+  {
+    "table": "gas_growth_monthly",
     "rows": 1320,
-    "sha256": "ffaeaa5a5f3abc197f77ac06e9e1ae486bafd4cee46088dc608025764982051f"
+    "sha256": "36246dd86364df6651f4c0ca427ea48856effd95edd2179b9d6637a5a0e14233"
   },
-  "gas_safety_monthly.csv": {
+  {
+    "table": "gas_safety_monthly",
     "rows": 792,
-    "sha256": "546bb5a173e00c04bc5745069bb268480754d9e25c6b115fcd5297b7b98cb623"
+    "sha256": "6d3734dc3849e92f6207145b81f32104a32a128b89df0b166597766c99e18928"
   },
-  "gas_network_assets.csv": {
+  {
+    "table": "gas_network_assets",
     "rows": 12000,
-    "sha256": "05c64459c7b7503307f5a1d283d99fd0f89e97aedccaf36c1688156a69e2adff"
+    "sha256": "66db04eacf8921514a6651d3a79049a011cbb970c166941f0e6e9f96971ced68"
   },
-  "gas_hazard_orders.csv": {
+  {
+    "table": "gas_hazard_orders",
     "rows": 120,
-    "sha256": "086f045c01a86898fdfdfae40541883da68c95df0e2fc7957b7f98e5af06ec6f"
+    "sha256": "82cfb796095a288884730e0ac1b6232f8952883f22bba24c79ab8caa19dd5ae9"
   }
-}
+]

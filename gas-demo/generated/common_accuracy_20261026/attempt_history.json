@@ -1,0 +1,1437 @@
+[
+  {
+    "id": "GAS_SAFE-05",
+    "question": "东环干线运维班组截至2026年9月底有哪些未闭环隐患",
+    "code": "GAS_SAFE",
+    "seconds": 11.33,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 1,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_BIZ-05",
+    "question": "2026年9月各气源采购气量和加权均价",
+    "code": "GAS_BIZ",
+    "seconds": 14.07,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 3,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_AR-06",
+    "question": "2026年9月末工商客户前十大欠费占比",
+    "code": "GAS_AR",
+    "seconds": 12.07,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 1,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_BIZ-06",
+    "question": "沙湖分公司2026年各月供销差量和供销差率",
+    "code": "GAS_BIZ",
+    "seconds": 12.87,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "error"
+      },
+      {
+        "stage": "request.error",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 9,
+    "status": "execution_failed",
+    "reason": "Four-agent ask failed: 本任务修复次数已达控制台上限，请调整问题后重试。"
+  },
+  {
+    "id": "GAS_SAFE-06",
+    "question": "2026年9月新发现隐患截至月底闭环率",
+    "code": "GAS_SAFE",
+    "seconds": 10.73,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 4,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_AR-07",
+    "question": "2026年9月末各分公司账龄五档与余额能否勾稽",
+    "code": "GAS_AR",
+    "seconds": 13.11,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 5,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_BIZ-07",
+    "question": "2026年9月各服务中心报装、通气和净增用户",
+    "code": "GAS_BIZ",
+    "seconds": 13.22,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 10,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_SAFE-07",
+    "question": "截至2026年6月底与9月底未闭环隐患数对比",
+    "code": "GAS_SAFE",
+    "seconds": 13.12,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "error"
+      },
+      {
+        "stage": "request.error",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 2,
+    "status": "execution_failed",
+    "reason": "Four-agent ask failed: 本任务修复次数已达控制台上限，请调整问题后重试。"
+  },
+  {
+    "id": "GAS_AR-08",
+    "question": "登记稽核差异与重算量价差异有哪些不一致",
+    "code": "GAS_AR",
+    "seconds": 5.55,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate.retry",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 14,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_BIZ-08",
+    "question": "2026年9月各分公司每方采购与配气成本",
+    "code": "GAS_BIZ",
+    "seconds": 16.13,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 6,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_AR-09",
+    "question": "2026年9月末应收余额是多少",
+    "code": "GAS_AR",
+    "seconds": 11.83,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 1,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_BIZ-09",
+    "question": "2026年9月各分公司销气量排名",
+    "code": "GAS_BIZ",
+    "seconds": 8.97,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.node_index_entity_resolution",
+        "status": "retry"
+      },
+      {
+        "stage": "agent1.node_index_entity_resolution",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "error"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 5,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_SAFE-09",
+    "question": "2026年9月各分公司安检覆盖率",
+    "code": "GAS_SAFE",
+    "seconds": 13.56,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 6,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_AR-10",
+    "question": "2026年9月欠费最多的十个模拟工商客户",
+    "code": "GAS_AR",
+    "seconds": 10.93,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.node_index_entity_resolution",
+        "status": "retry"
+      },
+      {
+        "stage": "agent1.node_index_entity_resolution",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "error"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 10,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_BIZ-10",
+    "question": "2026年9月各分公司供销差率",
+    "code": "GAS_BIZ",
+    "seconds": 15.76,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 5,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_SAFE-10",
+    "question": "截至2026年9月底有哪些超期未闭环隐患",
+    "code": "GAS_SAFE",
+    "seconds": 14.89,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 13,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_AR-11",
+    "question": "2026年9月超过180天的应收有多少",
+    "code": "GAS_AR",
+    "seconds": 11.97,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 1,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_BIZ-11",
+    "question": "2026年前三季度模拟税前利润是多少",
+    "code": "GAS_BIZ",
+    "seconds": 13.42,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 1,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_SAFE-11",
+    "question": "2026年9月各分公司抢修及时率",
+    "code": "GAS_SAFE",
+    "seconds": 11.76,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 6,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_AR-12",
+    "question": "2026年9月各分公司气费回收率",
+    "code": "GAS_AR",
+    "seconds": 12.67,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 5,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_BIZ-12",
+    "question": "2026年9月居民和工商业销气收入各多少",
+    "code": "GAS_BIZ",
+    "seconds": 12.24,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 2,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_SAFE-08",
+    "question": "截至2026年9月底关联隐患的管段去重里程",
+    "code": "GAS_SAFE",
+    "seconds": 13.83,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 6,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_BIZ-13",
+    "question": "2026年9月哪个分公司估抄率最高",
+    "code": "GAS_BIZ",
+    "seconds": 9.52,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.node_index_entity_resolution",
+        "status": "retry"
+      },
+      {
+        "stage": "agent1.node_index_entity_resolution",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "error"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 1,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_SAFE-12",
+    "question": "2026年9月到访不遇还有多少户",
+    "code": "GAS_SAFE",
+    "seconds": 14.55,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 1,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  },
+  {
+    "id": "GAS_AR-15",
+    "question": "2026年9月末应收账龄结构是什么样",
+    "code": "GAS_AR",
+    "seconds": 13.44,
+    "stages": [
+      {
+        "stage": "stability.context",
+        "status": "response"
+      },
+      {
+        "stage": "agent1.scope_confirmed",
+        "status": "response"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "retry"
+      },
+      {
+        "stage": "agent2.sql_generate",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "retry"
+      },
+      {
+        "stage": "agent3.sql_review",
+        "status": "response"
+      },
+      {
+        "stage": "agent3.evidence",
+        "status": "response"
+      },
+      {
+        "stage": "stability.explain",
+        "status": "response"
+      },
+      {
+        "stage": "stability.assert",
+        "status": "response"
+      },
+      {
+        "stage": "datasource.execute_sql",
+        "status": "response"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      },
+      {
+        "stage": "agent4.analysis",
+        "status": "error"
+      }
+    ],
+    "expected_rows": 1,
+    "status": "execution_failed",
+    "reason": "['model_unavailable']"
+  }
+]

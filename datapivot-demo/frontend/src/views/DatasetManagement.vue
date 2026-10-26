@@ -134,7 +134,8 @@
                 <div v-if="canUseDatasetAction('synonym', 'create')" class="toolbar"><el-button size="small" @click="openItemEditor('synonym', -1)">新增路由词</el-button></div>
                 <el-table :data="full.synonyms" border size="small">
                   <el-table-column label="同义词" min-width="180"><template #default="{ row }">{{ row.synonym }}</template></el-table-column>
-                  <el-table-column label="归一词" min-width="180"><template #default="{ row }">{{ row.normalized_synonym }}</template></el-table-column>
+                  <el-table-column label="标准术语" min-width="160"><template #default="{ row }">{{ synonymSemantic(row)?.canonical || '未维护业务定义' }}</template></el-table-column>
+                  <el-table-column label="含义与使用边界" min-width="340"><template #default="{ row }"><span class="semantic-definition">{{ synonymSemantic(row)?.definition || '当前仅用于检索匹配，可在业务扩展词典中补充定义。' }}</span></template></el-table-column>
                   <el-table-column label="权重" width="80"><template #default="{ row }">{{ row.weight }}</template></el-table-column>
                   <el-table-column label="操作" width="130">
                     <template #default="{ $index }">
@@ -355,7 +356,7 @@
       <!-- 同义词编辑 -->
       <el-form v-if="itemEditorType === 'synonym'" label-width="80px">
         <el-form-item label="同义词"><el-input v-model="itemDraft.synonym" /></el-form-item>
-        <el-form-item label="归一词"><el-input v-model="itemDraft.normalized_synonym" /></el-form-item>
+        <el-form-item label="检索归一键"><el-input v-model="itemDraft.normalized_synonym" /><small>用于检索去重，不是标准业务术语；业务定义在扩展词典中维护。</small></el-form-item>
         <el-form-item label="权重"><el-input-number v-model="itemDraft.weight" :min="1" :max="10" /></el-form-item>
       </el-form>
 
@@ -678,11 +679,19 @@ const assetGroups = [
   {id:'quality',label:'质量与接入',items:[
     {key:'golden',label:'SQL 样例',description:'保存经过核对的查询样例，供查询专家参考。',collection:'golden_sql_samples'},
     {key:'regression_cases',label:'标准题集',description:'定义代表性业务问题及预期结果，用于验证问数质量。',collection:'regression_cases'},
-    {key:'external',label:'外部配置',description:'维护飞书与其他外部系统在当前数据集上的接入配置。',collection:'external_configs'}]}
+    {key:'external',label:'业务扩展与接入',description:'维护可编辑的业务词典、语义契约及外部接入配置。',collection:'external_configs'}]}
 ]
 const activeAssetGroup = computed(()=>assetGroups.find(group=>group.items.some(item=>item.key===activeTab.value)) || assetGroups[0])
 const activeAssetSection = computed(()=>activeAssetGroup.value.items.find(item=>item.key===activeTab.value) || activeAssetGroup.value.items[0])
 const assetCount = key => key==='transforms'?transforms.value.length:(full[assetGroups.flatMap(group=>group.items).find(item=>item.key===key)?.collection] || []).length
+
+const businessGlossary = computed(() => {
+  const entry=(full.external_configs || []).find(item=>item.config_key==='business_glossary' && item.is_active!==false)
+  let terms=entry?.config_value || []
+  if(typeof terms==='string'){try{terms=JSON.parse(terms)}catch{terms=[]}}
+  return new Map((Array.isArray(terms)?terms:[]).map(item=>[String(item.alias || '').trim().toLowerCase(),item]))
+})
+const synonymSemantic = row => businessGlossary.value.get(String(row.synonym || '').trim().toLowerCase())
 
 // ========== 基础状态 ==========
 const datasets = ref([])
@@ -2221,14 +2230,14 @@ onUnmounted(() => {
 .dataset-catalog-list{flex:1;padding:10px 8px;overflow:auto;max-height:calc(100dvh - 375px);min-height:280px;}
 .dataset-tile{display:block;width:100%;text-align:left;padding:14px 12px;border:1px solid transparent;border-radius:7px;margin:2px 0 6px;background:transparent;transition:background .15s,border-color .15s;}
 .dataset-tile:hover{background:#f0f3f6;}.dataset-tile.active{background:#fff;border-color:#d5dfe9;box-shadow:0 2px 5px #1a2d4306;}
-.dataset-tile-head{display:flex;align-items:flex-start;gap:10px;}.dataset-asset-icon{width:23px;height:23px;flex:none;color:#6d839b;}.dataset-asset-icon svg{width:20px;height:20px;}.dataset-tile.active .dataset-asset-icon{color:#365f91;}
-.dataset-tile-title{font-size:13px;font-weight:600;line-height:1.65;color:#354154;overflow-wrap:anywhere;}.dataset-tile-meta{display:block;margin:5px 0 9px 33px;font-size:10px;letter-spacing:.5px;color:#7b8795;}.dataset-tile-sub{display:flex;flex-wrap:wrap;gap:9px;font-size:10px;color:#89929d;margin-left:33px;}.asset-state{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:500;color:#51836f;white-space:nowrap;}.asset-state:before{content:'';width:5px;height:5px;border-radius:50%;background:#519577;}.asset-state.inactive{color:#8e96a0;}.asset-state.inactive:before{background:#a1a8b0;}.dataset-tile.inactive .dataset-tile-title{color:#8a939f;}
+.dataset-tile-head{display:flex;align-items:flex-start;gap:10px;}.dataset-asset-icon{width:23px;height:23px;flex:none;color:#6d839b;}.dataset-asset-icon svg{width:20px;height:20px;}.dataset-tile.active .dataset-asset-icon{color:#3c536e;}
+.dataset-tile-title{font-size:13px;font-weight:600;line-height:1.65;color:#354154;overflow-wrap:anywhere;}.dataset-tile-meta{display:block;margin:5px 0 9px 33px;font-size:10px;letter-spacing:.5px;color:#7b8795;}.dataset-tile-sub{display:flex;flex-wrap:wrap;gap:9px;font-size:10px;color:#89929d;margin-left:33px;}.asset-state{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:500;color:#526b7a;white-space:nowrap;}.asset-state:before{content:'';width:5px;height:5px;border-radius:50%;background:#526b7a;}.asset-state.inactive{color:#8e96a0;}.asset-state.inactive:before{background:#a1a8b0;}.dataset-tile.inactive .dataset-tile-title{color:#8a939f;}
 .catalog-footnote{margin-top:auto;padding:16px 18px;border-top:1px solid #e8ebef;font-size:10px;line-height:1.6;color:#8c96a2;}
-.dataset-editor{min-width:0;background:#fff;}.dataset-identity{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:24px 26px;border-bottom:1px solid #e9edf1;}.dataset-identity-copy{min-width:0;}.dataset-identity-line{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}.dataset-identity h2{font-size:20px;font-weight:600;line-height:1.6;margin:8px 0 6px;letter-spacing:-.4px;}.dataset-identity-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:#798592;font-size:11px;}.dataset-identity-meta i{width:3px;height:3px;border-radius:50%;background:#c4cbd3;}.dirty-indicator{color:#a47c35;font-size:10px;background:#fcf6e9;padding:2px 7px;border-radius:4px;}
+.dataset-editor{min-width:0;background:#fff;}.dataset-identity{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:24px 26px;border-bottom:1px solid #e9edf1;}.dataset-identity-copy{min-width:0;}.dataset-identity-line{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}.dataset-identity h2{font-size:20px;font-weight:600;line-height:1.6;margin:8px 0 6px;letter-spacing:-.4px;}.dataset-identity-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:#798592;font-size:11px;}.dataset-identity-meta i{width:3px;height:3px;border-radius:50%;background:#c4cbd3;}.dirty-indicator{color:#806b47;font-size:10px;background:#f5f2ec;padding:2px 7px;border-radius:4px;}
 .header-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}.header-actions :deep(.el-button+.el-button){margin-left:0;}.dataset-editor-body{padding:0 26px 26px;}
 .dataset-properties{border-bottom:1px solid #eceff3;}.dataset-properties summary{display:flex;align-items:center;gap:14px;list-style:none;padding:16px 0;font-size:12px;color:#435164;cursor:pointer;}.dataset-properties summary::-webkit-details-marker,.quality-disclosure summary::-webkit-details-marker{display:none;}.properties-summary{font-size:11px;color:#8b95a2;}.dataset-properties summary svg,.quality-disclosure summary svg{width:12px;height:12px;margin-left:auto;color:#8593a3;transition:transform .15s;}.dataset-properties[open] summary svg,.quality-disclosure[open] summary svg{transform:rotate(90deg);}.dataset-properties-body{padding:4px 0 20px;}.base-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 18px;}.base-form :deep(.el-form-item__label){font-size:11px!important;color:#6f7b8c;line-height:1.6!important;margin-bottom:7px;}.property-description{grid-column:span 2;}.property-switch-note{font-size:11px;color:#6e7d8d;margin-left:10px;}.property-danger{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:8px;font-size:11px;color:#9099a5;}
-.quality-disclosure{margin:16px 0;border:1px solid #e6ebee;border-radius:7px;}.quality-disclosure>summary{display:flex;align-items:center;gap:16px;padding:13px 16px;cursor:pointer;list-style:none;}.quality-score{font-size:23px;letter-spacing:-.6px;color:#3d6b5c;font-variant-numeric:tabular-nums;}.quality-score small{font-size:10px;color:#90a196;margin-left:3px;}.quality-summary-copy{display:flex;flex-direction:column;gap:4px;font-size:11px;color:#89948f;}.quality-summary-copy strong{font-size:12px;font-weight:500;color:#45584e;}.quality-summary-copy strong span{font-size:10px;color:#7a9585;margin-left:12px;}.quality-track{height:4px;background:#edf1ef;border-radius:4px;max-width:160px;flex:1;margin-left:auto;overflow:hidden;}.quality-track i{display:block;height:100%;background:#6d9b84;border-radius:4px;}.quality-detail-label{font-size:10px;color:#7c8b85;}.quality-disclosure summary svg{margin-left:0;}.quality-overview{padding:0 16px 16px;}.quality-checks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;}.quality-check{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:#7a8790;padding:9px 0;border-top:1px solid #edf0f2;}.quality-check strong{font-weight:500;color:#4f6f60;white-space:nowrap;}.quality-check small{font-size:10px;color:#a0a9af;}.quality-gaps{font-size:11px;line-height:1.7;color:#957a46;margin-top:10px;}
-.knowledge-workspace{margin-top:23px;min-width:0;}.knowledge-category-nav{display:flex;align-items:center;gap:24px;border-bottom:1px solid #e9edf1;}.knowledge-category-nav button{font-size:13px;font-weight:500;color:#8a94a1;padding:0 0 12px;border-bottom:2px solid transparent;display:flex;align-items:center;gap:7px;}.knowledge-category-nav button[aria-pressed=true]{color:#365f91;border-color:#365f91;}.knowledge-category-nav button span{font-size:10px;background:#f0f3f7;color:#8c99a8;min-width:18px;text-align:center;line-height:17px;border-radius:4px;}.knowledge-section-nav{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0 22px;}.knowledge-section-nav button{font-size:11px;color:#7c8897;padding:7px 11px;border:1px solid transparent;border-radius:5px;}.knowledge-section-nav button span{font-size:10px;color:#9aa6b4;margin-left:7px;}.knowledge-section-nav button[aria-current=page]{color:#385b85;background:#f1f5f9;border-color:#e2e9f1;}.knowledge-section-intro{display:flex;justify-content:space-between;gap:16px;margin-bottom:20px;align-items:flex-start;}.knowledge-section-intro h3{font-size:15px;font-weight:600;color:#283647;margin-bottom:6px;}.knowledge-section-intro p{font-size:11px;line-height:1.7;color:#82909d;}.knowledge-section-intro>span{font-size:10px;color:#96a0ac;white-space:nowrap;padding-top:2px;}.knowledge-content-tabs :deep(>.el-tabs__header){display:none;}.knowledge-content-tabs :deep(.el-tabs__content){min-width:0;overflow:hidden;}.knowledge-content-tabs :deep(.el-table){--el-table-border-color:#e9edf2;--el-table-header-bg-color:#f8fafb;font-size:12px;}.knowledge-content-tabs :deep(.el-table th.el-table__cell){font-weight:500;font-size:11px;color:#7b8795;}.knowledge-content-tabs :deep(.el-table .el-table__cell){padding:11px 0;}.knowledge-content-tabs :deep(.el-table--border .el-table__cell){border-right:none;}.knowledge-content-tabs :deep(.el-table--border::after){display:none;}.toolbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px;}.toolbar :deep(.el-button+.el-button){margin-left:0;}
+.quality-disclosure{margin:16px 0;border:1px solid #e6ebee;border-radius:7px;}.quality-disclosure>summary{display:flex;align-items:center;gap:16px;padding:13px 16px;cursor:pointer;list-style:none;}.quality-score{font-size:23px;letter-spacing:-.6px;color:#526b7a;font-variant-numeric:tabular-nums;}.quality-score small{font-size:10px;color:#90a196;margin-left:3px;}.quality-summary-copy{display:flex;flex-direction:column;gap:4px;font-size:11px;color:#89948f;}.quality-summary-copy strong{font-size:12px;font-weight:500;color:#526b7a;}.quality-summary-copy strong span{font-size:10px;color:#526b7a;margin-left:12px;}.quality-track{height:4px;background:#edf2f5;border-radius:4px;max-width:160px;flex:1;margin-left:auto;overflow:hidden;}.quality-track i{display:block;height:100%;background:#526b7a;border-radius:4px;}.quality-detail-label{font-size:10px;color:#7c8b85;}.quality-disclosure summary svg{margin-left:0;}.quality-overview{padding:0 16px 16px;}.quality-checks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;}.quality-check{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:#7a8790;padding:9px 0;border-top:1px solid #edf0f2;}.quality-check strong{font-weight:500;color:#526b7a;white-space:nowrap;}.quality-check small{font-size:10px;color:#a0a9af;}.quality-gaps{font-size:11px;line-height:1.7;color:#806b47;margin-top:10px;}
+.knowledge-workspace{margin-top:23px;min-width:0;}.knowledge-category-nav{display:flex;align-items:center;gap:24px;border-bottom:1px solid #e9edf1;}.knowledge-category-nav button{font-size:13px;font-weight:500;color:#8a94a1;padding:0 0 12px;border-bottom:2px solid transparent;display:flex;align-items:center;gap:7px;}.knowledge-category-nav button[aria-pressed=true]{color:#3c536e;border-color:#3c536e;}.knowledge-category-nav button span{font-size:10px;background:#f0f3f7;color:#8c99a8;min-width:18px;text-align:center;line-height:17px;border-radius:4px;}.knowledge-section-nav{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0 22px;}.knowledge-section-nav button{font-size:11px;color:#7c8897;padding:7px 11px;border:1px solid transparent;border-radius:5px;}.knowledge-section-nav button span{font-size:10px;color:#9aa6b4;margin-left:7px;}.knowledge-section-nav button[aria-current=page]{color:#3c536e;background:#edf2f8;border-color:#e2e9f1;}.knowledge-section-intro{display:flex;justify-content:space-between;gap:16px;margin-bottom:20px;align-items:flex-start;}.knowledge-section-intro h3{font-size:15px;font-weight:600;color:#283647;margin-bottom:6px;}.knowledge-section-intro p{font-size:11px;line-height:1.7;color:#82909d;}.knowledge-section-intro>span{font-size:10px;color:#96a0ac;white-space:nowrap;padding-top:2px;}.knowledge-content-tabs :deep(>.el-tabs__header){display:none;}.knowledge-content-tabs :deep(.el-tabs__content){min-width:0;overflow:hidden;}.knowledge-content-tabs :deep(.el-table){--el-table-border-color:#e9edf2;--el-table-header-bg-color:#f8fafb;font-size:12px;}.knowledge-content-tabs :deep(.el-table th.el-table__cell){font-weight:500;font-size:11px;color:#7b8795;}.knowledge-content-tabs :deep(.el-table .el-table__cell){padding:11px 0;}.knowledge-content-tabs :deep(.el-table--border .el-table__cell){border-right:none;}.knowledge-content-tabs :deep(.el-table--border::after){display:none;}.toolbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px;}.toolbar :deep(.el-button+.el-button){margin-left:0;}
 .readonly-alert{margin:16px 0;}.readonly-summary-card{padding:22px;border:1px solid #e7ebf0;border-radius:8px;background:#fafbfc;margin-top:20px;}.readonly-summary-title{font-size:14px;font-weight:600;}.readonly-summary-desc{font-size:12px;color:#83909d;line-height:1.8;margin:9px 0 20px;}.readonly-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;}.readonly-summary-grid span{display:block;font-size:10px;color:#8794a3;margin-bottom:6px;}.readonly-summary-grid strong{font-size:12px;color:#536276;}
 .dataset-page button:focus-visible,.dataset-page summary:focus-visible{outline:2px solid #6c8cad;outline-offset:3px;}
 @media(max-width:1300px){.dataset-workspace{grid-template-columns:230px minmax(0,1fr);}.dataset-identity{align-items:flex-start;flex-direction:column;}.dataset-identity .header-actions{width:100%;justify-content:flex-start;}.quality-track{max-width:90px;}.quality-checks{grid-template-columns:repeat(2,minmax(0,1fr));}.base-form{grid-template-columns:repeat(2,minmax(0,1fr));}.property-description{grid-column:span 1;}}
@@ -2255,13 +2264,13 @@ onUnmounted(() => {
 .prompt-generate-form {
   margin-top: 2px;
   padding: 16px 16px 2px;
-  border: 1px solid #F2F5F4;
+  border: 1px solid #edf2f5;
   border-radius: 4px;
-  background: #F2F5F4;
+  background: #edf2f5;
 }
 .prompt-progress-panel {
-  border: 1px solid #eff6ff;
-  background: linear-gradient(180deg, #F2F5F4 0%, #eff6ff 100%);
+  border: 1px solid #edf2f8;
+  background: linear-gradient(180deg, #edf2f5 0%, #edf2f8 100%);
   border-radius: 4px;
   padding: 14px 16px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
@@ -2286,7 +2295,7 @@ onUnmounted(() => {
 }
 .prompt-progress-head em {
   flex: 0 0 auto;
-  color: #1d4ed8;
+  color: #425f83;
   font-style: normal;
   font-weight: 600;
 }
@@ -2327,14 +2336,14 @@ onUnmounted(() => {
 }
 .prompt-stage.done,
 .prompt-stage.active {
-  border-color: #eff6ff;
-  color: #1d4ed8;
-  background: #ECFDF5;
+  border-color: #edf2f8;
+  color: #425f83;
+  background: #edf2f5;
 }
 .prompt-stage.done span,
 .prompt-stage.active span {
   color: #fff;
-  background: #1d4ed8;
+  background: #425f83;
 }
 .prompt-stage.active {
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
@@ -2350,3 +2359,5 @@ onUnmounted(() => {
   .prompt-stage-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 </style>
+
+<style scoped>.semantic-definition{display:block;color:#475569;line-height:1.8;font-size:13px;white-space:normal}</style>

@@ -1,0 +1,57 @@
+{
+  "question": "2026年9月各分公司抢修及时率",
+  "reference_sql": "SELECT branch_name,SUM(emergency_on_time)::numeric/NULLIF(SUM(emergency_total),0) AS 抢修及时率 FROM v_gas_safety WHERE month='2026-09' GROUP BY branch_name",
+  "expected": [
+    {
+      "branch_name": "临港分公司",
+      "抢修及时率": 0.9357798165137615
+    },
+    {
+      "branch_name": "沙湖分公司",
+      "抢修及时率": 0.9134615384615384
+    },
+    {
+      "branch_name": "滨江分公司",
+      "抢修及时率": 0.9019607843137255
+    },
+    {
+      "branch_name": "经开分公司",
+      "抢修及时率": 0.8769230769230769
+    },
+    {
+      "branch_name": "高压输配分公司",
+      "抢修及时率": 0.8947368421052632
+    },
+    {
+      "branch_name": "高新分公司",
+      "抢修及时率": 0.8837209302325582
+    }
+  ],
+  "result": {
+    "error": null,
+    "requires_confirmation": false,
+    "confirmation_type": null,
+    "analysis": "## 江城燃气·安全与管网治理\n\nAI 问数未完成：未能生成或通过校验的可执行查询。请调整问题或检查模型服务后重试；当前未生成业务答案。",
+    "ask_flow": {
+      "flow": "basic",
+      "reason": "basic_selected",
+      "requested_flow": "basic",
+      "controller": "AskFlowController",
+      "duration_seconds": 1.817
+    }
+  },
+  "datasets": [
+    {
+      "dataset_id": 66,
+      "dataset_name": "江城燃气·安全与管网治理",
+      "sql": "",
+      "columns": [],
+      "rows": [],
+      "analysis": "AI 问数未完成：未能生成或通过校验的可执行查询。请调整问题或检查模型服务后重试；当前未生成业务答案。",
+      "analysis_status": "model_unavailable",
+      "query_status": "failed",
+      "error": null,
+      "row_count": 0
+    }
+  ]
+}

@@ -94,7 +94,7 @@ defineEmits(['togglePanel', 'newChat', 'showHistory'])
   padding: 0;
   border-radius: 999px;
   background: transparent;
-  color: #386553;
+  color: #526b7a;
   font-size: 12px;
   font-weight: 800;
   box-shadow: none;
@@ -139,18 +139,18 @@ defineEmits(['togglePanel', 'newChat', 'showHistory'])
 }
 
 .ax-solid-btn {
-  border: 1px solid rgba(29, 78, 216, 0.42);
+  border: 1px solid rgba(66, 95, 131, 0.42);
   background: #FFFFFF;
-  color: #386553;
+  color: #526b7a;
   box-shadow:
-    0 10px 20px rgba(29, 78, 216, 0.06),
+    0 10px 20px rgba(66, 95, 131, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .ax-solid-btn:hover {
-  border-color: rgba(29, 78, 216, 0.58);
-  background: rgba(29, 78, 216, 0.04);
-  color: #386553;
+  border-color: rgba(66, 95, 131, 0.58);
+  background: rgba(66, 95, 131, 0.04);
+  color: #526b7a;
   transform: translateY(-1px);
 }
 

@@ -195,7 +195,7 @@ watch(displaySql, () => {
   border-radius: 5px;
   overflow: hidden;
   margin: 9px 0;
-  background: #F2F5F4;
+  background: #edf2f5;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
 }
 
@@ -225,7 +225,7 @@ watch(displaySql, () => {
   height: 31px;
   border-radius: 4px;
   border: 1px solid rgba(26, 26, 26, 0.16);
-  background: #eff6ff;
+  background: #edf2f8;
   color: #1A1A1A;
   font-size: 9px;
   font-weight: 800;
@@ -268,8 +268,8 @@ watch(displaySql, () => {
   height: 24px;
   padding: 0 8px;
   border-radius: 4px;
-  background: #ECFDF5;
-  color: #10B981;
+  background: #edf2f5;
+  color: #526b7a;
   font-size: 10px;
   font-weight: 700;
 }
@@ -299,8 +299,8 @@ watch(displaySql, () => {
 
 .ax-copy-btn:hover {
   border-color: rgba(26, 26, 26, 0.36);
-  color: #1e40af;
-  background: #eff6ff;
+  color: #425f83;
+  background: #edf2f8;
   transform: translateY(-1px);
 }
 
@@ -390,12 +390,12 @@ watch(displaySql, () => {
 }
 
 :deep(.ax-sql-pre .hljs-string) {
-  color: #10B981;
+  color: #526b7a;
 }
 
 :deep(.ax-sql-pre .hljs-number),
 :deep(.ax-sql-pre .hljs-literal) {
-  color: #F59E0B;
+  color: #806b47;
 }
 
 :deep(.ax-sql-pre .hljs-comment) {

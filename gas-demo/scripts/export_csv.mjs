@@ -10,7 +10,7 @@ const quote = value => {
   return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 };
 for (const [name, rows] of Object.entries(tables)) {
-  const headers = Object.keys(rows[0]);
+  const headers = [...new Set(rows.flatMap(row => Object.keys(row)))];
   const matrix = [headers, ...rows.map(row => headers.map(key => row[key] ?? ''))];
   const wb = Workbook.create();
   const sheet = wb.worksheets.add(name);

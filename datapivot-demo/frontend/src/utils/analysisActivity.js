@@ -98,6 +98,9 @@ export function analysisFacts(workflow = {}, result = null) {
   }
   const question = text(result?.question) || text(result?.research_plan?.question)
   if (question) append('scope', '本次问题', question)
+  // 单一数据域时不再给每条明细重复前缀数据集名（修复"数据集名在六张卡片重复出现"）；
+  // 多数据域对比时保留完整域标签以区分来源。sources 卡片的大字值仍取数据集名。
+  const singleScope = groups.size === 1
   for (const group of groups.values()) {
     const label = labelFor(group)
     const a = group.activities
@@ -105,7 +108,7 @@ export function analysisFacts(workflow = {}, result = null) {
     const query = a.get('query')
     const dataset = group.dataset
     if (!question && text(assets?.question)) append('scope', group.branch ? label : '本次问题', text(branches.get(group.branch)?.question) || text(assets.question))
-    if (list(assets?.time_mentions).length) append('scope', `${label} · 时间`, assets.time_mentions.map(String).join('、'))
+    if (list(assets?.time_mentions).length) append('scope', singleScope ? '时间范围' : `${label} · 时间`, assets.time_mentions.map(String).join('、'))
     if (group.name) {
       const counts = []
       if (number(assets?.field_count) !== null) counts.push(`${assets.field_count} 个字段定义`)
@@ -114,21 +117,21 @@ export function analysisFacts(workflow = {}, result = null) {
       append('sources', label, counts.join(' · ') || '已记录本次使用的数据集')
     }
     if (query) {
-      append('plan', label, text(query.public_summary) || '查询已生成，业务方案摘要未记录')
+      append('plan', singleScope ? '' : label, text(query.public_summary) || '查询已生成，业务方案摘要未记录')
       const methods = list(query.methods).map(method => methodLabels[String(method).toUpperCase()] || '').filter(Boolean)
       const shapes = list(query.aggregation).filter(value => typeof value === 'string')
-      if (methods.length || shapes.length) append('aggregation', label, [...new Set([...methods, ...shapes])].join(' · '))
+      if (methods.length || shapes.length) append('aggregation', singleScope ? '' : label, [...new Set([...methods, ...shapes])].join(' · '))
     }
     const review = dataset?.agent3_review && typeof dataset.agent3_review === 'object' ? dataset.agent3_review : a.get('review')
     if (review) {
-      append('review', `${label} · SQL`, reviewLabel(review.approved))
+      append('review', singleScope ? 'SQL' : `${label} · SQL`, reviewLabel(review.approved))
       if (review.approved === false) warnings.add('review')
     }
     const preflight = a.get('preflight')
-    if (preflight) for (const check of list(preflight.checks)) append('review', `${label} · 执行计划`, text(check))
+    if (preflight) for (const check of list(preflight.checks)) append('review', singleScope ? '执行计划' : `${label} · 执行计划`, text(check))
     const checks = a.get('checks')
     if (checks) {
-      for (const check of list(checks.checks)) append('review', `${label} · 数据核验`, text(check))
+      for (const check of list(checks.checks)) append('review', singleScope ? '数据核验' : `${label} · 数据核验`, text(check))
       if (['warning', 'failed'].includes(checks.status)) warnings.add('review')
     }
     // A rejected/failed query is not a zero-row result, even if it contains rows: [].
@@ -137,16 +140,16 @@ export function analysisFacts(workflow = {}, result = null) {
       (['completed','success'].includes(dataset.query_status) || dataset.rows.length > 0)
     const data = a.get('data')
     if (failed) {
-      append('results', label, '查询未完成，不能认定为零行数据')
+      append('results', singleScope ? '查询状态' : label, '查询未完成，不能认定为零行数据')
       warnings.add('results')
     } else if (returned || (data && !['failed','running','retrying'].includes(data.status))) {
       const rows = returned ? (number(dataset.row_count) ?? dataset.rows.length) : number(data.row_count)
       const columns = (returned ? (Array.isArray(dataset.columns) ? dataset.columns : Object.keys(dataset.rows[0] || {})) : list(data.columns)).map(String)
       const count = rows === null ? '返回行数未记录' : `返回 ${rows.toLocaleString('zh-CN')} 行`
       const fieldCount = returned ? (Array.isArray(dataset.columns) || dataset.rows.length ? columns.length : null) : (number(data.column_count) ?? (Array.isArray(data.columns) ? columns.length : null))
-      append('results', label, `${count}${fieldCount !== null ? ` · ${fieldCount} 个字段` : ''}`)
-      if (columns.length) append('results', `${label} · 字段`, columns.join('、') + (fieldCount > columns.length ? ` 等 ${fieldCount} 个字段` : ''))
-      else if (rows !== null && rows > 0) append('results', `${label} · 字段`, '字段清单未记录')
+      append('results', singleScope ? '规模' : label, `${count}${fieldCount !== null ? ` · ${fieldCount} 个字段` : ''}`)
+      if (columns.length) append('results', singleScope ? '字段' : `${label} · 字段`, columns.join('、') + (fieldCount > columns.length ? ` 等 ${fieldCount} 个字段` : ''))
+      else if (rows !== null && rows > 0) append('results', singleScope ? '字段' : `${label} · 字段`, '字段清单未记录')
     }
   }
   return factDefinitions.map(([id,label]) => {
@@ -156,10 +159,35 @@ export function analysisFacts(workflow = {}, result = null) {
     if (id === 'scope' && question) value = question
     if (id === 'review' && lines.length > 1) value = warnings.has(id) ? '有核验事项需要关注' : `${lines.length} 项审核与核验记录`
     if (id === 'results' && lines.length > 1) {
-      const returns=lines.filter(item=>!item.label.endsWith(' · 字段'))
+      const returns=lines.filter(item=>!item.label.endsWith(' · 字段') && item.label !== '字段')
       value=warnings.has(id)?'部分查询未完成':returns.length===1?returns[0].value:`${returns.length} 项查询返回记录`
     }
     if (['plan','aggregation'].includes(id) && lines.length > 1) value = `${lines.length} 项${id === 'plan' ? '查询方案' : '聚合方式'}记录`
     return {id, label, value, details: lines, status: warnings.has(id) ? 'warning' : lines.length ? 'available' : 'pending'}
   })
+}
+
+/** A public progress narrative built only from recorded facts, never from scratchpads. */
+export function analysisNarrative(workflow = {}, result = null) {
+  const facts = analysisFacts(workflow, result)
+  const byId = id => facts.find(fact => fact.id === id)
+  const titles = {scope: '先明确这次要回答什么', sources: '查询依据来自这里', plan: '本次查询如何计算', review: '查询经过哪些核验', results: '这次实际返回了什么'}
+  const steps = []
+  for (const id of ['scope', 'sources', 'plan', 'review', 'results']) {
+    const fact = byId(id)
+    if (fact.status === 'pending') continue
+    const details = [...fact.details]
+    if (id === 'plan') {
+      const aggregation = byId('aggregation')
+      if (aggregation.status !== 'pending') details.push(...aggregation.details.map(line => ({label: [line.label, '计算方式'].filter(Boolean).join(' · '), value: line.value})))
+    }
+    steps.push({...fact, title: titles[id], details: details.filter(line => line.value !== fact.value)})
+  }
+  // Aggregation without a public plan is still useful, but must not invent a plan.
+  if (byId('plan').status === 'pending' && byId('aggregation').status !== 'pending') {
+    const fact = byId('aggregation')
+    const index = steps.findIndex(step => ['review', 'results'].includes(step.id))
+    steps.splice(index < 0 ? steps.length : index, 0, {...fact, title: '已记录的计算方式', details: fact.details.filter(line => line.value !== fact.value)})
+  }
+  return steps
 }

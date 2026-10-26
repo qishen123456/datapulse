@@ -37,6 +37,8 @@ def _should_retry_with_another_model(exc: Exception) -> bool:
         "APIConnectionError",
         "InternalServerError",
         "RateLimitError",
+        # 流式看门狗中止（_consume_stream 240s 硬性时限）视为可用性故障，转移候选渠道
+        "TimeoutError",
     }
 
 

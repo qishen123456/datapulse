@@ -543,13 +543,13 @@ onUnmounted(() => {
 }
 
 .cmp-dock:focus-within {
-  border-top-color: #2563eb;
+  border-top-color: #425f83;
   background: #FFFFFF;
 }
 
 .cmp.is-running .cmp-dock {
-  border-top-color: #9FB4AF;
-  background: #FCFDFD;
+  border-top-color: #8297a4;
+  background: #f5f7f9;
 }
 
 /* ---------- 输入区（第一行，占满全宽） ---------- */
@@ -574,8 +574,8 @@ onUnmounted(() => {
   resize: none;
   font-size: 15px;
   line-height: 1.6;
-  color: #0E1A19;
-  caret-color: var(--brand-primary, #2563eb);
+  color: #344652;
+  caret-color: var(--brand-primary, #425f83);
   font-family: inherit;
 }
 
@@ -600,7 +600,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 8px;
   padding: 4px 2px;
-  background: #FCFDFD;
+  background: #f5f7f9;
   pointer-events: none;
 }
 
@@ -608,7 +608,7 @@ onUnmounted(() => {
   width: 18px;
   height: 2px;
   border-radius: 1px;
-  background: linear-gradient(90deg, rgba(148, 163, 160, 0.2) 0%, rgba(29, 78, 216, 0.75) 50%, rgba(148, 163, 160, 0.2) 100%);
+  background: linear-gradient(90deg, rgba(148, 163, 160, 0.2) 0%, rgba(66, 95, 131, 0.75) 50%, rgba(148, 163, 160, 0.2) 100%);
   animation: cmp-line-pulse 1.4s ease-in-out infinite;
   flex: 0 0 auto;
 }
@@ -617,7 +617,7 @@ onUnmounted(() => {
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
-  background: linear-gradient(110deg, rgba(100, 116, 139, 0.8) 0%, rgba(29, 78, 216, 1) 48%, rgba(100, 116, 139, 0.8) 100%);
+  background: linear-gradient(110deg, rgba(100, 116, 139, 0.8) 0%, rgba(66, 95, 131, 1) 48%, rgba(100, 116, 139, 0.8) 100%);
   background-size: 220px 100%;
   background-repeat: no-repeat;
   -webkit-background-clip: text;
@@ -673,23 +673,23 @@ onUnmounted(() => {
   padding-left: 28px;
   padding-right: 10px;
   border-radius: 4px;
-  background: #EEF2F1;
+  background: #edf2f5;
   box-shadow: none !important;
   cursor: pointer;
   transition: background 0.15s ease;
 }
 
 .cmp-dataset-select :deep(.el-select__wrapper:hover) {
-  background: #E2E9E7;
+  background: #dce5eb;
 }
 
 .cmp-dataset-select.is-locked :deep(.el-select__wrapper) {
-  background: #f0f4ef;
-  box-shadow: inset 0 0 0 1px rgba(29, 78, 216, 0.35) !important;
+  background: #edf2f5;
+  box-shadow: inset 0 0 0 1px rgba(66, 95, 131, 0.35) !important;
 }
 
 .cmp-dataset-select.is-locked :deep(.el-select__wrapper:hover) {
-  background: #dde8de;
+  background: #dce5eb;
 }
 
 .cmp-dataset-select :deep(.el-select__selected-item),
@@ -698,11 +698,11 @@ onUnmounted(() => {
   line-height: 1.2;
   font-weight: 650;
   white-space: nowrap;
-  color: #31413F;
+  color: #344652;
 }
 
 .cmp-dataset-select.is-locked :deep(.el-select__selected-item) {
-  color: #294e3e;
+  color: #344652;
 }
 
 .cmp-dataset-select :deep(.el-select__placeholder) {
@@ -728,7 +728,7 @@ onUnmounted(() => {
 }
 
 .cmp-dataset-select.is-locked .cmp-ds-icon {
-  color: #2563eb;
+  color: #425f83;
 }
 
 .cmp-ds-icon svg {
@@ -758,7 +758,7 @@ onUnmounted(() => {
 }
 
 .cmp-route-dot.is-locked {
-  background: #2563eb;
+  background: #425f83;
 }
 
 /* 运行状态：直角小块（非胶囊） */
@@ -769,8 +769,8 @@ onUnmounted(() => {
   max-width: 340px;
   padding: 4px 9px;
   border-radius: 3px;
-  border: 1px solid #E0E7E5;
-  background: #F3F6F5;
+  border: 1px solid #dce5eb;
+  background: #edf2f5;
   white-space: nowrap;
 }
 
@@ -778,29 +778,29 @@ onUnmounted(() => {
   width: 6px;
   height: 6px;
   border-radius: 1px;
-  background: #2563eb;
+  background: #425f83;
   flex: 0 0 auto;
   animation: cmp-dot-pulse 1.2s ease-in-out infinite;
 }
 
 .cmp-status.completed .cmp-status-dot {
-  background: #10B981;
+  background: #526b7a;
   animation: none;
 }
 
 .cmp-status.completed {
-  background: #ECFDF5;
-  border-color: #A7F3D0;
+  background: #edf2f5;
+  border-color: #bdcbd3;
 }
 
 .cmp-status.error .cmp-status-dot {
-  background: #EF4444;
+  background: #8b6064;
   animation: none;
 }
 
 .cmp-status.error {
-  background: #FEF2F2;
-  border-color: #FECACA;
+  background: #faf7f7;
+  border-color: #eadfe1;
 }
 
 @keyframes cmp-dot-pulse {
@@ -810,7 +810,7 @@ onUnmounted(() => {
 
 .cmp-status-text {
   min-width: 0;
-  color: #485753;
+  color: #526b7a;
   font-size: 11px;
   font-weight: 600;
   line-height: 1.2;
@@ -818,8 +818,8 @@ onUnmounted(() => {
   text-overflow: ellipsis;
 }
 
-.cmp-status.completed .cmp-status-text { color: #047857; }
-.cmp-status.error .cmp-status-text { color: #B91C1C; }
+.cmp-status.completed .cmp-status-text { color: #526b7a; }
+.cmp-status.error .cmp-status-text { color: #8b6064; }
 
 .cmp-status-time {
   color: #8A9995;
@@ -846,7 +846,7 @@ onUnmounted(() => {
 }
 
 .cmp-model-select :deep(.el-select__wrapper:hover) {
-  background: #EEF2F1;
+  background: #edf2f5;
   box-shadow: inset 0 0 0 1px #dbe3ed !important;
 }
 
@@ -855,11 +855,11 @@ onUnmounted(() => {
   font-size: 12px;
   font-weight: 650;
   line-height: 1.2;
-  color: #31413F;
+  color: #344652;
 }
 
 .cmp-model-select :deep(.el-select__placeholder) {
-  color: #294e3e;
+  color: #344652;
 }
 
 .cmp-model-icon {
@@ -872,7 +872,7 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #2563eb;
+  color: #425f83;
   pointer-events: none;
 }
 
@@ -899,9 +899,9 @@ onUnmounted(() => {
 }
 
 .cmp-icon-btn:hover {
-  background: #EEF2F1;
+  background: #edf2f5;
   border-color: #dbe3ed;
-  color: #294e3e;
+  color: #344652;
 }
 
 .cmp-icon-btn svg {
@@ -930,12 +930,12 @@ onUnmounted(() => {
 }
 
 .cmp-send-btn {
-  background: #294e3e;
-  box-shadow: inset 0 -2px 0 rgba(8, 17, 16, 0.22);
+  background: #344652;
+  box-shadow: inset 0 -2px 0 rgba(52, 70, 82, 0.22);
 }
 
 .cmp-send-btn:hover {
-  background: #0B5C56;
+  background: #344652;
 }
 
 .cmp-send-btn:active {
@@ -973,11 +973,11 @@ onUnmounted(() => {
 }
 
 .cmp-stop-btn {
-  background: #31413F;
+  background: #344652;
 }
 
 .cmp-stop-btn:hover {
-  background: #23302E;
+  background: #344652;
 }
 
 .cmp-stop-icon {
@@ -1005,13 +1005,13 @@ onUnmounted(() => {
 }
 
 .cmp-recorder-pill.is-cancel-pending {
-  border-color: #FCA5A5;
-  background: #FEF2F2;
+  border-color: #d7c6c8;
+  background: #faf7f7;
 }
 
 .cmp-recorder-icon {
   display: flex;
-  color: #2563eb;
+  color: #425f83;
 }
 
 .cmp-recorder-pill.is-recording .cmp-recorder-icon {
@@ -1024,8 +1024,8 @@ onUnmounted(() => {
 }
 
 @keyframes cmp-recorder-pulse {
-  0%, 100% { color: #2563eb; transform: scale(1); }
-  50% { color: #F97316; transform: scale(1.22); }
+  0%, 100% { color: #425f83; transform: scale(1); }
+  50% { color: #806b47; transform: scale(1.22); }
 }
 
 @keyframes cmp-recorder-glow {
@@ -1034,15 +1034,15 @@ onUnmounted(() => {
     box-shadow: none;
   }
   50% {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.14);
+    border-color: #425f83;
+    box-shadow: 0 0 0 3px rgba(66, 95, 131, 0.14);
   }
 }
 
 .cmp-recorder-timer {
   font-size: 13px;
   font-variant-numeric: tabular-nums;
-  color: #0E1A19;
+  color: #344652;
   min-width: 38px;
 }
 
@@ -1077,13 +1077,13 @@ onUnmounted(() => {
   bottom: 6px;
   width: 3px;
   border-radius: 1px;
-  background: #C3CFCA;
+  background: #bdcbd3;
   opacity: 0.7;
 }
 
 .ax-model-option.is-default-model::before {
   width: 4px;
-  background: #2563eb;
+  background: #425f83;
   opacity: 1;
 }
 
@@ -1097,12 +1097,12 @@ onUnmounted(() => {
 .ax-ds-option-title {
   font-size: 12px;
   font-weight: 600;
-  color: #31413F;
+  color: #344652;
   line-height: 1.4;
 }
 
 .ax-ds-option-auto .ax-ds-option-title {
-  color: #0E1A19;
+  color: #344652;
 }
 
 .ax-model-option-title {
@@ -1142,7 +1142,7 @@ onUnmounted(() => {
   white-space: nowrap;
   padding: 2px 8px;
   border-radius: 3px;
-  background: #EEF2F1;
+  background: #edf2f5;
   font-size: 10px;
   font-weight: 600;
   color: #5C6D68;
@@ -1156,8 +1156,8 @@ onUnmounted(() => {
   height: 18px;
   padding: 0 7px;
   border-radius: 3px;
-  background: rgba(29, 78, 216, 0.1);
-  color: #294e3e;
+  background: rgba(66, 95, 131, 0.1);
+  color: #344652;
   font-size: 10px;
   font-weight: 700;
 }
@@ -1165,7 +1165,7 @@ onUnmounted(() => {
 :deep(.ax-ds-popper.el-popper) {
   border-radius: 6px;
   border: 1px solid #dbe3ed;
-  box-shadow: 0 8px 24px rgba(13, 25, 24, 0.12);
+  box-shadow: 0 8px 24px rgba(52, 70, 82, 0.12);
   padding: 4px;
 }
 
@@ -1174,14 +1174,14 @@ onUnmounted(() => {
   border-radius: 4px;
   padding-top: 6px;
   padding-bottom: 6px;
-  color: #31413F;
+  color: #344652;
 }
 
 :deep(.ax-dataset-popper .el-select-dropdown__item.is-hovering),
 :deep(.ax-dataset-popper .el-select-dropdown__item:hover),
 :deep(.ax-model-popper .el-select-dropdown__item.is-hovering),
 :deep(.ax-model-popper .el-select-dropdown__item:hover) {
-  background: #F0F4F3;
+  background: #edf2f5;
 }
 
 /* ---------- 响应式 ---------- */
@@ -1224,7 +1224,7 @@ onUnmounted(() => {
   background: #FFFFFF;
   border: 1px solid #dbe3ed;
   border-radius: 6px;
-  box-shadow: 0 8px 24px rgba(13, 25, 24, 0.12);
+  box-shadow: 0 8px 24px rgba(52, 70, 82, 0.12);
   max-height: 380px;
   overflow: hidden;
 }
@@ -1256,11 +1256,11 @@ onUnmounted(() => {
 }
 .ax-model-popper .el-select-dropdown__item:hover,
 .ax-model-popper .el-select-dropdown__item.is-hovering {
-  background: #F0F4F3;
+  background: #edf2f5;
   border-color: #dbe3ed;
 }
 .ax-model-popper .el-select-dropdown__item.is-selected {
-  background: #f0f4ef;
+  background: #edf2f5;
   border-color: #cbd5e1;
 }
 .ax-model-option-title {
@@ -1290,7 +1290,7 @@ onUnmounted(() => {
   width: 18px;
   height: 18px;
   flex: 0 0 auto;
-  color: #2563eb;
+  color: #425f83;
 }
 .ax-model-icon-mini svg {
   width: 14px;
@@ -1308,8 +1308,8 @@ onUnmounted(() => {
   flex: 0 0 auto;
   padding: 1px 6px;
   border-radius: 4px;
-  background: rgba(29, 78, 216, 0.1);
-  color: #294e3e;
+  background: rgba(66, 95, 131, 0.1);
+  color: #344652;
   font-size: 10px;
   font-weight: 600;
   line-height: 1.3;
@@ -1329,7 +1329,7 @@ onUnmounted(() => {
   line-height: 1.3;
 }
 .ax-model-check {
-  color: #294e3e;
+  color: #344652;
   font-size: 13px;
   font-weight: 700;
   line-height: 1;
@@ -1337,13 +1337,13 @@ onUnmounted(() => {
 </style>
 
 <style scoped>
-.cmp-dock{position:relative;isolation:isolate;transition:border-color .2s,box-shadow .2s;overflow:hidden}.cmp-dock:focus-within{border-color:#93b4ec!important;box-shadow:0 0 0 3px #dbeafe80,0 8px 28px #2563eb08!important}.cmp-activity-ribbon{position:absolute;inset:0 0 auto;height:2px;pointer-events:none;background:linear-gradient(90deg,transparent 5%,#93b4ec 30%,#2563eb 48%,#648bd0 58%,transparent 80%);background-size:230% 100%;animation:composer-marquee 3.2s linear infinite;opacity:.85}.cmp-draft-hint{display:flex;align-items:center;gap:7px;color:#475569;font-size:12px;margin-bottom:10px;line-height:1.6}.cmp-draft-hint>span:last-child{margin-left:auto;font-size:11px;color:#64748b}.cmp-draft-spark{color:#2563eb;font-size:13px}.cmp.is-running .cmp-dock{background:#fff}.cmp-send-btn.is-queue-send{background:#2563eb}.cmp-send-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}.cmp-stop-btn{background:#f7f7f5!important;color:#475569!important;border:1px solid #dfe4dc!important;box-shadow:none!important;border-radius:7px!important}.cmp-stop-btn:hover{background:#fef2f2!important;color:#b91c1c!important;border-color:#fecaca!important}.cmp-stop-icon{background:currentColor}.cmp-send-btn:active:not(:disabled){transform:translateY(1px)}@keyframes composer-marquee{from{background-position:160% 0}to{background-position:-60% 0}}@media(max-width:600px){.cmp-draft-hint>span:last-child{display:none}.cmp-command-right{gap:6px}.cmp-stop-btn{padding-inline:8px}.cmp-send-btn.is-queue-send{padding-inline:10px}}@media(prefers-reduced-motion:reduce){.cmp-activity-ribbon{animation:none;background-position:50% 0;opacity:.5}.cmp-dock,.cmp-send-btn{transition:none}}
+.cmp-dock{position:relative;isolation:isolate;transition:border-color .2s,box-shadow .2s;overflow:hidden}.cmp-dock:focus-within{border-color:#7188a5!important;box-shadow:0 0 0 3px #dce5ef80,0 8px 28px #425f8308!important}.cmp-activity-ribbon{position:absolute;inset:0 0 auto;height:2px;pointer-events:none;background:linear-gradient(90deg,transparent 5%,#7188a5 30%,#425f83 48%,#425f83 58%,transparent 80%);background-size:230% 100%;animation:composer-marquee 3.2s linear infinite;opacity:.85}.cmp-draft-hint{display:flex;align-items:center;gap:7px;color:#475569;font-size:12px;margin-bottom:10px;line-height:1.6}.cmp-draft-hint>span:last-child{margin-left:auto;font-size:11px;color:#617085}.cmp-draft-spark{color:#425f83;font-size:13px}.cmp.is-running .cmp-dock{background:#fff}.cmp-send-btn.is-queue-send{background:#425f83}.cmp-send-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}.cmp-stop-btn{background:#f4f7fa!important;color:#475569!important;border:1px solid #dce5eb!important;box-shadow:none!important;border-radius:7px!important}.cmp-stop-btn:hover{background:#faf7f7!important;color:#8b6064!important;border-color:#eadfe1!important}.cmp-stop-icon{background:currentColor}.cmp-send-btn:active:not(:disabled){transform:translateY(1px)}@keyframes composer-marquee{from{background-position:160% 0}to{background-position:-60% 0}}@media(max-width:600px){.cmp-draft-hint>span:last-child{display:none}.cmp-command-right{gap:6px}.cmp-stop-btn{padding-inline:8px}.cmp-send-btn.is-queue-send{padding-inline:10px}}@media(prefers-reduced-motion:reduce){.cmp-activity-ribbon{animation:none;background-position:50% 0;opacity:.5}.cmp-dock,.cmp-send-btn{transition:none}}
 </style>
 
 <style scoped>
 @property --composer-orbit-angle{syntax:'<angle>';initial-value:0deg;inherits:false}
 .cmp-activity-ribbon{inset:0!important;width:100%;height:100%!important;padding:0!important;background:none!important;mask:none!important;-webkit-mask:none!important;animation:none!important;opacity:0;pointer-events:none}
-.cmp.is-running .cmp-dock{border:2px solid transparent!important;background:linear-gradient(#fff,#fff) padding-box,conic-gradient(from var(--composer-orbit-angle),#e2e8f0 0deg,#e2e8f0 250deg,#93b4ec 285deg,#2563eb 320deg,#648bd0 342deg,#e2e8f0 360deg) border-box!important;animation:composer-orbit 3.2s linear infinite!important}
+.cmp.is-running .cmp-dock{border:2px solid transparent!important;background:linear-gradient(#fff,#fff) padding-box,conic-gradient(from var(--composer-orbit-angle),#e2e8f0 0deg,#e2e8f0 250deg,#7188a5 285deg,#425f83 320deg,#425f83 342deg,#e2e8f0 360deg) border-box!important;animation:composer-orbit 3.2s linear infinite!important}
 @keyframes composer-orbit{to{--composer-orbit-angle:360deg}}
-@media(prefers-reduced-motion:reduce){.cmp.is-running .cmp-dock{animation:none!important;background:linear-gradient(#fff,#fff) padding-box,linear-gradient(110deg,#93b4ec,#2563eb,#648bd0) border-box!important}}
+@media(prefers-reduced-motion:reduce){.cmp.is-running .cmp-dock{animation:none!important;background:linear-gradient(#fff,#fff) padding-box,linear-gradient(110deg,#7188a5,#425f83,#425f83) border-box!important}}
 </style>
